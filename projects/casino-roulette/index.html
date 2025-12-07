@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Казино Рулетка</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover {
+            transform: translateY(-3px);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .balance-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .balance {
+            font-size: 2.5em;
+            color: #FFD700;
+            font-weight: 700;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .roulette-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #c41e3a 0deg 9.73deg,
+                #000 9.73deg 19.46deg,
+                #c41e3a 19.46deg 29.19deg,
+                #000 29.19deg 38.92deg,
+                #c41e3a 38.92deg 48.65deg,
+                #000 48.65deg 58.38deg,
+                #c41e3a 58.38deg 68.11deg,
+                #000 68.11deg 77.84deg,
+                #c41e3a 77.84deg 87.57deg,
+                #000 87.57deg 97.3deg,
+                #c41e3a 97.3deg 107.03deg,
+                #000 107.03deg 116.76deg,
+                #c41e3a 116.76deg 126.49deg,
+                #000 126.49deg 136.22deg,
+                #c41e3a 136.22deg 145.95deg,
+                #000 145.95deg 155.68deg,
+                #c41e3a 155.68deg 165.41deg,
+                #000 165.41deg 175.14deg,
+                #c41e3a 175.14deg 184.87deg,
+                #000 184.87deg 194.6deg,
+                #c41e3a 194.6deg 204.33deg,
+                #000 204.33deg 214.06deg,
+                #c41e3a 214.06deg 223.79deg,
+                #000 223.79deg 233.52deg,
+                #c41e3a 233.52deg 243.25deg,
+                #000 243.25deg 252.98deg,
+                #c41e3a 252.98deg 262.71deg,
+                #000 262.71deg 272.44deg,
+                #c41e3a 272.44deg 282.17deg,
+                #000 282.17deg 291.9deg,
+                #c41e3a 291.9deg 301.63deg,
+                #000 301.63deg 311.36deg,
+                #c41e3a 311.36deg 321.09deg,
+                #000 321.09deg 330.82deg,
+                #c41e3a 330.82deg 340.55deg,
+                #000 340.55deg 350.28deg,
+                #c41e3a 350.28deg 360deg
+            );
+            border: 10px solid #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 30px rgba(0,0,0,0.5);
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wheel-center {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #FFD700;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+            z-index: 10;
+        }
+
+        .result-display {
+            text-align: center;
+            font-size: 2em;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-number {
+            font-size: 3em;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .betting-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .bet-type {
+            margin-bottom: 25px;
+        }
+
+        .bet-type h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .bet-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .bet-btn {
+            padding: 15px;
+            border: 2px solid #FFD700;
+            background: rgba(255, 215, 0, 0.1);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .bet-btn:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .bet-btn.active {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .bet-btn.red {
+            border-color: #c41e3a;
+            background: rgba(196, 30, 58, 0.2);
+        }
+
+        .bet-btn.red:hover {
+            background: rgba(196, 30, 58, 0.4);
+        }
+
+        .bet-btn.black {
+            border-color: #333;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .bet-btn.black:hover {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .bet-amount-container {
+            margin: 25px 0;
+        }
+
+        .bet-amount-container label {
+            display: block;
+            margin-bottom: 10px;
+            color: #FFD700;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .bet-amount-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #FFD700;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .quick-bet-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .quick-bet {
+            padding: 10px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid #FFD700;
+            color: #FFD700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .quick-bet:hover {
+            background: rgba(255, 215, 0, 0.4);
+        }
+
+        .spin-button {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5em;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .current-bets {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            min-height: 60px;
+        }
+
+        .current-bets h4 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .bet-item {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-bets {
+            background: rgba(196, 30, 58, 0.3);
+            border: 1px solid #c41e3a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .clear-bets:hover {
+            background: rgba(196, 30, 58, 0.5);
+        }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px 60px;
+            border-radius: 20px;
+            border: 3px solid #FFD700;
+            font-size: 2em;
+            font-weight: 700;
+            z-index: 1000;
+            display: none;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
+        .message.show {
+            display: block;
+            animation: messageAppear 0.5s ease;
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .win {
+            color: #4CAF50;
+        }
+
+        .lose {
+            color: #c41e3a;
+        }
+
+        .history {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .history h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+
+        .history-numbers {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .history-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 2px solid #FFD700;
+        }
+
+        .history-number.red {
+            background: #c41e3a;
+        }
+
+        .history-number.black {
+            background: #000;
+        }
+
+        .history-number.green {
+            background: #0a6b0d;
+        }
+
+        @media (max-width: 1200px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .wheel-container {
+                width: 300px;
+                height: 300px;
+            }
+
+            .balance {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../../index.html" class="back-link">← Назад к портфолио</a>
+
+        <header>
+            <h1>🎰 Казино Рулетка</h1>
+        </header>
+
+        <div class="balance-container">
+            <div>Ваш баланс:</div>
+            <div class="balance" id="balance">$1000</div>
+        </div>
+
+        <div class="game-area">
+            <div class="roulette-container">
+                <div class="result-display" id="resultDisplay">
+                    Сделайте ставку и крутите рулетку!
+                </div>
+
+                <div class="wheel-container">
+                    <div class="wheel-pointer"></div>
+                    <div class="wheel" id="wheel">
+                        <div class="wheel-center">🎰</div>
+                    </div>
+                </div>
+
+                <div class="history">
+                    <h3>История выпавших чисел:</h3>
+                    <div class="history-numbers" id="history"></div>
+                </div>
+            </div>
+
+            <div class="betting-container">
+                <div class="bet-type">
+                    <h3>Цвет</h3>
+                    <div class="bet-buttons">
+                        <button class="bet-btn red" onclick="selectBet('red', 2)">
+                            Красное<br>x2
+                        </button>
+                        <button class="bet-btn black" onclick="selectBet('black', 2)">
+                            Чёрное<br>x2
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bet-type">
+                    <h3>Чет / Нечет</h3>
+                    <div class="bet-buttons">
+                        <button class="bet-btn" onclick="selectBet('even', 2)">
+                            Чётное<br>x2
+                        </button>
+                        <button class="bet-btn" onclick="selectBet('odd', 2)">
+                            Нечётное<br>x2
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bet-type">
+                    <h3>Диапазон</h3>
+                    <div class="bet-buttons">
+                        <button class="bet-btn" onclick="selectBet('1-18', 2)">
+                            1-18<br>x2
+                        </button>
+                        <button class="bet-btn" onclick="selectBet('19-36', 2)">
+                            19-36<br>x2
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bet-type">
+                    <h3>Прямая ставка на число (0-36)</h3>
+                    <input type="number" id="straightNumber" min="0" max="36" 
+                           placeholder="Введите число 0-36" class="bet-amount-input" 
+                           style="margin-bottom: 10px;">
+                    <button class="bet-btn" onclick="selectStraightBet()">
+                        Ставка на число<br>x36
+                    </button>
+                </div>
+
+                <div class="bet-amount-container">
+                    <label>Размер ставки:</label>
+                    <input type="number" id="betAmount" class="bet-amount-input" 
+                           value="10" min="1" placeholder="Введите сумму">
+                    <div class="quick-bet-buttons">
+                        <button class="quick-bet" onclick="setBetAmount(10)">$10</button>
+                        <button class="quick-bet" onclick="setBetAmount(50)">$50</button>
+                        <button class="quick-bet" onclick="setBetAmount(100)">$100</button>
+                        <button class="quick-bet" onclick="setBetAmount(500)">$500</button>
+                    </div>
+                </div>
+
+                <div class="current-bets" id="currentBets">
+                    <h4>Текущие ставки:</h4>
+                    <div id="betsList">Ставок пока нет</div>
+                </div>
+
+                <button class="clear-bets" onclick="clearBets()">Очистить ставки</button>
+
+                <button class="spin-button" id="spinButton" onclick="spin()">
+                    🎰 КРУТИТЬ РУЛЕТКУ 🎰
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <script>
+        let balance = parseInt(localStorage.getItem('rouletteBalance')) || 1000;
+        let currentBets = [];
+        let isSpinning = false;
+        let history = JSON.parse(localStorage.getItem('rouletteHistory')) || [];
+
+        // Определение красных и чёрных чисел
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        const blackNumbers = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35];
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = '$' + balance;
+            localStorage.setItem('rouletteBalance', balance);
+        }
+
+        function updateHistory() {
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML = '';
+            history.slice(-10).reverse().forEach(num => {
+                const div = document.createElement('div');
+                div.className = 'history-number';
+                if (num === 0) {
+                    div.classList.add('green');
+                } else if (redNumbers.includes(num)) {
+                    div.classList.add('red');
+                } else {
+                    div.classList.add('black');
+                }
+                div.textContent = num;
+                historyDiv.appendChild(div);
+            });
+            localStorage.setItem('rouletteHistory', JSON.stringify(history));
+        }
+
+        function setBetAmount(amount) {
+            document.getElementById('betAmount').value = amount;
+        }
+
+        function selectBet(type, multiplier) {
+            const amount = parseInt(document.getElementById('betAmount').value);
+            if (!amount || amount <= 0) {
+                showMessage('Введите сумму ставки!', false);
+                return;
+            }
+            if (amount > balance) {
+                showMessage('Недостаточно средств!', false);
+                return;
+            }
+
+            // Проверяем, нет ли уже такой ставки
+            const existingBet = currentBets.find(bet => bet.type === type);
+            if (existingBet) {
+                existingBet.amount += amount;
+            } else {
+                currentBets.push({ type, amount, multiplier });
+            }
+
+            updateBetsList();
+        }
+
+        function selectStraightBet() {
+            const number = parseInt(document.getElementById('straightNumber').value);
+            const amount = parseInt(document.getElementById('betAmount').value);
+
+            if (isNaN(number) || number < 0 || number > 36) {
+                showMessage('Введите число от 0 до 36!', false);
+                return;
+            }
+
+            if (!amount || amount <= 0) {
+                showMessage('Введите сумму ставки!', false);
+                return;
+            }
+
+            if (amount > balance) {
+                showMessage('Недостаточно средств!', false);
+                return;
+            }
+
+            const existingBet = currentBets.find(bet => bet.type === 'straight-' + number);
+            if (existingBet) {
+                existingBet.amount += amount;
+            } else {
+                currentBets.push({ 
+                    type: 'straight-' + number, 
+                    amount, 
+                    multiplier: 36,
+                    displayName: 'Число ' + number
+                });
+            }
+
+            updateBetsList();
+        }
+
+        function updateBetsList() {
+            const betsDiv = document.getElementById('betsList');
+            if (currentBets.length === 0) {
+                betsDiv.innerHTML = 'Ставок пока нет';
+                return;
+            }
+
+            betsDiv.innerHTML = currentBets.map(bet => {
+                const displayName = bet.displayName || bet.type.toUpperCase();
+                return `<div class="bet-item">
+                    <span>${displayName}: $${bet.amount}</span>
+                    <span style="color: #FFD700;">x${bet.multiplier}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function clearBets() {
+            currentBets = [];
+            updateBetsList();
+        }
+
+        function getTotalBetAmount() {
+            return currentBets.reduce((sum, bet) => sum + bet.amount, 0);
+        }
+
+        function spin() {
+            if (isSpinning) return;
+
+            if (currentBets.length === 0) {
+                showMessage('Сделайте ставку!', false);
+                return;
+            }
+
+            const totalBet = getTotalBetAmount();
+            if (totalBet > balance) {
+                showMessage('Недостаточно средств!', false);
+                return;
+            }
+
+            isSpinning = true;
+            balance -= totalBet;
+            updateBalance();
+
+            document.getElementById('spinButton').disabled = true;
+            document.getElementById('resultDisplay').textContent = 'Крутим...';
+
+            const wheel = document.getElementById('wheel');
+            const randomRotation = 360 * 5 + Math.random() * 360;
+            wheel.style.transform = `rotate(${randomRotation}deg)`;
+
+            setTimeout(() => {
+                const winningNumber = Math.floor(Math.random() * 37); // 0-36
+                processResult(winningNumber);
+            }, 3000);
+        }
+
+        function processResult(winningNumber) {
+            history.push(winningNumber);
+            updateHistory();
+
+            let winColor = 'green';
+            let colorName = 'Зелёное';
+            
+            if (redNumbers.includes(winningNumber)) {
+                winColor = 'red';
+                colorName = 'Красное';
+            } else if (blackNumbers.includes(winningNumber)) {
+                winColor = 'black';
+                colorName = 'Чёрное';
+            }
+
+            const resultDiv = document.getElementById('resultDisplay');
+            resultDiv.innerHTML = `
+                <div>
+                    <div style="color: ${winColor === 'red' ? '#c41e3a' : winColor === 'black' ? '#fff' : '#4CAF50'}">
+                        Выпало: <span class="result-number">${winningNumber}</span>
+                    </div>
+                    <div style="font-size: 0.6em; margin-top: 10px;">${colorName}</div>
+                </div>
+            `;
+
+            let totalWin = 0;
+
+            currentBets.forEach(bet => {
+                let isWin = false;
+
+                if (bet.type === 'red' && redNumbers.includes(winningNumber)) {
+                    isWin = true;
+                } else if (bet.type === 'black' && blackNumbers.includes(winningNumber)) {
+                    isWin = true;
+                } else if (bet.type === 'even' && winningNumber !== 0 && winningNumber % 2 === 0) {
+                    isWin = true;
+                } else if (bet.type === 'odd' && winningNumber % 2 !== 0) {
+                    isWin = true;
+                } else if (bet.type === '1-18' && winningNumber >= 1 && winningNumber <= 18) {
+                    isWin = true;
+                } else if (bet.type === '19-36' && winningNumber >= 19 && winningNumber <= 36) {
+                    isWin = true;
+                } else if (bet.type.startsWith('straight-')) {
+                    const betNumber = parseInt(bet.type.split('-')[1]);
+                    if (betNumber === winningNumber) {
+                        isWin = true;
+                    }
+                }
+
+                if (isWin) {
+                    totalWin += bet.amount * bet.multiplier;
+                }
+            });
+
+            balance += totalWin;
+            updateBalance();
+
+            if (totalWin > 0) {
+                showMessage(`🎉 ВЫИГРЫШ! +$${totalWin}`, true);
+            } else {
+                showMessage(`😢 Не повезло! -$${getTotalBetAmount()}`, false);
+            }
+
+            if (balance <= 0) {
+                setTimeout(() => {
+                    if (confirm('Вы проиграли все деньги! Начать заново с $1000?')) {
+                        balance = 1000;
+                        updateBalance();
+                    }
+                }, 2000);
+            }
+
+            currentBets = [];
+            updateBetsList();
+
+            isSpinning = false;
+            document.getElementById('spinButton').disabled = false;
+
+            // Сброс вращения колеса
+            setTimeout(() => {
+                const wheel = document.getElementById('wheel');
+                wheel.style.transition = 'none';
+                wheel.style.transform = 'rotate(0deg)';
+                setTimeout(() => {
+                    wheel.style.transition = 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+                }, 50);
+            }, 100);
+        }
+
+        function showMessage(text, isWin) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message show ' + (isWin ? 'win' : 'lose');
+            
+            setTimeout(() => {
+                messageDiv.classList.remove('show');
+            }, 2000);
+        }
+
+        // Инициализация
+        updateBalance();
+        updateHistory();
+        updateBetsList();
+    </script>
+</body>
+</html>
