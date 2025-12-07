@@ -1,0 +1,40 @@
+name: Update Projects List
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'projects/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Generate projects.json
+        run: node .github/scripts/generate-projects.js
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet projects.json || echo "changed=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add projects.json
+          git commit -m "🚀 Auto-update projects.json [skip ci]"
+          git push
