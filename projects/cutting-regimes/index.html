@@ -3,1220 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>РљР°Р»СЊРєСѓР»СЏС‚РѕСЂ СЂРµР¶РёРјРѕРІ СЂРµР·Р°РЅРёСЏ - РўРѕРєР°СЂРЅР°СЏ РѕР±СЂР°Р±РѕС‚РєР° v1.0</title>
+    <title>Генератор отчета | Токарная обработка</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background-color: #525659; /* Цвет фона как в Word/Acrobat */
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
             overflow: hidden;
         }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* ЛЕВАЯ ПАНЕЛЬ - ВВОД */
+        .sidebar {
+            width: 350px;
+            background: #2c3e50;
             color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        .form-section {
-            background: #f8f9fa;
-            border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 18px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
             gap: 15px;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #333;
-            font-size: 14px;
-        }
-
-        input, select {
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .btn {
-            padding: 12px 24px;
+        .sidebar h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.9rem; color: #bdc3c7; }
+        .input-group input, .input-group select {
+            padding: 8px;
+            border-radius: 4px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .btn-generate {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: 0.2s;
         }
+        .btn-generate:hover { background: #2ecc71; }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-print {
+            background: #3498db;
             color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-info:hover {
-            background: #138496;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-            transform: translateY(-2px);
-        }
-
-        .results {
-            display: none;
-            margin-top: 30px;
-        }
-
-        .results.active {
-            display: block;
-        }
-
-        .result-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        .result-card h4 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .result-item {
+        /* ПРАВАЯ ПАНЕЛЬ - ОТЧЕТ (ЛИСТ А4) */
+        .preview-area {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
             display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            justify-content: center;
         }
 
-        .result-item:last-child {
-            border-bottom: none;
+        .a4-page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            color: black;
+            font-family: "Times New Roman", serif;
+            font-size: 14pt;
+            line-height: 1.3;
         }
 
-        .result-label {
-            font-weight: 600;
-            color: #555;
-        }
-
-        .result-value {
-            color: #333;
-            font-weight: 700;
-        }
-
-        .power-check-success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #28a745;
-        }
-
-        .power-check-fail {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #dc3545;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .toast.success { background: #28a745; }
-        .toast.error { background: #dc3545; }
-        .toast.warning { background: #ffc107; color: #212529; }
-        .toast.info { background: #17a2b8; }
-
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
+        /* Стилизация текста отчета */
+        .report-header { font-weight: bold; margin-bottom: 15px; }
+        .report-section { margin-bottom: 10px; }
+        .formula { font-style: italic; }
+        .sub { vertical-align: sub; font-size: 0.7em; }
+        .sup { vertical-align: super; font-size: 0.7em; }
+        
+        /* Скрытие интерфейса при печати */
+        @media print {
+            body { background: white; height: auto; display: block; }
+            .sidebar { display: none; }
+            .preview-area { display: block; padding: 0; }
+            .a4-page { width: 100%; box-shadow: none; margin: 0; padding: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>вљ™пёЏ РљР°Р»СЊРєСѓР»СЏС‚РѕСЂ СЂРµР¶РёРјРѕРІ СЂРµР·Р°РЅРёСЏ</h1>
-            <p>РўРѕРєР°СЂРЅР°СЏ РѕР±СЂР°Р±РѕС‚РєР° v1.0 | РЎ С‚Р°Р±Р»РёС†Р°РјРё РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ РёР· РјРµС‚РѕРґРёС‡РєРё</p>
+
+    <div class="sidebar">
+        <h2>🛠️ Параметры операции</h2>
+        
+        <div class="input-group">
+            <label>Оборудование (Станок):</label>
+            <input type="text" id="machine" value="Токарно-винторезный станок 1К62">
+        </div>
+        <div class="input-group">
+            <label>Мощность станка (Nст), кВт:</label>
+            <input type="number" id="N_st" value="10">
+        </div>
+        <div class="input-group">
+            <label>Переход (описание):</label>
+            <input type="text" id="transition" value="Подрезать торец А, выдержав р-р 18">
+        </div>
+        <div class="input-group">
+            <label>Инструмент:</label>
+            <input type="text" id="tool" value="Резец проходной отогнутый с ВК6">
         </div>
 
-        <div class="content">
-            <!-- РўРёРї РѕР±СЂР°Р±РѕС‚РєРё -->
-            <div class="form-section">
-                <h3>рџ”§ РўРёРї РѕР±СЂР°Р±РѕС‚РєРё</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="operationType">РћРїРµСЂР°С†РёСЏ:</label>
-                        <select id="operationType">
-                            <option>РќР°СЂСѓР¶РЅРѕРµ РїСЂРѕРґРѕР»СЊРЅРѕРµ С‚РѕС‡РµРЅРёРµ РїСЂРѕС…РѕРґРЅС‹РјРё СЂРµР·С†Р°РјРё</option>
-                            <option>РќР°СЂСѓР¶РЅРѕРµ РїСЂРѕРґРѕР»СЊРЅРѕРµ С‚РѕС‡РµРЅРёРµ СЂРµР·С†Р°РјРё СЃ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рј Р»РµР·РІРёРµРј</option>
-                            <option>Р Р°СЃС‚Р°С‡РёРІР°РЅРёРµ</option>
-                            <option>РџРѕРґСЂРµР·Р°РЅРёРµ С‚РѕСЂС†Р°</option>
-                            <option>РћС‚СЂРµР·Р°РЅРёРµ</option>
-                            <option>РџСЂРѕСЂРµР·Р°РЅРёРµ</option>
-                            <option>Р¤Р°СЃРѕРЅРЅРѕРµ С‚РѕС‡РµРЅРёРµ</option>
-                            <option>РќР°СЂРµР·Р°РЅРёРµ РєСЂРµРїРµР¶РЅРѕР№ СЂРµР·СЊР±С‹ (С‡РµСЂРЅРѕРІС‹Рµ С…РѕРґС‹)</option>
-                            <option>РќР°СЂРµР·Р°РЅРёРµ РєСЂРµРїРµР¶РЅРѕР№ СЂРµР·СЊР±С‹ (С‡РёСЃС‚РѕРІС‹Рµ С…РѕРґС‹)</option>
-                            <option>Р’РёС…СЂРµРІРѕРµ РЅР°СЂРµР·Р°РЅРёРµ СЂРµР·СЊР±С‹</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+        <hr style="border-color: #7f8c8d; width: 100%;">
 
-            <!-- РњР°С‚РµСЂРёР°Р»С‹ -->
-            <div class="form-section">
-                <h3>рџ”© РњР°С‚РµСЂРёР°Р»С‹</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="material">РњР°С‚РµСЂРёР°Р» РґРµС‚Р°Р»Рё:</label>
-                        <select id="material">
-                            <option>РЎС‚Р°Р»СЊ РєРѕРЅСЃС‚СЂСѓРєС†РёРѕРЅРЅР°СЏ (ПѓРІ = 750 РњРџР°)</option>
-                            <option>РЎС‚Р°Р»СЊ Р¶Р°СЂРѕРїСЂРѕС‡РЅР°СЏ 12РҐ18Рќ9Рў (141 РќР’)</option>
-                            <option>Р§СѓРіСѓРЅ СЃРµСЂС‹Р№ (190 РќР’)</option>
-                            <option>Р§СѓРіСѓРЅ РєРѕРІРєРёР№ (150 РќР’)</option>
-                            <option>РњРµРґРЅС‹Рµ РіРµС‚РµСЂРѕРіРµРЅРЅС‹Рµ СЃРїР»Р°РІС‹ (120 РќР’)</option>
-                            <option>РЎРёР»СѓРјРёРЅ Рё Р»РёС‚РµР№РЅС‹Рµ Р°Р»СЋРјРёРЅРёРµРІС‹Рµ СЃРїР»Р°РІС‹</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="toolMaterial">РњР°С‚РµСЂРёР°Р» РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°:</label>
-                        <select id="toolMaterial">
-                            <option>РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ Рў15Рљ6</option>
-                            <option>РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ Рў5Рљ10</option>
-                            <option>РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ Рў14Рљ8</option>
-                            <option>РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ Рў30Рљ4</option>
-                            <option>РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ Р’Рљ8</option>
-                            <option>РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ Р’Рљ6</option>
-                            <option>РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ Р’Рљ4</option>
-                            <option>Р‘С‹СЃС‚СЂРѕСЂРµР¶СѓС‰Р°СЏ СЃС‚Р°Р»СЊ Р 18</option>
-                            <option>Р‘С‹СЃС‚СЂРѕСЂРµР¶СѓС‰Р°СЏ СЃС‚Р°Р»СЊ Р 6Рњ5</option>
-                            <option>Р‘С‹СЃС‚СЂРѕСЂРµР¶СѓС‰Р°СЏ СЃС‚Р°Р»СЊ Р 9</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєР° РѕР±СЂР°Р±РѕС‚РєРё -->
-            <div class="form-section">
-                <h3>рџ“‹ РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєР° РѕР±СЂР°Р±РѕС‚РєРё</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="machiningType">Р’РёРґ РѕР±СЂР°Р±РѕС‚РєРё:</label>
-                        <select id="machiningType">
-                            <option>Р§РµСЂРЅРѕРІР°СЏ</option>
-                            <option>РџРѕР»СѓС‡РёСЃС‚РѕРІР°СЏ</option>
-                            <option>Р§РёСЃС‚РѕРІР°СЏ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="surfaceCondition">РЎРѕСЃС‚РѕСЏРЅРёРµ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё:</label>
-                        <select id="surfaceCondition">
-                            <option>Р§РёСЃС‚Р°СЏ РїРѕРІРµСЂС…РЅРѕСЃС‚СЊ</option>
-                            <option>РџРѕРІРµСЂС…РЅРѕСЃС‚СЊ СЃ РєРѕСЂРєРѕР№</option>
-                            <option>РџСЂРѕРєР°С‚РЅР°СЏ РѕРєР°Р»РёРЅР°</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="cooling">РћС…Р»Р°Р¶РґРµРЅРёРµ:</label>
-                        <select id="cooling">
-                            <option>РЎ РѕС…Р»Р°Р¶РґРµРЅРёРµРј</option>
-                            <option>Р‘РµР· РѕС…Р»Р°Р¶РґРµРЅРёСЏ</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Р“РµРѕРјРµС‚СЂРёС‡РµСЃРєРёРµ РїР°СЂР°РјРµС‚СЂС‹ -->
-            <div class="form-section">
-                <h3>рџ“ђ Р“РµРѕРјРµС‚СЂРёС‡РµСЃРєРёРµ РїР°СЂР°РјРµС‚СЂС‹</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="diameter">Р”РёР°РјРµС‚СЂ С‚РѕС‡РµРЅРёСЏ D, РјРј:</label>
-                        <input type="number" id="diameter" value="50" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label for="depth">Р“Р»СѓР±РёРЅР° СЂРµР·Р°РЅРёСЏ t, РјРј:</label>
-                        <input type="number" id="depth" value="2.0" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label for="feed">РџРѕРґР°С‡Р° S, РјРј/РѕР±:</label>
-                        <input type="number" id="feed" value="0.3" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="length">Р”Р»РёРЅР° РѕР±СЂР°Р±РѕС‚РєРё l, РјРј:</label>
-                        <input type="number" id="length" value="100" step="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="approach">Р’СЂРµР·Р°РЅРёРµ lв‚Ѓ, РјРј:</label>
-                        <input type="number" id="approach" value="3" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label for="overtravel">РџРµСЂРµР±РµРі lв‚‚, РјРј:</label>
-                        <input type="number" id="overtravel" value="3" step="0.1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- РџР°СЂР°РјРµС‚СЂС‹ РѕРїРµСЂР°С†РёРё -->
-            <div class="form-section">
-                <h3>рџ”ў РџР°СЂР°РјРµС‚СЂС‹ РѕРїРµСЂР°С†РёРё</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="operationNumber">РќРѕРјРµСЂ РѕРїРµСЂР°С†РёРё:</label>
-                        <input type="text" id="operationNumber" value="I">
-                    </div>
-                    <div class="form-group">
-                        <label for="transitionNumber">РќРѕРјРµСЂ РїРµСЂРµС…РѕРґР°:</label>
-                        <input type="number" id="transitionNumber" value="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="toolLife">РЎС‚РѕР№РєРѕСЃС‚СЊ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р° T, РјРёРЅ:</label>
-                        <input type="number" id="toolLife" value="90" step="1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- РћР±РѕСЂСѓРґРѕРІР°РЅРёРµ -->
-            <div class="form-section">
-                <h3>рџЏ­ РћР±РѕСЂСѓРґРѕРІР°РЅРёРµ</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="machine">РЎС‚Р°РЅРѕРє:</label>
-                        <select id="machine">
-                            <option>РўРѕРєР°СЂРЅРѕ-РІРёРЅС‚РѕСЂРµР·РЅС‹Р№ 1Рљ62</option>
-                            <option>РўРѕРєР°СЂРЅРѕ-РІРёРЅС‚РѕСЂРµР·РЅС‹Р№ 16Рљ20</option>
-                            <option>РўРѕРєР°СЂРЅРѕ-РІРёРЅС‚РѕСЂРµР·РЅС‹Р№ 1Рђ62</option>
-                            <option>РўРѕРєР°СЂРЅС‹Р№ Р°РІС‚РѕРјР°С‚ 1Рђ240</option>
-                            <option>РўРѕРєР°СЂРЅС‹Р№ РїРѕР»СѓР°РІС‚РѕРјР°С‚ 1Р‘240</option>
-                            <option>РўРѕРєР°СЂРЅС‹Р№ СЃ Р§РџРЈ 16Рљ20Р¤3</option>
-                            <option>РўРѕРєР°СЂРЅС‹Р№ СЃ Р§РџРЈ 16Рђ20Р¤3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="machinePower">РњРѕС‰РЅРѕСЃС‚СЊ СЃС‚Р°РЅРєР° N, РєР’С‚:</label>
-                        <input type="number" id="machinePower" value="10" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label for="efficiency">РљРџР” СЃС‚Р°РЅРєР° О·:</label>
-                        <input type="number" id="efficiency" value="0.8" step="0.01" min="0" max="1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- РџСЂРёСЃРїРѕСЃРѕР±Р»РµРЅРёРµ -->
-            <div class="form-section">
-                <h3>рџ”§ РџСЂРёСЃРїРѕСЃРѕР±Р»РµРЅРёРµ Рё РёРЅСЃС‚СЂСѓРјРµРЅС‚</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="fixture">РџСЂРёСЃРїРѕСЃРѕР±Р»РµРЅРёРµ:</label>
-                        <input type="text" id="fixture" value="3С…-РєСѓР»Р°С‡РєРѕРІС‹Р№ РїР°С‚СЂРѕРЅ">
-                    </div>
-                    <div class="form-group">
-                        <label for="toolGost">Р“РћРЎРў СЂРµР·С†Р°:</label>
-                        <input type="text" id="toolGost" value="Р“РћРЎРў 18880-70">
-                    </div>
-                </div>
-            </div>
-
-            <!-- РљРЅРѕРїРєРё -->
-            <div class="form-section" style="grid-column: 1 / -1;">
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="calculate()">
-                        рџ“Љ Р’С‹РїРѕР»РЅРёС‚СЊ СЂР°СЃС‡РµС‚
-                    </button>
-                    <button class="btn btn-secondary" onclick="generateReport()">
-                        рџ“„ РЎС„РѕСЂРјРёСЂРѕРІР°С‚СЊ РѕС‚С‡РµС‚
-                    </button>
-                    <button class="btn btn-info" onclick="saveData()">
-                        рџ’ѕ РЎРѕС…СЂР°РЅРёС‚СЊ РґР°РЅРЅС‹Рµ
-                    </button>
-                    <button class="btn btn-info" onclick="loadData()">
-                        рџ“‚ Р—Р°РіСЂСѓР·РёС‚СЊ РґР°РЅРЅС‹Рµ
-                    </button>
-                    <button class="btn btn-warning" onclick="clearResults()">
-                        рџ—‘пёЏ РћС‡РёСЃС‚РёС‚СЊ
-                    </button>
-                </div>
-            </div>
-
-            <!-- Р РµР·СѓР»СЊС‚Р°С‚С‹ -->
-            <div class="results" id="results">
-                <div class="form-section">
-                    <h3>рџ“Љ Р РµР·СѓР»СЊС‚Р°С‚С‹ СЂР°СЃС‡РµС‚Р°</h3>
-                    <div id="resultsContent"></div>
-                </div>
-            </div>
+        <div class="input-group">
+            <label>Глубина резания (t), мм:</label>
+            <input type="number" id="t" value="2.0" step="0.1">
         </div>
+        <div class="input-group">
+            <label>Подача (S), мм/об:</label>
+            <input type="number" id="s" value="0.84" step="0.01">
+        </div>
+        <div class="input-group">
+            <label>Диаметр детали (D), мм:</label>
+            <input type="number" id="D" value="92" step="1">
+        </div>
+        <div class="input-group">
+            <label>Длина обработки (L), мм:</label>
+            <input type="number" id="L" value="18" step="1">
+        </div>
+
+        <button class="btn-generate" onclick="updateReport()">🔄 Обновить отчет</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Печать / PDF</button>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div class="preview-area">
+        <div class="a4-page" id="report-content">
+            </div>
+    </div>
+
+<script>
+    // Стандартные обороты 1К62
+    const SPEEDS_1K62 = [12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000];
+
+    function getNearestSpeed(n) {
+        return SPEEDS_1K62.reduce((prev, curr) => Math.abs(curr - n) < Math.abs(prev - n) ? curr : prev);
+    }
+
+    function updateReport() {
+        // 1. Сбор данных
+        const machine = document.getElementById('machine').value;
+        const N_st = parseFloat(document.getElementById('N_st').value);
+        const transition = document.getElementById('transition').value;
+        const tool = document.getElementById('tool').value;
+        
+        const t = parseFloat(document.getElementById('t').value);
+        const s = parseFloat(document.getElementById('s').value);
+        const D = parseFloat(document.getElementById('D').value);
+        const L = parseFloat(document.getElementById('L').value);
+
+        // 2. Коэффициенты (как в твоем примере)
+        const Cv = 420, m = 0.2, x = 0.15, y = 0.2;
+        const T_life = 90;
+        
+        // K_v (Поправочный коэффициент скорости)
+        // Примерный расчет составного Kv (Kmp * Kmu * ...)
+        // Берем итоговый Kv из примера или считаем упрощенно
+        const K_v = 1.08; // Как в примере (или можно сделать расчет)
+
+        // 3. Расчет Скорости (V расч)
+        // Формула: V = Cv / (T^m * t^x * s^y) * Kv
+        const denominator = Math.pow(T_life, m) * Math.pow(t, x) * Math.pow(s, y);
+        const V_calc = (Cv / denominator) * K_v;
+
+        // 4. Расчет Оборотов (n расч)
+        const n_calc = (1000 * V_calc) / (Math.PI * D);
+
+        // 5. Корректировка по станку
+        const n_st = getNearestSpeed(n_calc);
+        const s_st = s; // Предполагаем, что подача есть на станке
+
+        // 6. Действительная скорость
+        const V_act = (Math.PI * D * n_st) / 1000;
+
+        // 7. Сила резания Pz
+        // Pz = 10 * Cp * t^x * s^y * V^n * Kp
+        const Cp = 300, x_p = 1.0, y_p = 0.75, n_p = 0.15;
+        const Kp = 1.0;
+        
+        // ВАЖНО: В твоем примере Pz зависит от V^n (обычно V в степени n_p)
+        const Pz = 10 * Cp * Math.pow(t, x_p) * Math.pow(s, y_p) * Math.pow(V_act, n_p) * Kp;
+
+        // 8. Мощность резания
+        // Nрез = (Pz * V) / (1020 * 60)
+        const N_rez = (Pz * V_act) / (1020 * 60);
+
+        // 9. Технологическое время
+        // To = L_total / (n * s)
+        const l_rez = 1.2; // врезание
+        const l_per = 1.0; // перебег
+        const L_total = L + l_rez + l_per;
+        const T_o = L_total / (n_st * s_st);
+
+        // ==========================================
+        // ГЕНЕРАЦИЯ HTML ОТЧЕТА
+        // ==========================================
+        
+        const html = `
+            <div class="report-header">
+                I операция: ТОКАРНАЯ<br>
+                Оборудование: ${machine}, N<span class="sub">ст</span>=${N_st} кВт.<br>
+                Приспособление: 3х-кулачковый патрон.<br>
+                1 переход: ${transition}.<br>
+                Режущий инструмент: ${tool}, ГОСТ 18880-70.
+            </div>
+
+            <div class="report-section">
+                <strong>1. Глубина резания:</strong> t = z<span class="sub">1max</span> = ${t} мм
+            </div>
+
+            <div class="report-section">
+                <strong>2. Подача:</strong> S = ${s} мм/об
+            </div>
+
+            <div class="report-section">
+                <strong>3. Допускаемая скорость резания:</strong><br>
+                <br>
+                V = <span class="formula">C<span class="sub">v</span> / (T<span class="sup">m</span> · t<span class="sup">x</span> · S<span class="sup">y</span>) · K<span class="sub">v</span></span>, м/мин<br>
+                <br>
+                где: T = ${T_life} мин — стойкость инструмента.<br>
+                K<span class="sub">v</span> = ${K_v} — поправочный коэффициент.<br>
+                C<span class="sub">v</span> = ${Cv}; m = ${m}; x = ${x}; y = ${y}.<br>
+                <br>
+                V = ${Cv} / (${T_life}<span class="sup">${m}</span> · ${t}<span class="sup">${x}</span> · ${s}<span class="sup">${y}</span>) · ${K_v} = <strong>${V_calc.toFixed(2)} м/мин.</strong>
+            </div>
+
+            <div class="report-section">
+                <strong>4. Расчетное число оборотов:</strong><br>
+                n = 1000 · V / (π · D) = 1000 · ${V_calc.toFixed(2)} / (3.14 · ${D}) = <strong>${n_calc.toFixed(2)} об/мин.</strong>
+            </div>
+
+            <div class="report-section">
+                <strong>5. Корректировка по станку:</strong><br>
+                Принимаем ближайшее значение по паспорту станка 1К62:<br>
+                <strong>n<span class="sub">ст</span> = ${n_st} об/мин;</strong> S<span class="sub">ст</span> = ${s_st} мм/об.
+            </div>
+
+            <div class="report-section">
+                <strong>6. Определяем действительную скорость резания:</strong><br>
+                V<span class="sub">д</span> = π · D · n<span class="sub">ст</span> / 1000 = 3.14 · ${D} · ${n_st} / 1000 = <strong>${V_act.toFixed(2)} м/мин.</strong>
+            </div>
+
+            <div class="report-section">
+                <strong>7. Сила резания P<span class="sub">z</span>:</strong><br>
+                P<span class="sub">z</span> = 10 · C<span class="sub">p</span> · t<span class="sup">x</span> · S<span class="sup">y</span> · V<span class="sup">n</span> · K<span class="sub">p</span>, Н<br>
+                <br>
+                Коэффициенты: C<span class="sub">p</span>=${Cp}; x=${x_p}; y=${y_p}; n=${n_p}; K<span class="sub">p</span>=${Kp}.<br>
+                <br>
+                P<span class="sub">z</span> = 10 · ${Cp} · ${t}<span class="sup">${x_p}</span> · ${s}<span class="sup">${y_p}</span> · ${V_act.toFixed(2)}<span class="sup">${n_p}</span> · ${Kp} = <strong>${Pz.toFixed(2)} Н.</strong>
+            </div>
+
+            <div class="report-section">
+                <strong>8. Мощность резания N<span class="sub">рез</span>:</strong><br>
+                N<span class="sub">рез</span> = P<span class="sub">z</span> · V<span class="sub">д</span> / (1020 · 60) = ${Pz.toFixed(0)} · ${V_act.toFixed(2)} / 61200 = <strong>${N_rez.toFixed(2)} кВт.</strong>
+            </div>
+
+            <div class="report-section">
+                <strong>9. Проверка по мощности:</strong><br>
+                N<span class="sub">рез</span> (${N_rez.toFixed(2)} кВт) ≤ N<span class="sub">ст</span> (${N_st} кВт) — <span style="font-weight:bold; color:${N_rez <= N_st ? 'green' : 'red'}">${N_rez <= N_st ? 'Условие выполняется' : 'ПЕРЕГРУЗКА!'}</span>.
+            </div>
+
+            <div class="report-section">
+                <strong>10. Технологическое время T<span class="sub">o</span>:</strong><br>
+                T<span class="sub">o</span> = L<span class="sub">полн</span> / (n<span class="sub">ст</span> · S)<br>
+                L<span class="sub">полн</span> = ${L} + ${l_rez} + ${l_per} = ${L_total} мм.<br>
+                T<span class="sub">o</span> = ${L_total} / (${n_st} · ${s}) = <strong>${T_o.toFixed(3)} мин.</strong>
+            </div>
+        `;
+
+        document.getElementById('report-content').innerHTML = html;
+    }
+
+    // Запуск при загрузке
+    updateReport();
+</script>
 
-    <script>
-        // Р“Р»РѕР±Р°Р»СЊРЅР°СЏ РїРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
-        let calculationResults = null;
-
-        // РўР°Р±Р»РёС†С‹ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ РґР»СЏ СЂР°СЃС‡РµС‚Р° СЃРєРѕСЂРѕСЃС‚Рё СЂРµР·Р°РЅРёСЏ
-        function getCuttingSpeedCoefficients(material, toolMaterial, machiningType, feed_s, depth_p = null) {
-            // РЎРўРђР›Р¬ РљРћРќРЎРўР РЈРљР¦РРћРќРќРђРЇ ПѓРІ = 750 РњРџР°
-            if (material.includes("РЎС‚Р°Р»СЊ") && material.includes("750")) {
-                // РќР°СЂСѓР¶РЅРѕРµ РїСЂРѕРґРѕР»СЊРЅРѕРµ С‚РѕС‡РµРЅРёРµ РїСЂРѕС…РѕРґРЅС‹РјРё СЂРµР·С†Р°РјРё
-                if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅРѕРµ") && machiningType.includes("РїСЂРѕС…РѕРґРЅ")) {
-                    if (toolMaterial.includes("Рў15Рљ6")) {
-                        if (feed_s <= 0.3) return { Cv: 350, x: 0, y: 0.20, m: 0.20 };
-                        else if (feed_s <= 0.7) return { Cv: 290, x: 0.15, y: 0.35, m: 0.20 };
-                        else return { Cv: 280, x: 0, y: 0.45, m: 0.20 };
-                    }
-                }
-                
-                // РўРѕС‡РµРЅРёРµ СЂРµР·С†Р°РјРё СЃ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рј Р»РµР·РІРёРµРј
-                if (machiningType.includes("РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅ") && machiningType.includes("Р»РµР·РІРё")) {
-                    if (toolMaterial.includes("Рў15Рљ6")) {
-                        if (feed_s <= (depth_p || 1.0)) return { Cv: 250, x: 0.30, y: 0.15, m: 0.18 };
-                        else return { Cv: 250, x: 0.15, y: 0.30, m: 0.18 };
-                    }
-                }
-                
-                // РћС‚СЂРµР·Р°РЅРёРµ
-                if (machiningType.includes("РћС‚СЂРµР·Р°РЅ")) {
-                    if (toolMaterial.includes("Рў5Рљ10")) return { Cv: 47, x: 0, y: 0.80, m: 0.20 };
-                    else if (toolMaterial.includes("Р 18")) return { Cv: 23.7, x: 0, y: 0.66, m: 0.25 };
-                }
-                
-                // Р¤Р°СЃРѕРЅРЅРѕРµ С‚РѕС‡РµРЅРёРµ
-                if (machiningType.includes("Р¤Р°СЃРѕРЅРЅ")) {
-                    if (toolMaterial.includes("Р 18")) return { Cv: 22.7, x: 0, y: 0.50, m: 0.30 };
-                }
-                
-                // РќР°СЂРµР·Р°РЅРёРµ СЂРµР·СЊР±С‹
-                if (machiningType.includes("РќР°СЂРµР·Р°РЅ") && machiningType.includes("СЂРµР·СЊР±")) {
-                    if (toolMaterial.includes("Рў15Рљ6")) return { Cv: 244, x: 0.23, y: 0.30, m: 0.20 };
-                    else if (toolMaterial.includes("Р 6Рњ5")) {
-                        if (machiningType.includes("С‡РµСЂРЅРѕРІ")) {
-                            if (depth_p && depth_p <= 2) return { Cv: 14.8, x: 0.70, y: 0.30, m: 0.11 };
-                            else return { Cv: 30, x: 0.60, y: 0.25, m: 0.08 };
-                        } else {
-                            return { Cv: 41.8, x: 0.45, y: 0.30, m: 0.13 };
-                        }
-                    }
-                }
-                
-                // Р’РёС…СЂРµРІРѕРµ РЅР°СЂРµР·Р°РЅРёРµ
-                if (machiningType.includes("Р’РёС…СЂРµРІ")) {
-                    if (toolMaterial.includes("Рў15Рљ6")) return { Cv: 2330, x: 0.50, y: 0.50, m: 0.50 };
-                }
-            }
-            
-            // Р§РЈР“РЈРќ РЎР•Р Р«Р™ 190РќР’
-            else if (material.includes("Р§СѓРіСѓРЅ СЃРµСЂС‹Р№") || (material.includes("Р§СѓРіСѓРЅ") && material.includes("190"))) {
-                if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅРѕРµ") && machiningType.includes("РїСЂРѕС…РѕРґРЅ")) {
-                    if (toolMaterial.includes("Р’Рљ6")) {
-                        if (feed_s <= 0.40) return { Cv: 292, x: 0.15, y: 0.20, m: 0.20 };
-                        else return { Cv: 243, x: 0.15, y: 0.40, m: 0.20 };
-                    }
-                }
-                
-                if (machiningType.includes("РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅ")) {
-                    if (toolMaterial.includes("Р’Рљ6")) {
-                        if (feed_s >= (depth_p || 1.0)) return { Cv: 240, x: 0.40, y: 0.20, m: 0.28 };
-                        else return { Cv: 240, x: 0.20, y: 0.40, m: 0.28 };
-                    }
-                }
-                
-                if (machiningType.includes("РћС‚СЂРµР·Р°РЅ")) {
-                    if (toolMaterial.includes("Р’Рљ6")) return { Cv: 68.5, x: 0, y: 0.40, m: 0.20 };
-                }
-                
-                if (machiningType.includes("РќР°СЂРµР·Р°РЅ") && machiningType.includes("СЂРµР·СЊР±")) {
-                    if (toolMaterial.includes("Р’Рљ6")) return { Cv: 83, x: 0.45, y: 0, m: 0.33 };
-                }
-            }
-            
-            // Р§РЈР“РЈРќ РљРћР’РљРР™ 150РќР’
-            else if (material.includes("Р§СѓРіСѓРЅ РєРѕРІРєРёР№") || (material.includes("Р§СѓРіСѓРЅ") && material.includes("150"))) {
-                if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅРѕРµ") && machiningType.includes("РїСЂРѕС…РѕРґРЅ")) {
-                    if (toolMaterial.includes("Р’Рљ8")) {
-                        if (feed_s <= 0.40) return { Cv: 317, x: 0.15, y: 0.20, m: 0.20 };
-                        else return { Cv: 215, x: 0.15, y: 0.45, m: 0.20 };
-                    }
-                }
-                
-                if (machiningType.includes("РћС‚СЂРµР·Р°РЅ")) {
-                    if (toolMaterial.includes("Р’Рљ6")) return { Cv: 86, x: 0, y: 0.4, m: 0.20 };
-                }
-            }
-            
-            // РњР•Р”РќР«Р• РЎРџР›РђР’Р«
-            else if (material.includes("РњРµРґРЅ")) {
-                if (toolMaterial.includes("Р 18")) {
-                    if (feed_s <= 0.20) return { Cv: 270, x: 0.12, y: 0.25, m: 0.23 };
-                    else return { Cv: 182, x: 0.12, y: 0.30, m: 0.23 };
-                }
-            }
-            
-            // РЎРР›РЈРњРРќ Р РђР›Р®РњРРќРР™
-            else if (material.includes("РЎРёР»СѓРјРёРЅ") || material.includes("РђР»СЋРјРёРЅРёРµРІ")) {
-                if (toolMaterial.includes("Р 18")) {
-                    if (feed_s <= 0.20) return { Cv: 485, x: 0.12, y: 0.25, m: 0.28 };
-                    else return { Cv: 328, x: 0.12, y: 0.50, m: 0.28 };
-                }
-            }
-            
-            // Р—РЅР°С‡РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
-            return { Cv: 317, x: 0.15, y: 0.20, m: 0.20 };
-        }
-
-        // РўР°Р±Р»РёС†С‹ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ РґР»СЏ СЂР°СЃС‡РµС‚Р° СЃРёР»С‹ СЂРµР·Р°РЅРёСЏ
-        function getCuttingForceCoefficients(material, toolMaterial, machiningType, forceComponent) {
-            // РЎРўРђР›Р¬ РљРћРќРЎРўР РЈРљР¦РРћРќРќРђРЇ ПѓРІ = 750 РњРџР°
-            if (material.includes("РЎС‚Р°Р»СЊ") && material.includes("750")) {
-                if (toolMaterial.includes("РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ") || toolMaterial.includes("Рў15Рљ6") || toolMaterial.includes("Р’Рљ")) {
-                    if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅ") || machiningType.includes("РїРѕРїРµСЂРµС‡РЅ") || machiningType.includes("СЂР°СЃС‚Р°С‡")) {
-                        if (forceComponent === 'Pz') return { Cp: 300, x: 1.0, y: 0.75, n: -0.15 };
-                        else if (forceComponent === 'Py') return { Cp: 243, x: 0.9, y: 0.6, n: -0.15 };
-                        else if (forceComponent === 'Px') return { Cp: 339, x: 1.0, y: 0.5, n: -0.15 };
-                    }
-                    
-                    if (machiningType.includes("РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 384, x: 0.90, y: 0.90, n: -0.15 };
-                        else if (forceComponent === 'Py') return { Cp: 355, x: 0.6, y: 0.8, n: -0.3 };
-                        else if (forceComponent === 'Px') return { Cp: 241, x: 1.05, y: 0.2, n: -0.4 };
-                    }
-                    
-                    if (machiningType.includes("РћС‚СЂРµР·Р°РЅ") || machiningType.includes("РџСЂРѕСЂРµР·Р°РЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 408, x: 0.72, y: 0.8, n: 0 };
-                        else if (forceComponent === 'Py') return { Cp: 173, x: 0.73, y: 0.67, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("РќР°СЂРµР·Р°РЅ") && machiningType.includes("СЂРµР·СЊР±")) {
-                        if (forceComponent === 'Pz') return { Cp: 148, x: 0, y: 1.7, n: 0.71 };
-                    }
-                }
-                
-                else if (toolMaterial.includes("Р‘С‹СЃС‚СЂРѕСЂРµР¶СѓС‰Р°СЏ") || toolMaterial.includes("Р 18") || toolMaterial.includes("Р 6Рњ5")) {
-                    if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅ") || machiningType.includes("РїРѕРґСЂРµР·Р°РЅ") || machiningType.includes("СЂР°СЃС‚Р°С‡")) {
-                        if (forceComponent === 'Pz') return { Cp: 200, x: 1.0, y: 0.75, n: 0 };
-                        else if (forceComponent === 'Py') return { Cp: 125, x: 0.9, y: 0.75, n: 0 };
-                        else if (forceComponent === 'Px') return { Cp: 67, x: 1.2, y: 0.65, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("РћС‚СЂРµР·Р°РЅ") || machiningType.includes("РџСЂРѕСЂРµР·Р°РЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 247, x: 0, y: 1.0, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("Р¤Р°СЃРѕРЅРЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 212, x: 0, y: 1.0, n: 0 };
-                    }
-                }
-            }
-            
-            // Р§РЈР“РЈРќ РЎР•Р Р«Р™ 190РќР’
-            else if (material.includes("Р§СѓРіСѓРЅ СЃРµСЂС‹Р№") || (material.includes("Р§СѓРіСѓРЅ") && material.includes("190"))) {
-                if (toolMaterial.includes("РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ") || toolMaterial.includes("Р’Рљ")) {
-                    if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅ") || machiningType.includes("РїРѕРїРµСЂРµС‡РЅ") || machiningType.includes("СЂР°СЃС‚Р°С‡")) {
-                        if (forceComponent === 'Pz') return { Cp: 92, x: 1.0, y: 0.75, n: 0 };
-                        else if (forceComponent === 'Py') return { Cp: 54, x: 0.9, y: 0.75, n: 0 };
-                        else if (forceComponent === 'Px') return { Cp: 46, x: 1.0, y: 0.4, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 123, x: 1.0, y: 0.85, n: 0 };
-                        else if (forceComponent === 'Py') return { Cp: 61, x: 0.6, y: 0.5, n: 0 };
-                        else if (forceComponent === 'Px') return { Cp: 24, x: 1.05, y: 0.2, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("РќР°СЂРµР·Р°РЅ") && machiningType.includes("СЂРµР·СЊР±")) {
-                        if (forceComponent === 'Pz') return { Cp: 103, x: 0, y: 1.8, n: 0.82 };
-                    }
-                }
-                
-                else if (toolMaterial.includes("Р‘С‹СЃС‚СЂРѕСЂРµР¶СѓС‰Р°СЏ") || toolMaterial.includes("Р 18")) {
-                    if (machiningType.includes("РћС‚СЂРµР·Р°РЅ") || machiningType.includes("РџСЂРѕСЂРµР·Р°РЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 158, x: 0, y: 1.0, n: 0 };
-                    }
-                }
-            }
-            
-            // Р§РЈР“РЈРќ РљРћР’РљРР™ 150РќР’
-            else if (material.includes("Р§СѓРіСѓРЅ РєРѕРІРєРёР№") || (material.includes("Р§СѓРіСѓРЅ") && material.includes("150"))) {
-                if (toolMaterial.includes("РўРІРµСЂРґС‹Р№ СЃРїР»Р°РІ") || toolMaterial.includes("Р’Рљ")) {
-                    if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅ") || machiningType.includes("РїРѕРїРµСЂРµС‡РЅ") || machiningType.includes("СЂР°СЃС‚Р°С‡")) {
-                        if (forceComponent === 'Pz') return { Cp: 81, x: 1.0, y: 0.75, n: 0 };
-                        else if (forceComponent === 'Py') return { Cp: 43, x: 0.9, y: 0.75, n: 0 };
-                        else if (forceComponent === 'Px') return { Cp: 38, x: 1.0, y: 0.4, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("РћС‚СЂРµР·Р°РЅ") || machiningType.includes("РџСЂРѕСЂРµР·Р°РЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 139, x: 0, y: 1.0, n: 0 };
-                    }
-                }
-            }
-            
-            // РњР•Р”РќР«Р• РЎРџР›РђР’Р«
-            else if (material.includes("РњРµРґРЅ")) {
-                if (toolMaterial.includes("Р‘С‹СЃС‚СЂРѕСЂРµР¶СѓС‰Р°СЏ") || toolMaterial.includes("Р 18")) {
-                    if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅ") || machiningType.includes("РїРѕРїРµСЂРµС‡РЅ") || machiningType.includes("СЂР°СЃС‚Р°С‡")) {
-                        if (forceComponent === 'Pz') return { Cp: 55, x: 1.0, y: 0.66, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("РћС‚СЂРµР·Р°РЅ") || machiningType.includes("РџСЂРѕСЂРµР·Р°РЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 75, x: 0, y: 1.0, n: 0 };
-                    }
-                }
-            }
-            
-            // РђР›Р®РњРРќРР™ Р РЎРР›РЈРњРРќ
-            else if (material.includes("РђР»СЋРјРёРЅРёР№") || material.includes("РЎРёР»СѓРјРёРЅ")) {
-                if (toolMaterial.includes("Р‘С‹СЃС‚СЂРѕСЂРµР¶СѓС‰Р°СЏ") || toolMaterial.includes("Р 18")) {
-                    if (machiningType.includes("РїСЂРѕРґРѕР»СЊРЅ") || machiningType.includes("РїРѕРїРµСЂРµС‡РЅ") || 
-                        machiningType.includes("СЂР°СЃС‚Р°С‡") || machiningType.includes("РїРѕРґСЂРµР·Р°РЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 40, x: 1.0, y: 0.75, n: 0 };
-                    }
-                    
-                    if (machiningType.includes("РћС‚СЂРµР·Р°РЅ") || machiningType.includes("РџСЂРѕСЂРµР·Р°РЅ")) {
-                        if (forceComponent === 'Pz') return { Cp: 50, x: 0, y: 1.0, n: 0 };
-                    }
-                }
-            }
-            
-            // Р—РЅР°С‡РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
-            if (forceComponent === 'Pz') return { Cp: 300, x: 1.0, y: 0.75, n: 0 };
-            else if (forceComponent === 'Py') return { Cp: 243, x: 0.9, y: 0.6, n: 0 };
-            else if (forceComponent === 'Px') return { Cp: 339, x: 1.0, y: 0.5, n: 0 };
-            return { Cp: 300, x: 1.0, y: 0.75, n: 0 };
-        }
-
-        // РџРѕРїСЂР°РІРѕС‡РЅС‹Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹
-        function getKv(material, toolMaterial, surfaceCondition, cooling) {
-            let Kmv = 1.0;  // РљРѕСЌС„С„РёС†РёРµРЅС‚ РјР°С‚РµСЂРёР°Р»Р°
-            let Kpv = 1.0;  // РљРѕСЌС„С„РёС†РёРµРЅС‚ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
-            let Kiv = 1.0;  // РљРѕСЌС„С„РёС†РёРµРЅС‚ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
-            let Klv = 1.0;  // РљРѕСЌС„С„РёС†РёРµРЅС‚ РѕС…Р»Р°Р¶РґРµРЅРёСЏ
-            
-            // РљРѕСЌС„С„РёС†РёРµРЅС‚ РјР°С‚РµСЂРёР°Р»Р° (РїСЂРёРјРµСЂРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ)
-            if (material.includes("РЎС‚Р°Р»СЊ") && material.includes("750")) Kmv = 1.0;
-            else if (material.includes("Р¶Р°СЂРѕРїСЂРѕС‡РЅ")) Kmv = 0.7;
-            else if (material.includes("Р§СѓРіСѓРЅ")) Kmv = 1.1;
-            else if (material.includes("РњРµРґРЅ")) Kmv = 1.3;
-            else if (material.includes("РђР»СЋРјРёРЅРёРµРІ") || material.includes("РЎРёР»СѓРјРёРЅ")) Kmv = 1.5;
-            
-            // РљРѕСЌС„С„РёС†РёРµРЅС‚ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
-            if (surfaceCondition.includes("Р§РёСЃС‚Р°СЏ")) Kpv = 1.0;
-            else if (surfaceCondition.includes("РєРѕСЂРєРѕР№")) Kpv = 0.8;
-            else if (surfaceCondition.includes("РѕРєР°Р»РёРЅР°")) Kpv = 0.65;
-            
-            // РљРѕСЌС„С„РёС†РёРµРЅС‚ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
-            if (toolMaterial.includes("Рў15Рљ6")) Kiv = 1.0;
-            else if (toolMaterial.includes("Рў5Рљ10")) Kiv = 0.85;
-            else if (toolMaterial.includes("Р’Рљ6")) Kiv = 1.0;
-            else if (toolMaterial.includes("Р’Рљ8")) Kiv = 0.95;
-            else if (toolMaterial.includes("Р 18") || toolMaterial.includes("Р 6Рњ5")) Kiv = 0.7;
-            
-            // РљРѕСЌС„С„РёС†РёРµРЅС‚ РѕС…Р»Р°Р¶РґРµРЅРёСЏ
-            if (cooling.includes("РЎ РѕС…Р»Р°Р¶РґРµРЅРёРµРј")) Klv = 1.0;
-            else Klv = 0.9;
-            
-            return Kmv * Kpv * Kiv * Klv;
-        }
-
-        function getKp() {
-            // РџРѕРїСЂР°РІРѕС‡РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР»СЏ СЃРёР»С‹ СЂРµР·Р°РЅРёСЏ (СѓРїСЂРѕС‰РµРЅРЅРѕ)
-            return 1.0;
-        }
-
-        // Р Р°СЃС‡РµС‚ СЂРµР¶РёРјРѕРІ СЂРµР·Р°РЅРёСЏ
-        function calculate() {
-            try {
-                // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёСЏ РёР· С„РѕСЂРјС‹
-                const operationType = document.getElementById('operationType').value;
-                const material = document.getElementById('material').value;
-                const toolMaterial = document.getElementById('toolMaterial').value;
-                const machiningType = document.getElementById('machiningType').value;
-                const surfaceCondition = document.getElementById('surfaceCondition').value;
-                const cooling = document.getElementById('cooling').value;
-                
-                const D = parseFloat(document.getElementById('diameter').value);
-                const t = parseFloat(document.getElementById('depth').value);
-                const S = parseFloat(document.getElementById('feed').value);
-                const l = parseFloat(document.getElementById('length').value);
-                const l1 = parseFloat(document.getElementById('approach').value);
-                const l2 = parseFloat(document.getElementById('overtravel').value);
-                const T = parseFloat(document.getElementById('toolLife').value);
-                
-                const operationNum = document.getElementById('operationNumber').value;
-                const transitionNum = parseInt(document.getElementById('transitionNumber').value);
-                const machine = document.getElementById('machine').value;
-                const N_st = parseFloat(document.getElementById('machinePower').value);
-                const eta = parseFloat(document.getElementById('efficiency').value);
-                const fixture = document.getElementById('fixture').value;
-                const toolGost = document.getElementById('toolGost').value;
-                
-                // РџСЂРѕРІРµСЂРєР° РґР°РЅРЅС‹С…
-                if (isNaN(D) || isNaN(t) || isNaN(S) || isNaN(l) || isNaN(T) || isNaN(N_st)) {
-                    showToast('вљ пёЏ РџСЂРѕРІРµСЂСЊС‚Рµ РІРІРµРґРµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ!', 'warning');
-                    return;
-                }
-                
-                // РџРѕР»СѓС‡Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ СЃРєРѕСЂРѕСЃС‚Рё СЂРµР·Р°РЅРёСЏ
-                const speedCoeffs = getCuttingSpeedCoefficients(material, toolMaterial, operationType, S, t);
-                const { Cv, x: x_v, y: y_v, m } = speedCoeffs;
-                
-                // РџРѕР»СѓС‡Р°РµРј РїРѕРїСЂР°РІРѕС‡РЅС‹Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹
-                const Kv = getKv(material, toolMaterial, surfaceCondition, cooling);
-                
-                // Р Р°СЃС‡РµС‚ СЃРєРѕСЂРѕСЃС‚Рё СЂРµР·Р°РЅРёСЏ
-                const V = (Cv / (Math.pow(T, m) * Math.pow(t, x_v) * Math.pow(S, y_v))) * Kv;
-                
-                // Р Р°СЃС‡РµС‚РЅРѕРµ С‡РёСЃР»Рѕ РѕР±РѕСЂРѕС‚РѕРІ
-                const n_calc = (1000 * V) / (Math.PI * D);
-                
-                // РџСЂРёРЅСЏС‚РѕРµ С‡РёСЃР»Рѕ РѕР±РѕСЂРѕС‚РѕРІ (РѕРєСЂСѓРіР»СЏРµРј РґРѕ Р±Р»РёР¶Р°Р№С€РµРіРѕ СЃС‚Р°РЅРґР°СЂС‚РЅРѕРіРѕ)
-                const standardSpeeds = [10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000];
-                let n_accepted = standardSpeeds[0];
-                for (let speed of standardSpeeds) {
-                    if (speed >= n_calc) {
-                        n_accepted = speed;
-                        break;
-                    }
-                    n_accepted = speed;
-                }
-                
-                // Р¤Р°РєС‚РёС‡РµСЃРєР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ
-                const Vf = (Math.PI * D * n_accepted) / 1000;
-                
-                // РџРѕР»СѓС‡Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ СЃРёР»С‹ СЂРµР·Р°РЅРёСЏ
-                const forceCoeffs = getCuttingForceCoefficients(material, toolMaterial, operationType, 'Pz');
-                const { Cp, x: x_p, y: y_p, n: n_p } = forceCoeffs;
-                
-                // РџРѕРїСЂР°РІРѕС‡РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ СЃРёР»С‹
-                const Kp = getKp();
-                
-                // Р Р°СЃС‡РµС‚ СЃРёР»С‹ СЂРµР·Р°РЅРёСЏ Pz
-                const Pz = 10 * Cp * Math.pow(t, x_p) * Math.pow(S, y_p) * Math.pow(Vf, n_p) * Kp;
-                
-                // РњРѕС‰РЅРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ
-                const N_rez = (Pz * Vf) / 61200;
-                
-                // РўСЂРµР±СѓРµРјР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ РЅР° РїСЂРёРІРѕРґРµ
-                const N_trebuemaya = N_rez / eta;
-                
-                // РџСЂРѕРІРµСЂРєР° РїРѕ РјРѕС‰РЅРѕСЃС‚Рё
-                const powerCheck = N_trebuemaya <= N_st;
-                
-                // РћСЃРЅРѕРІРЅРѕРµ РІСЂРµРјСЏ
-                const To = (l + l1 + l2) / (S * n_accepted);
-                
-                // РЎРѕС…СЂР°РЅСЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹
-                calculationResults = {
-                    operationType, material, toolMaterial, machiningType,
-                    surfaceCondition, cooling, D, t, S, l, l1, l2, T,
-                    operationNum, transitionNum, machine, N_st, eta,
-                    fixture, toolGost,
-                    Cv, x_v, y_v, m, Kv, V, n_calc, n_accepted, Vf,
-                    Cp, x_p, y_p, n_p, Kp, Pz,
-                    N_rez, N_trebuemaya, powerCheck, To
-                };
-                
-                // РћС‚РѕР±СЂР°Р¶Р°РµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹
-                displayResults();
-                showToast('вњ… Р Р°СЃС‡РµС‚ РІС‹РїРѕР»РЅРµРЅ СѓСЃРїРµС€РЅРѕ!', 'success');
-                
-            } catch (error) {
-                showToast('вќЊ РћС€РёР±РєР° РїСЂРё СЂР°СЃС‡РµС‚Рµ: ' + error.message, 'error');
-                console.error(error);
-            }
-        }
-
-        // РћС‚РѕР±СЂР°Р¶РµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
-        function displayResults() {
-            if (!calculationResults) return;
-            
-            const r = calculationResults;
-            
-            let html = `
-                <div class="result-card">
-                    <h4>рџ“‹ РСЃС…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ</h4>
-                    <div class="result-item">
-                        <span class="result-label">РћРїРµСЂР°С†РёСЏ:</span>
-                        <span class="result-value">${r.operationType}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РњР°С‚РµСЂРёР°Р» РґРµС‚Р°Р»Рё:</span>
-                        <span class="result-value">${r.material}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РРЅСЃС‚СЂСѓРјРµРЅС‚:</span>
-                        <span class="result-value">${r.toolMaterial}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Р”РёР°РјРµС‚СЂ D:</span>
-                        <span class="result-value">${r.D} РјРј</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Р“Р»СѓР±РёРЅР° СЂРµР·Р°РЅРёСЏ t:</span>
-                        <span class="result-value">${r.t} РјРј</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РџРѕРґР°С‡Р° S:</span>
-                        <span class="result-value">${r.S} РјРј/РѕР±</span>
-                    </div>
-                </div>
-
-                <div class="result-card">
-                    <h4>вљЎ РЎРєРѕСЂРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ</h4>
-                    <div class="result-item">
-                        <span class="result-label">РљРѕСЌС„С„РёС†РёРµРЅС‚ Cv:</span>
-                        <span class="result-value">${r.Cv}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РЎС‚РѕР№РєРѕСЃС‚СЊ T:</span>
-                        <span class="result-value">${r.T} РјРёРЅ</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РџРѕРєР°Р·Р°С‚РµР»Рё СЃС‚РµРїРµРЅРё (x, y, m):</span>
-                        <span class="result-value">${r.x_v}, ${r.y_v}, ${r.m}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РџРѕРїСЂР°РІРѕС‡РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ Kv:</span>
-                        <span class="result-value">${r.Kv.toFixed(3)}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Р Р°СЃС‡РµС‚РЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ V:</span>
-                        <span class="result-value">${r.V.toFixed(2)} Рј/РјРёРЅ</span>
-                    </div>
-                </div>
-
-                <div class="result-card">
-                    <h4>рџ”„ Р§РёСЃР»Рѕ РѕР±РѕСЂРѕС‚РѕРІ</h4>
-                    <div class="result-item">
-                        <span class="result-label">Р Р°СЃС‡РµС‚РЅРѕРµ n:</span>
-                        <span class="result-value">${r.n_calc.toFixed(1)} РѕР±/РјРёРЅ</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РџСЂРёРЅСЏС‚РѕРµ n:</span>
-                        <span class="result-value">${r.n_accepted} РѕР±/РјРёРЅ</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Р¤Р°РєС‚РёС‡РµСЃРєР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ VС„:</span>
-                        <span class="result-value">${r.Vf.toFixed(2)} Рј/РјРёРЅ</span>
-                    </div>
-                </div>
-
-                <div class="result-card">
-                    <h4>рџ’Є РЎРёР»Р° СЂРµР·Р°РЅРёСЏ</h4>
-                    <div class="result-item">
-                        <span class="result-label">РљРѕСЌС„С„РёС†РёРµРЅС‚ Cp:</span>
-                        <span class="result-value">${r.Cp}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РџРѕРєР°Р·Р°С‚РµР»Рё СЃС‚РµРїРµРЅРё (x, y, n):</span>
-                        <span class="result-value">${r.x_p}, ${r.y_p}, ${r.n_p}</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РўР°РЅРіРµРЅС†РёР°Р»СЊРЅР°СЏ СЃРёР»Р° Pz:</span>
-                        <span class="result-value">${r.Pz.toFixed(1)} Рќ</span>
-                    </div>
-                </div>
-
-                <div class="result-card">
-                    <h4>вљЎ РњРѕС‰РЅРѕСЃС‚СЊ</h4>
-                    <div class="result-item">
-                        <span class="result-label">Р­С„С„РµРєС‚РёРІРЅР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ NСЌ:</span>
-                        <span class="result-value">${r.N_rez.toFixed(3)} РєР’С‚</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РўСЂРµР±СѓРµРјР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ NС‚СЂ:</span>
-                        <span class="result-value">${r.N_trebuemaya.toFixed(3)} РєР’С‚</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">РњРѕС‰РЅРѕСЃС‚СЊ СЃС‚Р°РЅРєР° N:</span>
-                        <span class="result-value">${r.N_st} РєР’С‚</span>
-                    </div>
-                    <div class="${r.powerCheck ? 'power-check-success' : 'power-check-fail'}">
-                        <strong>${r.powerCheck ? 'вњ… РџСЂРѕРІРµСЂРєР° РїСЂРѕР№РґРµРЅР°' : 'вќЊ РџСЂРѕРІРµСЂРєР° РЅРµ РїСЂРѕР№РґРµРЅР°'}</strong><br>
-                        ${r.powerCheck ? 'РћР±СЂР°Р±РѕС‚РєР° РІРѕР·РјРѕР¶РЅР°' : 'РћР±СЂР°Р±РѕС‚РєР° РЅРµРІРѕР·РјРѕР¶РЅР° - РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ СЃС‚Р°РЅРєР°'}
-                    </div>
-                </div>
-
-                <div class="result-card">
-                    <h4>вЏ±пёЏ РћСЃРЅРѕРІРЅРѕРµ РІСЂРµРјСЏ</h4>
-                    <div class="result-item">
-                        <span class="result-label">РћСЃРЅРѕРІРЅРѕРµ РІСЂРµРјСЏ To:</span>
-                        <span class="result-value">${r.To.toFixed(3)} РјРёРЅ (${(r.To * 60).toFixed(1)} СЃРµРє)</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Р”Р»РёРЅР° РѕР±СЂР°Р±РѕС‚РєРё:</span>
-                        <span class="result-value">${r.l} РјРј</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Р’СЂРµР·Р°РЅРёРµ + РџРµСЂРµР±РµРі:</span>
-                        <span class="result-value">${r.l1} + ${r.l2} = ${(r.l1 + r.l2).toFixed(1)} РјРј</span>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('resultsContent').innerHTML = html;
-            document.getElementById('results').classList.add('active');
-        }
-
-        // Р“РµРЅРµСЂР°С†РёСЏ РѕС‚С‡РµС‚Р° РІ С„РѕСЂРјР°С‚Рµ РѕР±СЂР°Р·С†Р° Word-РґРѕРєСѓРјРµРЅС‚Р°
-        function generateReport() {
-            if (!calculationResults) {
-                showToast('вљ пёЏ РЎРЅР°С‡Р°Р»Р° РІС‹РїРѕР»РЅРёС‚Рµ СЂР°СЃС‡РµС‚!', 'warning');
-                return;
-            }
-
-            const r = calculationResults;
-            
-            // Р¤РѕСЂРјРёСЂСѓРµРј РѕС‚С‡РµС‚ РІ С„РѕСЂРјР°С‚Рµ РѕР±СЂР°Р·С†Р° I_РѕРїРµСЂР°С†РёСЏ.docx
-            const reportContent = `${r.operationNum} РѕРїРµСЂР°С†РёСЏ : РўРћРљРђР РќРђРЇ
-
-РћР±РѕСЂСѓРґРѕРІР°РЅРёРµ: ${r.machine}, NСЃС‚=${r.N_st} РєР’С‚.
-РџСЂРёСЃРїРѕСЃРѕР±Р»РµРЅРёРµ: ${r.fixture}.
-
-${r.transitionNum} РїРµСЂРµС…РѕРґ: ${r.operationType}.
-
-Р РµР¶СѓС‰РёР№ РёРЅСЃС‚СЂСѓРјРµРЅС‚: Р РµР·РµС† СЃ ${r.toolMaterial}, ${r.toolGost}.
-
-Р“Р»СѓР±РёРЅР° СЂРµР·Р°РЅРёСЏ: t = ${r.t} РјРј
-
-РџРѕРґР°С‡Р°: S = ${r.S} РјРј/РѕР±
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-Р”РѕРїСѓСЃРєР°РµРјР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ
-
-                V = Cv / (T^m Г— t^x Г— S^y) Г— Kv,  Рј/РјРёРЅ
-
-T = ${r.T} РјРёРЅ вЂ” СЃС‚РѕР№РєРѕСЃС‚СЊ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
-
-Kv = ${r.Kv.toFixed(3)} вЂ” РїРѕРїСЂР°РІРѕС‡РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚
-Kmv вЂ” РєРѕСЌС„С„РёС†РёРµРЅС‚, СѓС‡РёС‚С‹РІР°СЋС‰РёР№ РІР»РёСЏРЅРёРµ С„РёР·РёРєРѕ-РјРµС…. СЃРІ-РІ РѕР±СЂР°Р±Р°С‚С‹РІР°РµРјРѕРіРѕ РјР°С‚РµСЂРёР°Р»Р°
-Kpv вЂ” РєРѕСЌС„С„РёС†РёРµРЅС‚, СѓС‡РёС‚С‹РІР°СЋС‰РёР№ РІР»РёСЏРЅРёРµ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё Р·Р°РіРѕС‚РѕРІРєРё
-Kiv вЂ” РєРѕСЌС„С„РёС†РёРµРЅС‚, СѓС‡РёС‚С‹РІР°СЋС‰РёР№ РІР»РёСЏРЅРёРµ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°Р»СЊРЅРѕРіРѕ РјР°С‚РµСЂРёР°Р»Р°
-Klv вЂ” РєРѕСЌС„С„РёС†РёРµРЅС‚, СѓС‡РёС‚С‹РІР°СЋС‰РёР№ РѕС…Р»Р°Р¶РґРµРЅРёРµ
-
-РљРѕСЌС„С„РёС†РёРµРЅС‚С‹ РёР· С‚Р°Р±Р»РёС† РјРµС‚РѕРґРёС‡РєРё:
-Cv = ${r.Cv}; m = ${r.m}; x = ${r.x_v}; y = ${r.y_v}
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-V = ${r.V.toFixed(2)} Рј/РјРёРЅ
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-Р Р°СЃС‡РµС‚РЅРѕРµ С‡РёСЃР»Рѕ РѕР±РѕСЂРѕС‚РѕРІ
-
-                n = (1000 Г— V) / (ПЂ Г— D),  РѕР±/РјРёРЅ
-
-n СЂР°СЃС‡ = ${r.n_calc.toFixed(1)} РѕР±/РјРёРЅ
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° РїРѕ СЃС‚Р°РЅРєСѓ
-
-nСЃС‚ = ${r.n_accepted} РѕР±/РјРёРЅ;  SСЃС‚ = ${r.S} РјРј/РѕР±
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-РћРїСЂРµРґРµР»СЏРµРј РґРµР№СЃС‚РІРёС‚РµР»СЊРЅСѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ
-
-                VС„ = (ПЂ Г— D Г— n) / 1000,  Рј/РјРёРЅ
-
-VС„ = ${r.Vf.toFixed(2)} Рј/РјРёРЅ
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-РЎРёР»Р° СЂРµР·Р°РЅРёСЏ
-
-                PZ = 10 Г— Cp Г— t^x Г— S^y Г— V^n Г— Kp,  Рќ
-
-Kp = ${r.Kp.toFixed(3)} вЂ” РїРѕРїСЂР°РІРѕС‡РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ СѓСЃР»РѕРІРёР№ СЂРµР·Р°РЅРёСЏ
-
-РљРѕСЌС„С„РёС†РёРµРЅС‚С‹ РёР· С‚Р°Р±Р»РёС† РјРµС‚РѕРґРёС‡РєРё:
-Cp = ${r.Cp}; x = ${r.x_p}; y = ${r.y_p}; n = ${r.n_p}
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-PZ = ${r.Pz.toFixed(2)} Рќ
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-РњРѕС‰РЅРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ
-
-                NСЌ = (Pz Г— VС„) / 61200,  РєР’С‚
-
-NСЌ = ${r.N_rez.toFixed(3)} РєР’С‚
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-РњРѕС‰РЅРѕСЃС‚СЊ РЅР° РїСЂРёРІРѕРґРµ
-
-                NС‚СЂ = NСЌ / О·,  РєР’С‚
-
-О· = ${r.eta} вЂ” РљРџР” СЃС‚Р°РЅРєР°
-
-NС‚СЂ = ${r.N_trebuemaya.toFixed(3)} РєР’С‚
-
-${r.powerCheck ? 'вњ“' : 'вњ—'} РЈСЃР»РѕРІРёРµ NС‚СЂ в‰¤ NСЃС‚ ${r.powerCheck ? 'РІС‹РїРѕР»РЅРµРЅРѕ' : 'РќР• РІС‹РїРѕР»РЅРµРЅРѕ'}, РѕР±СЂР°Р±РѕС‚РєР° ${r.powerCheck ? 'РІРѕР·РјРѕР¶РЅР°' : 'РЅРµРІРѕР·РјРѕР¶РЅР°'}
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-РўРµС…РЅРѕР»РѕРіРёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ
-
-                To = (l + lв‚Ѓ + lв‚‚) / (S Г— n),  РјРёРЅ
-
-РіРґРµ: l = ${r.l} РјРј вЂ” РґР»РёРЅР° РѕР±СЂР°Р±РѕС‚РєРё (РёР· С‡РµСЂС‚РµР¶Р°);
-     lв‚Ѓ = ${r.l1} РјРј вЂ” РІРµР»РёС‡РёРЅР° РІСЂРµР·Р°РЅРёСЏ;
-     lв‚‚ = ${r.l2} РјРј вЂ” РІРµР»РёС‡РёРЅР° РїРµСЂРµР±РµРіР°.
-
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-To = ${r.To.toFixed(3)} РјРёРЅ
-в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-
-
-в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
-РРўРћР“РћР’Р«Р• Р Р•Р–РРњР« Р Р•Р—РђРќРРЇ:
-в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
-
-Р“Р»СѓР±РёРЅР° СЂРµР·Р°РЅРёСЏ t      = ${r.t} РјРј
-РџРѕРґР°С‡Р° S               = ${r.S} РјРј/РѕР±
-РЎРєРѕСЂРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ V     = ${r.Vf.toFixed(2)} Рј/РјРёРЅ
-Р§РёСЃР»Рѕ РѕР±РѕСЂРѕС‚РѕРІ n       = ${r.n_accepted} РѕР±/РјРёРЅ
-РЎРёР»Р° СЂРµР·Р°РЅРёСЏ Pz        = ${r.Pz.toFixed(1)} Рќ
-РњРѕС‰РЅРѕСЃС‚СЊ СЂРµР·Р°РЅРёСЏ NСЌ    = ${r.N_rez.toFixed(3)} РєР’С‚
-РћСЃРЅРѕРІРЅРѕРµ РІСЂРµРјСЏ To      = ${r.To.toFixed(3)} РјРёРЅ
-
-в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
-Р Р°СЃС‡РµС‚ РІС‹РїРѕР»РЅРµРЅ: ${new Date().toLocaleString('ru-RU')}
-РџСЂРѕРіСЂР°РјРјР°: РљР°Р»СЊРєСѓР»СЏС‚РѕСЂ СЂРµР¶РёРјРѕРІ СЂРµР·Р°РЅРёСЏ РґР»СЏ С‚РѕРєР°СЂРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё v1.0
-в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
-`;
-
-            // РЎРѕР·РґР°РµРј С‚РµРєСЃС‚РѕРІС‹Р№ С„Р°Р№Р» РґР»СЏ СЃРєР°С‡РёРІР°РЅРёСЏ
-            const blob = new Blob([reportContent], { type: 'text/plain; charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `РўРѕРєР°СЂРЅР°СЏ_РѕР±СЂР°Р±РѕС‚РєР°_${new Date().toISOString().slice(0, 10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            showToast('рџ“„ РћС‚С‡РµС‚ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ Рё Р·Р°РіСЂСѓР¶РµРЅ!');
-        }
-
-        // РЎРѕС…СЂР°РЅРµРЅРёРµ РґР°РЅРЅС‹С… РІ LocalStorage
-        function saveData() {
-            const data = {
-                operationType: document.getElementById('operationType').value,
-                material: document.getElementById('material').value,
-                toolMaterial: document.getElementById('toolMaterial').value,
-                machiningType: document.getElementById('machiningType').value,
-                surfaceCondition: document.getElementById('surfaceCondition').value,
-                cooling: document.getElementById('cooling').value,
-                diameter: document.getElementById('diameter').value,
-                depth: document.getElementById('depth').value,
-                feed: document.getElementById('feed').value,
-                length: document.getElementById('length').value,
-                approach: document.getElementById('approach').value,
-                overtravel: document.getElementById('overtravel').value,
-                operationNumber: document.getElementById('operationNumber').value,
-                transitionNumber: document.getElementById('transitionNumber').value,
-                toolLife: document.getElementById('toolLife').value,
-                machine: document.getElementById('machine').value,
-                machinePower: document.getElementById('machinePower').value,
-                efficiency: document.getElementById('efficiency').value,
-                fixture: document.getElementById('fixture').value,
-                toolGost: document.getElementById('toolGost').value
-            };
-            
-            localStorage.setItem('turningCalculatorData', JSON.stringify(data));
-            showToast('рџ’ѕ Р”Р°РЅРЅС‹Рµ СЃРѕС…СЂР°РЅРµРЅС‹!', 'success');
-        }
-
-        // Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… РёР· LocalStorage
-        function loadData() {
-            const savedData = localStorage.getItem('turningCalculatorData');
-            if (!savedData) {
-                showToast('вљ пёЏ РќРµС‚ СЃРѕС…СЂР°РЅРµРЅРЅС‹С… РґР°РЅРЅС‹С…!', 'warning');
-                return;
-            }
-            
-            try {
-                const data = JSON.parse(savedData);
-                
-                document.getElementById('operationType').value = data.operationType || '';
-                document.getElementById('material').value = data.material || '';
-                document.getElementById('toolMaterial').value = data.toolMaterial || '';
-                document.getElementById('machiningType').value = data.machiningType || '';
-                document.getElementById('surfaceCondition').value = data.surfaceCondition || '';
-                document.getElementById('cooling').value = data.cooling || '';
-                document.getElementById('diameter').value = data.diameter || '';
-                document.getElementById('depth').value = data.depth || '';
-                document.getElementById('feed').value = data.feed || '';
-                document.getElementById('length').value = data.length || '';
-                document.getElementById('approach').value = data.approach || '';
-                document.getElementById('overtravel').value = data.overtravel || '';
-                document.getElementById('operationNumber').value = data.operationNumber || '';
-                document.getElementById('transitionNumber').value = data.transitionNumber || '';
-                document.getElementById('toolLife').value = data.toolLife || '';
-                document.getElementById('machine').value = data.machine || '';
-                document.getElementById('machinePower').value = data.machinePower || '';
-                document.getElementById('efficiency').value = data.efficiency || '';
-                document.getElementById('fixture').value = data.fixture || '';
-                document.getElementById('toolGost').value = data.toolGost || '';
-                
-                showToast('рџ“‚ Р”Р°РЅРЅС‹Рµ Р·Р°РіСЂСѓР¶РµРЅС‹!', 'success');
-            } catch (error) {
-                showToast('вќЊ РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ РґР°РЅРЅС‹С…!', 'error');
-            }
-        }
-
-        // РћС‡РёСЃС‚РєР° СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
-        function clearResults() {
-            calculationResults = null;
-            document.getElementById('results').classList.remove('active');
-            document.getElementById('resultsContent').innerHTML = '';
-            showToast('рџ—‘пёЏ Р РµР·СѓР»СЊС‚Р°С‚С‹ РѕС‡РёС‰РµРЅС‹!', 'info');
-        }
-
-        // РџРѕРєР°Р· СѓРІРµРґРѕРјР»РµРЅРёСЏ
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = 'toast ' + type + ' show';
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Р—Р°РіСЂСѓР·РєР° СЃРѕС…СЂР°РЅРµРЅРЅС‹С… РґР°РЅРЅС‹С… РїСЂРё Р·Р°РїСѓСЃРєРµ
-        window.addEventListener('load', () => {
-            const savedData = localStorage.getItem('turningCalculatorData');
-            if (savedData) {
-                console.log('РќР°Р№РґРµРЅС‹ СЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ');
-            }
-        });
-    </script>
 </body>
 </html>
