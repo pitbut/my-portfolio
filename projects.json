@@ -1,15 +1,26 @@
 [
   {
     "id": "checker",
-    "title": "Шашки",
-    "description": "Классическая настольная игра в шашки с выбором правил (русские, международные, английские), игрой против AI, анимациями движения фигур, звуковыми эффектами и сохранением прогресса.",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
     "date": "2025-12-08",
-    "tags": ["Игра",
-      "Стратегия",
-      "AI",
-      "Анимации"]
+    "tags": []
+  },
+  {
+    "id": "cutting-regimes",
+    "title": "?? ����������� ������� �������",
+    "description": "���������������� ���������� ��� ����������. ������ ��������, ��� � �������� ������� ��� �������� ��������� � �������������� �������� �������������.",
+    "image": "projects/cutting-regimes/preview.jpg",
+    "link": "projects/cutting-regimes/index.html",
+    "date": "2024-12-08",
+    "tags": [
+      "Engineering",
+      "Tools",
+      "JavaScript",
+      "Math"
+    ]
   },
   {
     "id": "graph-builder",
