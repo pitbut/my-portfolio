@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Построитель графиков</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            background: white;
+            margin: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        /* Левая панель */
+        .left-panel {
+            width: 350px;
+            background: #f5f5f5;
+            border-right: 2px solid #ddd;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .form-group {
+            margin: 10px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px 0;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        
+        .btn-success { background: #4CAF50; color: white; }
+        .btn-success:hover { background: #45a049; }
+        
+        .btn-warning { background: #FF9800; color: white; }
+        .btn-warning:hover { background: #f57c00; }
+        
+        .btn-danger { background: #f44336; color: white; }
+        .btn-danger:hover { background: #da190b; }
+        
+        .btn-purple { background: #9C27B0; color: white; }
+        .btn-purple:hover { background: #7B1FA2; }
+        
+        .btn-blue { background: #2196F3; color: white; }
+        .btn-blue:hover { background: #0b7dda; }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        .radio-group {
+            margin: 5px 0;
+        }
+        
+        .radio-group label {
+            display: block;
+            padding: 5px;
+            cursor: pointer;
+        }
+        
+        .radio-group input {
+            margin-right: 8px;
+        }
+        
+        .curve-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        
+        .curve-item {
+            padding: 8px;
+            margin: 3px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .curve-item:hover {
+            background: #f0f0f0;
+        }
+        
+        .curve-item.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* Правая панель */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        #graphCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        
+        /* Таблица координат */
+        .table-container {
+            height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .color-btn {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        .color-btn.active {
+            border: 3px solid #000;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Левая панель -->
+        <div class="left-panel">
+            <!-- Начальные настройки -->
+            <div class="section">
+                <h3>⚙️ Начальные настройки</h3>
+                
+                <div class="form-group">
+                    <label>Количество кривых:</label>
+                    <input type="number" id="numCurves" value="3" min="1" max="10">
+                </div>
+                
+                <button class="btn btn-primary" onclick="createCurves()">Создать кривые</button>
+                
+                <div class="form-group">
+                    <label>Подпись оси X:</label>
+                    <input type="text" id="labelX" value="X">
+                </div>
+                
+                <div class="form-group">
+                    <label>Подпись оси Y:</label>
+                    <input type="text" id="labelY" value="Y">
+                </div>
+                
+                <div class="form-group">
+                    <label>Максимум X:</label>
+                    <input type="number" id="maxX" value="1000" min="10">
+                </div>
+                
+                <div class="form-group">
+                    <label>Максимум Y:</label>
+                    <input type="number" id="maxY" value="10" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Шаг сетки X:</label>
+                    <input type="number" id="gridStepX" value="100" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Шаг сетки Y:</label>
+                    <input type="number" id="gridStepY" value="1" min="0.1" step="0.1">
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showGrid" checked>
+                    <label for="showGrid">Показать сетку</label>
+                </div>
+                
+                <button class="btn btn-success" onclick="applySettings()">Применить настройки</button>
+            </div>
+            
+            <!-- Список кривых -->
+            <div class="section">
+                <h3>📈 Кривые</h3>
+                <div class="curve-list" id="curveList"></div>
+            </div>
+            
+            <!-- Настройки текущей кривой -->
+            <div class="section">
+                <h3>🎨 Настройки кривой</h3>
+                
+                <div class="form-group">
+                    <label>Название:</label>
+                    <input type="text" id="curveName" placeholder="Кривая 1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Цвет линии:</label>
+                    <div id="colorPicker"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Стиль линии:</label>
+                    <select id="lineStyle">
+                        <option value="solid">Сплошная</option>
+                        <option value="dashed">Штриховая</option>
+                        <option value="dotted">Точечная</option>
+                        <option value="dashdot">Штрихпунктирная</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Форма точек:</label>
+                    <select id="markerShape">
+                        <option value="circle">Круг</option>
+                        <option value="square">Квадрат</option>
+                        <option value="triangle">Треугольник</option>
+                        <option value="diamond">Ромб</option>
+                        <option value="star">Звезда</option>
+                        <option value="cross">Крест</option>
+                    </select>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showPoints" checked>
+                    <label for="showPoints">Показывать точки</label>
+                </div>
+                
+                <button class="btn btn-primary" onclick="applyCurveSettings()">Применить к кривой</button>
+            </div>
+            
+            <!-- Режимы работы -->
+            <div class="section">
+                <h3>🖱️ Режимы работы</h3>
+                
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="mode" value="add" checked>
+                        Добавить точку
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="delete">
+                        Удалить точку
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="move">
+                        Переместить точку
+                    </label>
+                </div>
+                
+                <button class="btn btn-danger" onclick="clearCurrentCurve()">🗑️ Очистить кривую</button>
+                <button class="btn btn-warning" onclick="smoothCurve()">📈 Сгладить кривую</button>
+            </div>
+            
+            <!-- Построение по формуле -->
+            <div class="section">
+                <h3>🔢 Построение по формуле</h3>
+                
+                <div class="form-group">
+                    <label>Формула (y=):</label>
+                    <input type="text" id="formula" value="Math.sin(x/100)*5 + 5" placeholder="Math.sin(x)">
+                </div>
+                
+                <div class="form-group">
+                    <label>Количество точек:</label>
+                    <input type="number" id="numPoints" value="50" min="2" max="1000">
+                </div>
+                
+                <button class="btn btn-purple" onclick="buildFromFormula()">Построить по формуле</button>
+                
+                <small style="display: block; margin-top: 10px; color: #666;">
+                    Примеры: Math.sin(x), x*x, Math.sqrt(x), Math.exp(x/100)
+                </small>
+            </div>
+            
+            <!-- Экспорт -->
+            <div class="section">
+                <h3>💾 Экспорт</h3>
+                
+                <button class="btn btn-success" onclick="saveAsPNG()">💾 Сохранить PNG</button>
+                <button class="btn btn-success" onclick="saveAsSVG()">💾 Сохранить SVG</button>
+                <button class="btn btn-blue" onclick="printGraph()">🖨️ Печать</button>
+            </div>
+        </div>
+        
+        <!-- Правая панель -->
+        <div class="right-panel">
+            <h2 style="color: #667eea; margin-bottom: 15px;">📊 График</h2>
+            
+            <!-- График -->
+            <div class="canvas-container">
+                <canvas id="graphCanvas"></canvas>
+            </div>
+            
+            <!-- Таблица координат -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>X</th>
+                            <th>Y</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="3">Выберите кривую</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let canvas, ctx;
+        let curves = [];
+        let currentCurveIndex = null;
+        let mode = 'add';
+        let settings = {
+            labelX: 'X',
+            labelY: 'Y',
+            maxX: 1000,
+            maxY: 10,
+            gridStepX: 100,
+            gridStepY: 1,
+            showGrid: true
+        };
+        let draggingPoint = null;
+        let hoveredPoint = null;
+        
+        const COLORS = ['#2196F3', '#FF5722', '#4CAF50', '#FFC107', '#9C27B0', '#00BCD4', '#FF9800', '#E91E63'];
+        const MARGIN = 60;
+        
+        // Инициализация
+        window.onload = function() {
+            canvas = document.getElementById('graphCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Устанавливаем размер canvas
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // События мыши
+            canvas.addEventListener('click', onCanvasClick);
+            canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseup', onMouseUp);
+            canvas.addEventListener('mouseleave', onMouseUp);
+            
+            // Режимы
+            document.querySelectorAll('input[name="mode"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    mode = e.target.value;
+                    updateCursor();
+                });
+            });
+            
+            // Цвета
+            createColorPicker();
+            
+            // Создаём начальные кривые
+            createCurves();
+        };
+        
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 4;
+            canvas.height = container.clientHeight - 4;
+            drawGraph();
+        }
+        
+        function createColorPicker() {
+            const picker = document.getElementById('colorPicker');
+            COLORS.forEach((color, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'color-btn';
+                btn.style.backgroundColor = color;
+                btn.onclick = () => selectColor(i);
+                picker.appendChild(btn);
+            });
+        }
+        
+        function selectColor(index) {
+            document.querySelectorAll('.color-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+        }
+        
+        function createCurves() {
+            const num = parseInt(document.getElementById('numCurves').value);
+            curves = [];
+            
+            for (let i = 0; i < num; i++) {
+                curves.push({
+                    name: `Кривая ${i + 1}`,
+                    points: [],
+                    color: COLORS[i % COLORS.length],
+                    lineStyle: 'solid',
+                    markerShape: 'circle',
+                    showPoints: true
+                });
+            }
+            
+            currentCurveIndex = 0;
+            updateCurveList();
+            updateCurveSettings();
+            drawGraph();
+        }
+        
+        function updateCurveList() {
+            const list = document.getElementById('curveList');
+            list.innerHTML = '';
+            
+            curves.forEach((curve, i) => {
+                const item = document.createElement('div');
+                item.className = 'curve-item' + (i === currentCurveIndex ? ' active' : '');
+                item.innerHTML = `
+                    <span style="display: inline-block; width: 15px; height: 15px; background: ${curve.color}; border-radius: 3px; margin-right: 8px;"></span>
+                    ${curve.name} (${curve.points.length} точек)
+                `;
+                item.onclick = () => selectCurve(i);
+                list.appendChild(item);
+            });
+        }
+        
+        function selectCurve(index) {
+            currentCurveIndex = index;
+            updateCurveList();
+            updateCurveSettings();
+            updateTable();
+        }
+        
+        function updateCurveSettings() {
+            if (currentCurveIndex === null) return;
+            
+            const curve = curves[currentCurveIndex];
+            document.getElementById('curveName').value = curve.name;
+            document.getElementById('lineStyle').value = curve.lineStyle;
+            document.getElementById('markerShape').value = curve.markerShape;
+            document.getElementById('showPoints').checked = curve.showPoints;
+            
+            // Выбрать цвет
+            const colorIndex = COLORS.indexOf(curve.color);
+            selectColor(colorIndex >= 0 ? colorIndex : 0);
+        }
+        
+        function applyCurveSettings() {
+            if (currentCurveIndex === null) return;
+            
+            const curve = curves[currentCurveIndex];
+            curve.name = document.getElementById('curveName').value;
+            curve.lineStyle = document.getElementById('lineStyle').value;
+            curve.markerShape = document.getElementById('markerShape').value;
+            curve.showPoints = document.getElementById('showPoints').checked;
+            
+            // Получить выбранный цвет
+            const activeColor = document.querySelector('.color-btn.active');
+            if (activeColor) {
+                curve.color = activeColor.style.backgroundColor;
+            }
+            
+            updateCurveList();
+            drawGraph();
+        }
+        
+        function applySettings() {
+            settings.labelX = document.getElementById('labelX').value;
+            settings.labelY = document.getElementById('labelY').value;
+            settings.maxX = parseFloat(document.getElementById('maxX').value);
+            settings.maxY = parseFloat(document.getElementById('maxY').value);
+            settings.gridStepX = parseFloat(document.getElementById('gridStepX').value);
+            settings.gridStepY = parseFloat(document.getElementById('gridStepY').value);
+            settings.showGrid = document.getElementById('showGrid').checked;
+            
+            drawGraph();
+        }
+        
+        function drawGraph() {
+            if (!ctx) return;
+            
+            // Очистка
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Фон
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Сетка
+            if (settings.showGrid) {
+                drawGrid();
+            }
+            
+            // Оси
+            drawAxes();
+            
+            // Кривые
+            curves.forEach(curve => drawCurve(curve));
+            
+            // Подсвеченная точка
+            if (hoveredPoint) {
+                drawHighlight(hoveredPoint.x, hoveredPoint.y);
+            }
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+            
+            const graphWidth = canvas.width - 2 * MARGIN;
+            const graphHeight = canvas.height - 2 * MARGIN;
+            
+            // Вертикальные линии
+            for (let x = 0; x <= settings.maxX; x += settings.gridStepX) {
+                const px = MARGIN + (x / settings.maxX) * graphWidth;
+                ctx.beginPath();
+                ctx.moveTo(px, MARGIN);
+                ctx.lineTo(px, canvas.height - MARGIN);
+                ctx.stroke();
+            }
+            
+            // Горизонтальные линии
+            for (let y = 0; y <= settings.maxY; y += settings.gridStepY) {
+                const py = canvas.height - MARGIN - (y / settings.maxY) * graphHeight;
+                ctx.beginPath();
+                ctx.moveTo(MARGIN, py);
+                ctx.lineTo(canvas.width - MARGIN, py);
+                ctx.stroke();
+            }
+        }
+        
+        function drawAxes() {
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.setLineDash([]);
+            
+            const graphWidth = canvas.width - 2 * MARGIN;
+            const graphHeight = canvas.height - 2 * MARGIN;
+            
+            // Ось X
+            ctx.beginPath();
+            ctx.moveTo(MARGIN, canvas.height - MARGIN);
+            ctx.lineTo(canvas.width - MARGIN, canvas.height - MARGIN);
+            ctx.stroke();
+            
+            // Стрелка X
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - MARGIN, canvas.height - MARGIN);
+            ctx.lineTo(canvas.width - MARGIN - 10, canvas.height - MARGIN - 5);
+            ctx.lineTo(canvas.width - MARGIN - 10, canvas.height - MARGIN + 5);
+            ctx.fill();
+            
+            // Подпись X
+            ctx.textAlign = 'center';
+            ctx.fillText(settings.labelX, canvas.width - MARGIN / 2, canvas.height - MARGIN + 5);
+            
+            // Ось Y
+            ctx.beginPath();
+            ctx.moveTo(MARGIN, canvas.height - MARGIN);
+            ctx.lineTo(MARGIN, MARGIN);
+            ctx.stroke();
+            
+            // Стрелка Y
+            ctx.beginPath();
+            ctx.moveTo(MARGIN, MARGIN);
+            ctx.lineTo(MARGIN - 5, MARGIN + 10);
+            ctx.lineTo(MARGIN + 5, MARGIN + 10);
+            ctx.fill();
+            
+            // Подпись Y
+            ctx.save();
+            ctx.translate(MARGIN - 40, MARGIN + 20);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText(settings.labelY, 0, 0);
+            ctx.restore();
+            
+            // Метки на осях
+            ctx.font = '11px Arial';
+            ctx.fillStyle = '#666';
+            
+            // Метки X
+            for (let x = 0; x <= settings.maxX; x += settings.gridStepX) {
+                const px = MARGIN + (x / settings.maxX) * graphWidth;
+                ctx.textAlign = 'center';
+                ctx.fillText(x, px, canvas.height - MARGIN + 20);
+            }
+            
+            // Метки Y
+            for (let y = 0; y <= settings.maxY; y += settings.gridStepY) {
+                const py = canvas.height - MARGIN - (y / settings.maxY) * graphHeight;
+                ctx.textAlign = 'right';
+                ctx.fillText(y.toFixed(1), MARGIN - 10, py + 4);
+            }
+        }
+        
+        function drawCurve(curve) {
+            if (curve.points.length === 0) return;
+            
+            const graphWidth = canvas.width - 2 * MARGIN;
+            const graphHeight = canvas.height - 2 * MARGIN;
+            
+            // Сортировка точек по X
+            const sortedPoints = [...curve.points].sort((a, b) => a.x - a.x);
+            
+            // Линия
+            ctx.strokeStyle = curve.color;
+            ctx.lineWidth = 2;
+            
+            // Стиль линии
+            switch (curve.lineStyle) {
+                case 'dashed':
+                    ctx.setLineDash([10, 5]);
+                    break;
+                case 'dotted':
+                    ctx.setLineDash([2, 3]);
+                    break;
+                case 'dashdot':
+                    ctx.setLineDash([10, 5, 2, 5]);
+                    break;
+                default:
+                    ctx.setLineDash([]);
+            }
+            
+            ctx.beginPath();
+            sortedPoints.forEach((point, i) => {
+                const px = MARGIN + (point.x / settings.maxX) * graphWidth;
+                const py = canvas.height - MARGIN - (point.y / settings.maxY) * graphHeight;
+                
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            });
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+            
+            // Точки
+            if (curve.showPoints) {
+                curve.points.forEach(point => {
+                    const px = MARGIN + (point.x / settings.maxX) * graphWidth;
+                    const py = canvas.height - MARGIN - (point.y / settings.maxY) * graphHeight;
+                    drawMarker(px, py, curve.markerShape, curve.color);
+                });
+            }
+        }
+        
+        function drawMarker(x, y, shape, color) {
+            ctx.fillStyle = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            
+            const size = 6;
+            
+            switch (shape) {
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                    
+                case 'square':
+                    ctx.fillRect(x - size, y - size, size * 2, size * 2);
+                    break;
+                    
+                case 'triangle':
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - size);
+                    ctx.lineTo(x + size, y + size);
+                    ctx.lineTo(x - size, y + size);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                    
+                case 'diamond':
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - size);
+                    ctx.lineTo(x + size, y);
+                    ctx.lineTo(x, y + size);
+                    ctx.lineTo(x - size, y);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                    
+                case 'star':
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                        const radius = i % 2 === 0 ? size : size / 2;
+                        const px = x + Math.cos(angle) * radius;
+                        const py = y + Math.sin(angle) * radius;
+                        if (i === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                    
+                case 'cross':
+                    ctx.beginPath();
+                    ctx.moveTo(x - size, y);
+                    ctx.lineTo(x + size, y);
+                    ctx.moveTo(x, y - size);
+                    ctx.lineTo(x, y + size);
+                    ctx.stroke();
+                    break;
+            }
+        }
+        
+        function drawHighlight(x, y) {
+            const graphWidth = canvas.width - 2 * MARGIN;
+            const graphHeight = canvas.height - 2 * MARGIN;
+            const px = MARGIN + (x / settings.maxX) * graphWidth;
+            const py = canvas.height - MARGIN - (y / settings.maxY) * graphHeight;
+            
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(px, py, 10, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
+        function canvasToGraph(canvasX, canvasY) {
+            const graphWidth = canvas.width - 2 * MARGIN;
+            const graphHeight = canvas.height - 2 * MARGIN;
+            
+            const x = ((canvasX - MARGIN) / graphWidth) * settings.maxX;
+            const y = ((canvas.height - MARGIN - canvasY) / graphHeight) * settings.maxY;
+            
+            return {
+                x: Math.max(0, Math.min(settings.maxX, x)),
+                y: Math.max(0, Math.min(settings.maxY, y))
+            };
+        }
+        
+        function findNearestPoint(x, y, threshold = 20) {
+            if (currentCurveIndex === null) return null;
+            
+            const curve = curves[currentCurveIndex];
+            const graphWidth = canvas.width - 2 * MARGIN;
+            const graphHeight = canvas.height - 2 * MARGIN;
+            
+            let nearest = null;
+            let minDist = threshold;
+            
+            curve.points.forEach((point, index) => {
+                const px = MARGIN + (point.x / settings.maxX) * graphWidth;
+                const py = canvas.height - MARGIN - (point.y / settings.maxY) * graphHeight;
+                const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+                
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = { point, index };
+                }
+            });
+            
+            return nearest;
+        }
+        
+        function onCanvasClick(e) {
+            if (currentCurveIndex === null) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const graphPoint = canvasToGraph(x, y);
+            
+            if (mode === 'add') {
+                curves[currentCurveIndex].points.push(graphPoint);
+                updateCurveList();
+                updateTable();
+                drawGraph();
+            } else if (mode === 'delete') {
+                const nearest = findNearestPoint(x, y);
+                if (nearest) {
+                    curves[currentCurveIndex].points.splice(nearest.index, 1);
+                    updateCurveList();
+                    updateTable();
+                    drawGraph();
+                }
+            }
+        }
+        
+        function onMouseDown(e) {
+            if (mode !== 'move' || currentCurveIndex === null) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            draggingPoint = findNearestPoint(x, y);
+        }
+        
+        function onMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (mode === 'move' && draggingPoint) {
+                const graphPoint = canvasToGraph(x, y);
+                curves[currentCurveIndex].points[draggingPoint.index] = graphPoint;
+                updateTable();
+                drawGraph();
+            } else {
+                // Подсветка точки при наведении
+                const nearest = findNearestPoint(x, y);
+                if (nearest) {
+                    hoveredPoint = nearest.point;
+                } else {
+                    hoveredPoint = null;
+                }
+                drawGraph();
+            }
+        }
+        
+        function onMouseUp() {
+            if (draggingPoint) {
+                draggingPoint = null;
+                updateTable();
+            }
+        }
+        
+        function updateCursor() {
+            switch (mode) {
+                case 'add':
+                    canvas.style.cursor = 'crosshair';
+                    break;
+                case 'delete':
+                    canvas.style.cursor = 'not-allowed';
+                    break;
+                case 'move':
+                    canvas.style.cursor = 'move';
+                    break;
+            }
+        }
+        
+        function updateTable() {
+            if (currentCurveIndex === null) {
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="3">Выберите кривую</td></tr>';
+                return;
+            }
+            
+            const curve = curves[currentCurveIndex];
+            const tbody = document.getElementById('tableBody');
+            
+            if (curve.points.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3">Нет точек</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = curve.points
+                .map((point, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${point.x.toFixed(2)}</td>
+                        <td>${point.y.toFixed(2)}</td>
+                    </tr>
+                `)
+                .join('');
+        }
+        
+        function clearCurrentCurve() {
+            if (currentCurveIndex === null) return;
+            
+            if (confirm(`Удалить все точки из кривой "${curves[currentCurveIndex].name}"?`)) {
+                curves[currentCurveIndex].points = [];
+                updateCurveList();
+                updateTable();
+                drawGraph();
+            }
+        }
+        
+        function smoothCurve() {
+            if (currentCurveIndex === null) return;
+            
+            const curve = curves[currentCurveIndex];
+            if (curve.points.length < 3) {
+                alert('Для сглаживания нужно минимум 3 точки');
+                return;
+            }
+            
+            // Сортировка
+            const sorted = [...curve.points].sort((a, b) => a.x - b.x);
+            
+            // Кубическая интерполяция (упрощённая)
+            const smoothed = [];
+            const steps = 100;
+            
+            for (let i = 0; i < sorted.length - 1; i++) {
+                const p0 = sorted[Math.max(0, i - 1)];
+                const p1 = sorted[i];
+                const p2 = sorted[i + 1];
+                const p3 = sorted[Math.min(sorted.length - 1, i + 2)];
+                
+                for (let t = 0; t < 1; t += 1 / steps) {
+                    const x = catmullRom(p0.x, p1.x, p2.x, p3.x, t);
+                    const y = catmullRom(p0.y, p1.y, p2.y, p3.y, t);
+                    smoothed.push({ x, y });
+                }
+            }
+            
+            smoothed.push(sorted[sorted.length - 1]);
+            
+            curve.points = smoothed;
+            updateCurveList();
+            updateTable();
+            drawGraph();
+        }
+        
+        function catmullRom(p0, p1, p2, p3, t) {
+            const v0 = (p2 - p0) * 0.5;
+            const v1 = (p3 - p1) * 0.5;
+            const t2 = t * t;
+            const t3 = t * t2;
+            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+        }
+        
+        function buildFromFormula() {
+            if (currentCurveIndex === null) return;
+            
+            const formula = document.getElementById('formula').value;
+            const numPoints = parseInt(document.getElementById('numPoints').value);
+            
+            try {
+                const points = [];
+                const step = settings.maxX / (numPoints - 1);
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const x = i * step;
+                    let y;
+                    
+                    try {
+                        y = eval(formula.replace(/x/g, x));
+                    } catch {
+                        throw new Error('Ошибка в формуле');
+                    }
+                    
+                    if (isNaN(y) || !isFinite(y)) {
+                        continue;
+                    }
+                    
+                    y = Math.max(0, Math.min(settings.maxY, y));
+                    points.push({ x, y });
+                }
+                
+                if (points.length === 0) {
+                    throw new Error('Формула не дала валидных результатов');
+                }
+                
+                curves[currentCurveIndex].points = points;
+                updateCurveList();
+                updateTable();
+                drawGraph();
+                
+                alert(`График построен!\nСоздано ${points.length} точек.\nТеперь вы можете редактировать точки вручную.`);
+            } catch (error) {
+                alert('Ошибка в формуле:\n' + error.message + '\n\nПримеры правильных формул:\nMath.sin(x/100)*5 + 5\nx*x/100\nMath.sqrt(x)');
+            }
+        }
+        
+        function saveAsPNG() {
+            const link = document.createElement('a');
+            link.download = 'график.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function saveAsSVG() {
+            // SVG генерация (упрощённая)
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}">`;
+            svg += `<rect width="${canvas.width}" height="${canvas.height}" fill="white"/>`;
+            
+            // Здесь должна быть полная SVG генерация
+            // Для простоты конвертируем canvas в PNG и встраиваем
+            const dataURL = canvas.toDataURL('image/png');
+            svg += `<image href="${dataURL}" width="${canvas.width}" height="${canvas.height}"/>`;
+            svg += `</svg>`;
+            
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const link = document.createElement('a');
+            link.download = 'график.svg';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+        
+        function printGraph() {
+            const dataURL = canvas.toDataURL('image/png');
+            const win = window.open('');
+            win.document.write(`
+                <html>
+                <head><title>Печать графика</title></head>
+                <body style="margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh;">
+                    <img src="${dataURL}" style="max-width:100%; max-height:100vh;" onload="window.print(); window.close();">
+                </body>
+                </html>
+            `);
+        }
+    </script>
+</body>
+</html>
