@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Расчет режимов резания при фрезеровании v1.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header .subtitle {
+            color: #16a085;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-section h2 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dce4ec;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 180px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .results-section {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #e9ecef;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .result-block {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .result-block h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .result-value {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .result-table th {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        .result-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .power-check {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .power-check.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .power-check.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .formula {
+            background: #f1f3f5;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .coefficient-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: #3498db;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        .scrollable {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 10px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span>⚙️</span>
+                <span>Расчет режимов резания при фрезеровании</span>
+                <span>⚙️</span>
+            </h1>
+            <div class="subtitle">Версия 1.0 • С интегрированными таблицами коэффициентов из методички</div>
+        </div>
+
+        <div class="main-content">
+            <!-- Левая колонка -->
+            <div class="scrollable">
+                <div class="form-section">
+                    <h2>🔧 Тип операции</h2>
+                    <div class="form-group">
+                        <label>Тип фрезы:</label>
+                        <select id="cutterType">
+                            <option>Торцовые</option>
+                            <option>Цилиндрические</option>
+                            <option>Дисковые со вставными ножами</option>
+                            <option>Дисковые цельные</option>
+                            <option>Концевые</option>
+                            <option>Прорезные и отрезные</option>
+                            <option>Фасонные и угловые</option>
+                            <option>Шпоночные двухперые</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Операция:</label>
+                        <select id="operationType">
+                            <option>Фрезерование плоскостей</option>
+                            <option>Фрезерование уступов и пазов</option>
+                            <option>Прорезание пазов и отрезание</option>
+                            <option>Фрезерование угловых канавок и фасонное</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>🔩 Материалы</h2>
+                    <div class="form-group">
+                        <label>Материал детали:</label>
+                        <select id="material">
+                            <option>Сталь конструкционная (σв = 750 МПа)</option>
+                            <option>Сталь жаропрочная 12Х18Н9Т (141 НВ)</option>
+                            <option>Чугун серый (190 НВ)</option>
+                            <option>Чугун ковкий (150 НВ)</option>
+                            <option>Медные гетерогенные сплавы (100-140 НВ)</option>
+                            <option>Силумин и литейные алюминиевые сплавы</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Материал инструмента:</label>
+                        <select id="toolMaterial">
+                            <option>Твердый сплав Т15К6</option>
+                            <option>Твердый сплав Т5К10</option>
+                            <option>Твердый сплав ВК8</option>
+                            <option>Твердый сплав ВК6</option>
+                            <option selected>Быстрорежущая сталь Р6М5</option>
+                            <option>Быстрорежущая сталь Р18</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>⚙️ Характеристика обработки</h2>
+                    <div class="form-group">
+                        <label>Вид обработки:</label>
+                        <select id="machiningType">
+                            <option selected>Черновая</option>
+                            <option>Получистовая</option>
+                            <option>Чистовая</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Охлаждение:</label>
+                        <select id="cooling">
+                            <option>Без охлаждения</option>
+                            <option>С охлаждением</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка -->
+            <div class="scrollable">
+                <div class="form-section">
+                    <h2>📏 Параметры фрезы</h2>
+                    <div class="form-group">
+                        <label>Диаметр фрезы D, мм:</label>
+                        <input type="number" id="diameter" value="160" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Число зубьев z:</label>
+                        <input type="number" id="teethNumber" value="18" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Ширина фрезерования B, мм:</label>
+                        <input type="number" id="width" value="2" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>🔨 Режимы резания</h2>
+                    <div class="form-group">
+                        <label>Глубина резания t, мм:</label>
+                        <input type="number" id="depth" value="4" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Подача на зуб Sz, мм/зуб:</label>
+                        <input type="number" id="feedPerTooth" value="0.3" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Стойкость инструмента T, мин:</label>
+                        <input type="number" id="toolLife" value="150" step="1">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>📐 Размеры обработки</h2>
+                    <div class="form-group">
+                        <label>Длина обработки L, мм:</label>
+                        <input type="number" id="length" value="100" step="0.1">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Врезание l₁, мм:</label>
+                            <input type="number" id="approach" value="5" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Перебег l₂, мм:</label>
+                            <input type="number" id="overtravel" value="5" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>🏭 Параметры станка</h2>
+                    <div class="form-group">
+                        <label>Модель станка:</label>
+                        <select id="machine">
+                            <option selected>6Р81</option>
+                            <option>6Р82</option>
+                            <option>6Р12</option>
+                            <option>6Р13</option>
+                            <option>6М82Г</option>
+                            <option>6Н81</option>
+                            <option>6Т80Ш</option>
+                        </select>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Мощность N, кВт:</label>
+                            <input type="number" id="machinePower" value="5.5" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>КПД η:</label>
+                            <input type="number" id="efficiency" value="0.8" step="0.01">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="form-section" style="grid-column: 1 / -1;">
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="calculate()">
+                        📊 Выполнить расчет
+                    </button>
+                    <button class="btn btn-secondary" onclick="generateReport()">
+                        📄 Сформировать отчет
+                    </button>
+                    <button class="btn btn-info" onclick="saveData()">
+                        💾 Сохранить данные
+                    </button>
+                    <button class="btn btn-info" onclick="loadData()">
+                        📂 Загрузить данные
+                    </button>
+                    <button class="btn btn-warning" onclick="clearResults()">
+                        🗑️ Очистить
+                    </button>
+                </div>
+            </div>
+
+            <!-- Результаты -->
+            <div class="results-section" id="resultsSection">
+                <h2>📊 РЕЗУЛЬТАТЫ РАСЧЕТА РЕЖИМОВ ФРЕЗЕРОВАНИЯ</h2>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальная переменная для хранения результатов
+        let calculationResults = null;
+
+        // Таблицы коэффициентов из методички
+        function getCuttingSpeedCoefficients(material, toolMaterial, cutterType, operation, widthB, depthT, feedSz) {
+            // Сталь конструкционная σв = 750 МПа
+            if (material.includes('750') || material.includes('Сталь конструкционная')) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('Т15К6')) {
+                        return [332, 0.2, 0.1, 0.4, 0.2, 0, 0.2];
+                    } else if (toolMaterial.includes('Р6М5')) {
+                        if (feedSz <= 0.1) {
+                            return [64.7, 0.25, 0.1, 0.2, 0.15, 0, 0.2];
+                        } else {
+                            return [41, 0.25, 0.1, 0.4, 0.15, 0, 0.2];
+                        }
+                    }
+                } else if (cutterType.includes('Цилиндрические')) {
+                    if (toolMaterial.includes('Т15К6')) {
+                        if (widthB <= 35) {
+                            if (depthT <= 2) {
+                                return [390, 0.17, 0.19, 0.28, -0.05, 0.1, 0.33];
+                            } else {
+                                return [443, 0.17, 0.38, 0.28, -0.05, 0.1, 0.33];
+                            }
+                        } else {
+                            if (depthT <= 2) {
+                                return [616, 0.17, 0.19, 0.28, 0.08, 0.1, 0.33];
+                            } else {
+                                return [700, 0.17, 0.38, 0.28, 0.08, 0.1, 0.33];
+                            }
+                        }
+                    } else if (toolMaterial.includes('Р6М5')) {
+                        if (feedSz <= 0.1) {
+                            return [55, 0.45, 0.3, 0.2, 0.1, 0.1, 0.33];
+                        } else {
+                            return [35.4, 0.45, 0.3, 0.4, 0.1, 0.1, 0.33];
+                        }
+                    }
+                } else if (cutterType.includes('Дисковые со вставными')) {
+                    if (toolMaterial.includes('Т15К6')) {
+                        if (feedSz < 0.12) {
+                            return [1340, 0.2, 0.4, 0.12, 0, 0, 0.35];
+                        } else {
+                            return [740, 0.2, 0.4, 0.4, 0, 0, 0.35];
+                        }
+                    } else if (toolMaterial.includes('Р6М5')) {
+                        if (feedSz <= 0.1) {
+                            return [75.5, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                        } else {
+                            return [48.5, 0.25, 0.3, 0.4, 0.1, 0.1, 0.2];
+                        }
+                    }
+                } else if (cutterType.includes('Дисковые цельные')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [68.5, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                    }
+                } else if (cutterType.includes('Концевые')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [145, 0.44, 0.24, 0.26, 0.1, 0.13, 0.37];
+                    } else if (toolMaterial.includes('Т15К6')) {
+                        return [234, 0.44, 0.24, 0.26, 0.1, 0.13, 0.37];
+                    }
+                } else if (cutterType.includes('Прорезные') || cutterType.includes('отрезные')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [53, 0.25, 0.3, 0.2, 0.2, 0.1, 0.2];
+                    }
+                } else if (cutterType.includes('Фасонные') || cutterType.includes('угловые')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [53, 0.45, 0.3, 0.2, 0.1, 0.1, 0.33];
+                    }
+                } else if (cutterType.includes('Шпоночные')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [12, 0.3, 0.3, 0.25, 0, 0, 0.26];
+                    }
+                }
+            }
+            // Сталь жаропрочная 12Х18Н9Т
+            else if (material.includes('жаропрочн') || material.includes('12Х18Н9Т')) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('ВК8')) {
+                        return [108, 0.2, 0.06, 0.3, 0.2, 0, 0.32];
+                    } else if (toolMaterial.includes('Р6М5')) {
+                        return [49.6, 0.15, 0.2, 0.3, 0.2, 0.1, 0.14];
+                    }
+                } else if (cutterType.includes('Цилиндрические')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [44, 0.29, 0.3, 0.34, 0.1, 0.1, 0.24];
+                    }
+                } else if (cutterType.includes('Концевые')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [22.5, 0.35, 0.21, 0.48, 0.03, 0.1, 0.27];
+                    }
+                }
+            }
+            // Чугун серый 190НВ
+            else if (material.includes('Чугун серый') || (material.includes('190') && material.includes('НВ'))) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('ВК6')) {
+                        return [445, 0.2, 0.15, 0.35, 0.2, 0, 0.32];
+                    } else if (toolMaterial.includes('Р6М5')) {
+                        return [42, 0.2, 0.1, 0.4, 0.1, 0.1, 0.15];
+                    }
+                } else if (cutterType.includes('Цилиндрические')) {
+                    if (toolMaterial.includes('ВК6')) {
+                        if (depthT < 2.5) {
+                            if (feedSz <= 0.2) {
+                                return [923, 0.37, 0.13, 0.19, 0.23, 0.14, 0.42];
+                            } else {
+                                return [588, 0.37, 0.13, 0.47, 0.23, 0.14, 0.42];
+                            }
+                        } else {
+                            if (feedSz <= 0.2) {
+                                return [1180, 0.37, 0.40, 0.19, 0.23, 0.14, 0.42];
+                            } else {
+                                return [750, 0.37, 0.40, 0.47, 0.23, 0.14, 0.42];
+                            }
+                        }
+                    } else if (toolMaterial.includes('Р6М5')) {
+                        if (feedSz <= 0.15) {
+                            return [57.6, 0.7, 0.5, 0.2, 0.3, 0.3, 0.25];
+                        } else {
+                            return [27, 0.7, 0.5, 0.6, 0.3, 0.3, 0.25];
+                        }
+                    }
+                } else if (cutterType.includes('Дисковые со вставными')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [85, 0.2, 0.5, 0.4, 0.1, 0.1, 0.15];
+                    }
+                } else if (cutterType.includes('Дисковые цельные')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [72, 0.2, 0.5, 0.4, 0.1, 0.1, 0.15];
+                    }
+                }
+            }
+            // Чугун ковкий 150НВ
+            else if (material.includes('Чугун ковкий') || (material.includes('150') && material.includes('НВ'))) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('ВК6')) {
+                        if (feedSz <= 0.18) {
+                            return [994, 0.22, 0.17, 0.1, 0.22, 0, 0.33];
+                        } else {
+                            return [695, 0.22, 0.17, 0.32, 0.22, 0, 0.33];
+                        }
+                    } else if (toolMaterial.includes('Р6М5')) {
+                        if (feedSz <= 0.1) {
+                            return [90.5, 0.25, 0.1, 0.2, 0.15, 0.1, 0.2];
+                        } else {
+                            return [57.4, 0.25, 0.1, 0.4, 0.15, 0.1, 0.2];
+                        }
+                    }
+                } else if (cutterType.includes('Цилиндрические')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        if (feedSz <= 0.1) {
+                            return [77, 0.45, 0.3, 0.2, 0.1, 0.1, 0.33];
+                        } else {
+                            return [49.5, 0.45, 0.3, 0.4, 0.1, 0.1, 0.33];
+                        }
+                    }
+                } else if (cutterType.includes('Дисковые со вставными')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        if (feedSz <= 0.1) {
+                            return [105.8, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                        } else {
+                            return [68, 0.25, 0.3, 0.4, 0.1, 0.1, 0.2];
+                        }
+                    }
+                } else if (cutterType.includes('Дисковые цельные')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [95.8, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                    }
+                } else if (cutterType.includes('Концевые')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [68.5, 0.45, 0.3, 0.2, 0.1, 0.1, 0.33];
+                    }
+                } else if (cutterType.includes('Прорезные') || cutterType.includes('отрезные')) {
+                    if (toolMaterial.includes('Р6М5')) {
+                        return [74, 0.25, 0.3, 0.2, 0.2, 0.1, 0.2];
+                    }
+                }
+            }
+            // Медные сплавы
+            else if (material.includes('Медн')) {
+                if (toolMaterial.includes('Р6М5')) {
+                    if (cutterType.includes('Торцовые')) {
+                        if (feedSz <= 0.1) {
+                            return [136, 0.25, 0.1, 0.2, 0.15, 0.1, 0.2];
+                        } else {
+                            return [86.2, 0.25, 0.1, 0.4, 0.15, 0.1, 0.2];
+                        }
+                    } else if (cutterType.includes('Цилиндрические')) {
+                        if (feedSz <= 0.1) {
+                            return [115.5, 0.45, 0.3, 0.2, 0.1, 0.1, 0.33];
+                        } else {
+                            return [74.3, 0.45, 0.3, 0.4, 0.1, 0.1, 0.33];
+                        }
+                    } else if (cutterType.includes('Дисковые со вставными')) {
+                        if (feedSz <= 0.1) {
+                            return [158.5, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                        } else {
+                            return [102, 0.25, 0.3, 0.4, 0.1, 0.1, 0.2];
+                        }
+                    } else if (cutterType.includes('Дисковые цельные')) {
+                        return [144, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                    }
+                }
+            }
+            // Силумин и алюминиевые сплавы
+            else if (material.includes('Силумин') || material.includes('алюминиев')) {
+                if (toolMaterial.includes('Р6М5')) {
+                    if (cutterType.includes('Торцовые')) {
+                        if (feedSz <= 0.1) {
+                            return [245, 0.25, 0.1, 0.2, 0.15, 0.1, 0.2];
+                        } else {
+                            return [155, 0.25, 0.1, 0.4, 0.15, 0.1, 0.2];
+                        }
+                    } else if (cutterType.includes('Цилиндрические')) {
+                        if (feedSz <= 0.1) {
+                            return [208, 0.45, 0.3, 0.2, 0.1, 0.1, 0.33];
+                        } else {
+                            return [133.5, 0.45, 0.3, 0.4, 0.1, 0.1, 0.33];
+                        }
+                    } else if (cutterType.includes('Дисковые со вставными')) {
+                        if (feedSz <= 0.1) {
+                            return [285, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                        } else {
+                            return [183.4, 0.25, 0.3, 0.4, 0.1, 0.1, 0.2];
+                        }
+                    } else if (cutterType.includes('Дисковые цельные')) {
+                        return [259, 0.25, 0.3, 0.2, 0.1, 0.1, 0.2];
+                    } else if (cutterType.includes('Концевые')) {
+                        return [185.5, 0.45, 0.3, 0.2, 0.1, 0.1, 0.33];
+                    } else if (cutterType.includes('Прорезные') || cutterType.includes('отрезные')) {
+                        return [200, 0.25, 0.3, 0.2, 0.2, 0.1, 0.2];
+                    }
+                }
+            }
+
+            // Значения по умолчанию
+            console.warn('Используются коэффициенты по умолчанию');
+            return [85, 0.25, 0.3, 0.3, 0.15, 0.1, 0.2];
+        }
+
+        function getToolLife(cutterType, diameter) {
+            if (cutterType.includes('Торцовые')) {
+                if (diameter <= 40) return 120;
+                if (diameter <= 90) return 180;
+                if (diameter <= 250) return 240;
+                if (diameter <= 400) return 300;
+                return 400;
+            } else if (cutterType.includes('Цилиндрические')) {
+                if (diameter <= 90) return 180;
+                if (diameter <= 250) return 240;
+                return 180;
+            } else if (cutterType.includes('Дисковые')) {
+                if (diameter <= 110) return 120;
+                if (diameter <= 200) return 150;
+                if (diameter <= 300) return 180;
+                return 240;
+            } else if (cutterType.includes('Концевые')) {
+                if (diameter <= 25) return 80;
+                if (diameter <= 60) return 90;
+                if (diameter <= 180) return 120;
+                return 180;
+            } else if (cutterType.includes('Прорезные') || cutterType.includes('отрезные')) {
+                if (diameter <= 75) return 60;
+                if (diameter <= 110) return 75;
+                if (diameter <= 200) return 120;
+                return 150;
+            } else if (cutterType.includes('Фасонные') || cutterType.includes('угловые')) {
+                if (diameter <= 40) return 120;
+                return 180;
+            }
+            return 120;
+        }
+
+        function getCuttingForceCoefficients(material, toolMaterial, cutterType, operation) {
+            // Сталь конструкционная σв = 750 МПа
+            if (material.includes('750') || material.includes('Сталь конструкционная')) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('Т15К6') || toolMaterial.includes('ВК')) {
+                        return [825, 1.0, 0.75, 1.1, 1.3, 0.2];
+                    } else if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5') || toolMaterial.includes('Р18')) {
+                        return [82.5, 0.95, 0.8, 1.1, 1.1, 0];
+                    }
+                } else if (cutterType.includes('Цилиндрические')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('Т15К6') || toolMaterial.includes('ВК')) {
+                        return [101, 0.88, 0.75, 1.0, 0.87, 0];
+                    } else if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [68.2, 0.86, 0.72, 1.0, 0.86, 0];
+                    }
+                } else if (cutterType.includes('Дисковые') || cutterType.includes('Прорезные') || cutterType.includes('отрезные')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('Т15К6') || toolMaterial.includes('ВК')) {
+                        return [261, 0.9, 0.8, 1.1, 1.1, 0.1];
+                    } else if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [68.2, 0.86, 0.72, 1.0, 0.86, 0];
+                    }
+                } else if (cutterType.includes('Концевые')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('Т15К6') || toolMaterial.includes('ВК')) {
+                        return [12.5, 0.85, 0.75, 1.0, 0.73, -0.13];
+                    } else if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [68.2, 0.86, 0.72, 1.0, 0.86, 0];
+                    }
+                } else if (cutterType.includes('Фасонные') || cutterType.includes('угловые')) {
+                    if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [47, 0.86, 0.72, 0.1, 0.86, 0];
+                    }
+                }
+            }
+            // Сталь жаропрочная
+            else if (material.includes('жаропрочн') || material.includes('12Х18Н9Т')) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('ВК')) {
+                        return [218, 0.92, 0.78, 1.0, 1.15, 0];
+                    }
+                } else if (cutterType.includes('Концевые')) {
+                    if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [82, 0.75, 0.6, 1.0, 0.86, 0];
+                    }
+                }
+            }
+            // Чугун серый
+            else if (material.includes('Чугун серый') || (material.includes('190') && material.includes('НВ'))) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('ВК')) {
+                        return [54.5, 0.9, 0.74, 1.0, 1.0, 0];
+                    } else if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [50, 0.9, 0.72, 1.14, 1.14, 0];
+                    }
+                } else if (cutterType.includes('Цилиндрические')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('ВК')) {
+                        return [58, 0.9, 0.8, 1.0, 0.9, 0];
+                    } else if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [30, 0.83, 0.65, 1.0, 0.83, 0];
+                    }
+                } else if (cutterType.includes('Дисковые') || cutterType.includes('Концевые') || cutterType.includes('Прорезные')) {
+                    if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [30, 0.83, 0.65, 1.0, 0.83, 0];
+                    }
+                }
+            }
+            // Чугун ковкий
+            else if (material.includes('Чугун ковкий') || (material.includes('150') && material.includes('НВ'))) {
+                if (cutterType.includes('Торцовые')) {
+                    if (toolMaterial.includes('Твердый сплав') || toolMaterial.includes('ВК')) {
+                        return [491, 1.0, 0.75, 1.1, 1.3, 0.2];
+                    } else if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [50, 0.95, 0.8, 1.1, 1.1, 0];
+                    }
+                } else if (cutterType.includes('Цилиндрические') || cutterType.includes('Дисковые') || cutterType.includes('Концевые') || cutterType.includes('Прорезные')) {
+                    if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                        return [30, 0.86, 0.72, 1.0, 0.86, 0];
+                    }
+                }
+            }
+            // Медные сплавы
+            else if (material.includes('Медн')) {
+                if (toolMaterial.includes('Быстрорежущая') || toolMaterial.includes('Р6М5')) {
+                    return [22.6, 0.86, 0.72, 1.0, 0.86, 0];
+                }
+            }
+
+            // По умолчанию
+            return [30, 0.83, 0.65, 1.0, 0.83, 0];
+        }
+
+        function calculate() {
+            try {
+                // Получение данных из формы
+                const D = parseFloat(document.getElementById('diameter').value);
+                const z = parseInt(document.getElementById('teethNumber').value);
+                const B = parseFloat(document.getElementById('width').value);
+                const t = parseFloat(document.getElementById('depth').value);
+                const Sz = parseFloat(document.getElementById('feedPerTooth').value);
+                const T_input = parseFloat(document.getElementById('toolLife').value);
+                const l = parseFloat(document.getElementById('length').value);
+                const l1 = parseFloat(document.getElementById('approach').value);
+                const l2 = parseFloat(document.getElementById('overtravel').value);
+                const N_st = parseFloat(document.getElementById('machinePower').value);
+                const eta = parseFloat(document.getElementById('efficiency').value);
+
+                const material = document.getElementById('material').value;
+                const toolMaterial = document.getElementById('toolMaterial').value;
+                const cutterType = document.getElementById('cutterType').value;
+                const operation = document.getElementById('operationType').value;
+                const machiningType = document.getElementById('machiningType').value;
+                const cooling = document.getElementById('cooling').value;
+                const machine = document.getElementById('machine').value;
+
+                // Получение коэффициентов
+                const [Cv, q, x, y, u, p, m] = getCuttingSpeedCoefficients(
+                    material, toolMaterial, cutterType, operation, B, t, Sz
+                );
+
+                let T = getToolLife(cutterType, D);
+                if (T_input !== 150) {
+                    T = T_input;
+                }
+
+                // Поправочный коэффициент
+                let Kv = cooling.includes('С охлаждением') ? 1.0 : 0.8;
+
+                // Расчет скорости резания
+                const V = (Cv / (Math.pow(T, m) * Math.pow(D, q) * Math.pow(t, x) * 
+                           Math.pow(Sz, y) * Math.pow(B, u) * Math.pow(z, p))) * Kv;
+
+                // Расчет числа оборотов
+                const n_calc = (1000 * V) / (Math.PI * D);
+
+                // Стандартные обороты
+                const standardSpeeds = [16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 
+                                      250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000];
+                const n_accepted = standardSpeeds.reduce((prev, curr) => 
+                    Math.abs(curr - n_calc) < Math.abs(prev - n_calc) ? curr : prev
+                );
+
+                // Фактическая скорость
+                const Vf = (Math.PI * D * n_accepted) / 1000;
+
+                // Расчет подачи
+                const Sm = Sz * z * n_accepted;
+                const Sz_fact = Sm / (z * n_accepted);
+
+                // Коэффициенты силы
+                const [Cp, x_p, y_p, u_p, q_p, w_p] = getCuttingForceCoefficients(
+                    material, toolMaterial, cutterType, operation
+                );
+
+                const Kp = 1.0;
+
+                // Окружная сила
+                let Pz;
+                if (q_p !== 0) {
+                    Pz = 10 * Cp * Math.pow(t, x_p) * Math.pow(Sz, y_p) * 
+                         Math.pow(B, u_p) * Math.pow(D, w_p) * z / Math.pow(n_accepted, q_p) * Kp;
+                } else {
+                    Pz = 10 * Cp * Math.pow(t, x_p) * Math.pow(Sz, y_p) * 
+                         Math.pow(B, u_p) * Math.pow(D, w_p) * z * Kp;
+                }
+
+                // Мощность резания
+                const N_rez = (Pz * Vf) / (1020 * 60);
+                const N_trebuemaya = N_rez / eta;
+
+                // Проверка по мощности
+                const powerCheck = N_trebuemaya <= N_st;
+
+                // Основное время
+                const L_total = l + l1 + l2;
+                const To = L_total / Sm;
+
+                // Сохранение результатов
+                calculationResults = {
+                    cutterType, operation, material, toolMaterial, machiningType, cooling, machine,
+                    D, z, B, t, Sz, l, l1, l2, L_total,
+                    Cv, T, q, x, y, u, p, m, Kv, V, n_calc, n_accepted, Vf, Sm, Sz_fact,
+                    Cp, x_p, y_p, u_p, q_p, w_p, Kp, Pz,
+                    N_rez, N_trebuemaya, N_st, eta, powerCheck, To
+                };
+
+                displayResults();
+                showToast('✅ Расчет выполнен успешно!');
+            } catch (error) {
+                showToast('❌ Ошибка при расчете: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        function displayResults() {
+            const r = calculationResults;
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContent = document.getElementById('resultsContent');
+
+            let html = `
+                <div class="result-block">
+                    <h3>📋 Исходные данные</h3>
+                    <div class="result-item">
+                        <span class="result-label">Тип фрезы:</span>
+                        <span class="result-value">${r.cutterType}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Операция:</span>
+                        <span class="result-value">${r.operation}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Материал детали:</span>
+                        <span class="result-value">${r.material}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Материал инструмента:</span>
+                        <span class="result-value">${r.toolMaterial}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Вид обработки:</span>
+                        <span class="result-value">${r.machiningType}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Охлаждение:</span>
+                        <span class="result-value">${r.cooling}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Станок:</span>
+                        <span class="result-value">${r.machine}</span>
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <h3>📊 Расчет скорости резания</h3>
+                    <div class="coefficient-info">
+                        <strong>📖 Коэффициенты из таблицы 81 методички:</strong><br>
+                        Cv = ${r.Cv} (выбран автоматически!)<br>
+                        T = ${r.T} мин (стойкость инструмента)<br>
+                        Показатели степени: q=${r.q}, x=${r.x}, y=${r.y}, u=${r.u}, p=${r.p}, m=${r.m}<br>
+                        Kv = ${r.Kv.toFixed(3)} (поправочный коэффициент)
+                    </div>
+                    <div class="formula">
+                        V = Cv / (T<sup>m</sup> × D<sup>q</sup> × t<sup>x</sup> × Sz<sup>y</sup> × B<sup>u</sup> × z<sup>p</sup>) × Kv
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Скорость резания V:</span>
+                        <span class="result-value">${r.V.toFixed(2)} м/мин</span>
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <h3>⚙️ Число оборотов и подача</h3>
+                    <div class="result-item">
+                        <span class="result-label">Расчётное число оборотов n<sub>расч</sub>:</span>
+                        <span class="result-value">${r.n_calc.toFixed(1)} об/мин</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Принятое число оборотов n:</span>
+                        <span class="result-value">${r.n_accepted} об/мин</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Фактическая скорость V<sub>ф</sub>:</span>
+                        <span class="result-value">${r.Vf.toFixed(2)} м/мин</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Минутная подача S<sub>м</sub>:</span>
+                        <span class="result-value">${r.Sm.toFixed(1)} мм/мин</span>
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <h3>💪 Сила резания</h3>
+                    <div class="coefficient-info">
+                        <strong>📖 Коэффициенты из таблицы 83 методички:</strong><br>
+                        Cp = ${r.Cp}, x=${r.x_p}, y=${r.y_p}, u=${r.u_p}, w=${r.w_p}, q=${r.q_p}<br>
+                        Kp = ${r.Kp.toFixed(3)}
+                    </div>
+                    <div class="formula">
+                        Pz = 10 × Cp × t<sup>x</sup> × Sz<sup>y</sup> × B<sup>u</sup> × D<sup>w</sup> × z / n<sup>q</sup> × Kp
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Окружная сила резания Pz:</span>
+                        <span class="result-value">${r.Pz.toFixed(1)} Н</span>
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <h3>⚡ Мощность резания</h3>
+                    <div class="result-item">
+                        <span class="result-label">Эффективная мощность N<sub>э</sub>:</span>
+                        <span class="result-value">${r.N_rez.toFixed(3)} кВт</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Требуемая мощность N<sub>тр</sub>:</span>
+                        <span class="result-value">${r.N_trebuemaya.toFixed(3)} кВт</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Мощность станка N:</span>
+                        <span class="result-value">${r.N_st} кВт</span>
+                    </div>
+                    <div class="power-check ${r.powerCheck ? 'success' : 'fail'}">
+                        ${r.powerCheck ? '✅ ПРОВЕРКА ПО МОЩНОСТИ ПРОЙДЕНА' : '❌ ПРОВЕРКА ПО МОЩНОСТИ НЕ ПРОЙДЕНА'}
+                        <br>
+                        N<sub>тр</sub> ${r.powerCheck ? '≤' : '>'} N (${r.N_trebuemaya.toFixed(3)} ${r.powerCheck ? '≤' : '>'} ${r.N_st})
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <h3>⏱️ Основное время</h3>
+                    <div class="result-item">
+                        <span class="result-label">Полная длина обработки L:</span>
+                        <span class="result-value">${r.L_total.toFixed(1)} мм</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Основное время T<sub>o</sub>:</span>
+                        <span class="result-value">${r.To.toFixed(3)} мин (${(r.To * 60).toFixed(1)} сек)</span>
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <h3>✅ Итоговые режимы резания</h3>
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th>Параметр</th>
+                                <th>Значение</th>
+                                <th>Ед. изм.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Глубина резания t</td>
+                                <td>${r.t.toFixed(1)}</td>
+                                <td>мм</td>
+                            </tr>
+                            <tr>
+                                <td>Подача на зуб Sz</td>
+                                <td>${r.Sz.toFixed(2)}</td>
+                                <td>мм/зуб</td>
+                            </tr>
+                            <tr>
+                                <td>Минутная подача Sm</td>
+                                <td>${r.Sm.toFixed(1)}</td>
+                                <td>мм/мин</td>
+                            </tr>
+                            <tr>
+                                <td>Скорость резания V</td>
+                                <td>${r.Vf.toFixed(2)}</td>
+                                <td>м/мин</td>
+                            </tr>
+                            <tr>
+                                <td>Число оборотов n</td>
+                                <td>${r.n_accepted}</td>
+                                <td>об/мин</td>
+                            </tr>
+                            <tr>
+                                <td>Окружная сила Pz</td>
+                                <td>${r.Pz.toFixed(1)}</td>
+                                <td>Н</td>
+                            </tr>
+                            <tr>
+                                <td>Мощность резания Nэ</td>
+                                <td>${r.N_rez.toFixed(3)}</td>
+                                <td>кВт</td>
+                            </tr>
+                            <tr>
+                                <td>Основное время To</td>
+                                <td>${r.To.toFixed(3)}</td>
+                                <td>мин</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="text-align: center; padding: 20px; color: #7f8c8d; font-size: 0.9em;">
+                    Расчёт выполнен: ${new Date().toLocaleString('ru-RU')}
+                </div>
+            `;
+
+            resultsContent.innerHTML = html;
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateReport() {
+            if (!calculationResults) {
+                showToast('⚠️ Сначала выполните расчет!', 'warning');
+                return;
+            }
+
+            const r = calculationResults;
+            
+            // Формируем отчет в формате образца Word-документа
+            const reportContent = `Оборудование – ${r.machine}  Nст=${r.N_st} кВт
+Режущий инструмент – ${r.cutterType}, ${r.toolMaterial}
+
+1-переход. ${r.operation}
+
+Глубина резания. t = ${r.t} мм
+
+Подача. Sz = ${r.Sz} мм/зуб
+
+В зависимости от диаметра обработки размера державки, обработываемого материала и глубины резания.
+
+──────────────────────────────────────────────────────────────────
+
+3. Допустимая скорость резания
+
+                V = Cv / (T^m × D^q × t^x × Sz^y × B^u × z^p) × Kv, м/мин
+
+T = ${r.T} мин – стойкость инструмента
+D = ${r.D} мм,     z = ${r.z},     B = ${r.B} мм
+
+Коэффициенты из таблицы 81:
+Cv = ${r.Cv}
+x = ${r.x}
+y = ${r.y}
+m = ${r.m}
+p = ${r.p}
+u = ${r.u}
+q = ${r.q}
+
+Kv – поправочный коэффициент.
+Kv = ${r.Kv.toFixed(3)}
+
+──────────────────────────────────────────────────────────────────
+V = ${r.V.toFixed(2)} м/мин
+──────────────────────────────────────────────────────────────────
+
+4. Расчет числа оборотов
+
+                n = (1000 × V) / (π × D), об/мин
+
+n расч = ${r.n_calc.toFixed(1)} об/мин
+
+──────────────────────────────────────────────────────────────────
+
+5. Расчетная минутная подача
+
+                Sm = Sz × z × n, мм/мин
+
+Sm расч = ${r.Sm.toFixed(1)} мм/мин
+
+──────────────────────────────────────────────────────────────────
+
+6. Корректировка расчетных величин по станку
+
+n прин = ${r.n_accepted} об/мин            Sm прин = ${r.Sm.toFixed(1)} мм/мин
+
+──────────────────────────────────────────────────────────────────
+
+7. Действительная скорость резания
+
+                Vф = (π × D × n) / 1000, м/мин
+
+Vф = ${r.Vf.toFixed(2)} м/мин
+
+Действительная подача на зуб:
+Sz факт = ${r.Sz_fact.toFixed(3)} мм/зуб
+
+──────────────────────────────────────────────────────────────────
+
+8. Сила резания
+
+                Pz = 10 × Cp × t^x × Sz^y × B^u × D^w × z / n^q × Kp, Н
+
+Коэффициенты из таблицы 83:
+Cp = ${r.Cp}
+x = ${r.x_p}
+y = ${r.y_p}
+u = ${r.u_p}
+q = ${r.q_p}
+w = ${r.w_p}
+
+Kp = ${r.Kp.toFixed(3)}
+
+──────────────────────────────────────────────────────────────────
+Pz = ${r.Pz.toFixed(1)} Н
+──────────────────────────────────────────────────────────────────
+
+9. Мощность резания
+
+                Nэ = (Pz × Vф) / 61200, кВт
+
+Nэ = ${r.N_rez.toFixed(3)} кВт
+
+──────────────────────────────────────────────────────────────────
+
+10. Мощность на приводе
+
+                Nтр = Nэ / η, кВт
+
+Nтр = ${r.N_trebuemaya.toFixed(3)} кВт
+
+${r.powerCheck ? '✓' : '✗'} Условие Nтр ≤ Nст ${r.powerCheck ? 'выполнено' : 'НЕ выполнено'}, обработка ${r.powerCheck ? 'возможна' : 'невозможна'}
+
+──────────────────────────────────────────────────────────────────
+
+11. Технологическое время
+
+                To = (L + l₁ + l₂) / Sm, мин
+
+L = ${r.l} мм – длина обработки для нашего случая
+l₁ = ${r.l1} мм – величина врезания резца
+l₂ = ${r.l2} мм – величина перебега резца
+
+──────────────────────────────────────────────────────────────────
+To = ${r.To.toFixed(3)} мин
+──────────────────────────────────────────────────────────────────
+
+12. Штучное время
+
+Tшт = ${r.To.toFixed(3)} мин
+
+
+═══════════════════════════════════════════════════════════════════
+Расчет выполнен: ${new Date().toLocaleString('ru-RU')}
+Программа: Калькулятор режимов резания при фрезеровании v1.0
+═══════════════════════════════════════════════════════════════════
+`;
+
+            // Создаем текстовый файл для скачивания
+            const blob = new Blob([reportContent], { type: 'text/plain; charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Режимы_резания_${new Date().toISOString().slice(0, 10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('📄 Отчет сформирован и загружен!');
+        }
+
+
+        function saveData() {
+            const data = {
+                diameter: document.getElementById('diameter').value,
+                teethNumber: document.getElementById('teethNumber').value,
+                width: document.getElementById('width').value,
+                depth: document.getElementById('depth').value,
+                feedPerTooth: document.getElementById('feedPerTooth').value,
+                toolLife: document.getElementById('toolLife').value,
+                length: document.getElementById('length').value,
+                approach: document.getElementById('approach').value,
+                overtravel: document.getElementById('overtravel').value,
+                machinePower: document.getElementById('machinePower').value,
+                efficiency: document.getElementById('efficiency').value,
+                cutterType: document.getElementById('cutterType').value,
+                operationType: document.getElementById('operationType').value,
+                material: document.getElementById('material').value,
+                toolMaterial: document.getElementById('toolMaterial').value,
+                machiningType: document.getElementById('machiningType').value,
+                cooling: document.getElementById('cooling').value,
+                machine: document.getElementById('machine').value
+            };
+
+            localStorage.setItem('millingCalculatorData', JSON.stringify(data));
+            showToast('💾 Данные сохранены!');
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('millingCalculatorData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                document.getElementById('diameter').value = data.diameter;
+                document.getElementById('teethNumber').value = data.teethNumber;
+                document.getElementById('width').value = data.width;
+                document.getElementById('depth').value = data.depth;
+                document.getElementById('feedPerTooth').value = data.feedPerTooth;
+                document.getElementById('toolLife').value = data.toolLife;
+                document.getElementById('length').value = data.length;
+                document.getElementById('approach').value = data.approach;
+                document.getElementById('overtravel').value = data.overtravel;
+                document.getElementById('machinePower').value = data.machinePower;
+                document.getElementById('efficiency').value = data.efficiency;
+                document.getElementById('cutterType').value = data.cutterType;
+                document.getElementById('operationType').value = data.operationType;
+                document.getElementById('material').value = data.material;
+                document.getElementById('toolMaterial').value = data.toolMaterial;
+                document.getElementById('machiningType').value = data.machiningType;
+                document.getElementById('cooling').value = data.cooling;
+                document.getElementById('machine').value = data.machine;
+
+                showToast('📂 Данные загружены!');
+            } else {
+                showToast('⚠️ Сохраненных данных не найдено!', 'warning');
+            }
+        }
+
+        function clearResults() {
+            calculationResults = null;
+            document.getElementById('resultsSection').classList.remove('show');
+            showToast('🗑️ Результаты очищены!');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Автозагрузка данных при старте
+        window.addEventListener('load', () => {
+            const savedData = localStorage.getItem('millingCalculatorData');
+            if (savedData) {
+                const autoLoad = confirm('Обнаружены сохраненные данные. Загрузить их?');
+                if (autoLoad) {
+                    loadData();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
