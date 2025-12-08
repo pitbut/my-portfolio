@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет режимов резания | Токарная обработка</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        /* Header */
+        header {
+            grid-column: 1 / -1;
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+        .subtitle { font-size: 0.9rem; opacity: 0.8; font-weight: normal; }
+
+        /* Forms */
+        .input-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        fieldset {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        legend {
+            font-weight: bold;
+            color: var(--accent);
+            padding: 0 5px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label { font-size: 0.9rem; font-weight: 500; }
+
+        select, input {
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Buttons */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active { transform: translateY(1px); }
+
+        .btn-calc { background: var(--success); color: white; }
+        .btn-print { background: var(--accent); color: white; }
+        .btn-clear { background: #95a5a6; color: white; }
+
+        /* Results Panel */
+        .results-panel {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .result-group {
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .result-group h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 5px;
+            color: #bdc3c7;
+        }
+
+        .res-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .res-val { font-family: 'Courier New', monospace; font-weight: bold; color: #f1c40f; }
+        .unit { opacity: 0.7; font-size: 0.8rem; margin-left: 5px; }
+
+        .status-check {
+            text-align: center;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status-ok { background: var(--success); }
+        .status-fail { background: var(--danger); }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .results-panel { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Калькулятор режимов резания v2.0</h1>
+            <span class="subtitle">Токарная обработка | Методика машиностроения</span>
+        </div>
+        <div>???</div>
+    </header>
+
+    <div class="input-panel" id="inputForm">
+        <fieldset>
+            <legend>1. Тип обработки и Материал</legend>
+            <div class="form-group">
+                <label>Операция:</label>
+                <select id="operation_type">
+                    <option value="longitudinal">Наружное продольное точение</option>
+                    <option value="additional">Точение с доп. лезвием</option>
+                    <option value="parting">Отрезание / Прорезание</option>
+                    <option value="threading">Нарезание резьбы</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Материал детали:</label>
+                <select id="material">
+                    <option value="steel_750">Сталь конструкционная (?в=750 МПа)</option>
+                    <option value="iron_gray_190">Чугун серый (190 НВ)</option>
+                    <option value="iron_mall_150">Чугун ковкий (150 НВ)</option>
+                    <option value="copper">Медные сплавы</option>
+                    <option value="aluminum">Алюминиевые сплавы</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Материал инструмента:</label>
+                <select id="tool_material">
+                    <option value="T15K6">Твердый сплав Т15К6</option>
+                    <option value="T5K10">Твердый сплав Т5К10</option>
+                    <option value="VK8">Твердый сплав ВК8</option>
+                    <option value="VK6">Твердый сплав ВК6</option>
+                    <option value="R18">Быстрорежущая сталь Р18/Р6М5</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>2. Геометрия (мм)</legend>
+            <div class="form-group">
+                <label>Диаметр (D):</label>
+                <input type="number" id="diameter" value="50" step="1">
+            </div>
+            <div class="form-group">
+                <label>Глубина резания (t):</label>
+                <input type="number" id="depth" value="2.0" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Длина обработки (l):</label>
+                <input type="number" id="length" value="100" step="1">
+            </div>
+            <div class="form-group">
+                <label>Врезание + Перебег (l1+l2):</label>
+                <input type="number" id="approach" value="6" step="1">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>3. Режимы и Станок</legend>
+            <div class="form-group">
+                <label>Подача (S), мм/об:</label>
+                <input type="number" id="feed" value="0.5" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Ускор. подача (Sy), мм/мин:</label>
+                <input type="number" id="rapid_feed" value="500">
+            </div>
+            <div class="form-group">
+                <label>Мощность станка (N), кВт:</label>
+                <input type="number" id="machine_power" value="10">
+            </div>
+            <div class="form-group">
+                <label>КПД станка (?):</label>
+                <input type="number" id="efficiency" value="0.75" step="0.05">
+            </div>
+        </fieldset>
+
+        <div class="actions">
+            <button class="btn-calc" onclick="calculate()">?? Рассчитать</button>
+            <button class="btn-print" onclick="window.print()">??? Печать</button>
+            <button class="btn-clear" onclick="location.reload()">??? Сброс</button>
+        </div>
+    </div>
+
+    <div class="results-panel" id="results">
+        <h2 style="margin-top:0; border-bottom: 2px solid var(--accent); padding-bottom:10px;">Результаты</h2>
+        
+        <div class="result-group">
+            <h3>?? Скорость</h3>
+            <div class="res-row"><span>Расчетная V:</span> <div><span class="res-val" id="res_v">0.00</span><span class="unit">м/мин</span></div></div>
+            <div class="res-row"><span>Обороты (стандарт):</span> <div><span class="res-val" id="res_n">0</span><span class="unit">об/мин</span></div></div>
+            <div class="res-row"><span>Факт. скорость Vф:</span> <div><span class="res-val" id="res_vf">0.00</span><span class="unit">м/мин</span></div></div>
+        </div>
+
+        <div class="result-group">
+            <h3>?? Силы резания</h3>
+            <div class="res-row"><span>Pz (Тангенциальная):</span> <div><span class="res-val" id="res_pz">0</span><span class="unit">Н</span></div></div>
+            <div class="res-row"><span>Py (Радиальная):</span> <div><span class="res-val" id="res_py">0</span><span class="unit">Н</span></div></div>
+            <div class="res-row"><span>Px (Осевая):</span> <div><span class="res-val" id="res_px">0</span><span class="unit">Н</span></div></div>
+        </div>
+
+        <div class="result-group">
+            <h3>? Мощность</h3>
+            <div class="res-row"><span>Эффективная Nэ:</span> <div><span class="res-val" id="res_ne">0.000</span><span class="unit">кВт</span></div></div>
+            <div class="res-row"><span>Требуемая Nтр:</span> <div><span class="res-val" id="res_ntr">0.000</span><span class="unit">кВт</span></div></div>
+            <div id="power_status" class="status-check">ОЖИДАНИЕ</div>
+        </div>
+
+        <div class="result-group">
+            <h3>?? Время</h3>
+            <div class="res-row"><span>Основное время To:</span> <div><span class="res-val" id="res_to">0.000</span><span class="unit">мин</span></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Стандартный ряд оборотов шпинделя
+    const STANDARD_SPEEDS = [16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000];
+
+    // Функция получения коэффициентов скорости (Cv, x, y, m)
+    // Портировано из Python логики
+    function getSpeedCoeffs(mat, tool, op, s, t) {
+        // Значения по умолчанию
+        let c = { Cv: 300, x: 0, y: 0.20, m: 0.20, T: 60 };
+        
+        // Стойкость инструмента
+        c.T = (tool.includes('VK') || tool.includes('T')) ? 90 : 60;
+
+        // 1. СТАЛЬ КОНСТРУКЦИОННАЯ
+        if (mat === 'steel_750') {
+            if (op === 'longitudinal') {
+                if (tool === 'T15K6' || tool === 'T14K8') {
+                    if (s <= 0.3) { c.Cv=350; c.x=0; c.y=0.20; c.m=0.20; }
+                    else if (s <= 0.7) { c.Cv=290; c.x=0.15; c.y=0.35; c.m=0.20; }
+                    else { c.Cv=280; c.x=0; c.y=0.45; c.m=0.20; }
+                }
+            } else if (op === 'parting') {
+                if (tool === 'T5K10') { c.Cv=47; c.x=0; c.y=0.80; c.m=0.20; }
+                else if (tool === 'R18') { c.Cv=23.7; c.x=0; c.y=0.66; c.m=0.25; }
+            } else if (op === 'threading') {
+                if (tool === 'T15K6') { c.Cv=244; c.x=0.23; c.y=0.30; c.m=0.20; }
+                else if (tool === 'R18') { c.Cv=41.8; c.x=0.45; c.y=0.30; c.m=0.13; }
+            }
+        }
+        // 2. ЧУГУН СЕРЫЙ
+        else if (mat === 'iron_gray_190') {
+            if (op === 'longitudinal') {
+                if (tool === 'VK6') {
+                    if (s <= 0.4) { c.Cv=292; c.x=0.15; c.y=0.20; c.m=0.20; }
+                    else { c.Cv=243; c.x=0.15; c.y=0.40; c.m=0.20; }
+                }
+            } else if (op === 'parting') {
+                if (tool === 'VK6') { c.Cv=68.5; c.x=0; c.y=0.40; c.m=0.20; }
+            }
+        }
+        // 3. ЧУГУН КОВКИЙ
+        else if (mat === 'iron_mall_150') {
+             if (op === 'longitudinal' && tool === 'VK8') {
+                 if (s <= 0.4) { c.Cv=317; c.x=0.15; c.y=0.20; c.m=0.20; }
+                 else { c.Cv=215; c.x=0.15; c.y=0.45; c.m=0.20; }
+             }
+        }
+        // 4. ЦВЕТНЫЕ МЕТАЛЛЫ
+        else if (mat === 'aluminum') {
+            if (s <= 0.2) { c.Cv=485; c.x=0.12; c.y=0.25; c.m=0.28; }
+            else { c.Cv=328; c.x=0.12; c.y=0.50; c.m=0.28; }
+        }
+
+        return c;
+    }
+
+    // Функция получения коэффициентов силы (Cp, x, y, n)
+    function getForceCoeffs(mat, tool, op, component) {
+        // Упрощенная логика по умолчанию
+        let c = { Cp: 300, x: 1.0, y: 0.75, n: 0 };
+        
+        if (component === 'Py') { c.Cp = 243; c.y = 0.6; }
+        if (component === 'Px') { c.Cp = 339; c.y = 0.5; }
+
+        const isHard = (tool.includes('T') || tool.includes('VK'));
+
+        if (mat === 'steel_750') {
+            if (isHard) {
+                if (op === 'longitudinal') {
+                    if (component === 'Pz') { c.Cp=300; c.x=1.0; c.y=0.75; c.n=-0.15; }
+                    if (component === 'Py') { c.Cp=243; c.x=0.9; c.y=0.6; c.n=-0.15; }
+                    if (component === 'Px') { c.Cp=339; c.x=1.0; c.y=0.5; c.n=-0.15; }
+                } else if (op === 'parting') {
+                    if (component === 'Pz') { c.Cp=408; c.x=0.72; c.y=0.8; c.n=0; }
+                    if (component === 'Py') { c.Cp=173; c.x=0.73; c.y=0.67; c.n=0; }
+                }
+            } else { // R18
+                 if (op === 'longitudinal' && component === 'Pz') { c.Cp=200; c.x=1.0; c.y=0.75; c.n=0; }
+            }
+        } 
+        else if (mat.includes('iron')) {
+            if (isHard && op === 'longitudinal') {
+                if (component === 'Pz') { c.Cp=92; c.x=1.0; c.y=0.75; c.n=0; }
+            }
+        }
+
+        return c;
+    }
+
+    function getHB(mat) {
+        if (mat.includes('190')) return 190;
+        if (mat.includes('150')) return 150;
+        if (mat === 'steel_750') return 217;
+        return 200;
+    }
+
+    function calculate() {
+        // Сбор данных
+        const D = parseFloat(document.getElementById('diameter').value);
+        const t = parseFloat(document.getElementById('depth').value);
+        const l = parseFloat(document.getElementById('length').value);
+        const l_add = parseFloat(document.getElementById('approach').value);
+        const s = parseFloat(document.getElementById('feed').value);
+        const sy = parseFloat(document.getElementById('rapid_feed').value);
+        const N_st = parseFloat(document.getElementById('machine_power').value);
+        const eta = parseFloat(document.getElementById('efficiency').value);
+        
+        const mat = document.getElementById('material').value;
+        const tool = document.getElementById('tool_material').value;
+        const op = document.getElementById('operation_type').value;
+
+        // 1. Расчет скорости
+        const sc = getSpeedCoeffs(mat, tool, op, s, t);
+        const Kv = 1.0; 
+        
+        let V = (sc.Cv / (Math.pow(sc.T, sc.m) * Math.pow(t, sc.x) * Math.pow(s, sc.y))) * Kv;
+
+        // 2. Обороты
+        let n_calc = (1000 * V) / (Math.PI * D);
+        // Поиск ближайшего стандартного
+        let n_accepted = STANDARD_SPEEDS.reduce((prev, curr) => 
+            Math.abs(curr - n_calc) < Math.abs(prev - n_calc) ? curr : prev
+        );
+        let V_fact = (Math.PI * D * n_accepted) / 1000;
+
+        // 3. Силы
+        const HB = getHB(mat);
+        const components = ['Pz', 'Py', 'Px'];
+        let Forces = {};
+        
+        components.forEach(comp => {
+            let fc = getForceCoeffs(mat, tool, op, comp);
+            let force = fc.Cp * Math.pow(t, fc.x) * Math.pow(s, fc.y);
+            if (fc.n !== 0) force *= Math.pow(HB, fc.n);
+            Forces[comp] = force;
+        });
+
+        // 4. Мощность
+        let N_rez = (Forces.Pz * V_fact) / (1020 * 60); // кВт
+        let N_treb = N_rez / eta;
+
+        // 5. Время
+        let L_total = l + l_add;
+        let To = (L_total / (n_accepted * s)) + (L_total / (n_accepted * (sy/n_accepted))); // Грубая оценка для Sy
+
+        // === ВЫВОД РЕЗУЛЬТАТОВ ===
+        document.getElementById('res_v').innerText = V.toFixed(2);
+        document.getElementById('res_n').innerText = n_accepted;
+        document.getElementById('res_vf').innerText = V_fact.toFixed(2);
+
+        document.getElementById('res_pz').innerText = Forces.Pz.toFixed(0);
+        document.getElementById('res_py').innerText = Forces.Py.toFixed(0);
+        document.getElementById('res_px').innerText = Forces.Px.toFixed(0);
+
+        document.getElementById('res_ne').innerText = N_rez.toFixed(3);
+        document.getElementById('res_ntr').innerText = N_treb.toFixed(3);
+
+        const statusEl = document.getElementById('power_status');
+        if (N_treb <= N_st) {
+            statusEl.innerText = "? МОЩНОСТЬ В НОРМЕ";
+            statusEl.className = "status-check status-ok";
+        } else {
+            statusEl.innerText = "?? ПЕРЕГРУЗКА СТАНКА";
+            statusEl.className = "status-check status-fail";
+        }
+
+        document.getElementById('res_to').innerText = To.toFixed(3);
+    }
+</script>
+
+</body>
+</html>
