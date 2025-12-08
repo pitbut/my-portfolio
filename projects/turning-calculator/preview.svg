@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Фон -->
+  <rect width="800" height="600" fill="url(#bg)"/>
+  
+  <!-- Токарный станок (упрощенная схема) -->
+  <g transform="translate(100, 150)">
+    <!-- Станина -->
+    <rect x="0" y="200" width="600" height="40" fill="#34495e" rx="5"/>
+    
+    <!-- Передняя бабка -->
+    <rect x="50" y="120" width="120" height="80" fill="#2c3e50" rx="5"/>
+    <circle cx="110" cy="160" r="30" fill="#95a5a6"/>
+    <circle cx="110" cy="160" r="20" fill="#7f8c8d"/>
+    
+    <!-- Задняя бабка -->
+    <rect x="450" y="120" width="100" height="80" fill="#2c3e50" rx="5"/>
+    <circle cx="500" cy="160" r="15" fill="#95a5a6"/>
+    
+    <!-- Суппорт -->
+    <rect x="220" y="140" width="100" height="60" fill="#34495e" rx="5"/>
+    <polygon points="280,180 320,180 310,220" fill="#e74c3c"/>
+    
+    <!-- Заготовка -->
+    <rect x="140" y="155" width="250" height="10" fill="#bdc3c7" rx="2"/>
+    <line x1="140" y1="160" x2="390" y2="160" stroke="#7f8c8d" stroke-width="2"/>
+  </g>
+  
+  <!-- Заголовок -->
+  <text x="400" y="60" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">
+    ⚙️ Токарная обработка
+  </text>
+  
+  <!-- Подзаголовок -->
+  <text x="400" y="100" font-family="Arial, sans-serif" font-size="20" fill="white" text-anchor="middle" opacity="0.9">
+    Калькулятор режимов резания v1.0
+  </text>
+  
+  <!-- Иконки режимов -->
+  <g transform="translate(150, 450)">
+    <!-- V - скорость -->
+    <circle cx="50" cy="0" r="35" fill="white" opacity="0.9"/>
+    <text x="50" y="10" font-family="Arial" font-size="24" font-weight="bold" fill="#667eea" text-anchor="middle">V</text>
+    
+    <!-- n - обороты -->
+    <circle cx="170" cy="0" r="35" fill="white" opacity="0.9"/>
+    <text x="170" y="10" font-family="Arial" font-size="24" font-weight="bold" fill="#667eea" text-anchor="middle">n</text>
+    
+    <!-- Pz - сила -->
+    <circle cx="290" cy="0" r="35" fill="white" opacity="0.9"/>
+    <text x="290" y="10" font-family="Arial" font-size="20" font-weight="bold" fill="#667eea" text-anchor="middle">Pz</text>
+    
+    <!-- N - мощность -->
+    <circle cx="410" cy="0" r="35" fill="white" opacity="0.9"/>
+    <text x="410" y="10" font-family="Arial" font-size="24" font-weight="bold" fill="#667eea" text-anchor="middle">N</text>
+    
+    <!-- To - время -->
+    <circle cx="530" cy="0" r="35" fill="white" opacity="0.9"/>
+    <text x="530" y="10" font-family="Arial" font-size="20" font-weight="bold" fill="#667eea" text-anchor="middle">To</text>
+  </g>
+  
+  <!-- Версия -->
+  <text x="750" y="580" font-family="Arial" font-size="14" fill="white" text-anchor="end" opacity="0.7">
+    v1.0
+  </text>
+</svg>

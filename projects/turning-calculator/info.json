@@ -1,0 +1,18 @@
+{
+  "name": "Калькулятор режимов резания - Токарная обработка",
+  "version": "1.0",
+  "description": "Веб-приложение для расчета режимов резания при токарной обработке с генерацией отчетов",
+  "author": "Pit",
+  "organization": "Tashkent Institute of Textile and Light Industry",
+  "date": "2024-12-08",
+  "category": "Engineering Calculations",
+  "tags": ["токарная обработка", "режимы резания", "калькулятор"],
+  "features": [
+    "Расчет скорости резания",
+    "Расчет силы резания",
+    "Отчет в формате методички"
+  ],
+  "file_size": "60 KB",
+  "technologies": ["HTML5", "CSS3", "JavaScript"],
+  "offline_support": true
+}
