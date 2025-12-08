@@ -2,11 +2,14 @@
   {
     "id": "checker",
     "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=Checker",
+    "description": "Шашки для развлечения",
+    "image": "projects/checker/preview.png",
     "link": "projects/checker/index.html",
     "date": "2025-12-08",
-    "tags": []
+    "tags": [
+      "Игра",
+      "Азарт"
+    ]
   },
   {
     "id": "graph-builder",
