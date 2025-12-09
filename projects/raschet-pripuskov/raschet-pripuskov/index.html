@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет припусков на механическую обработку</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 15px 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+
+        .step:first-child::before {
+            left: 50%;
+        }
+
+        .step:last-child::before {
+            right: 50%;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-number {
+            background: #2a5298;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-number {
+            background: #4caf50;
+            color: white;
+        }
+
+        .step.completed::before,
+        .step.active::before {
+            background: #2a5298;
+        }
+
+        .step-label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: #2a5298;
+            font-weight: 600;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .transitions-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .transition-item {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .transition-item:hover {
+            border-color: #2a5298;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .transition-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .transition-number {
+            background: #2a5298;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .remove-transition {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .remove-transition:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #2a5298;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e3c72;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-add {
+            background: #17a2b8;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-add:hover {
+            background: #138496;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .result-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-table th {
+            background: #2a5298;
+            color: white;
+            font-weight: 600;
+        }
+
+        .result-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .result-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .calculation-details {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .calculation-details h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+        }
+
+        .formula {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #2a5298;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .steps {
+                flex-direction: column;
+            }
+
+            .step::before {
+                display: none;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Расчет припусков на механическую обработку</h1>
+            <p>Профессиональный расчет по ГОСТ с подробным отчетом</p>
+        </header>
+
+        <div class="card">
+            <div class="steps">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Тип заготовки</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Переходы</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Размеры</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Результат</div>
+                </div>
+            </div>
+
+            <!-- Шаг 1: Выбор типа заготовки -->
+            <div class="step-content active" data-step="1">
+                <h2>Выбор типа заготовки</h2>
+                <div class="info-box">
+                    <h4>ℹ️ Информация</h4>
+                    <p>Выберите тип заготовки и метод её изготовления. Это определит начальные параметры качества поверхности (Rz и T).</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Тип заготовки:</label>
+                    <select id="blankType">
+                        <option value="">-- Выберите тип --</option>
+                        <option value="casting_sand">Литье в песчаные формы</option>
+                        <option value="casting_mold">Литье в кокиль/центробежное</option>
+                        <option value="casting_shell">Литье в оболочковые формы</option>
+                        <option value="casting_wax">Литье по выплавляемым моделям</option>
+                        <option value="casting_pressure">Литье под давлением</option>
+                        <option value="forging_hammer">Ковка на молотах</option>
+                        <option value="forging_press">Штамповка на прессах</option>
+                        <option value="rolling_hot">Горячекатаный прокат</option>
+                        <option value="rolling_calibrated">Калиброванный прокат</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Тип обрабатываемой поверхности:</label>
+                    <select id="surfaceType">
+                        <option value="external">Наружная цилиндрическая</option>
+                        <option value="internal">Внутренняя цилиндрическая</option>
+                        <option value="flat">Плоская</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Размер заготовки (диаметр/ширина), мм:</label>
+                    <input type="number" id="blankSize" min="1" step="0.1" placeholder="Введите размер">
+                </div>
+
+                <div class="form-group">
+                    <label>Длина детали, мм:</label>
+                    <input type="number" id="partLength" min="1" step="0.1" placeholder="Введите длину (для расчета ρ)">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="goToStep(2)">Далее →</button>
+                </div>
+            </div>
+
+            <!-- Шаг 2: Выбор переходов -->
+            <div class="step-content" data-step="2">
+                <h2>Технологические переходы</h2>
+                <div class="info-box">
+                    <h4>ℹ️ Информация</h4>
+                    <p>Добавьте последовательность технологических переходов для обработки поверхности. Первым будет автоматически добавлена заготовка.</p>
+                </div>
+
+                <div class="transitions-container" id="transitionsContainer"></div>
+
+                <button class="btn btn-add" onclick="addTransition()">+ Добавить переход</button>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">← Назад</button>
+                    <button class="btn btn-primary" onclick="goToStep(3)">Далее →</button>
+                </div>
+            </div>
+
+            <!-- Шаг 3: Ввод размеров -->
+            <div class="step-content" data-step="3">
+                <h2>Конечный размер детали</h2>
+                <div class="info-box">
+                    <h4>ℹ️ Информация</h4>
+                    <p>Укажите требуемый размер готовой детали согласно чертежу.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Номинальный размер детали, мм:</label>
+                    <input type="number" id="nominalSize" step="0.01" placeholder="Например: 24.00">
+                </div>
+
+                <div class="form-group">
+                    <label>Допуск (квалитет):</label>
+                    <select id="tolerance">
+                        <option value="0.21">IT11 (±0.21)</option>
+                        <option value="0.13">IT10 (±0.13)</option>
+                        <option value="0.08" selected>IT9 (±0.08)</option>
+                        <option value="0.052">IT8 (±0.052)</option>
+                        <option value="0.033">IT7 (±0.033)</option>
+                        <option value="0.021">IT6 (±0.021)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Тип посадки:</label>
+                    <select id="fitType">
+                        <option value="h">Вал (h) - отрицательный допуск</option>
+                        <option value="H" selected>Отверстие (H) - положительный допуск</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">← Назад</button>
+                    <button class="btn btn-success" onclick="calculate()">🧮 Рассчитать</button>
+                </div>
+            </div>
+
+            <!-- Шаг 4: Результаты -->
+            <div class="step-content" data-step="4">
+                <h2>Результаты расчета</h2>
+                
+                <div class="result-section" id="resultsContainer">
+                    <!-- Результаты будут добавлены сюда -->
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">🔄 Новый расчет</button>
+                    <button class="btn btn-success" onclick="downloadReport()">📥 Скачать отчет</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные о параметрах качества для разных типов заготовок
+        const blankData = {
+            'casting_sand': { 
+                rz: { small: 800, medium: 900, large: 1000 },
+                t: { small: 0, medium: 0, large: 0 },
+                name: 'Литье в песчаные формы'
+            },
+            'casting_mold': { 
+                rz: { small: 200, medium: 200, large: 200 },
+                t: { small: 250, medium: 250, large: 250 },
+                name: 'Литье в кокиль'
+            },
+            'casting_shell': { 
+                rz: { small: 40, medium: 40, large: 40 },
+                t: { small: 200, medium: 200, large: 200 },
+                name: 'Литье в оболочковые формы'
+            },
+            'casting_wax': { 
+                rz: { small: 30, medium: 32, large: 32 },
+                t: { small: 140, medium: 170, large: 170 },
+                name: 'Литье по выплавляемым моделям'
+            },
+            'casting_pressure': { 
+                rz: { small: 50, medium: 50, large: 50 },
+                t: { small: 100, medium: 100, large: 100 },
+                name: 'Литье под давлением'
+            },
+            'forging_hammer': { 
+                rz: { small: 80, medium: 160, large: 200 },
+                t: { small: 150, medium: 200, large: 250 },
+                name: 'Штамповка на молотах'
+            },
+            'forging_press': { 
+                rz: { small: 50, medium: 50, large: 50 },
+                t: { small: 75, medium: 75, large: 75 },
+                name: 'Штамповка на прессах'
+            },
+            'rolling_hot': { 
+                rz: { small: 150, medium: 150, large: 200 },
+                t: { small: 150, medium: 250, large: 300 },
+                name: 'Горячекатаный прокат'
+            },
+            'rolling_calibrated': { 
+                rz: { small: 60, medium: 60, large: 60 },
+                t: { small: 60, medium: 75, large: 75 },
+                name: 'Калиброванный прокат'
+            }
+        };
+
+        // Параметры для методов обработки
+        const processingData = {
+            'rough_turning': {
+                name: 'Черновое точение',
+                rz: 50,
+                t: 50,
+                ky: 0.06,
+                type: 'turning'
+            },
+            'semifinish_turning': {
+                name: 'Получистовое точение',
+                rz: 25,
+                t: 25,
+                ky: 0.05,
+                type: 'turning'
+            },
+            'finish_turning': {
+                name: 'Чистовое точение',
+                rz: 10,
+                t: 20,
+                ky: 0.04,
+                type: 'turning'
+            },
+            'fine_turning': {
+                name: 'Тонкое точение',
+                rz: 5,
+                t: 5,
+                ky: 0.02,
+                type: 'turning'
+            },
+            'rough_milling': {
+                name: 'Черновое фрезерование',
+                rz: 50,
+                t: 50,
+                ky: 0.06,
+                type: 'milling'
+            },
+            'semifinish_milling': {
+                name: 'Получистовое фрезерование',
+                rz: 25,
+                t: 25,
+                ky: 0.05,
+                type: 'milling'
+            },
+            'finish_milling': {
+                name: 'Чистовое фрезерование',
+                rz: 10,
+                t: 15,
+                ky: 0.04,
+                type: 'milling'
+            },
+            'rough_grinding': {
+                name: 'Черновое шлифование',
+                rz: 10,
+                t: 20,
+                ky: 0.03,
+                type: 'grinding'
+            },
+            'finish_grinding': {
+                name: 'Чистовое шлифование',
+                rz: 5,
+                t: 15,
+                ky: 0.02,
+                type: 'grinding'
+            },
+            'fine_grinding': {
+                name: 'Тонкое шлифование',
+                rz: 2.5,
+                t: 5,
+                ky: 0.01,
+                type: 'grinding'
+            },
+            'surface_grinding_rough': {
+                name: 'Плоскошлифование черновое',
+                rz: 10,
+                t: 20,
+                ky: 0.03,
+                type: 'surface_grinding'
+            },
+            'surface_grinding_finish': {
+                name: 'Плоскошлифование чистовое',
+                rz: 2.5,
+                t: 10,
+                ky: 0.02,
+                type: 'surface_grinding'
+            },
+            'polishing': {
+                name: 'Полирование',
+                rz: 0.63,
+                t: 0,
+                ky: 0,
+                type: 'polishing'
+            }
+        };
+
+        let currentStep = 1;
+        let transitionCount = 0;
+        let calculationData = {};
+
+        // Навигация по шагам
+        function goToStep(step) {
+            if (step > currentStep && !validateStep(currentStep)) {
+                return;
+            }
+
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active', 'completed'));
+            document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
+
+            for (let i = 1; i < step; i++) {
+                document.querySelector(`.step[data-step="${i}"]`).classList.add('completed');
+            }
+
+            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+            document.querySelector(`.step-content[data-step="${step}"]`).classList.add('active');
+
+            currentStep = step;
+        }
+
+        // Валидация шага
+        function validateStep(step) {
+            if (step === 1) {
+                const blankType = document.getElementById('blankType').value;
+                const blankSize = document.getElementById('blankSize').value;
+                const partLength = document.getElementById('partLength').value;
+                
+                if (!blankType || !blankSize || !partLength) {
+                    alert('Пожалуйста, заполните все поля!');
+                    return false;
+                }
+            }
+
+            if (step === 2) {
+                if (transitionCount === 0) {
+                    alert('Добавьте хотя бы один технологический переход!');
+                    return false;
+                }
+            }
+
+            if (step === 3) {
+                const nominalSize = document.getElementById('nominalSize').value;
+                if (!nominalSize) {
+                    alert('Укажите номинальный размер детали!');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Добавление перехода
+        function addTransition() {
+            transitionCount++;
+            const container = document.getElementById('transitionsContainer');
+            
+            const transitionDiv = document.createElement('div');
+            transitionDiv.className = 'transition-item';
+            transitionDiv.id = `transition-${transitionCount}`;
+            
+            transitionDiv.innerHTML = `
+                <div class="transition-header">
+                    <div class="transition-number">${transitionCount}</div>
+                    <button class="remove-transition" onclick="removeTransition(${transitionCount})">Удалить</button>
+                </div>
+                <div class="form-group">
+                    <label>Метод обработки:</label>
+                    <select class="transition-method">
+                        <option value="">-- Выберите метод --</option>
+                        <optgroup label="Токарная обработка">
+                            <option value="rough_turning">Черновое точение</option>
+                            <option value="semifinish_turning">Получистовое точение</option>
+                            <option value="finish_turning">Чистовое точение</option>
+                            <option value="fine_turning">Тонкое точение</option>
+                        </optgroup>
+                        <optgroup label="Фрезерная обработка">
+                            <option value="rough_milling">Черновое фрезерование</option>
+                            <option value="semifinish_milling">Получистовое фрезерование</option>
+                            <option value="finish_milling">Чистовое фрезерование</option>
+                        </optgroup>
+                        <optgroup label="Шлифование">
+                            <option value="rough_grinding">Черновое шлифование (круглое)</option>
+                            <option value="finish_grinding">Чистовое шлифование (круглое)</option>
+                            <option value="fine_grinding">Тонкое шлифование (круглое)</option>
+                            <option value="surface_grinding_rough">Плоскошлифование черновое</option>
+                            <option value="surface_grinding_finish">Плоскошлифование чистовое</option>
+                        </optgroup>
+                        <optgroup label="Отделочная обработка">
+                            <option value="polishing">Полирование</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Описание перехода (база, размер):</label>
+                    <input type="text" class="transition-description" placeholder="Например: Подрезать торец А, выдержав р-р 17">
+                </div>
+                <div class="form-group">
+                    <label>Погрешность закрепления εз, мкм:</label>
+                    <input type="number" class="transition-epsilon" value="60" min="0" step="1">
+                </div>
+                <div class="form-group">
+                    <label>Погрешность базирования εб, мкм:</label>
+                    <input type="number" class="transition-epsilon-b" value="0" min="0" step="1">
+                </div>
+            `;
+            
+            container.appendChild(transitionDiv);
+        }
+
+        // Удаление перехода
+        function removeTransition(id) {
+            const element = document.getElementById(`transition-${id}`);
+            if (element) {
+                element.remove();
+                transitionCount--;
+                renumberTransitions();
+            }
+        }
+
+        // Перенумерация переходов
+        function renumberTransitions() {
+            const transitions = document.querySelectorAll('.transition-item');
+            transitions.forEach((trans, index) => {
+                const number = trans.querySelector('.transition-number');
+                if (number) {
+                    number.textContent = index + 1;
+                }
+            });
+        }
+
+        // Основной расчет
+        function calculate() {
+            if (!validateStep(3)) return;
+
+            // Собираем данные
+            const blankType = document.getElementById('blankType').value;
+            const blankSize = parseFloat(document.getElementById('blankSize').value);
+            const partLength = parseFloat(document.getElementById('partLength').value);
+            const surfaceType = document.getElementById('surfaceType').value;
+            const nominalSize = parseFloat(document.getElementById('nominalSize').value);
+            const tolerance = parseFloat(document.getElementById('tolerance').value);
+            const fitType = document.getElementById('fitType').value;
+
+            // Получаем параметры заготовки
+            const blank = blankData[blankType];
+            let sizeCategory = 'small';
+            if (blankSize > 80) sizeCategory = 'large';
+            else if (blankSize > 30) sizeCategory = 'medium';
+
+            const initialRz = blank.rz[sizeCategory];
+            const initialT = blank.t[sizeCategory];
+
+            // Удельная кривизна (из таблицы 2.27)
+            let deltaK = 4; // для литья в песчаные формы
+            if (blankType.includes('forging')) deltaK = 2.4;
+            if (blankType.includes('rolling_hot')) deltaK = 12;
+            if (blankType.includes('rolling_calibrated')) deltaK = 4;
+
+            const rhoKor = deltaK * partLength; // Погрешность коробления
+
+            // Собираем переходы
+            const transitions = [];
+            const transitionElements = document.querySelectorAll('.transition-item');
+            
+            // Добавляем заготовку
+            transitions.push({
+                name: blank.name,
+                rz: initialRz,
+                t: initialT,
+                rho: rhoKor,
+                epsilon: 0,
+                ky: 0
+            });
+
+            // Добавляем переходы обработки
+            let currentRho = rhoKor;
+            transitionElements.forEach((el, index) => {
+                const method = el.querySelector('.transition-method').value;
+                if (!method) return;
+
+                const processData = processingData[method];
+                const epsilonZ = parseFloat(el.querySelector('.transition-epsilon').value) || 0;
+                const epsilonB = parseFloat(el.querySelector('.transition-epsilon-b').value) || 0;
+                const description = el.querySelector('.transition-description')?.value || '';
+                
+                // Расчет остаточной погрешности
+                if (index > 0) {
+                    currentRho = currentRho * transitions[index].ky;
+                }
+
+                const epsilonU = Math.sqrt(epsilonB * epsilonB + epsilonZ * epsilonZ);
+
+                transitions.push({
+                    name: processData.name,
+                    rz: processData.rz,
+                    t: processData.t,
+                    rho: currentRho,
+                    epsilon: epsilonU,
+                    epsilonB: epsilonB,
+                    epsilonZ: epsilonZ,
+                    description: description,
+                    ky: processData.ky
+                });
+            });
+
+            // Расчет припусков
+            const results = [];
+            let currentSize = nominalSize;
+
+            // Последний переход (готовая деталь)
+            const finalTolerance = tolerance * 2;
+            results.push({
+                transition: transitions[transitions.length - 1].name,
+                rz: transitions[transitions.length - 1].rz,
+                t: transitions[transitions.length - 1].t,
+                rho: 0,
+                epsilon: 0,
+                allowance: 0,
+                tolerance: finalTolerance,
+                sizeMin: nominalSize,
+                sizeMax: nominalSize + (fitType === 'H' ? finalTolerance : 0) - (fitType === 'h' ? finalTolerance : 0)
+            });
+
+            // Расчет от конца к началу
+            for (let i = transitions.length - 2; i >= 0; i--) {
+                const trans = transitions[i];
+                const prevResult = results[results.length - 1];
+                
+                // Минимальный припуск по формуле
+                let zMin;
+                if (trans.name.includes('Полирование')) {
+                    zMin = 2 * trans.rz;
+                } else {
+                    const sqrtPart = Math.sqrt(trans.rho * trans.rho + trans.epsilon * trans.epsilon);
+                    zMin = 2 * (trans.rz + trans.t + sqrtPart);
+                }
+
+                // Округление припуска
+                zMin = Math.ceil(zMin);
+
+                // Расчет допуска для данного перехода
+                let transitionTolerance;
+                if (i === 0) {
+                    // Допуск заготовки
+                    transitionTolerance = blankSize * 0.04; // примерно 4% от размера
+                } else {
+                    // Допуск механической обработки
+                    if (trans.name.includes('Черновое')) transitionTolerance = 0.21;
+                    else if (trans.name.includes('Получистовое')) transitionTolerance = 0.13;
+                    else if (trans.name.includes('Чистовое')) transitionTolerance = 0.08;
+                    else if (trans.name.includes('Тонкое')) transitionTolerance = 0.052;
+                    else transitionTolerance = 0.13;
+                }
+
+                // Расчет размеров
+                let newSizeMin, newSizeMax;
+                if (surfaceType === 'external' || surfaceType === 'flat') {
+                    newSizeMin = prevResult.sizeMin + zMin / 1000;
+                    newSizeMax = newSizeMin + transitionTolerance;
+                } else {
+                    newSizeMax = prevResult.sizeMax - zMin / 1000;
+                    newSizeMin = newSizeMax - transitionTolerance;
+                }
+
+                results.push({
+                    transition: trans.name,
+                    rz: trans.rz,
+                    t: trans.t,
+                    rho: trans.rho,
+                    epsilon: trans.epsilon,
+                    epsilonB: trans.epsilonB || 0,
+                    epsilonZ: trans.epsilonZ || 0,
+                    description: trans.description || '',
+                    allowance: zMin,
+                    tolerance: transitionTolerance,
+                    sizeMin: newSizeMin,
+                    sizeMax: newSizeMax
+                });
+            }
+
+            // Переворачиваем массив для правильного порядка
+            results.reverse();
+
+            // Сохраняем данные для отчета
+            calculationData = {
+                blank: blank.name,
+                blankSize: blankSize,
+                partLength: partLength,
+                surfaceType: surfaceType,
+                nominalSize: nominalSize,
+                tolerance: tolerance,
+                fitType: fitType,
+                results: results,
+                deltaK: deltaK,
+                rhoKor: rhoKor
+            };
+
+            // Отображаем результаты
+            displayResults(results);
+            goToStep(4);
+        }
+
+        // Отображение результатов
+// Новая функция displayResults с подробными расчетами
+function displayResults(results) {
+    const container = document.getElementById('resultsContainer');
+    
+    let html = '<div class="operation-block">';
+    html += '<div class="operation-title">РАСЧЕТ ПРИПУСКОВ НА МЕХАНИЧЕСКУЮ ОБРАБОТКУ</div>';
+    
+    // Исходные данные
+    html += '<h3>Исходные данные</h3>';
+    html += '<div class="info-box">';
+    html += `<p><strong>Тип заготовки:</strong> ${calculationData.blank}</p>`;
+    html += `<p><strong>Размер заготовки:</strong> ${calculationData.blankSize} мм</p>`;
+    html += `<p><strong>Длина детали:</strong> ${calculationData.partLength} мм</p>`;
+    html += `<p><strong>Тип поверхности:</strong> ${calculationData.surfaceType === 'external' ? 'Наружная цилиндрическая' : calculationData.surfaceType === 'internal' ? 'Внутренняя цилиндрическая' : 'Плоская'}</p>`;
+    html += `<p><strong>Номинальный размер детали:</strong> ${calculationData.nominalSize} мм</p>`;
+    html += '</div>';
+    
+    // Расчет по каждому переходу
+    results.forEach((res, index) => {
+        if (index === results.length - 1) return; // Пропускаем последний (готовая деталь)
+        
+        const nextRes = results[index + 1];
+        if (!nextRes) return;
+        
+        html += '<div class="transition-calc">';
+        html += `<div class="transition-title">ПЕРЕХОД ${index + 1}: ${res.transition}</div>`;
+        
+        if (res.description) {
+            html += `<p style="margin-bottom: 15px;"><em>${res.description}</em></p>`;
+        }
+        
+        // 1. Определяем минимальный припуск
+        html += '<div class="calc-step">';
+        html += '<div class="calc-step-title">1. Определяем минимальный припуск</div>';
+        
+        // Формула
+        if (calculationData.surfaceType === 'flat') {
+            html += '<div class="formula">z<sub>min</sub> = (Rz + h)<sub>i-1</sub> + ρ + ε<sub>yi</sub>, мкм</div>';
+        } else {
+            html += '<div class="formula">2z<sub>min</sub> = 2[(Rz + h)<sub>i-1</sub> + √(ρ² + ε<sub>yi</sub>²)], мкм</div>';
+        }
+        
+        // а) Параметры качества заготовки
+        html += '<div class="param-explain">';
+        html += `а) (Rz + h)<sub>i-1</sub> = ${Math.round(res.rz + res.t)} мкм`;
+        html += ` — ${res.transition}`;
+        if (index === 0) {
+            html += ' (заготовка)';
+        }
+        html += '<div class="reference">т.6, с. 182, СТМ1</div>';
+        html += '</div>';
+        
+        // б) Пространственные отклонения
+        html += '<div class="param-explain">';
+        html += 'б) Суммарное значение пространственных отклонений';
+        if (index === 0) {
+            html += '<div class="formula" style="margin-top: 5px;">';
+            html += `ρ = Δ<sub>к</sub> × L = ${calculationData.deltaK} × ${calculationData.partLength} = ${Math.round(res.rho)} мкм`;
+            html += '</div>';
+            html += `<div style="padding-left: 15px; margin-top: 5px;">где: Δ'<sub>к</sub> = ${calculationData.deltaK} мкм/мм`;
+            html += '<div class="reference">т.8, с.183, СТМ1</div>';
+            html += `<div>L = ${calculationData.partLength} мм — длина обработки</div>`;
+            html += '</div>';
+        } else {
+            html += `<div class="formula" style="margin-top: 5px;">ρ = ${Math.round(res.rho)} мкм (уточнение после предыдущего перехода)</div>`;
+        }
+        html += '</div>';
+        
+        // в) Погрешность установки
+        html += '<div class="param-explain">';
+        html += 'в) Погрешность установки';
+        html += '<div class="formula" style="margin-top: 5px;">';
+        html += `ε<sub>yi</sub> = √(ε<sub>б</sub>² + ε<sub>з</sub>²) = √(${Math.round(res.epsilonB || 0)}² + ${Math.round(res.epsilonZ || 0)}²) = ${Math.round(res.epsilon)} мкм`;
+        html += '</div>';
+        html += `<div style="padding-left: 15px; margin-top: 5px;">где: ε<sub>б</sub> = ${Math.round(res.epsilonB || 0)} мкм — погрешность базирования`;
+        html += '<div class="reference">т.11, с. 130, СТМ1</div>';
+        html += `<div>ε<sub>з</sub> = ${Math.round(res.epsilonZ || 0)} мкм — погрешность закрепления`;
+        html += '<div class="reference">т.13, с. 42, СТМ1</div>';
+        html += '</div>';
+        html += '</div>';
+        
+        // Итог
+        let zFormula;
+        if (calculationData.surfaceType === 'flat') {
+            zFormula = `z<sub>min</sub> = ${Math.round(res.rz + res.t)} + ${Math.round(res.rho)} + ${Math.round(res.epsilon)} = ${Math.round(res.allowance / 2)} мкм`;
+        } else {
+            const sqrtPart = Math.sqrt(res.rho * res.rho + res.epsilon * res.epsilon);
+            zFormula = `2z<sub>min</sub> = 2[${Math.round(res.rz + res.t)} + √(${Math.round(res.rho)}² + ${Math.round(res.epsilon)}²)] = 2[${Math.round(res.rz + res.t)} + ${Math.round(sqrtPart)}] = ${Math.round(res.allowance)} мкм`;
+        }
+        html += `<div class="formula-result">${zFormula}</div>`;
+        html += '</div>';
+        
+        // 2. Определяем максимальный припуск
+        html += '<div class="calc-step">';
+        html += '<div class="calc-step-title">2. Определяем максимальный припуск</div>';
+        
+        const prevTolerance = res.tolerance * 1000; // в мкм
+        const currentTolerance = nextRes.tolerance * 1000; // в мкм
+        const zMax = res.allowance + prevTolerance - currentTolerance;
+        
+        if (calculationData.surfaceType === 'flat') {
+            html += '<div class="formula">';
+            html += `z<sub>max</sub> = z<sub>min</sub> + TD<sub>i-1</sub> - TD<sub>i</sub> = ${Math.round(res.allowance / 2)} + ${Math.round(prevTolerance)} - ${Math.round(currentTolerance)} = ${Math.round(zMax / 2)} мкм`;
+            html += '</div>';
+        } else {
+            html += '<div class="formula">';
+            html += `2z<sub>max</sub> = 2z<sub>min</sub> + TD<sub>i-1</sub> - TD<sub>i</sub> = ${Math.round(res.allowance)} + ${Math.round(prevTolerance)} - ${Math.round(currentTolerance)} = ${Math.round(zMax)} мкм`;
+            html += '</div>';
+        }
+        
+        html += '<div class="param-explain">';
+        html += `где: TD<sub>i-1</sub> = ${Math.round(prevTolerance)} мкм — допуск предыдущего перехода`;
+        html += '<div class="reference">т.4, с. 8, СТМ1</div>';
+        html += `<div>TD<sub>i</sub> = ${Math.round(currentTolerance)} мкм — допуск текущего перехода`;
+        html += '<div class="reference">т.4, с. 8, СТМ1</div>';
+        html += '</div>';
+        html += '</div>';
+        
+        // 3. Принимаем припуск
+        html += '<div class="calc-step">';
+        html += '<div class="calc-step-title">3. Принимаем припуск</div>';
+        const adoptedAllowance = (res.allowance / 1000).toFixed(1);
+        if (calculationData.surfaceType === 'flat') {
+            html += `<div class="formula-result">z<sub>max</sub> = ${adoptedAllowance} мм</div>`;
+        } else {
+            html += `<div class="formula-result">2z<sub>max</sub> = ${adoptedAllowance} мм</div>`;
+        }
+        html += '</div>';
+        
+        html += '</div>'; // end transition-calc
+    });
+    
+    // Итоговая таблица
+    html += '<h3 style="margin-top: 30px;">📊 Итоговая таблица расчета</h3>';
+    html += '<table class="summary-table">';
+    html += '<tr>';
+    html += '<th>№</th>';
+    html += '<th>Технологический переход</th>';
+    html += '<th>Rz, мкм</th>';
+    html += '<th>T, мкм</th>';
+    html += '<th>ρ, мкм</th>';
+    html += '<th>ε, мкм</th>';
+    html += '<th>' + (calculationData.surfaceType === 'flat' ? 'z' : '2z') + '<sub>min</sub>, мкм</th>';
+    html += '<th>Допуск, мм</th>';
+    html += '<th>Размер, мм</th>';
+    html += '</tr>';
+
+    results.forEach((res, index) => {
+        html += '<tr>';
+        html += `<td>${index + 1}</td>`;
+        html += `<td><strong>${res.transition}</strong></td>`;
+        html += `<td>${res.rz.toFixed(1)}</td>`;
+        html += `<td>${res.t.toFixed(1)}</td>`;
+        html += `<td>${Math.round(res.rho)}</td>`;
+        html += `<td>${Math.round(res.epsilon)}</td>`;
+        html += `<td><strong>${calculationData.surfaceType === 'flat' ? Math.round(res.allowance / 2) : Math.round(res.allowance)}</strong></td>`;
+        html += `<td>${res.tolerance.toFixed(3)}</td>`;
+        
+        // Размер с допуском
+        let sizeStr;
+        if (calculationData.surfaceType === 'external' || calculationData.surfaceType === 'flat') {
+            sizeStr = `${res.sizeMin.toFixed(2)} +${(res.sizeMax - res.sizeMin).toFixed(3)}`;
+        } else {
+            sizeStr = `${res.sizeMax.toFixed(2)} -${(res.sizeMax - res.sizeMin).toFixed(3)}`;
+        }
+        html += `<td>${sizeStr}</td>`;
+        html += '</tr>';
+    });
+
+    html += '</table>';
+    html += '</div>'; // end operation-block
+
+    container.innerHTML = html;
+}
+
+        // Скачивание отчета
+        function downloadReport() {
+            let report = '=================================================\n';
+            report += '   РАСЧЕТ ПРИПУСКОВ НА МЕХАНИЧЕСКУЮ ОБРАБОТКУ\n';
+            report += '=================================================\n\n';
+            
+            report += 'ИСХОДНЫЕ ДАННЫЕ:\n';
+            report += '─────────────────────────────────────────────────\n';
+            report += `Тип заготовки: ${calculationData.blank}\n`;
+            report += `Размер заготовки: ${calculationData.blankSize} мм\n`;
+            report += `Длина детали: ${calculationData.partLength} мм\n`;
+            report += `Тип поверхности: ${calculationData.surfaceType === 'external' ? 'Наружная цилиндрическая' : calculationData.surfaceType === 'internal' ? 'Внутренняя цилиндрическая' : 'Плоская'}\n`;
+            report += `Номинальный размер детали: ${calculationData.nominalSize} мм\n`;
+            report += `Допуск: ±${calculationData.tolerance} мм\n\n`;
+
+            // Подробный расчет по каждому переходу
+            const results = calculationData.results;
+            
+            results.forEach((res, index) => {
+                if (index === results.length - 1) return; // Пропускаем последний
+                
+                const nextRes = results[index + 1];
+                if (!nextRes) return;
+                
+                report += '\n' + '='.repeat(60) + '\n';
+                report += `ПЕРЕХОД ${index + 1}: ${res.transition.toUpperCase()}\n`;
+                report += '='.repeat(60) + '\n';
+                
+                if (res.description) {
+                    report += `База/Описание: ${res.description}\n\n`;
+                }
+                
+                // 1. Минимальный припуск
+                report += '__1. Определяем минимальный припуск__\n\n';
+                
+                if (calculationData.surfaceType === 'flat') {
+                    report += 'z_min = (Rz + h)_{i-1} + ρ + ε_yi, мкм\n\n';
+                } else {
+                    report += '2z_min = 2[(Rz + h)_{i-1} + √(ρ² + ε_yi²)], мкм\n\n';
+                }
+                
+                // a) Параметры качества
+                report += `а) (Rz + h)_{i-1} = ${Math.round(res.rz + res.t)} мкм — ${res.transition}`;
+                if (index === 0) {
+                    report += ' (заготовка)';
+                }
+                report += '\n';
+                report += '   т.6, с. 182, СТМ1\n\n';
+                
+                // б) Пространственные отклонения
+                report += 'б) Суммарное значение пространственных отклонений\n';
+                if (index === 0) {
+                    report += `   ρ = Δк × L = ${calculationData.deltaK} × ${calculationData.partLength} = ${Math.round(res.rho)} мкм\n`;
+                    report += `   где: Δ'к = ${calculationData.deltaK} мкм/мм (т.8, с.183, СТМ1)\n`;
+                    report += `        L = ${calculationData.partLength} мм — длина обработки\n\n`;
+                } else {
+                    report += `   ρ = ${Math.round(res.rho)} мкм (уточнение после предыдущего перехода)\n\n`;
+                }
+                
+                // в) Погрешность установки
+                report += 'в) Погрешность установки\n';
+                report += `   ε_yi = √(ε_б² + ε_з²) = √(${Math.round(res.epsilonB || 0)}² + ${Math.round(res.epsilonZ || 0)}²) = ${Math.round(res.epsilon)} мкм\n`;
+                report += `   где: ε_б = ${Math.round(res.epsilonB || 0)} мкм — погрешность базирования (т.11, с. 130, СТМ1)\n`;
+                report += `        ε_з = ${Math.round(res.epsilonZ || 0)} мкм — погрешность закрепления (т.13, с. 42, СТМ1)\n\n`;
+                
+                // Итоговый расчет
+                if (calculationData.surfaceType === 'flat') {
+                    report += `z_min = ${Math.round(res.rz + res.t)} + ${Math.round(res.rho)} + ${Math.round(res.epsilon)} = ${Math.round(res.allowance / 2)} мкм\n\n`;
+                } else {
+                    const sqrtPart = Math.sqrt(res.rho * res.rho + res.epsilon * res.epsilon);
+                    report += `2z_min = 2[${Math.round(res.rz + res.t)} + √(${Math.round(res.rho)}² + ${Math.round(res.epsilon)}²)]\n`;
+                    report += `2z_min = 2[${Math.round(res.rz + res.t)} + ${Math.round(sqrtPart)}] = ${Math.round(res.allowance)} мкм\n\n`;
+                }
+                
+                // 2. Максимальный припуск
+                report += '__2. Определяем максимальный припуск__\n\n';
+                
+                const prevTolerance = res.tolerance * 1000;
+                const currentTolerance = nextRes.tolerance * 1000;
+                const zMax = res.allowance + prevTolerance - currentTolerance;
+                
+                if (calculationData.surfaceType === 'flat') {
+                    report += `z_max = z_min + TD_{i-1} - TD_i = ${Math.round(res.allowance / 2)} + ${Math.round(prevTolerance)} - ${Math.round(currentTolerance)} = ${Math.round(zMax / 2)} мкм\n\n`;
+                } else {
+                    report += `2z_max = 2z_min + TD_{i-1} - TD_i = ${Math.round(res.allowance)} + ${Math.round(prevTolerance)} - ${Math.round(currentTolerance)} = ${Math.round(zMax)} мкм\n\n`;
+                }
+                
+                report += `где: TD_{i-1} = ${Math.round(prevTolerance)} мкм — допуск предыдущего перехода (т.4, с. 8, СТМ1)\n`;
+                report += `     TD_i = ${Math.round(currentTolerance)} мкм — допуск текущего перехода (т.4, с. 8, СТМ1)\n\n`;
+                
+                // 3. Принимаем припуск
+                report += '__3. Принимаем припуск__\n\n';
+                const adoptedAllowance = (res.allowance / 1000).toFixed(1);
+                if (calculationData.surfaceType === 'flat') {
+                    report += `z_max = ${adoptedAllowance} мм\n\n`;
+                } else {
+                    report += `2z_max = ${adoptedAllowance} мм\n\n`;
+                }
+            });
+
+            // Итоговая таблица
+            report += '\n' + '='.repeat(60) + '\n';
+            report += 'ИТОГОВАЯ ТАБЛИЦА РАСЧЕТА ПРИПУСКОВ\n';
+            report += '='.repeat(60) + '\n\n';
+            report += String.prototype.padEnd.call('Переход', 25) + ' | ';
+            report += String.prototype.padEnd.call('Rz', 6) + ' | ';
+            report += String.prototype.padEnd.call('T', 6) + ' | ';
+            report += String.prototype.padEnd.call('ρ', 6) + ' | ';
+            report += String.prototype.padEnd.call('ε', 6) + ' | ';
+            report += String.prototype.padEnd.call(calculationData.surfaceType === 'flat' ? 'zmin' : '2zmin', 8) + ' | ';
+            report += String.prototype.padEnd.call('Допуск', 8) + ' | ';
+            report += String.prototype.padEnd.call('Размер', 15) + '\n';
+            report += '-'.repeat(100) + '\n';
+
+            results.forEach((res, index) => {
+                report += String.prototype.padEnd.call(`${index + 1}. ${res.transition}`, 25) + ' | ';
+                report += String.prototype.padEnd.call(res.rz.toFixed(1), 6) + ' | ';
+                report += String.prototype.padEnd.call(res.t.toFixed(1), 6) + ' | ';
+                report += String.prototype.padEnd.call(Math.round(res.rho).toString(), 6) + ' | ';
+                report += String.prototype.padEnd.call(Math.round(res.epsilon).toString(), 6) + ' | ';
+                const allowanceVal = calculationData.surfaceType === 'flat' ? Math.round(res.allowance / 2) : Math.round(res.allowance);
+                report += String.prototype.padEnd.call(allowanceVal.toString(), 8) + ' | ';
+                report += String.prototype.padEnd.call(res.tolerance.toFixed(3), 8) + ' | ';
+                
+                let sizeStr;
+                if (calculationData.surfaceType === 'external' || calculationData.surfaceType === 'flat') {
+                    sizeStr = `${res.sizeMin.toFixed(2)} +${(res.sizeMax - res.sizeMin).toFixed(3)}`;
+                } else {
+                    sizeStr = `${res.sizeMax.toFixed(2)} -${(res.sizeMax - res.sizeMin).toFixed(3)}`;
+                }
+                report += String.prototype.padEnd.call(sizeStr, 15) + '\n';
+            });
+
+            report += '-'.repeat(100) + '\n\n';
+
+            report += '─────────────────────────────────────────────────\n';
+            report += 'Расчет выполнен в соответствии с ГОСТ\n';
+            report += 'Методические указания по технологии машиностроения\n';
+            report += `Дата расчета: ${new Date().toLocaleString('ru-RU')}\n`;
+            report += '=================================================\n';
+
+            // Создаем blob и скачиваем
+            const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Расчет_припусков_${Date.now()}.txt`;
+            link.click();
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Калькулятор припусков загружен');
+        });
+    </script>
+</body>
+</html>
