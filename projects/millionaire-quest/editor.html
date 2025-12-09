@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✏️ Редактор квестов</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 { color: #1a1a2e; font-size: 2.2em; text-align: center; margin-bottom: 10px; }
+        .subtitle { color: #666; text-align: center; margin-bottom: 30px; }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #FFD700;
+        }
+        
+        .section-title { font-size: 1.3em; color: #1a1a2e; margin-bottom: 15px; font-weight: 600; }
+        
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus { outline: none; border-color: #FFD700; }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #1a1a2e;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-danger { background: #f44336; color: white; }
+        
+        .level-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .level-number { font-size: 1.4em; font-weight: 600; color: #FFD700; }
+        
+        .upload-area {
+            border: 3px dashed #FFD700;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fffef8;
+        }
+        
+        .upload-area:hover { background: #fff8dc; border-color: #FFA500; }
+        .upload-area.has-image { border-style: solid; border-color: #4CAF50; padding: 20px; }
+        
+        .preview-container {
+            position: relative;
+            max-width: 600px;
+            margin: 15px auto;
+            display: none;
+        }
+        
+        .preview-container.active { display: block; }
+        
+        .preview-img {
+            max-width: 100%;
+            border-radius: 10px;
+            cursor: crosshair;
+            display: block;
+        }
+        
+        .setup-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: red;
+            border: 3px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        .letter-input {
+            width: 150px !important;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        .message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #1565C0;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .modal-title {
+            font-size: 1.5em;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .forgot-password-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #FFD700;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 20px 15px; }
+            h1 { font-size: 1.8em; }
+            .actions { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Назад в меню</a>
+        
+        <h1 id="pageTitle">✏️ Создать новый квест</h1>
+        <p class="subtitle" id="pageSubtitle">Создайте квест с пазлами, вопросами и поиском букв</p>
+
+        <div id="messageArea"></div>
+
+        <div class="section">
+            <div class="section-title">📋 Информация о квесте</div>
+            
+            <div style="margin-bottom: 20px;">
+                <label>Название квеста *</label>
+                <input type="text" id="questTitle" placeholder="Например: Найди клад!">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label>Автор (опционально)</label>
+                <input type="text" id="questAuthor" placeholder="Ваше имя">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label>Финальный пароль из букв *</label>
+                <input type="text" id="finalPassword" placeholder="Например: КЛАД" style="text-transform: uppercase;">
+                <div class="info-box">
+                    💡 Игрок составит этот пароль из букв, найденных на уровнях
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔒 Защита квеста</div>
+            
+            <div style="margin-bottom: 20px;">
+                <label>Пароль для редактирования (опционально)</label>
+                <input type="password" id="questPassword" placeholder="Оставьте пустым, если не нужна защита">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label>Секретный вопрос</label>
+                <input type="text" id="secretQuestion" placeholder="Например: Название первого питомца?">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label>Ответ на секретный вопрос</label>
+                <input type="text" id="secretAnswer" placeholder="Ваш ответ">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🎮 Уровни квеста</div>
+            <div class="info-box">
+                📸 Загрузите фото → Кликните на месте, где спрятана буква → Добавьте вопрос (опционально) → Введите букву/цифру
+            </div>
+            <div id="levelsContainer"></div>
+            <button class="btn btn-primary" onclick="addLevel()">+ Добавить уровень</button>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🏆 Финальное сокровище</div>
+            
+            <div class="upload-area" id="treasureUpload" onclick="document.getElementById('treasureInput').click()">
+                <p style="font-size: 1.2em;">📸 Загрузите фото места с сокровищем</p>
+            </div>
+            <input type="file" id="treasureInput" accept="image/*" style="display: none;" onchange="handleTreasureUpload(event)">
+
+            <div class="preview-container" id="treasurePreview">
+                <img class="preview-img" id="treasureImg" onclick="setTreasureMarker(event)">
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="saveQuest()">💾 Сохранить квест</button>
+            <button class="btn btn-primary" onclick="exportQuest()">📤 Экспортировать JSON</button>
+            <button class="btn btn-danger" onclick="clearQuest()">🗑️ Очистить всё</button>
+        </div>
+    </div>
+
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-title">🔒 Введите пароль</div>
+            <div style="margin-bottom: 20px;">
+                <label>Пароль:</label>
+                <input type="password" id="passwordInput" placeholder="Введите пароль">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="checkPassword()">Проверить</button>
+                <button class="btn" style="background: #e0e0e0;" onclick="closePasswordModal()">Отмена</button>
+            </div>
+            <div class="forgot-password-link" onclick="showSecretQuestion()">Забыли пароль?</div>
+        </div>
+    </div>
+
+    <div class="modal" id="secretModal">
+        <div class="modal-content">
+            <div class="modal-title">🔐 Восстановление доступа</div>
+            <div style="margin-bottom: 20px;">
+                <label id="secretQuestionLabel">Секретный вопрос</label>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label>Ваш ответ:</label>
+                <input type="text" id="secretAnswerInput" placeholder="Введите ответ">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="checkSecretAnswer()">Проверить</button>
+                <button class="btn" style="background: #e0e0e0;" onclick="closeSecretModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let questData = [];
+        let treasureLocation = { image: '', markerX: 50, markerY: 50 };
+        let editMode = false;
+        let editIndex = -1;
+        let currentQuestForEdit = null;
+
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isEdit = urlParams.get('edit') === 'true';
+
+            if (isEdit) {
+                editIndex = parseInt(localStorage.getItem('editQuestIndex'));
+                const quests = JSON.parse(localStorage.getItem('quests') || '[]');
+                
+                if (editIndex >= 0 && editIndex < quests.length) {
+                    currentQuestForEdit = quests[editIndex];
+                    
+                    if (currentQuestForEdit.passwordHash) {
+                        document.getElementById('passwordModal').classList.add('active');
+                    } else {
+                        loadQuestForEdit(currentQuestForEdit);
+                    }
+                }
+            } else {
+                addLevel();
+            }
+        });
+
+        async function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const hash = await hashString(password);
+
+            if (hash === currentQuestForEdit.passwordHash) {
+                closePasswordModal();
+                loadQuestForEdit(currentQuestForEdit);
+            } else {
+                showMessage('error', 'Неверный пароль!');
+            }
+        }
+
+        function showSecretQuestion() {
+            if (currentQuestForEdit.secretQuestion) {
+                closePasswordModal();
+                document.getElementById('secretQuestionLabel').textContent = 
+                    'Секретный вопрос: ' + currentQuestForEdit.secretQuestion;
+                document.getElementById('secretModal').classList.add('active');
+            } else {
+                showMessage('error', 'Секретный вопрос не установлен');
+            }
+        }
+
+        async function checkSecretAnswer() {
+            const answer = document.getElementById('secretAnswerInput').value;
+            const hash = await hashString(answer.toLowerCase().trim());
+
+            if (hash === currentQuestForEdit.secretAnswerHash) {
+                closeSecretModal();
+                loadQuestForEdit(currentQuestForEdit);
+                showMessage('success', '✅ Доступ восстановлен!');
+            } else {
+                showMessage('error', 'Неверный ответ!');
+            }
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+        }
+
+        function closeSecretModal() {
+            document.getElementById('secretModal').classList.remove('active');
+        }
+
+        function loadQuestForEdit(quest) {
+            editMode = true;
+            document.getElementById('pageTitle').textContent = '🔧 Редактирование квеста';
+
+            document.getElementById('questTitle').value = quest.title || '';
+            document.getElementById('questAuthor').value = quest.author || '';
+            document.getElementById('finalPassword').value = quest.correctPassword || '';
+
+            questData = JSON.parse(JSON.stringify(quest.levels || []));
+            treasureLocation = JSON.parse(JSON.stringify(quest.treasureLocation || { image: '', markerX: 50, markerY: 50 }));
+
+            renderLevels();
+            
+            if (treasureLocation.image) {
+                document.getElementById('treasureImg').src = treasureLocation.image;
+                document.getElementById('treasurePreview').classList.add('active');
+                document.getElementById('treasureUpload').classList.add('has-image');
+                document.getElementById('treasureUpload').querySelector('p').textContent = '✅ Загружено';
+            }
+
+            showMessage('success', '✅ Квест загружен');
+        }
+
+        function addLevel() {
+            questData.push({ image: '', letter: '', markerX: 50, markerY: 50, question: '' });
+            renderLevels();
+        }
+
+        function renderLevels() {
+            const container = document.getElementById('levelsContainer');
+            container.innerHTML = '';
+
+            questData.forEach((level, index) => {
+                const card = document.createElement('div');
+                card.className = 'level-card';
+                card.innerHTML = `
+                    <div class="level-header">
+                        <div class="level-number">Уровень ${index + 1}</div>
+                        <button class="btn btn-danger" onclick="deleteLevel(${index})">🗑️</button>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label>Изображение для пазла *</label>
+                        <div class="upload-area ${level.image ? 'has-image' : ''}" 
+                             onclick="document.getElementById('imageInput-${index}').click()">
+                            <p>${level.image ? '✅ Загружено' : '📸 Загрузить'}</p>
+                        </div>
+                        <input type="file" id="imageInput-${index}" accept="image/*" 
+                               style="display: none;" onchange="handleImageUpload(event, ${index})">
+                    </div>
+
+                    <div class="preview-container ${level.image ? 'active' : ''}" id="preview-${index}">
+                        <img class="preview-img" id="img-${index}" src="${level.image || ''}" 
+                             onclick="setMarker(event, ${index})">
+                    </div>
+
+                    <div class="info-box">
+                        ${level.image ? `✓ Метка: ${Math.round(level.markerX)}%, ${Math.round(level.markerY)}%` : 
+                        'Загрузите фото и кликните на месте с буквой'}
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <label>Вопрос или задание (опционально)</label>
+                        <textarea style="width: 100%; min-height: 80px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: inherit; font-size: 1em;" 
+                                  onchange="updateQuestion(${index}, this.value)" 
+                                  placeholder="Например: Найдите на фото красный автомобиль">${level.question || ''}</textarea>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <label>Буква/цифра/слово *</label>
+                        <input type="text" class="letter-input" value="${level.letter}" 
+                               onchange="updateLetter(${index}, this.value)" 
+                               placeholder="?" maxlength="10">
+                    </div>
+                `;
+                container.appendChild(card);
+                
+                if (level.image) {
+                    setTimeout(() => {
+                        const preview = document.getElementById(`preview-${index}`);
+                        if (preview) {
+                            const marker = document.createElement('div');
+                            marker.className = 'setup-marker';
+                            marker.style.left = level.markerX + '%';
+                            marker.style.top = level.markerY + '%';
+                            preview.appendChild(marker);
+                        }
+                    }, 100);
+                }
+            });
+        }
+
+        function handleImageUpload(event, index) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSize = 1200;
+                        
+                        if (width > height && width > maxSize) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else if (height > maxSize) {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        questData[index].image = canvas.toDataURL('image/jpeg', 0.9);
+                        renderLevels();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setMarker(event, index) {
+            const img = event.target;
+            const rect = img.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+            questData[index].markerX = x;
+            questData[index].markerY = y;
+            renderLevels();
+        }
+
+        function updateLetter(index, value) {
+            questData[index].letter = value.toUpperCase();
+        }
+
+        function updateQuestion(index, value) {
+            questData[index].question = value;
+        }
+
+        function deleteLevel(index) {
+            if (confirm('Удалить этот уровень?')) {
+                questData.splice(index, 1);
+                renderLevels();
+            }
+        }
+
+        function handleTreasureUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSize = 1200;
+                        
+                        if (width > height && width > maxSize) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else if (height > maxSize) {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        treasureLocation.image = canvas.toDataURL('image/jpeg', 0.9);
+                        document.getElementById('treasureImg').src = treasureLocation.image;
+                        document.getElementById('treasurePreview').classList.add('active');
+                        document.getElementById('treasureUpload').classList.add('has-image');
+                        document.getElementById('treasureUpload').querySelector('p').textContent = '✅ Загружено';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setTreasureMarker(event) {
+            const img = event.target;
+            const rect = img.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+            treasureLocation.markerX = x;
+            treasureLocation.markerY = y;
+
+            const preview = document.getElementById('treasurePreview');
+            const oldMarker = preview.querySelector('.setup-marker');
+            if (oldMarker) oldMarker.remove();
+
+            const marker = document.createElement('div');
+            marker.className = 'setup-marker';
+            marker.style.left = x + '%';
+            marker.style.top = y + '%';
+            preview.appendChild(marker);
+        }
+
+        async function saveQuest() {
+            const title = document.getElementById('questTitle').value.trim();
+            const author = document.getElementById('questAuthor').value.trim();
+            const finalPassword = document.getElementById('finalPassword').value.trim().toUpperCase();
+            const password = document.getElementById('questPassword').value;
+            const secretQuestion = document.getElementById('secretQuestion').value.trim();
+            const secretAnswer = document.getElementById('secretAnswer').value.trim();
+
+            if (!title) { showMessage('error', '❌ Укажите название'); return; }
+            if (!finalPassword) { showMessage('error', '❌ Укажите финальный пароль'); return; }
+            if (questData.length === 0) { showMessage('error', '❌ Добавьте уровень'); return; }
+
+            for (let i = 0; i < questData.length; i++) {
+                if (!questData[i].image || !questData[i].letter) {
+                    showMessage('error', `❌ Уровень ${i + 1}: загрузите фото и букву`);
+                    return;
+                }
+            }
+
+            if (!treasureLocation.image) {
+                showMessage('error', '❌ Загрузите фото сокровища');
+                return;
+            }
+
+            const quest = {
+                title, author,
+                correctPassword: finalPassword,
+                created: new Date().toISOString(),
+                passwordHash: '',
+                secretQuestion: '',
+                secretAnswerHash: '',
+                levels: questData,
+                treasureLocation
+            };
+
+            if (password && !editMode) quest.passwordHash = await hashString(password);
+            if (secretQuestion && secretAnswer && !editMode) {
+                quest.secretQuestion = secretQuestion;
+                quest.secretAnswerHash = await hashString(secretAnswer.toLowerCase().trim());
+            }
+
+            const quests = JSON.parse(localStorage.getItem('quests') || '[]');
+            
+            if (editMode && editIndex >= 0) {
+                quest.passwordHash = currentQuestForEdit.passwordHash;
+                quest.secretQuestion = currentQuestForEdit.secretQuestion;
+                quest.secretAnswerHash = currentQuestForEdit.secretAnswerHash;
+                quests[editIndex] = quest;
+                showMessage('success', '✅ Обновлено!');
+            } else {
+                quests.push(quest);
+                showMessage('success', '✅ Создано!');
+            }
+
+            localStorage.setItem('quests', JSON.stringify(quests));
+            setTimeout(() => window.location.href = 'index.html', 1500);
+        }
+
+        function exportQuest() {
+            const title = document.getElementById('questTitle').value.trim();
+            if (!title) { showMessage('error', '❌ Укажите название'); return; }
+
+            const quest = {
+                title,
+                author: document.getElementById('questAuthor').value.trim(),
+                correctPassword: document.getElementById('finalPassword').value.trim().toUpperCase(),
+                created: new Date().toISOString(),
+                levels: questData,
+                treasureLocation
+            };
+
+            const filename = title.toLowerCase().replace(/[^a-zа-я0-9]/g, '-') + '.json';
+            const dataBlob = new Blob([JSON.stringify(quest, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = filename;
+            link.click();
+            showMessage('success', '✅ Экспортировано!');
+        }
+
+        function clearQuest() {
+            if (confirm('Очистить всё?')) {
+                questData = [];
+                treasureLocation = { image: '', markerX: 50, markerY: 50 };
+                document.getElementById('questTitle').value = '';
+                document.getElementById('questAuthor').value = '';
+                document.getElementById('finalPassword').value = '';
+                renderLevels();
+                addLevel();
+                showMessage('success', '✅ Очищено');
+            }
+        }
+
+        function showMessage(type, text) {
+            document.getElementById('messageArea').innerHTML = 
+                `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => document.getElementById('messageArea').innerHTML = '', 4000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎮 Прохождение квеста</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #FFD700;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .progress {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        
+        .collected-letters {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.5em;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        .puzzle-container {
+            display: grid;
+            gap: 5px;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            touch-action: none;
+        }
+        
+        .puzzle-piece {
+            aspect-ratio: 1;
+            cursor: grab;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            background-size: cover;
+            background-position: center;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+            border-color: #FFD700;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+        }
+        
+        .puzzle-piece.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transform: scale(1.1);
+            z-index: 1000;
+        }
+        
+        .puzzle-piece.correct {
+            border-color: #4CAF50;
+            cursor: default;
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .puzzle-piece.correct:hover {
+            transform: scale(1);
+        }
+        
+        .completed-image {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            display: none;
+        }
+        
+        .completed-image.active {
+            display: block;
+        }
+        
+        .completed-image img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        
+        .marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ff0000 0%, #ff6b6b 100%);
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 20px rgba(255,0,0,0.6);
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        .letter-input {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .letter-input.active {
+            display: block;
+        }
+        
+        .letter-input input {
+            font-size: 2em;
+            width: 100px;
+            height: 80px;
+            text-align: center;
+            border: 3px solid #FFD700;
+            border-radius: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        
+        .letter-input button {
+            margin-left: 10px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .message {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .password-screen, .final-screen {
+            text-align: center;
+            display: none;
+        }
+        
+        .password-screen.active, .final-screen.active {
+            display: block;
+        }
+        
+        .password-input {
+            margin: 30px 0;
+        }
+        
+        .password-input input {
+            font-size: 2em;
+            padding: 15px;
+            text-align: center;
+            border: 3px solid #FFD700;
+            border-radius: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            min-width: 250px;
+        }
+        
+        .password-input button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .final-image {
+            position: relative;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+        
+        .final-image img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 30px;
+            background: #e0e0e0;
+            color: #333;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            h1 { font-size: 2em; }
+            .puzzle-container { padding: 5px; }
+            .marker { width: 30px; height: 30px; }
+            .letter-input input { width: 80px; height: 70px; font-size: 1.5em; }
+            .password-input input { font-size: 1.5em; min-width: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="questTitle">Загрузка...</h1>
+        
+        <div class="progress" id="progress">Уровень 1 из 1</div>
+        <div class="collected-letters">Собрано букв: <span id="letters">(пусто)</span></div>
+        
+        <div id="questionBox" style="display: none; background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 20px; border-radius: 15px; margin: 20px 0; border-left: 4px solid #2196F3;">
+            <div style="font-weight: 600; color: #1565C0; margin-bottom: 10px; font-size: 1.1em;">📋 Задание:</div>
+            <div id="questionText" style="color: #1976D2; font-size: 1.05em; line-height: 1.5;"></div>
+        </div>
+        
+        <div class="puzzle-container" id="puzzleContainer"></div>
+        
+        <div class="completed-image" id="completedImage">
+            <img id="fullImage" src="">
+        </div>
+        
+        <div class="letter-input" id="letterInput">
+            <input type="text" id="letterField" maxlength="10" placeholder="?">
+            <button onclick="checkLetter()">✓ Проверить</button>
+        </div>
+        
+        <div id="messageBox"></div>
+        
+        <div class="password-screen" id="passwordScreen">
+            <h2 style="color: #FFD700; margin-bottom: 20px;">🎉 Все буквы собраны!</h2>
+            <p style="font-size: 1.2em; margin-bottom: 10px;">Ваши буквы:</p>
+            <p style="font-size: 2em; color: #FFD700; font-weight: bold;" id="finalLetters"></p>
+            
+            <div class="password-input">
+                <input type="text" id="passwordField" placeholder="Введите пароль">
+                <br>
+                <button onclick="checkPassword()">🔓 Проверить пароль</button>
+            </div>
+            
+            <div id="passwordMessage"></div>
+        </div>
+        
+        <div class="final-screen" id="finalScreen">
+            <h2 style="color: #FFD700; margin-bottom: 20px;">🏆 Поздравляем!</h2>
+            <p style="font-size: 1.3em; margin-bottom: 30px;">Вы нашли клад!</p>
+            
+            <div class="final-image">
+                <img id="treasureImage" src="">
+            </div>
+            
+            <a href="index.html" class="back-btn">← Вернуться в меню</a>
+        </div>
+    </div>
+
+    <script>
+        let questData = [];
+        let treasureLocation = {};
+        let correctPassword = '';
+        let currentLevel = 0;
+        let collectedLetters = [];
+        const gridSize = 3;
+        let puzzlePieces = [];
+        let draggedPiece = null;
+        let touchedPiece = null;
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const questIndex = parseInt(localStorage.getItem('currentQuestIndex'));
+            const quests = JSON.parse(localStorage.getItem('quests') || '[]');
+
+            if (questIndex >= 0 && questIndex < quests.length) {
+                const quest = quests[questIndex];
+                questData = quest.levels || [];
+                treasureLocation = quest.treasureLocation || {};
+                correctPassword = quest.correctPassword || '';
+                document.getElementById('questTitle').textContent = quest.title;
+                
+                if (questData.length > 0) {
+                    loadLevel();
+                } else {
+                    showError('Квест пуст');
+                }
+            } else {
+                showError('Квест не найден');
+            }
+        });
+
+        function loadLevel() {
+            if (currentLevel >= questData.length) {
+                showPasswordScreen();
+                return;
+            }
+
+            const level = questData[currentLevel];
+            document.getElementById('progress').textContent = 
+                `Уровень ${currentLevel + 1} из ${questData.length}`;
+            
+            document.getElementById('letters').textContent = 
+                collectedLetters.join(' ') || '(пусто)';
+
+            // Отображение вопроса/задания
+            const questionBox = document.getElementById('questionBox');
+            const questionText = document.getElementById('questionText');
+            if (level.question && level.question.trim()) {
+                questionText.textContent = level.question;
+                questionBox.style.display = 'block';
+            } else {
+                questionBox.style.display = 'none';
+            }
+
+            createPuzzle(level.image);
+            
+            document.getElementById('completedImage').classList.remove('active');
+            document.getElementById('letterInput').classList.remove('active');
+            document.getElementById('messageBox').innerHTML = '';
+        }
+
+        function createPuzzle(imageSrc) {
+            const container = document.getElementById('puzzleContainer');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            
+            puzzlePieces = [];
+            let correctPositions = [];
+            
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                correctPositions.push(i);
+            }
+            
+            let shuffled = [...correctPositions].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.dataset.correctPos = i;
+                piece.dataset.currentPos = shuffled[i];
+                piece.draggable = true;
+                
+                const row = Math.floor(shuffled[i] / gridSize);
+                const col = shuffled[i] % gridSize;
+                
+                piece.style.backgroundImage = `url(${imageSrc})`;
+                piece.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+                piece.style.backgroundPosition = 
+                    `${col * 100 / (gridSize - 1)}% ${row * 100 / (gridSize - 1)}%`;
+                
+                piece.addEventListener('dragstart', handleDragStart);
+                piece.addEventListener('dragover', handleDragOver);
+                piece.addEventListener('drop', handleDrop);
+                piece.addEventListener('dragend', handleDragEnd);
+                
+                piece.addEventListener('touchstart', handleTouchStart, {passive: false});
+                piece.addEventListener('touchmove', handleTouchMove, {passive: false});
+                piece.addEventListener('touchend', handleTouchEnd);
+                
+                container.appendChild(piece);
+                puzzlePieces.push(piece);
+            }
+            
+            checkAllPieces();
+        }
+
+        function handleDragStart(e) {
+            if (this.classList.contains('correct')) {
+                e.preventDefault();
+                return;
+            }
+            draggedPiece = this;
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            return false;
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            
+            if (draggedPiece && this !== draggedPiece && 
+                !this.classList.contains('correct') && 
+                !draggedPiece.classList.contains('correct')) {
+                swapPieces(draggedPiece, this);
+            }
+            
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedPiece = null;
+        }
+
+        function handleTouchStart(e) {
+            if (this.classList.contains('correct')) return;
+            touchedPiece = this;
+            this.classList.add('dragging');
+            e.preventDefault();
+        }
+
+        function handleTouchMove(e) {
+            if (!touchedPiece) return;
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (element && element.classList.contains('puzzle-piece') && element !== touchedPiece) {
+                document.querySelectorAll('.puzzle-piece').forEach(p => {
+                    p.style.backgroundColor = '';
+                });
+                if (!element.classList.contains('correct')) {
+                    element.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
+                }
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchedPiece) return;
+            
+            const touch = e.changedTouches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (element && element.classList.contains('puzzle-piece') && element !== touchedPiece) {
+                if (!element.classList.contains('correct') && !touchedPiece.classList.contains('correct')) {
+                    swapPieces(touchedPiece, element);
+                }
+            }
+            
+            touchedPiece.classList.remove('dragging');
+            document.querySelectorAll('.puzzle-piece').forEach(p => {
+                p.style.backgroundColor = '';
+            });
+            touchedPiece = null;
+        }
+
+        function swapPieces(piece1, piece2) {
+            const temp = piece1.dataset.currentPos;
+            piece1.dataset.currentPos = piece2.dataset.currentPos;
+            piece2.dataset.currentPos = temp;
+            
+            const tempBg = piece1.style.backgroundPosition;
+            piece1.style.backgroundPosition = piece2.style.backgroundPosition;
+            piece2.style.backgroundPosition = tempBg;
+            
+            checkAllPieces();
+        }
+
+        function checkAllPieces() {
+            puzzlePieces.forEach(piece => {
+                if (parseInt(piece.dataset.correctPos) === parseInt(piece.dataset.currentPos)) {
+                    if (!piece.classList.contains('correct')) {
+                        piece.classList.add('correct');
+                        piece.draggable = false;
+                    }
+                } else {
+                    piece.classList.remove('correct');
+                    piece.draggable = true;
+                }
+            });
+            
+            if (document.querySelectorAll('.puzzle-piece.correct').length === gridSize * gridSize) {
+                setTimeout(showCompletedImage, 500);
+            }
+        }
+
+        function showCompletedImage() {
+            const level = questData[currentLevel];
+            
+            document.getElementById('puzzleContainer').style.display = 'none';
+            
+            const completedDiv = document.getElementById('completedImage');
+            const img = document.getElementById('fullImage');
+            img.src = level.image;
+            
+            const oldMarker = completedDiv.querySelector('.marker');
+            if (oldMarker) oldMarker.remove();
+            
+            const marker = document.createElement('div');
+            marker.className = 'marker';
+            marker.style.left = level.markerX + '%';
+            marker.style.top = level.markerY + '%';
+            marker.onclick = showLetterInput;
+            
+            completedDiv.appendChild(marker);
+            completedDiv.classList.add('active');
+            
+            document.getElementById('messageBox').innerHTML = 
+                '<div class="message success">🎉 Пазл собран! Нажми на красную точку!</div>';
+        }
+
+        function showLetterInput() {
+            document.getElementById('letterInput').classList.add('active');
+            document.getElementById('letterField').value = '';
+            document.getElementById('letterField').focus();
+        }
+
+        function checkLetter() {
+            const input = document.getElementById('letterField').value.toUpperCase();
+            const correctLetter = questData[currentLevel].letter.toUpperCase();
+            
+            if (input === correctLetter) {
+                collectedLetters.push(correctLetter);
+                document.getElementById('messageBox').innerHTML = 
+                    '<div class="message success">✅ Правильно! Буква найдена!</div>';
+                
+                setTimeout(() => {
+                    currentLevel++;
+                    document.getElementById('puzzleContainer').style.display = 'grid';
+                    loadLevel();
+                }, 2000);
+            } else {
+                document.getElementById('messageBox').innerHTML = 
+                    '<div class="message error">❌ Неправильно! Попробуй ещё раз!</div>';
+            }
+        }
+
+        function showPasswordScreen() {
+            document.getElementById('puzzleContainer').style.display = 'none';
+            document.getElementById('passwordScreen').classList.add('active');
+            document.getElementById('finalLetters').textContent = collectedLetters.join(' ');
+        }
+
+        function checkPassword() {
+            const input = document.getElementById('passwordField').value.toUpperCase();
+            
+            if (input === correctPassword.toUpperCase()) {
+                showFinalScreen();
+            } else {
+                document.getElementById('passwordMessage').innerHTML = 
+                    '<div class="message error">❌ Неправильный пароль! Попробуй ещё раз!</div>';
+            }
+        }
+
+        function showFinalScreen() {
+            document.getElementById('passwordScreen').classList.remove('active');
+            document.getElementById('finalScreen').classList.add('active');
+            
+            const img = document.getElementById('treasureImage');
+            img.src = treasureLocation.image;
+            
+            const treasureDiv = img.parentElement;
+            
+            const marker = document.createElement('div');
+            marker.className = 'marker';
+            marker.style.left = treasureLocation.markerX + '%';
+            marker.style.top = treasureLocation.markerY + '%';
+            
+            treasureDiv.appendChild(marker);
+        }
+
+        function showError(message) {
+            document.querySelector('.container').innerHTML = `
+                <h1 style="color: #f44336;">Ошибка</h1>
+                <div class="message error" style="margin: 30px 0;">${message}</div>
+                <a href="index.html" class="back-btn">← Вернуться в меню</a>
+            `;
+        }
+    </script>
+</body>
+</html>

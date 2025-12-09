@@ -1,0 +1,44 @@
+{
+  "title": "🏴‍☠️ Поиск пиратского клада",
+  "author": "Капитан Джек",
+  "correctPassword": "КЛАД",
+  "created": "2024-12-09T00:00:00.000Z",
+  "passwordHash": "",
+  "secretQuestion": "",
+  "secretAnswerHash": "",
+  "levels": [
+    {
+      "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect fill='%23667eea' width='600' height='600'/%3E%3Ctext x='300' y='250' font-size='80' fill='white' text-anchor='middle'%3EУРОВЕНЬ 1%3C/text%3E%3Ctext x='300' y='350' font-size='40' fill='white' text-anchor='middle'%3EЗагрузите своё фото%3C/text%3E%3Ccircle cx='300' cy='450' r='20' fill='red'/%3E%3C/svg%3E",
+      "letter": "К",
+      "markerX": 50,
+      "markerY": 75,
+      "question": "Соберите пазл и найдите красную точку. Какая буква спрятана в этом месте?"
+    },
+    {
+      "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect fill='%2345a049' width='600' height='600'/%3E%3Ctext x='300' y='250' font-size='80' fill='white' text-anchor='middle'%3EУРОВЕНЬ 2%3C/text%3E%3Ctext x='300' y='350' font-size='40' fill='white' text-anchor='middle'%3EЗамените на своё фото%3C/text%3E%3Ccircle cx='150' cy='150' r='20' fill='red'/%3E%3C/svg%3E",
+      "letter": "Л",
+      "markerX": 25,
+      "markerY": 25,
+      "question": "Вторая буква клада находится в левом верхнем углу. Найдите её!"
+    },
+    {
+      "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect fill='%23764ba2' width='600' height='600'/%3E%3Ctext x='300' y='250' font-size='80' fill='white' text-anchor='middle'%3EУРОВЕНЬ 3%3C/text%3E%3Ctext x='300' y='350' font-size='40' fill='white' text-anchor='middle'%3EИспользуйте редактор%3C/text%3E%3Ccircle cx='450' cy='300' r='20' fill='red'/%3E%3C/svg%3E",
+      "letter": "А",
+      "markerX": 75,
+      "markerY": 50,
+      "question": "Используйте редактор, чтобы создать собственный квест с вопросами!"
+    },
+    {
+      "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect fill='%23FF6B6B' width='600' height='600'/%3E%3Ctext x='300' y='250' font-size='80' fill='white' text-anchor='middle'%3EУРОВЕНЬ 4%3C/text%3E%3Ctext x='300' y='350' font-size='40' fill='white' text-anchor='middle'%3EЧтобы изменить квест%3C/text%3E%3Ccircle cx='300' cy='150' r='20' fill='red'/%3E%3C/svg%3E",
+      "letter": "Д",
+      "markerX": 50,
+      "markerY": 25,
+      "question": "Последняя буква! Соберите пазл и найдите её в центре сверху."
+    }
+  ],
+  "treasureLocation": {
+    "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect fill='%23FFD700' width='600' height='600'/%3E%3Ctext x='300' y='250' font-size='100' fill='%231a1a2e' text-anchor='middle'%3E🏆%3C/text%3E%3Ctext x='300' y='350' font-size='50' fill='%231a1a2e' text-anchor='middle'%3EСОКРОВИЩЕ!%3C/text%3E%3Ctext x='300' y='450' font-size='30' fill='%231a1a2e' text-anchor='middle'%3EЗдесь был клад%3C/text%3E%3Ccircle cx='300' cy='500' r='20' fill='red'/%3E%3C/svg%3E",
+    "markerX": 50,
+    "markerY": 83
+  }
+}
