@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Как стать миллиардером</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Золотые частицы на фоне */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle, rgba(255, 215, 0, 0.1) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255, 215, 0, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px;
+            background-position: 0 0, 40px 40px;
+            animation: sparkle 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes sparkle {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 30px;
+            padding: 50px 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5), 
+                        0 0 0 1px rgba(255, 215, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 4em;
+            animation: pulse 2s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        h1 {
+            color: #1a1a2e;
+            font-size: 2em;
+            margin: 20px 0 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1em;
+            font-weight: 400;
+        }
+
+        .gold-line {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+            margin: 30px 0;
+            border-radius: 10px;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #1a1a2e;
+            border: none;
+            padding: 20px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .menu-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .menu-btn:active {
+            transform: translateY(0);
+        }
+
+        .menu-btn .icon {
+            font-size: 1.5em;
+            z-index: 1;
+        }
+
+        .menu-btn span {
+            z-index: 1;
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            color: #FFD700;
+            box-shadow: 0 5px 15px rgba(15, 52, 96, 0.3);
+        }
+
+        .secondary-btn:hover {
+            box-shadow: 0 8px 25px rgba(15, 52, 96, 0.5);
+        }
+
+        .info-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            border-radius: 15px;
+            border-left: 4px solid #FFD700;
+        }
+
+        .info-section h3 {
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            padding: 8px 0;
+            color: #333;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .info-section li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .version {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .logo {
+                font-size: 3em;
+            }
+
+            .menu-btn {
+                padding: 18px 25px;
+                font-size: 1em;
+            }
+
+            .info-section {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 25px 15px;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 1.3em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .menu-btn {
+                padding: 15px 20px;
+                font-size: 0.95em;
+                gap: 10px;
+            }
+
+            .menu-btn .icon {
+                font-size: 1.3em;
+            }
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #1a1a2e;
+            font-size: 1.5em;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .quest-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quest-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .quest-item:hover {
+            background: #fff;
+            border-color: #FFD700;
+            transform: translateX(5px);
+        }
+
+        .quest-item-title {
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+
+        .quest-item-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">💰</div>
+            <h1>Как стать миллиардером</h1>
+            <p class="subtitle">Квест-симулятор успеха</p>
+        </div>
+
+        <div class="gold-line"></div>
+
+        <div class="menu">
+            <button class="menu-btn" onclick="openQuestSelector()">
+                <span class="icon">🎮</span>
+                <span>Пройти квест</span>
+            </button>
+
+            <button class="menu-btn" onclick="window.location.href='editor.html'">
+                <span class="icon">✏️</span>
+                <span>Создать новый квест</span>
+            </button>
+
+            <button class="menu-btn secondary-btn" onclick="openEditSelector()">
+                <span class="icon">🔧</span>
+                <span>Редактировать квест</span>
+            </button>
+
+            <button class="menu-btn secondary-btn" onclick="importQuest()">
+                <span class="icon">📥</span>
+                <span>Загрузить квест (JSON)</span>
+            </button>
+
+            <button class="menu-btn secondary-btn" onclick="downloadOfflineVersion()">
+                <span class="icon">💾</span>
+                <span>Скачать офлайн версию</span>
+            </button>
+        </div>
+
+        <div class="info-section">
+            <h3>🌟 Возможности:</h3>
+            <ul>
+                <li>Создание собственных квестов</li>
+                <li>Защита паролем + секретный вопрос</li>
+                <li>Импорт/экспорт квестов (JSON)</li>
+                <li>Работает на телефонах и планшетах</li>
+                <li>Сохранение прогресса локально</li>
+            </ul>
+        </div>
+
+        <div class="version">v1.0.0 | © 2024</div>
+    </div>
+
+    <!-- Модальное окно выбора квеста -->
+    <div class="modal" id="questModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Выберите квест</h2>
+                <button class="close-modal" onclick="closeModal('questModal')">&times;</button>
+            </div>
+            <div id="questList" class="quest-list"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора квеста для редактирования -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Редактировать квест</h2>
+                <button class="close-modal" onclick="closeModal('editModal')">&times;</button>
+            </div>
+            <div id="editList" class="quest-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Загрузка демо-квеста при первом запуске
+        async function loadDemoQuest() {
+            const quests = loadQuests();
+            const hasDemo = quests.some(q => q.title === '💰 Как стать миллиардером');
+            
+            if (!hasDemo) {
+                try {
+                    const response = await fetch('quests/millionaire.json');
+                    const demoQuest = await response.json();
+                    quests.push(demoQuest);
+                    saveQuests(quests);
+                    console.log('✅ Демо-квест загружен');
+                } catch (error) {
+                    console.log('Демо-квест не найден или не загружен');
+                }
+            }
+        }
+
+        // Загрузка квестов из LocalStorage
+        function loadQuests() {
+            const quests = localStorage.getItem('quests');
+            return quests ? JSON.parse(quests) : [];
+        }
+
+        // Инициализация при загрузке
+        window.addEventListener('DOMContentLoaded', function() {
+            loadDemoQuest();
+        });
+
+        // Сохранение квестов в LocalStorage
+        function saveQuests(quests) {
+            localStorage.setItem('quests', JSON.stringify(quests));
+        }
+
+        // Открыть выбор квеста для прохождения
+        function openQuestSelector() {
+            const quests = loadQuests();
+            const questList = document.getElementById('questList');
+            
+            if (quests.length === 0) {
+                questList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>У вас пока нет квестов</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #999;">
+                            Создайте свой первый квест или загрузите готовый
+                        </p>
+                    </div>
+                `;
+            } else {
+                questList.innerHTML = quests.map((quest, index) => `
+                    <div class="quest-item" onclick="playQuest(${index})">
+                        <div class="quest-item-title">${quest.title}</div>
+                        <div class="quest-item-info">
+                            ${quest.author ? `Автор: ${quest.author} | ` : ''}
+                            Уровней: ${quest.levels.length} | 
+                            Создан: ${new Date(quest.created).toLocaleDateString('ru-RU')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('questModal').classList.add('active');
+        }
+
+        // Открыть выбор квеста для редактирования
+        function openEditSelector() {
+            const quests = loadQuests();
+            const editList = document.getElementById('editList');
+            
+            if (quests.length === 0) {
+                editList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>У вас пока нет квестов для редактирования</p>
+                    </div>
+                `;
+            } else {
+                editList.innerHTML = quests.map((quest, index) => `
+                    <div class="quest-item" onclick="editQuest(${index})">
+                        <div class="quest-item-title">${quest.title}</div>
+                        <div class="quest-item-info">
+                            ${quest.author ? `Автор: ${quest.author} | ` : ''}
+                            Уровней: ${quest.levels.length}
+                            ${quest.passwordHash ? ' | 🔒 Защищён паролем' : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        // Закрыть модальное окно
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Играть квест
+        function playQuest(index) {
+            localStorage.setItem('currentQuestIndex', index);
+            window.location.href = 'player.html';
+        }
+
+        // Редактировать квест
+        function editQuest(index) {
+            localStorage.setItem('editQuestIndex', index);
+            window.location.href = 'editor.html?edit=true';
+        }
+
+        // Импорт квеста
+        function importQuest() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        try {
+                            const quest = JSON.parse(event.target.result);
+                            
+                            // Проверка структуры квеста
+                            if (!quest.title || !quest.levels || !Array.isArray(quest.levels)) {
+                                alert('❌ Неверный формат файла квеста');
+                                return;
+                            }
+                            
+                            const quests = loadQuests();
+                            quests.push(quest);
+                            saveQuests(quests);
+                            
+                            alert(`✅ Квест "${quest.title}" успешно загружен!\nУровней: ${quest.levels.length}`);
+                        } catch (error) {
+                            alert('❌ Ошибка при чтении файла: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Скачать офлайн версию
+        function downloadOfflineVersion() {
+            alert('📦 Подготовка офлайн версии...\n\nВ разработке: функция для скачивания ZIP архива с editor.html, player.html и README файлом.');
+            // TODO: Реализовать создание ZIP архива
+        }
+
+        // Закрытие модального окна по клику вне его
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
