@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Свободный чат миллиардеров</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(26, 26, 26, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(-25%, -25%); }
+            50% { transform: translate(25%, 25%); }
+        }
+
+        .header h1 {
+            color: #1a1a1a;
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            color: #2d2d2d;
+            margin-top: 5px;
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Форма входа */
+        .login-form {
+            padding: 50px;
+            text-align: center;
+        }
+
+        .login-form h2 {
+            color: #d4af37;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px 20px;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            background: rgba(45, 45, 45, 0.8);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            margin-top: 15px;
+            font-size: 14px;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Чат */
+        .chat-container {
+            display: none;
+            height: 600px;
+            flex-direction: column;
+        }
+
+        .chat-container.active {
+            display: flex;
+        }
+
+        .chat-top {
+            padding: 20px;
+            background: rgba(45, 45, 45, 0.8);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #d4af37;
+            color: #1a1a1a;
+        }
+
+        .chat-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .users-sidebar {
+            width: 200px;
+            background: rgba(35, 35, 35, 0.9);
+            border-right: 2px solid rgba(212, 175, 55, 0.3);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .users-sidebar h3 {
+            color: #d4af37;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .user-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 5px;
+            color: #fff;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-item::before {
+            content: '●';
+            color: #4caf50;
+            margin-right: 8px;
+            font-size: 12px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .messages-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(26, 26, 26, 0.9);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background: rgba(45, 45, 45, 0.8);
+            border-radius: 10px;
+            border-left: 3px solid #d4af37;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message.system {
+            background: rgba(212, 175, 55, 0.1);
+            border-left-color: #f4d03f;
+            text-align: center;
+            font-style: italic;
+            color: #d4af37;
+        }
+
+        .message-author {
+            color: #d4af37;
+            font-weight: 700;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .message-text {
+            color: #e0e0e0;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message-time {
+            color: #888;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .message-form {
+            padding: 20px;
+            background: rgba(35, 35, 35, 0.9);
+            border-top: 2px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 20px;
+            background: rgba(45, 45, 45, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .send-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .online-count {
+            background: rgba(212, 175, 55, 0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #d4af37;
+            margin-left: 10px;
+        }
+
+        /* Скроллбар */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(26, 26, 26, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        @media (max-width: 768px) {
+            .users-sidebar {
+                display: none;
+            }
+            
+            .login-form {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Свободный чат миллиардеров</h1>
+            <p>Элитное пространство для общения успешных людей</p>
+        </div>
+
+        <!-- Форма входа -->
+        <div class="login-form" id="loginForm">
+            <h2>Добро пожаловать в элитный клуб</h2>
+            <div class="input-group">
+                <input type="text" id="usernameInput" placeholder="Введите ваше уникальное имя" maxlength="20" autocomplete="off">
+            </div>
+            <button class="btn" onclick="joinChat()">Войти в чат</button>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+
+        <!-- Чат -->
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-top">
+                <div class="user-info">
+                    👤 <span id="currentUser"></span>
+                    <span class="online-count" id="onlineCount">👥 0</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+            
+            <div class="chat-main">
+                <div class="users-sidebar">
+                    <h3>Онлайн</h3>
+                    <div id="usersList"></div>
+                </div>
+
+                <div class="messages-area">
+                    <div class="messages" id="messages"></div>
+                    
+                    <form class="message-form" onsubmit="sendMessage(event)">
+                        <input type="text" class="message-input" id="messageInput" placeholder="Введите сообщение..." autocomplete="off" maxlength="500">
+                        <button type="submit" class="send-btn">Отправить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация
+        let currentUsername = '';
+        const CHAT_KEY = 'billionaire_chat_messages';
+        const USERS_KEY = 'billionaire_chat_users';
+        const SESSION_KEY = 'billionaire_chat_session';
+        
+        // Кэш для отслеживания изменений
+        let lastMessagesLength = 0;
+        let lastUsersCount = 0;
+        let lastUsersString = '';
+
+        // Проверка существующей сессии
+        window.addEventListener('load', () => {
+            const session = localStorage.getItem(SESSION_KEY);
+            if (session) {
+                const userData = JSON.parse(session);
+                currentUsername = userData.username;
+                showChat();
+            }
+            
+            // Периодическое обновление
+            setInterval(updateChat, 1000);
+        });
+
+        // Вход в чат
+        function joinChat() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const errorDiv = document.getElementById('errorMessage');
+
+            if (!username) {
+                errorDiv.textContent = '⚠️ Введите имя!';
+                return;
+            }
+
+            if (username.length < 2) {
+                errorDiv.textContent = '⚠️ Имя должно быть минимум 2 символа!';
+                return;
+            }
+
+            // Проверка уникальности
+            const users = getUsers();
+            if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+                errorDiv.textContent = '⚠️ Это имя уже занято! Выберите другое.';
+                return;
+            }
+
+            // Добавляем пользователя
+            currentUsername = username;
+            addUser(username);
+            
+            // Сохраняем сессию
+            localStorage.setItem(SESSION_KEY, JSON.stringify({
+                username: username,
+                timestamp: Date.now()
+            }));
+
+            // Системное сообщение
+            addSystemMessage(`${username} присоединился к чату`);
+            
+            // Сбрасываем кэш для обновления
+            lastUsersString = '';
+            lastMessagesLength = 0;
+            
+            showChat();
+        }
+
+        // Показать чат
+        function showChat() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('chatContainer').classList.add('active');
+            document.getElementById('currentUser').textContent = currentUsername;
+            
+            // Сбрасываем кэш для первой загрузки
+            lastMessagesLength = 0;
+            lastUsersString = '';
+            
+            updateChat();
+            document.getElementById('messageInput').focus();
+        }
+
+        // Выход
+        function logout() {
+            addSystemMessage(`${currentUsername} покинул чат`);
+            removeUser(currentUsername);
+            localStorage.removeItem(SESSION_KEY);
+            location.reload();
+        }
+
+        // Отправка сообщения
+        function sendMessage(event) {
+            event.preventDefault();
+            
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            const message = {
+                id: Date.now(),
+                author: currentUsername,
+                text: text,
+                timestamp: Date.now()
+            };
+
+            const messages = getMessages();
+            messages.push(message);
+            localStorage.setItem(CHAT_KEY, JSON.stringify(messages));
+
+            input.value = '';
+            
+            // Сбрасываем кэш для немедленного обновления
+            lastMessagesLength = 0;
+            updateChat();
+        }
+
+        // Системное сообщение
+        function addSystemMessage(text) {
+            const message = {
+                id: Date.now(),
+                author: 'system',
+                text: text,
+                timestamp: Date.now()
+            };
+
+            const messages = getMessages();
+            messages.push(message);
+            localStorage.setItem(CHAT_KEY, JSON.stringify(messages));
+            
+            // Сбрасываем кэш для немедленного обновления
+            lastMessagesLength = 0;
+        }
+
+        // Обновление чата
+        function updateChat() {
+            updateMessages();
+            updateUsersList();
+            cleanupInactiveUsers();
+        }
+
+        // Обновление сообщений
+        function updateMessages() {
+            const messages = getMessages();
+            
+            // Проверяем, есть ли новые сообщения
+            if (messages.length === lastMessagesLength) {
+                return; // Нет изменений - не обновляем
+            }
+            
+            lastMessagesLength = messages.length;
+            
+            const messagesDiv = document.getElementById('messages');
+            const isScrolledToBottom = messagesDiv.scrollHeight - messagesDiv.scrollTop <= messagesDiv.clientHeight + 50;
+            
+            // Показываем последние 50 сообщений
+            const recentMessages = messages.slice(-50);
+            
+            messagesDiv.innerHTML = recentMessages.map(msg => {
+                const time = new Date(msg.timestamp).toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                if (msg.author === 'system') {
+                    return `
+                        <div class="message system">
+                            <div class="message-text">${msg.text}</div>
+                            <div class="message-time">${time}</div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="message">
+                        <div class="message-author">${msg.author}</div>
+                        <div class="message-text">${msg.text}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Автоскролл вниз только если был внизу
+            if (isScrolledToBottom) {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        // Обновление списка пользователей
+        function updateUsersList() {
+            const users = getUsers();
+            const usersString = users.map(u => u.username).sort().join(',');
+            
+            // Проверяем, изменился ли список
+            if (usersString === lastUsersString) {
+                return; // Нет изменений - не обновляем
+            }
+            
+            lastUsersString = usersString;
+            lastUsersCount = users.length;
+            
+            const usersDiv = document.getElementById('usersList');
+            const countSpan = document.getElementById('onlineCount');
+
+            countSpan.textContent = `👥 ${users.length}`;
+
+            usersDiv.innerHTML = users.map(user => `
+                <div class="user-item">${user.username}</div>
+            `).join('');
+        }
+
+        // Получить сообщения
+        function getMessages() {
+            const data = localStorage.getItem(CHAT_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        // Получить пользователей
+        function getUsers() {
+            const data = localStorage.getItem(USERS_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        // Добавить пользователя
+        function addUser(username) {
+            const users = getUsers();
+            users.push({
+                username: username,
+                lastActive: Date.now()
+            });
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        // Удалить пользователя
+        function removeUser(username) {
+            let users = getUsers();
+            users = users.filter(u => u.username !== username);
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        // Очистка неактивных пользователей (более 5 минут)
+        function cleanupInactiveUsers() {
+            const session = localStorage.getItem(SESSION_KEY);
+            if (!session) return;
+
+            let users = getUsers();
+            const fiveMinutes = 5 * 60 * 1000;
+            const now = Date.now();
+
+            // Обновляем активность текущего пользователя
+            users = users.map(u => {
+                if (u.username === currentUsername) {
+                    return { ...u, lastActive: now };
+                }
+                return u;
+            });
+
+            // Удаляем неактивных
+            const activeBefore = users.length;
+            users = users.filter(u => now - u.lastActive < fiveMinutes);
+            
+            if (activeBefore !== users.length) {
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            }
+        }
+
+        // Обработка Enter для отправки
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameInput = document.getElementById('usernameInput');
+            if (usernameInput) {
+                usernameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        joinChat();
+                    }
+                });
+            }
+        });
+
+        // Очистка при закрытии вкладки
+        window.addEventListener('beforeunload', () => {
+            if (currentUsername) {
+                removeUser(currentUsername);
+            }
+        });
+    </script>
+</body>
+</html>
