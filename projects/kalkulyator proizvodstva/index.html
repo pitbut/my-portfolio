@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Калькулятор производства</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4a6 100%);
+            color: #1a1a2e;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        .main-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-btn {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border: 2px solid #d4af37;
+            color: #f4e4a6;
+            padding: 30px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        }
+
+        .menu-btn i {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            display: none;
+            background: rgba(44, 62, 80, 0.5);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+            backdrop-filter: blur(10px);
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: #d4af37;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #d4af37;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(26, 26, 46, 0.8);
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4a6 100%);
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .btn-secondary {
+            background: #34495e;
+            color: #f4e4a6;
+            border: 2px solid #d4af37;
+        }
+
+        .btn-secondary:hover {
+            background: #2c3e50;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .card {
+            background: rgba(26, 26, 46, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #34495e;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #d4af37;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 20px;
+            background: rgba(52, 73, 94, 0.5);
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 10px;
+            width: auto;
+        }
+
+        .radio-group label:hover {
+            border-color: #d4af37;
+            background: rgba(52, 73, 94, 0.8);
+        }
+
+        .radio-group input[type="radio"]:checked + span {
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: rgba(52, 73, 94, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+            width: auto;
+        }
+
+        .detail-card {
+            background: rgba(26, 26, 46, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .detail-header {
+            color: #d4af37;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .operation-item {
+            background: rgba(52, 73, 94, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report {
+            background: white;
+            color: #000;
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .report-header {
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .report-section {
+            margin: 20px 0;
+        }
+
+        .report-section h3 {
+            color: #d4af37;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .report-table th,
+        .report-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .report-table th {
+            background: #d4af37;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        .report-total {
+            background: #f4e4a6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 2px solid #d4af37;
+        }
+
+        .report-total h3 {
+            color: #1a1a2e;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+
+        .total-row.grand {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1a1a2e;
+            border-top: 2px solid #d4af37;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .list-item {
+            background: rgba(26, 26, 46, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #34495e;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .list-item:hover {
+            border-color: #d4af37;
+        }
+
+        .list-item-info {
+            flex: 1;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #d4af37;
+            color: #1a1a2e;
+            border-radius: 5px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+
+        .back-btn {
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .section {
+                background: white;
+                border: none;
+                padding: 0;
+            }
+            .btn, .back-btn {
+                display: none;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .specs-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .specs-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .alert-info {
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid #3498db;
+            color: #3498db;
+        }
+
+        .alert-success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 2px solid #2ecc71;
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Калькулятор производства</h1>
+            <p>Профессиональный расчет стоимости изготовления деталей</p>
+        </div>
+
+        <!-- Главное меню -->
+        <div id="mainMenu" class="main-menu">
+            <div class="menu-btn" onclick="showSection('newProject')">
+                <i>📋</i>
+                <div>Новый проект</div>
+            </div>
+            <div class="menu-btn" onclick="showSection('projectsList')">
+                <i>📁</i>
+                <div>Мои проекты</div>
+            </div>
+            <div class="menu-btn" onclick="showSection('workers')">
+                <i>👷</i>
+                <div>Сотрудники</div>
+            </div>
+            <div class="menu-btn" onclick="showSection('materials')">
+                <i>🔩</i>
+                <div>Материалы</div>
+            </div>
+            <div class="menu-btn" onclick="exportFullDatabase()">
+                <i>💾</i>
+                <div>Экспорт всех данных</div>
+            </div>
+            <div class="menu-btn" onclick="importFullDatabase()">
+                <i>📥</i>
+                <div>Импорт всех данных</div>
+            </div>
+        </div>
+
+        <!-- Секция: Новый проект -->
+        <div id="newProject" class="section">
+            <button class="btn btn-secondary back-btn" onclick="showSection('mainMenu')">← Назад</button>
+            <h2 class="section-title">Новый проект</h2>
+
+            <div class="form-group">
+                <label>Название проекта:</label>
+                <input type="text" id="projectName" placeholder="Например: Деталь №5">
+            </div>
+
+            <div class="form-group">
+                <label>Режим расчета:</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="calcMode" value="time" checked onchange="toggleCalcMode()">
+                        <span>🕐 По времени</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="calcMode" value="mass" onchange="toggleCalcMode()">
+                        <span>⚖️ По массе заготовки</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Расчет по времени -->
+            <div id="timeModeSection">
+                <div class="card">
+                    <h3 style="color: #d4af37; margin-bottom: 15px;">Параметры времени</h3>
+                    <div class="form-group">
+                        <label>Стоимость часа работы (₽/час):</label>
+                        <input type="number" id="hourRate" value="500" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Общее время изготовления (часов):</label>
+                        <input type="number" id="totalTime" value="0" min="0" step="0.1">
+                    </div>
+                    <div class="alert alert-info">
+                        💡 Или добавьте работников ниже для детального учета времени
+                    </div>
+                </div>
+            </div>
+
+            <!-- Расчет по массе -->
+            <div id="massModeSection" style="display: none;">
+                <div class="card">
+                    <h3 style="color: #d4af37; margin-bottom: 15px;">Параметры расчета</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Коэффициент наценки на материал:</label>
+                            <input type="number" id="materialCoeff" value="1.5" min="1" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Коэффициент сложности изготовления:</label>
+                            <input type="number" id="complexityCoeff" value="1.2" min="1" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Детали -->
+            <div class="card">
+                <h3 style="color: #d4af37; margin-bottom: 15px;">Детали</h3>
+                <div id="detailsList"></div>
+                <button class="btn btn-primary" onclick="addDetail()">+ Добавить деталь</button>
+            </div>
+
+            <!-- Дополнительные расходы -->
+            <div class="card">
+                <h3 style="color: #d4af37; margin-bottom: 15px;">Дополнительные расходы</h3>
+                <div id="expensesList"></div>
+                <button class="btn btn-primary" onclick="addExpense()">+ Добавить расход</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" style="font-size: 1.2em; padding: 15px 50px;" onclick="calculateProject()">
+                    📊 Рассчитать проект
+                </button>
+            </div>
+        </div>
+
+        <!-- Секция: Отчет -->
+        <div id="reportSection" class="section">
+            <button class="btn btn-secondary back-btn" onclick="showSection('newProject')">← Вернуться к проекту</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Печать</button>
+            <button class="btn btn-secondary" onclick="saveProject()">💾 Сохранить проект</button>
+            <button class="btn btn-secondary" onclick="exportToJSON()">📁 Экспорт JSON</button>
+
+            <div id="reportContent" class="report"></div>
+        </div>
+
+        <!-- Секция: Список проектов -->
+        <div id="projectsList" class="section">
+            <button class="btn btn-secondary back-btn" onclick="showSection('mainMenu')">← Назад</button>
+            <button class="btn btn-primary" onclick="importProject()">📁 Загрузить проект из JSON</button>
+            <h2 class="section-title">Мои проекты</h2>
+            <div id="projectsListContent"></div>
+        </div>
+
+        <!-- Секция: Сотрудники -->
+        <div id="workers" class="section">
+            <button class="btn btn-secondary back-btn" onclick="showSection('mainMenu')">← Назад</button>
+            <button class="btn btn-primary" onclick="exportWorkers()">📤 Экспорт базы</button>
+            <button class="btn btn-primary" onclick="importWorkers()">📥 Импорт базы</button>
+            <h2 class="section-title">База сотрудников</h2>
+
+            <div class="card">
+                <h3 style="color: #d4af37; margin-bottom: 15px;">Добавить сотрудника</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Фамилия:</label>
+                        <input type="text" id="workerLastName">
+                    </div>
+                    <div class="form-group">
+                        <label>Имя Отчество:</label>
+                        <input type="text" id="workerFirstName">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ставка (₽/час):</label>
+                    <input type="number" id="workerRate" value="500" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Специальности:</label>
+                    <div class="checkbox-group" id="specialtiesCheckboxes"></div>
+                </div>
+                <button class="btn btn-primary" onclick="addWorker()">+ Добавить сотрудника</button>
+            </div>
+
+            <div id="workersList"></div>
+        </div>
+
+        <!-- Секция: Материалы -->
+        <div id="materials" class="section">
+            <button class="btn btn-secondary back-btn" onclick="showSection('mainMenu')">← Назад</button>
+            <button class="btn btn-primary" onclick="exportMaterials()">📤 Экспорт базы</button>
+            <button class="btn btn-primary" onclick="importMaterials()">📥 Импорт базы</button>
+            <h2 class="section-title">База материалов</h2>
+
+            <div class="card">
+                <h3 style="color: #d4af37; margin-bottom: 15px;">Добавить материал</h3>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Название материала:</label>
+                        <input type="text" id="materialName">
+                    </div>
+                    <div class="form-group">
+                        <label>Цена (₽/кг):</label>
+                        <input type="number" id="materialPrice" value="45" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Плотность (г/см³):</label>
+                        <input type="number" id="materialDensity" value="7.85" min="0" step="0.01">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addMaterial()">+ Добавить материал</button>
+            </div>
+
+            <div id="materialsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Базовые данные
+        const SPECIALTIES = [
+            'Слесарь',
+            'Токарь',
+            'Фрезеровщик',
+            'Заточник',
+            'Шлифовщик',
+            'Расточник',
+            'Зубодолбежник',
+            'Зубофрезеровщик'
+        ];
+
+        const BLANK_TYPES = {
+            circle: { name: 'Круг', fields: ['diameter', 'length'] },
+            square: { name: 'Квадрат', fields: ['side', 'length'] },
+            tube: { name: 'Труба', fields: ['outerDiameter', 'innerDiameter', 'length'] },
+            hexagon: { name: 'Шестигранник', fields: ['side', 'length'] },
+            corner: { name: 'Уголок', fields: ['width', 'height', 'thickness', 'length'] },
+            sheet: { name: 'Лист', fields: ['width', 'height', 'thickness'] }
+        };
+
+        // Инициализация
+        let currentProject = {
+            name: '',
+            mode: 'time',
+            hourRate: 500,
+            totalTime: 0,
+            materialCoeff: 1.5,
+            complexityCoeff: 1.2,
+            details: [],
+            expenses: []
+        };
+
+        // Загрузка данных из localStorage
+        function loadData() {
+            const workers = localStorage.getItem('workers');
+            const materials = localStorage.getItem('materials');
+            const projects = localStorage.getItem('projects');
+
+            if (!workers) {
+                const defaultWorkers = [
+                    { id: 1, lastName: 'Иванов', firstName: 'Иван Иванович', rate: 500, specialties: ['Токарь', 'Слесарь'] },
+                    { id: 2, lastName: 'Петров', firstName: 'Петр Петрович', rate: 550, specialties: ['Фрезеровщик'] }
+                ];
+                localStorage.setItem('workers', JSON.stringify(defaultWorkers));
+            }
+
+            if (!materials) {
+                const defaultMaterials = [
+                    { id: 1, name: 'Сталь обычная', price: 45, density: 7.85 },
+                    { id: 2, name: 'Сталь инструментальная', price: 120, density: 7.85 },
+                    { id: 3, name: 'Алюминий', price: 180, density: 2.7 },
+                    { id: 4, name: 'Бронза', price: 550, density: 8.8 },
+                    { id: 5, name: 'Капролон', price: 280, density: 1.15 },
+                    { id: 6, name: 'Фторопласт', price: 650, density: 2.2 }
+                ];
+                localStorage.setItem('materials', JSON.stringify(defaultMaterials));
+            }
+
+            if (!projects) {
+                localStorage.setItem('projects', JSON.stringify([]));
+            }
+        }
+
+        function getWorkers() {
+            return JSON.parse(localStorage.getItem('workers') || '[]');
+        }
+
+        function getMaterials() {
+            return JSON.parse(localStorage.getItem('materials') || '[]');
+        }
+
+        function getProjects() {
+            return JSON.parse(localStorage.getItem('projects') || '[]');
+        }
+
+        function saveWorkers(workers) {
+            localStorage.setItem('workers', JSON.stringify(workers));
+        }
+
+        function saveMaterials(materials) {
+            localStorage.setItem('materials', JSON.stringify(materials));
+        }
+
+        function saveProjects(projects) {
+            localStorage.setItem('projects', JSON.stringify(projects));
+        }
+
+        function importProject() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const project = JSON.parse(event.target.result);
+                        const projects = getProjects();
+                        project.id = Date.now();
+                        project.date = new Date().toLocaleDateString('ru-RU');
+                        projects.push(project);
+                        saveProjects(projects);
+                        alert('✅ Проект успешно загружен!');
+                        renderProjectsList();
+                    } catch (err) {
+                        alert('❌ Ошибка загрузки файла: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function exportFullDatabase() {
+            const data = {
+                version: '2.0',
+                exportDate: new Date().toISOString(),
+                workers: getWorkers(),
+                materials: getMaterials(),
+                projects: getProjects()
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `full_database_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            alert('✅ Полная база данных экспортирована!\n\nВключено:\n' +
+                  `- Сотрудников: ${data.workers.length}\n` +
+                  `- Материалов: ${data.materials.length}\n` +
+                  `- Проектов: ${data.projects.length}`);
+        }
+
+        function importFullDatabase() {
+            if (!confirm('⚠️ ВНИМАНИЕ!\n\nЭта операция заменит ВСЕ текущие данные:\n' +
+                        '- Всех сотрудников\n' +
+                        '- Все материалы\n' +
+                        '- Все проекты\n\n' +
+                        'Продолжить?')) {
+                return;
+            }
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        // Проверка структуры данных
+                        if (!data.workers || !data.materials) {
+                            throw new Error('Неверный формат файла полной базы данных');
+                        }
+
+                        // Обеспечиваем наличие плотности у материалов
+                        data.materials.forEach(m => {
+                            if (!m.density) m.density = 7.85;
+                        });
+
+                        // Сохраняем все данные
+                        saveWorkers(data.workers || []);
+                        saveMaterials(data.materials || []);
+                        saveProjects(data.projects || []);
+                        
+                        alert('✅ База данных успешно загружена!\n\n' +
+                              `Загружено:\n` +
+                              `- Сотрудников: ${data.workers.length}\n` +
+                              `- Материалов: ${data.materials.length}\n` +
+                              `- Проектов: ${data.projects ? data.projects.length : 0}`);
+                        
+                        // Обновляем отображение если находимся на соответствующих страницах
+                        if (document.getElementById('workers').classList.contains('active')) {
+                            renderWorkers();
+                        }
+                        if (document.getElementById('materials').classList.contains('active')) {
+                            renderMaterials();
+                        }
+                        if (document.getElementById('projectsList').classList.contains('active')) {
+                            renderProjectsList();
+                        }
+                    } catch (err) {
+                        alert('❌ Ошибка загрузки файла: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Навигация
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('mainMenu').style.display = 'none';
+
+            if (sectionId === 'mainMenu') {
+                document.getElementById('mainMenu').style.display = 'grid';
+            } else {
+                document.getElementById(sectionId).classList.add('active');
+            }
+
+            if (sectionId === 'workers') {
+                renderWorkers();
+            } else if (sectionId === 'materials') {
+                renderMaterials();
+            } else if (sectionId === 'projectsList') {
+                renderProjectsList();
+            }
+        }
+
+        // Переключение режима расчета
+        function toggleCalcMode() {
+            const mode = document.querySelector('input[name="calcMode"]:checked').value;
+            currentProject.mode = mode;
+            
+            if (mode === 'time') {
+                document.getElementById('timeModeSection').style.display = 'block';
+                document.getElementById('massModeSection').style.display = 'none';
+            } else {
+                document.getElementById('timeModeSection').style.display = 'none';
+                document.getElementById('massModeSection').style.display = 'block';
+            }
+        }
+
+        // Добавление детали
+        function addDetail() {
+            const detail = {
+                id: Date.now(),
+                name: '',
+                purpose: '',
+                quantity: 1,
+                blankType: 'circle',
+                dimensions: {},
+                material: null,
+                complexity: 1,
+                operations: []
+            };
+
+            currentProject.details.push(detail);
+            renderDetails();
+        }
+
+        function renderDetails() {
+            const container = document.getElementById('detailsList');
+            const materials = getMaterials();
+            const workers = getWorkers();
+
+            container.innerHTML = currentProject.details.map((detail, index) => {
+                const blankType = BLANK_TYPES[detail.blankType];
+                const mass = calculateBlankMass(detail);
+                const materialCost = detail.material && mass ? (mass * detail.material.price).toFixed(2) : 0;
+
+                return `
+                    <div class="detail-card">
+                        <div class="detail-header">
+                            <span>Деталь #${index + 1}</span>
+                            <button class="btn btn-danger" onclick="removeDetail(${detail.id})">Удалить</button>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Наименование детали:</label>
+                                <input type="text" value="${detail.name || ''}" 
+                                    placeholder="Например: Вал приводной"
+                                    onchange="updateDetailName(${detail.id}, this.value)">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Назначение:</label>
+                                <input type="text" value="${detail.purpose || ''}" 
+                                    placeholder="Например: Для передачи крутящего момента"
+                                    onchange="updateDetailPurpose(${detail.id}, this.value)">
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Количество (шт):</label>
+                                <input type="number" value="${detail.quantity}" min="1" 
+                                    onchange="updateDetailQuantity(${detail.id}, this.value)">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Тип заготовки:</label>
+                                <select onchange="updateDetailBlankType(${detail.id}, this.value)">
+                                    ${Object.keys(BLANK_TYPES).map(key => 
+                                        `<option value="${key}" ${detail.blankType === key ? 'selected' : ''}>
+                                            ${BLANK_TYPES[key].name}
+                                        </option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Размеры заготовки:</label>
+                            <div class="grid-3">
+                                ${renderDimensionFields(detail, blankType)}
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Материал:</label>
+                                <select onchange="updateDetailMaterial(${detail.id}, this.value)">
+                                    <option value="">Выберите материал</option>
+                                    ${materials.map(m => 
+                                        `<option value="${m.id}" ${detail.material?.id == m.id ? 'selected' : ''}>
+                                            ${m.name} (${m.price} ₽/кг)
+                                        </option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Коэффициент сложности:</label>
+                                <input type="number" value="${detail.complexity}" min="1" step="0.1"
+                                    onchange="updateDetailComplexity(${detail.id}, this.value)">
+                            </div>
+                        </div>
+
+                        ${mass ? `
+                            <div class="alert alert-success">
+                                ⚖️ Масса заготовки: <strong>${mass.toFixed(2)} кг</strong>
+                                ${materialCost > 0 ? ` | 💰 Стоимость материала: <strong>${materialCost} ₽</strong>` : ''}
+                            </div>
+                        ` : ''}
+
+                        <div class="form-group">
+                            <label>Операции и исполнители:</label>
+                            <div id="operations-${detail.id}">
+                                ${renderOperations(detail, workers)}
+                            </div>
+                            <button class="btn btn-secondary" onclick="addOperation(${detail.id})">
+                                + Добавить операцию
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDimensionFields(detail, blankType) {
+            const fields = blankType.fields;
+            const labels = {
+                diameter: 'Диаметр (мм)',
+                outerDiameter: 'Внешний Ø (мм)',
+                innerDiameter: 'Внутренний Ø (мм)',
+                side: 'Сторона (мм)',
+                width: 'Ширина (мм)',
+                height: 'Высота (мм)',
+                thickness: 'Толщина (мм)',
+                length: 'Длина (мм)'
+            };
+
+            return fields.map(field => `
+                <div>
+                    <label style="font-size: 0.9em; color: #aaa;">${labels[field]}:</label>
+                    <input type="number" value="${detail.dimensions[field] || ''}" min="0"
+                        onchange="updateDetailDimension(${detail.id}, '${field}', this.value)">
+                </div>
+            `).join('');
+        }
+
+        function renderOperations(detail, workers) {
+            if (detail.operations.length === 0) {
+                return '<p style="color: #999; padding: 10px;">Операции не добавлены</p>';
+            }
+
+            return detail.operations.map((op, idx) => `
+                <div class="operation-item">
+                    <div style="flex: 1;">
+                        <strong>${op.specialty}</strong> - ${op.worker.lastName} ${op.worker.firstName}
+                        <br><small style="color: #aaa;">${op.hours} ч × ${op.worker.rate} ₽/ч = ${(op.hours * op.worker.rate).toFixed(2)} ₽</small>
+                    </div>
+                    <button class="btn btn-danger" onclick="removeOperation(${detail.id}, ${idx})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function addOperation(detailId) {
+            const detail = currentProject.details.find(d => d.id === detailId);
+            const workers = getWorkers();
+
+            // Создаем форму для добавления операции
+            const formHtml = `
+                <div style="background: rgba(26,26,46,0.9); padding: 20px; border-radius: 10px; border: 2px solid #d4af37;">
+                    <h3 style="color: #d4af37; margin-bottom: 15px;">Добавить операцию</h3>
+                    
+                    <div class="form-group">
+                        <label>Специальность:</label>
+                        <select id="opSpecialty" onchange="filterWorkersBySpecialty()">
+                            <option value="">Выберите специальность</option>
+                            ${SPECIALTIES.map(s => `<option value="${s}">${s}</option>`).join('')}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Работник:</label>
+                        <select id="opWorker">
+                            <option value="">Сначала выберите специальность</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Время работы (часов):</label>
+                        <input type="number" id="opHours" min="0" step="0.1" value="1">
+                    </div>
+
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="saveOperation(${detailId})">Добавить</button>
+                        <button class="btn btn-secondary" onclick="cancelOperation()">Отмена</button>
+                    </div>
+                </div>
+            `;
+
+            // Показываем форму в модальном окне
+            const modal = document.createElement('div');
+            modal.id = 'operationModal';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+            modal.innerHTML = `<div style="max-width: 500px; width: 90%;">${formHtml}</div>`;
+            document.body.appendChild(modal);
+        }
+
+        function filterWorkersBySpecialty() {
+            const specialty = document.getElementById('opSpecialty').value;
+            const workerSelect = document.getElementById('opWorker');
+            const workers = getWorkers();
+
+            if (!specialty) {
+                workerSelect.innerHTML = '<option value="">Сначала выберите специальность</option>';
+                return;
+            }
+
+            const filtered = workers.filter(w => w.specialties.includes(specialty));
+
+            if (filtered.length === 0) {
+                workerSelect.innerHTML = '<option value="">Нет работников с этой специальностью</option>';
+            } else {
+                workerSelect.innerHTML = '<option value="">Выберите работника</option>' +
+                    filtered.map(w => `<option value="${w.id}">${w.lastName} ${w.firstName} (${w.rate} ₽/ч)</option>`).join('');
+            }
+        }
+
+        function saveOperation(detailId) {
+            const specialty = document.getElementById('opSpecialty').value;
+            const workerId = document.getElementById('opWorker').value;
+            const hours = parseFloat(document.getElementById('opHours').value);
+
+            if (!specialty || !workerId || !hours || hours <= 0) {
+                alert('Заполните все поля!');
+                return;
+            }
+
+            const workers = getWorkers();
+            const worker = workers.find(w => w.id == workerId);
+            const detail = currentProject.details.find(d => d.id === detailId);
+
+            detail.operations.push({
+                specialty: specialty,
+                worker: worker,
+                hours: hours
+            });
+
+            cancelOperation();
+            renderDetails();
+        }
+
+        function cancelOperation() {
+            const modal = document.getElementById('operationModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function removeOperation(detailId, index) {
+            const detail = currentProject.details.find(d => d.id === detailId);
+            detail.operations.splice(index, 1);
+            renderDetails();
+        }
+
+        function calculateBlankMass(detail) {
+            const dims = detail.dimensions;
+            const type = detail.blankType;
+
+            if (!detail.material || !detail.material.density) return 0;
+
+            const density = detail.material.density; // г/см³
+            let volume = 0; // в см³
+
+            switch(type) {
+                case 'circle':
+                    if (dims.diameter && dims.length) {
+                        const r = dims.diameter / 20; // мм в см, делим на 2 для радиуса
+                        volume = Math.PI * r * r * (dims.length / 10);
+                    }
+                    break;
+                case 'square':
+                    if (dims.side && dims.length) {
+                        volume = (dims.side / 10) * (dims.side / 10) * (dims.length / 10);
+                    }
+                    break;
+                case 'tube':
+                    if (dims.outerDiameter && dims.innerDiameter && dims.length) {
+                        const rOuter = dims.outerDiameter / 20;
+                        const rInner = dims.innerDiameter / 20;
+                        volume = Math.PI * (rOuter * rOuter - rInner * rInner) * (dims.length / 10);
+                    }
+                    break;
+                case 'hexagon':
+                    if (dims.side && dims.length) {
+                        const s = dims.side / 10;
+                        volume = (3 * Math.sqrt(3) / 2) * s * s * (dims.length / 10);
+                    }
+                    break;
+                case 'corner':
+                    if (dims.width && dims.height && dims.thickness && dims.length) {
+                        const w = dims.width / 10;
+                        const h = dims.height / 10;
+                        const t = dims.thickness / 10;
+                        const l = dims.length / 10;
+                        volume = (w * t + (h - t) * t) * l;
+                    }
+                    break;
+                case 'sheet':
+                    if (dims.width && dims.height && dims.thickness) {
+                        volume = (dims.width / 10) * (dims.height / 10) * (dims.thickness / 10);
+                    }
+                    break;
+            }
+
+            return volume > 0 ? (volume * density) / 1000 : 0; // переводим г в кг
+        }
+
+        function updateDetailQuantity(id, value) {
+            const detail = currentProject.details.find(d => d.id === id);
+            detail.quantity = parseInt(value) || 1;
+        }
+
+        function updateDetailName(id, value) {
+            const detail = currentProject.details.find(d => d.id === id);
+            detail.name = value;
+        }
+
+        function updateDetailPurpose(id, value) {
+            const detail = currentProject.details.find(d => d.id === id);
+            detail.purpose = value;
+        }
+
+        function updateDetailBlankType(id, value) {
+            const detail = currentProject.details.find(d => d.id === id);
+            detail.blankType = value;
+            detail.dimensions = {};
+            renderDetails();
+        }
+
+        function updateDetailDimension(id, field, value) {
+            const detail = currentProject.details.find(d => d.id === id);
+            detail.dimensions[field] = parseFloat(value) || 0;
+            renderDetails();
+        }
+
+        function updateDetailMaterial(id, materialId) {
+            const detail = currentProject.details.find(d => d.id === id);
+            const materials = getMaterials();
+            detail.material = materials.find(m => m.id == materialId) || null;
+            renderDetails();
+        }
+
+        function updateDetailComplexity(id, value) {
+            const detail = currentProject.details.find(d => d.id === id);
+            detail.complexity = parseFloat(value) || 1;
+        }
+
+        function removeDetail(id) {
+            if (confirm('Удалить деталь?')) {
+                currentProject.details = currentProject.details.filter(d => d.id !== id);
+                renderDetails();
+            }
+        }
+
+        // Дополнительные расходы
+        function addExpense() {
+            const expense = {
+                id: Date.now(),
+                description: '',
+                amount: 0
+            };
+
+            currentProject.expenses.push(expense);
+            renderExpenses();
+        }
+
+        function renderExpenses() {
+            const container = document.getElementById('expensesList');
+
+            if (currentProject.expenses.length === 0) {
+                container.innerHTML = '<p style="color: #999;">Дополнительных расходов нет</p>';
+                return;
+            }
+
+            container.innerHTML = currentProject.expenses.map((expense, index) => `
+                <div class="operation-item">
+                    <div style="flex: 1; display: flex; gap: 15px;">
+                        <input type="text" value="${expense.description}" 
+                            placeholder="Описание расхода"
+                            style="flex: 2;"
+                            onchange="updateExpenseDescription(${expense.id}, this.value)">
+                        <input type="number" value="${expense.amount}" 
+                            placeholder="Сумма"
+                            style="flex: 1;"
+                            onchange="updateExpenseAmount(${expense.id}, this.value)">
+                    </div>
+                    <button class="btn btn-danger" onclick="removeExpense(${expense.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateExpenseDescription(id, value) {
+            const expense = currentProject.expenses.find(e => e.id === id);
+            expense.description = value;
+        }
+
+        function updateExpenseAmount(id, value) {
+            const expense = currentProject.expenses.find(e => e.id === id);
+            expense.amount = parseFloat(value) || 0;
+        }
+
+        function removeExpense(id) {
+            currentProject.expenses = currentProject.expenses.filter(e => e.id !== id);
+            renderExpenses();
+        }
+
+        // Расчет проекта
+        function calculateProject() {
+            const name = document.getElementById('projectName').value.trim();
+            if (!name) {
+                alert('Введите название проекта!');
+                return;
+            }
+
+            if (currentProject.details.length === 0) {
+                alert('Добавьте хотя бы одну деталь!');
+                return;
+            }
+
+            currentProject.name = name;
+            currentProject.hourRate = parseFloat(document.getElementById('hourRate').value) || 500;
+            currentProject.totalTime = parseFloat(document.getElementById('totalTime').value) || 0;
+            currentProject.materialCoeff = parseFloat(document.getElementById('materialCoeff').value) || 1.5;
+            currentProject.complexityCoeff = parseFloat(document.getElementById('complexityCoeff').value) || 1.2;
+            currentProject.date = new Date().toLocaleDateString('ru-RU');
+
+            generateReport();
+            showSection('reportSection');
+        }
+
+        function generateReport() {
+            const report = document.getElementById('reportContent');
+            const mode = currentProject.mode;
+
+            let totalMaterialsCost = 0;
+            let totalLaborCost = 0;
+            let totalExpensesCost = 0;
+
+            // Расчет по деталям
+            const detailsReport = currentProject.details.map(detail => {
+                const mass = calculateBlankMass(detail);
+                const materialCostPerUnit = detail.material && mass ? mass * detail.material.price : 0;
+                
+                let detailLaborCost = 0;
+                let detailTimePerUnit = 0;
+                
+                detail.operations.forEach(op => {
+                    detailTimePerUnit += op.hours;
+                    detailLaborCost += op.hours * op.worker.rate;
+                });
+
+                const totalDetailTime = detailTimePerUnit * detail.quantity;
+                const totalDetailLaborCost = detailLaborCost * detail.quantity;
+
+                let totalDetailMaterialCost = 0;
+                
+                if (mode === 'mass') {
+                    totalDetailMaterialCost = materialCostPerUnit * detail.quantity * 
+                                             currentProject.materialCoeff * detail.complexity;
+                } else {
+                    totalDetailMaterialCost = materialCostPerUnit * detail.quantity;
+                }
+
+                totalMaterialsCost += totalDetailMaterialCost;
+                totalLaborCost += totalDetailLaborCost;
+
+                return {
+                    detail,
+                    mass,
+                    materialCostPerUnit,
+                    detailTimePerUnit,
+                    totalDetailTime,
+                    totalDetailMaterialCost,
+                    totalDetailLaborCost
+                };
+            });
+
+            // Учет общего времени (если указано)
+            if (mode === 'time' && currentProject.totalTime > 0) {
+                totalLaborCost += currentProject.totalTime * currentProject.hourRate;
+            }
+
+            // Дополнительные расходы
+            currentProject.expenses.forEach(expense => {
+                totalExpensesCost += expense.amount;
+            });
+
+            const grandTotal = totalMaterialsCost + totalLaborCost + totalExpensesCost;
+
+            // Статистика по работникам
+            const workerStats = {};
+            detailsReport.forEach((item, idx) => {
+                item.detail.operations.forEach(op => {
+                    const key = `${op.worker.id}`;
+                    if (!workerStats[key]) {
+                        workerStats[key] = {
+                            worker: op.worker,
+                            totalHours: 0,
+                            totalCost: 0,
+                            tasks: []
+                        };
+                    }
+                    const taskHours = op.hours * item.detail.quantity;
+                    const taskCost = taskHours * op.worker.rate;
+                    workerStats[key].totalHours += taskHours;
+                    workerStats[key].totalCost += taskCost;
+                    workerStats[key].tasks.push({
+                        detailIndex: idx + 1,
+                        specialty: op.specialty,
+                        hours: taskHours,
+                        cost: taskCost,
+                        quantity: item.detail.quantity
+                    });
+                });
+            });
+
+            // Генерация HTML отчета
+            report.innerHTML = `
+                <div class="report-header">
+                    <h1>ОТЧЕТ ПО ПРОЕКТУ</h1>
+                    <h2>"${currentProject.name}"</h2>
+                    <p>Дата: ${currentProject.date}</p>
+                    <p>Режим расчета: ${mode === 'time' ? '🕐 По времени' : '⚖️ По массе заготовки'}</p>
+                </div>
+
+                ${detailsReport.length > 0 ? `
+                    <div class="report-section">
+                        <h3>📦 МАТЕРИАЛЫ НА ЗАКУПКУ</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Деталь</th>
+                                    <th>Заготовка</th>
+                                    <th>Материал</th>
+                                    <th>Кол-во</th>
+                                    <th>Масса ед.</th>
+                                    <th>Общая масса</th>
+                                    <th>Стоимость</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${detailsReport.map((item, idx) => {
+                                    const blankDesc = getBlankDescription(item.detail);
+                                    const detailName = item.detail.name || `Деталь #${idx + 1}`;
+                                    const detailInfo = item.detail.purpose 
+                                        ? `${detailName}<br><small style="color: #666;">${item.detail.purpose}</small>`
+                                        : detailName;
+                                    return `
+                                        <tr>
+                                            <td><strong>${detailInfo}</strong></td>
+                                            <td>${blankDesc}</td>
+                                            <td>${item.detail.material?.name || '—'}</td>
+                                            <td>${item.detail.quantity} шт</td>
+                                            <td>${item.mass.toFixed(2)} кг</td>
+                                            <td>${(item.mass * item.detail.quantity).toFixed(2)} кг</td>
+                                            <td>${item.totalDetailMaterialCost.toFixed(2)} ₽</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : ''}
+
+                ${Object.keys(workerStats).length > 0 ? `
+                    <div class="report-section">
+                        <h3>👷 ПЛАН РАБОТЫ ДЛЯ СОТРУДНИКОВ</h3>
+                        ${Object.values(workerStats).map(stat => `
+                            <div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #d4af37;">
+                                <h4 style="color: #1a1a2e; margin-bottom: 10px;">
+                                    ${stat.worker.lastName} ${stat.worker.firstName}
+                                </h4>
+                                <table class="report-table" style="margin-top: 10px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Деталь</th>
+                                            <th>Операция</th>
+                                            <th>Время</th>
+                                            <th>Оплата</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${stat.tasks.map(task => {
+                                            const detail = currentProject.details[task.detailIndex - 1];
+                                            const detailName = detail?.name || `Деталь #${task.detailIndex}`;
+                                            return `
+                                                <tr>
+                                                    <td><strong>${detailName}</strong></td>
+                                                    <td>${task.specialty}</td>
+                                                    <td>${task.hours.toFixed(1)} ч ${task.quantity > 1 ? `(${(task.hours/task.quantity).toFixed(1)} ч × ${task.quantity} шт)` : ''}</td>
+                                                    <td>${task.cost.toFixed(2)} ₽</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                        <tr style="background: #d4af37; font-weight: bold;">
+                                            <td colspan="2"><strong>ИТОГО для ${stat.worker.lastName}</strong></td>
+                                            <td><strong>${stat.totalHours.toFixed(1)} ч</strong></td>
+                                            <td><strong>${stat.totalCost.toFixed(2)} ₽</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+
+                ${detailsReport.some(d => d.detail.operations.length > 0) || currentProject.totalTime > 0 ? `
+                    <div class="report-section">
+                        <h3>💰 СТАТИСТИКА ПО ЗАРПЛАТАМ</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Работник</th>
+                                    <th>Общее время</th>
+                                    <th>Ставка</th>
+                                    <th>Зарплата</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${currentProject.totalTime > 0 ? `
+                                    <tr>
+                                        <td><strong>Общее время (без детализации)</strong></td>
+                                        <td>${currentProject.totalTime} ч</td>
+                                        <td>${currentProject.hourRate} ₽/ч</td>
+                                        <td><strong>${(currentProject.totalTime * currentProject.hourRate).toFixed(2)} ₽</strong></td>
+                                    </tr>
+                                ` : ''}
+                                ${Object.values(workerStats).map(stat => `
+                                    <tr>
+                                        <td>${stat.worker.lastName} ${stat.worker.firstName}</td>
+                                        <td>${stat.totalHours.toFixed(1)} ч</td>
+                                        <td>${stat.worker.rate} ₽/ч</td>
+                                        <td><strong>${stat.totalCost.toFixed(2)} ₽</strong></td>
+                                    </tr>
+                                `).join('')}
+                                <tr style="background: #f4e4a6; font-weight: bold; font-size: 1.1em;">
+                                    <td colspan="3"><strong>ВСЕГО НА ЗАРПЛАТЫ:</strong></td>
+                                    <td><strong>${totalLaborCost.toFixed(2)} ₽</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                ` : ''}
+
+                ${currentProject.expenses.length > 0 ? `
+                    <div class="report-section">
+                        <h3>💸 ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Описание</th>
+                                    <th>Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${currentProject.expenses.map(expense => `
+                                    <tr>
+                                        <td>${expense.description || 'Без описания'}</td>
+                                        <td>${expense.amount.toFixed(2)} ₽</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : ''}
+
+                <div class="report-total">
+                    <h3>💰 ИТОГО</h3>
+                    <div class="total-row">
+                        <span>Материалы:</span>
+                        <span>${totalMaterialsCost.toFixed(2)} ₽</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Зарплаты сотрудников:</span>
+                        <span>${totalLaborCost.toFixed(2)} ₽</span>
+                    </div>
+                    ${totalExpensesCost > 0 ? `
+                        <div class="total-row">
+                            <span>Дополнительные расходы:</span>
+                            <span>${totalExpensesCost.toFixed(2)} ₽</span>
+                        </div>
+                    ` : ''}
+                    <div class="total-row grand">
+                        <span>ВСЕГО:</span>
+                        <span>${grandTotal.toFixed(2)} ₽</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getBlankDescription(detail) {
+            const type = BLANK_TYPES[detail.blankType].name;
+            const dims = detail.dimensions;
+            
+            let desc = type;
+            if (detail.blankType === 'circle') {
+                desc += dims.diameter && dims.length ? ` Ø${dims.diameter}×${dims.length}мм` : '';
+            } else if (detail.blankType === 'square') {
+                desc += dims.side && dims.length ? ` ${dims.side}×${dims.length}мм` : '';
+            } else if (detail.blankType === 'tube') {
+                desc += dims.outerDiameter && dims.innerDiameter && dims.length 
+                    ? ` Ø${dims.outerDiameter}/Ø${dims.innerDiameter}×${dims.length}мм` : '';
+            } else if (detail.blankType === 'hexagon') {
+                desc += dims.side && dims.length ? ` S${dims.side}×${dims.length}мм` : '';
+            } else if (detail.blankType === 'corner') {
+                desc += dims.width && dims.height && dims.thickness && dims.length 
+                    ? ` ${dims.width}×${dims.height}×${dims.thickness}×${dims.length}мм` : '';
+            } else if (detail.blankType === 'sheet') {
+                desc += dims.width && dims.height && dims.thickness 
+                    ? ` ${dims.width}×${dims.height}×${dims.thickness}мм` : '';
+            }
+            
+            return desc;
+        }
+
+        // Сохранение проекта
+        function saveProject() {
+            const projects = getProjects();
+            const existingIndex = projects.findIndex(p => p.id === currentProject.id);
+
+            if (existingIndex >= 0) {
+                projects[existingIndex] = { ...currentProject, id: currentProject.id };
+            } else {
+                currentProject.id = Date.now();
+                projects.push({ ...currentProject });
+            }
+
+            saveProjects(projects);
+            alert('✅ Проект сохранен!');
+        }
+
+        function exportToJSON() {
+            const dataStr = JSON.stringify(currentProject, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `project_${currentProject.name.replace(/\s+/g, '_')}.json`;
+            link.click();
+        }
+
+        // Список проектов
+        function renderProjectsList() {
+            const container = document.getElementById('projectsListContent');
+            const projects = getProjects();
+
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i>📁</i>
+                        <h3>Проектов пока нет</h3>
+                        <p>Создайте свой первый проект!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = projects.map(project => {
+                const detailsPreview = project.details.length > 0
+                    ? project.details.slice(0, 3).map(d => d.name || 'Без названия').join(', ')
+                    : 'Детали не добавлены';
+                const moreDetails = project.details.length > 3 ? ` и ещё ${project.details.length - 3}...` : '';
+                
+                return `
+                    <div class="list-item">
+                        <div class="list-item-info">
+                            <h3>${project.name}</h3>
+                            <p style="color: #aaa;">
+                                ${project.date} | 
+                                ${project.mode === 'time' ? '🕐 По времени' : '⚖️ По массе'} | 
+                                ${project.details.length} деталей
+                            </p>
+                            <p style="color: #d4af37; font-size: 0.9em; margin-top: 5px;">
+                                ${detailsPreview}${moreDetails}
+                            </p>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-secondary" onclick="loadProject(${project.id})">Открыть</button>
+                            <button class="btn btn-danger" onclick="deleteProject(${project.id})">Удалить</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadProject(id) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === id);
+            if (!project) return;
+
+            currentProject = { ...project };
+            
+            document.getElementById('projectName').value = project.name;
+            document.querySelector(`input[name="calcMode"][value="${project.mode}"]`).checked = true;
+            document.getElementById('hourRate').value = project.hourRate;
+            document.getElementById('totalTime').value = project.totalTime;
+            document.getElementById('materialCoeff').value = project.materialCoeff;
+            document.getElementById('complexityCoeff').value = project.complexityCoeff;
+
+            toggleCalcMode();
+            renderDetails();
+            renderExpenses();
+            showSection('newProject');
+        }
+
+        function deleteProject(id) {
+            if (!confirm('Удалить проект?')) return;
+            
+            const projects = getProjects();
+            saveProjects(projects.filter(p => p.id !== id));
+            renderProjectsList();
+        }
+
+        // Управление работниками
+        function renderWorkers() {
+            renderSpecialtiesCheckboxes();
+            const container = document.getElementById('workersList');
+            const workers = getWorkers();
+
+            if (workers.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Сотрудников пока нет</p></div>';
+                return;
+            }
+
+            container.innerHTML = workers.map(worker => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h3>${worker.lastName} ${worker.firstName}</h3>
+                        <p style="color: #d4af37;">Ставка: ${worker.rate} ₽/час</p>
+                        <div>
+                            ${worker.specialties.map(s => `<span class="badge">${s}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-danger" onclick="deleteWorker(${worker.id})">Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSpecialtiesCheckboxes() {
+            const container = document.getElementById('specialtiesCheckboxes');
+            container.innerHTML = SPECIALTIES.map(specialty => `
+                <label>
+                    <input type="checkbox" value="${specialty}">
+                    ${specialty}
+                </label>
+            `).join('');
+        }
+
+        function addWorker() {
+            const lastName = document.getElementById('workerLastName').value.trim();
+            const firstName = document.getElementById('workerFirstName').value.trim();
+            const rate = parseFloat(document.getElementById('workerRate').value);
+
+            if (!lastName || !firstName) {
+                alert('Заполните ФИО!');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('#specialtiesCheckboxes input:checked');
+            const specialties = Array.from(checkboxes).map(cb => cb.value);
+
+            if (specialties.length === 0) {
+                alert('Выберите хотя бы одну специальность!');
+                return;
+            }
+
+            const workers = getWorkers();
+            workers.push({
+                id: Date.now(),
+                lastName,
+                firstName,
+                rate,
+                specialties
+            });
+
+            saveWorkers(workers);
+            
+            document.getElementById('workerLastName').value = '';
+            document.getElementById('workerFirstName').value = '';
+            document.getElementById('workerRate').value = '500';
+            document.querySelectorAll('#specialtiesCheckboxes input').forEach(cb => cb.checked = false);
+
+            renderWorkers();
+        }
+
+        function deleteWorker(id) {
+            if (!confirm('Удалить сотрудника?')) return;
+            
+            const workers = getWorkers();
+            saveWorkers(workers.filter(w => w.id !== id));
+            renderWorkers();
+        }
+
+        function exportWorkers() {
+            const workers = getWorkers();
+            if (workers.length === 0) {
+                alert('База сотрудников пуста!');
+                return;
+            }
+
+            const dataStr = JSON.stringify(workers, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `workers_database_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            alert('✅ База сотрудников экспортирована!');
+        }
+
+        function importWorkers() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const workers = JSON.parse(event.target.result);
+                        
+                        // Проверка структуры данных
+                        if (!Array.isArray(workers)) {
+                            throw new Error('Неверный формат файла');
+                        }
+
+                        // Проверка на дубликаты ID и обновление при необходимости
+                        const existingWorkers = getWorkers();
+                        const maxId = existingWorkers.length > 0 
+                            ? Math.max(...existingWorkers.map(w => w.id))
+                            : 0;
+                        
+                        workers.forEach((worker, index) => {
+                            if (!worker.id || existingWorkers.some(w => w.id === worker.id)) {
+                                worker.id = maxId + index + 1;
+                            }
+                        });
+
+                        const mergeOption = confirm(
+                            'Объединить с существующими сотрудниками?\n\n' +
+                            'ДА - добавить к текущей базе\n' +
+                            'НЕТ - заменить всю базу'
+                        );
+
+                        if (mergeOption) {
+                            const merged = [...existingWorkers, ...workers];
+                            saveWorkers(merged);
+                            alert(`✅ Добавлено ${workers.length} сотрудников!`);
+                        } else {
+                            saveWorkers(workers);
+                            alert(`✅ База заменена. Загружено ${workers.length} сотрудников!`);
+                        }
+
+                        renderWorkers();
+                    } catch (err) {
+                        alert('❌ Ошибка загрузки файла: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Управление материалами
+        function renderMaterials() {
+            const container = document.getElementById('materialsList');
+            const materials = getMaterials();
+
+            if (materials.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Материалов пока нет</p></div>';
+                return;
+            }
+
+            container.innerHTML = materials.map(material => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h3>${material.name}</h3>
+                        <p style="color: #d4af37;">
+                            Цена: ${material.price} ₽/кг | 
+                            Плотность: ${material.density || '7.85'} г/см³
+                        </p>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-danger" onclick="deleteMaterial(${material.id})">Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addMaterial() {
+            const name = document.getElementById('materialName').value.trim();
+            const price = parseFloat(document.getElementById('materialPrice').value);
+            const density = parseFloat(document.getElementById('materialDensity').value);
+
+            if (!name) {
+                alert('Введите название материала!');
+                return;
+            }
+
+            if (isNaN(price) || price <= 0) {
+                alert('Введите корректную цену!');
+                return;
+            }
+
+            if (isNaN(density) || density <= 0) {
+                alert('Введите корректную плотность!');
+                return;
+            }
+
+            const materials = getMaterials();
+            materials.push({
+                id: Date.now(),
+                name,
+                price,
+                density
+            });
+
+            saveMaterials(materials);
+            
+            document.getElementById('materialName').value = '';
+            document.getElementById('materialPrice').value = '45';
+            document.getElementById('materialDensity').value = '7.85';
+
+            renderMaterials();
+        }
+
+        function deleteMaterial(id) {
+            if (!confirm('Удалить материал?')) return;
+            
+            const materials = getMaterials();
+            saveMaterials(materials.filter(m => m.id !== id));
+            renderMaterials();
+        }
+
+        function exportMaterials() {
+            const materials = getMaterials();
+            if (materials.length === 0) {
+                alert('База материалов пуста!');
+                return;
+            }
+
+            const dataStr = JSON.stringify(materials, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `materials_database_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            alert('✅ База материалов экспортирована!');
+        }
+
+        function importMaterials() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const materials = JSON.parse(event.target.result);
+                        
+                        // Проверка структуры данных
+                        if (!Array.isArray(materials)) {
+                            throw new Error('Неверный формат файла');
+                        }
+
+                        // Проверка на дубликаты ID и обновление при необходимости
+                        const existingMaterials = getMaterials();
+                        const maxId = existingMaterials.length > 0 
+                            ? Math.max(...existingMaterials.map(m => m.id))
+                            : 0;
+                        
+                        materials.forEach((material, index) => {
+                            if (!material.id || existingMaterials.some(m => m.id === material.id)) {
+                                material.id = maxId + index + 1;
+                            }
+                            // Устанавливаем плотность по умолчанию если её нет
+                            if (!material.density) {
+                                material.density = 7.85;
+                            }
+                        });
+
+                        const mergeOption = confirm(
+                            'Объединить с существующими материалами?\n\n' +
+                            'ДА - добавить к текущей базе\n' +
+                            'НЕТ - заменить всю базу'
+                        );
+
+                        if (mergeOption) {
+                            const merged = [...existingMaterials, ...materials];
+                            saveMaterials(merged);
+                            alert(`✅ Добавлено ${materials.length} материалов!`);
+                        } else {
+                            saveMaterials(materials);
+                            alert(`✅ База заменена. Загружено ${materials.length} материалов!`);
+                        }
+
+                        renderMaterials();
+                    } catch (err) {
+                        alert('❌ Ошибка загрузки файла: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Инициализация приложения
+        window.onload = function() {
+            loadData();
+            showSection('mainMenu');
+        };
+    </script>
+</body>
+</html>
