@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎥 Видеоконференции миллиардеров</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <!-- Jitsi Meet API -->
+    <script src='https://meet.jit.si/external_api.js'></script>
+    
+    <!-- React -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 90vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            color: #1a1a2e;
+            font-size: 36px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header p {
+            color: #1a1a2e;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .user-badge {
+            background: rgba(26, 26, 46, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #e91e63;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 30, 99, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .lobby-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .rooms-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+
+        .rooms-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .room-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .room-card:hover {
+            border-color: #d4af37;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .room-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+
+        .room-creator {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .room-participants {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4caf50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .participant-count {
+            background: #4caf50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .room-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .room-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .room-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .join-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .join-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .create-room-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .create-room-card h3 {
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-card h3 {
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #1a1a2e;
+            font-size: 18px;
+        }
+
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-header {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-header h2 {
+            color: #1a1a2e;
+            font-size: 20px;
+        }
+
+        .leave-btn {
+            padding: 10px 20px;
+            background: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .leave-btn:hover {
+            background: #c2185b;
+        }
+
+        .jitsi-wrapper {
+            flex: 1;
+        }
+
+        .login-container {
+            max-width: 500px;
+            margin: 100px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .login-container h2 {
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            font-size: 32px;
+        }
+
+        .login-container p {
+            color: #666;
+            margin-bottom: 35px;
+            font-size: 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-hint {
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 968px) {
+            .lobby-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header-controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBHjuNA9S_wGHX3sWVrhaUTuNbwaE__HM",
+            authDomain: "chat-millionairov.firebaseapp.com",
+            databaseURL: "https://chat-millionairov-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "chat-millionairov",
+            storageBucket: "chat-millionairov.firebasestorage.app",
+            messagingSenderId: "861766095966",
+            appId: "1:861766095966:web:9b8e24f87a26c89bc7d0cf"
+        };
+
+        // Инициализация Firebase
+        let database = null;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            database = firebase.database();
+            console.log('✅ Firebase подключен');
+        } catch (error) {
+            console.error('❌ Ошибка Firebase:', error);
+        }
+
+        const App = () => {
+            const [currentUser, setCurrentUser] = useState(null);
+            const [rooms, setRooms] = useState([]);
+            const [currentRoom, setCurrentRoom] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            
+            // Форма создания комнаты
+            const [roomName, setRoomName] = useState('');
+            const [roomDescription, setRoomDescription] = useState('');
+            
+            const jitsiApi = useRef(null);
+
+            // Подписка на комнаты
+            useEffect(() => {
+                if (!database || !currentUser) return;
+
+                const roomsRef = database.ref('videoRooms');
+                
+                const handleRooms = (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const roomsList = Object.entries(data)
+                            .map(([key, value]) => ({ id: key, ...value }))
+                            .sort((a, b) => b.createdAt - a.createdAt);
+                        setRooms(roomsList);
+                    } else {
+                        setRooms([]);
+                    }
+                };
+
+                roomsRef.on('value', handleRooms);
+                return () => roomsRef.off('value', handleRooms);
+            }, [currentUser]);
+
+            // Вход
+            const handleLogin = async (name) => {
+                if (!name.trim()) {
+                    setError('Введите ваше имя');
+                    return;
+                }
+                if (!database) {
+                    setError('Ошибка подключения к Firebase');
+                    return;
+                }
+                setLoading(true);
+                setError('');
+                
+                try {
+                    setCurrentUser(name.trim());
+                } catch (err) {
+                    setError('Ошибка входа: ' + err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // Создание комнаты
+            const handleCreateRoom = async (e) => {
+                e.preventDefault();
+                
+                if (!roomName.trim()) {
+                    setError('Введите название комнаты');
+                    return;
+                }
+
+                setLoading(true);
+                setError('');
+
+                try {
+                    const roomsRef = database.ref('videoRooms');
+                    const newRoom = {
+                        name: roomName.trim(),
+                        description: roomDescription.trim() || 'Видеоконференция',
+                        creator: currentUser,
+                        createdAt: Date.now(),
+                        participants: {
+                            [currentUser]: {
+                                name: currentUser,
+                                joinedAt: Date.now()
+                            }
+                        }
+                    };
+
+                    const roomRef = await roomsRef.push(newRoom);
+                    
+                    // Очистка формы
+                    setRoomName('');
+                    setRoomDescription('');
+                    
+                    // Присоединение к комнате
+                    joinRoom({ id: roomRef.key, ...newRoom });
+                } catch (err) {
+                    setError('Ошибка создания комнаты: ' + err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // Присоединение к комнате
+            const joinRoom = async (room) => {
+                try {
+                    // Добавляем себя в участники
+                    const roomRef = database.ref(`videoRooms/${room.id}/participants/${currentUser}`);
+                    await roomRef.set({
+                        name: currentUser,
+                        joinedAt: Date.now()
+                    });
+
+                    setCurrentRoom(room);
+
+                    // Запуск Jitsi
+                    setTimeout(() => {
+                        const domain = 'meet.jit.si';
+                        const options = {
+                            roomName: `millionaires-${room.id}`,
+                            width: '100%',
+                            height: '100%',
+                            parentNode: document.querySelector('#jitsi-container'),
+                            userInfo: {
+                                displayName: currentUser
+                            },
+                            configOverwrite: {
+                                startWithAudioMuted: false,
+                                startWithVideoMuted: false,
+                                enableWelcomePage: false
+                            },
+                            interfaceConfigOverwrite: {
+                                TOOLBAR_BUTTONS: [
+                                    'microphone', 'camera', 'closedcaptions', 'desktop',
+                                    'fullscreen', 'fodeviceselection', 'profile',
+                                    'chat', 'recording', 'livestreaming',
+                                    'settings', 'raisehand', 'videoquality', 'filmstrip',
+                                    'stats', 'shortcuts', 'tileview', 'help'
+                                ],
+                                SHOW_JITSI_WATERMARK: false
+                            }
+                        };
+                        
+                        jitsiApi.current = new JitsiMeetExternalAPI(domain, options);
+
+                        // Обработка выхода из комнаты
+                        jitsiApi.current.addEventListener('readyToClose', () => {
+                            leaveRoom();
+                        });
+                    }, 100);
+                } catch (err) {
+                    setError('Ошибка присоединения: ' + err.message);
+                }
+            };
+
+            // Выход из комнаты
+            const leaveRoom = async () => {
+                if (!currentRoom) return;
+
+                try {
+                    // Удаляем себя из участников
+                    const participantRef = database.ref(`videoRooms/${currentRoom.id}/participants/${currentUser}`);
+                    await participantRef.remove();
+
+                    // Проверяем, есть ли еще участники
+                    const roomRef = database.ref(`videoRooms/${currentRoom.id}/participants`);
+                    const snapshot = await roomRef.once('value');
+                    
+                    // Если никого нет - удаляем комнату
+                    if (!snapshot.exists()) {
+                        await database.ref(`videoRooms/${currentRoom.id}`).remove();
+                    }
+
+                    // Закрываем Jitsi
+                    if (jitsiApi.current) {
+                        jitsiApi.current.dispose();
+                        jitsiApi.current = null;
+                    }
+
+                    setCurrentRoom(null);
+                } catch (err) {
+                    console.error('Ошибка выхода:', err);
+                }
+            };
+
+            // Выход из приложения
+            const handleLogout = () => {
+                if (currentRoom) {
+                    leaveRoom();
+                }
+                setCurrentUser(null);
+                setRooms([]);
+            };
+
+            const formatTime = (timestamp) => {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = now - date;
+                
+                if (diff < 60000) return 'только что';
+                if (diff < 3600000) return Math.floor(diff / 60000) + ' мин назад';
+                if (diff < 86400000) return Math.floor(diff / 3600000) + ' ч назад';
+                return date.toLocaleDateString('ru-RU');
+            };
+
+            const getParticipantCount = (room) => {
+                return room.participants ? Object.keys(room.participants).length : 0;
+            };
+
+            // Экран входа
+            if (!currentUser) {
+                return <LoginScreen onLogin={handleLogin} loading={loading} error={error} />;
+            }
+
+            // Видеоконференция
+            if (currentRoom) {
+                return (
+                    <div className="video-container">
+                        <div className="video-header">
+                            <h2>🎥 {currentRoom.name}</h2>
+                            <button className="leave-btn" onClick={leaveRoom}>
+                                Покинуть комнату
+                            </button>
+                        </div>
+                        <div id="jitsi-container" className="jitsi-wrapper"></div>
+                    </div>
+                );
+            }
+
+            // Лобби
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>🎥 Видеоконференции миллиардеров</h1>
+                        <p>Создавайте комнаты и общайтесь с коллегами в HD качестве</p>
+                        <div className="header-controls">
+                            <div className="user-badge">
+                                👤 {currentUser}
+                            </div>
+                            <button className="btn btn-secondary" onClick={handleLogout}>
+                                Выйти
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="lobby-container">
+                        {/* Список комнат */}
+                        <div className="rooms-section">
+                            <div className="section-header">
+                                <h2 className="section-title">Активные комнаты</h2>
+                                <span style={{ color: '#4caf50', fontWeight: '600' }}>
+                                    {rooms.length} {rooms.length === 1 ? 'комната' : 'комнат'}
+                                </span>
+                            </div>
+
+                            {error && <div className="error-message">{error}</div>}
+
+                            {rooms.length === 0 ? (
+                                <div className="empty-state">
+                                    <div className="empty-state-icon">🎥</div>
+                                    <div className="empty-state-text">Пока нет активных комнат</div>
+                                    <div className="empty-state-hint">
+                                        Создайте первую комнату и пригласите коллег!
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="rooms-grid">
+                                    {rooms.map((room) => (
+                                        <div key={room.id} className="room-card" onClick={() => joinRoom(room)}>
+                                            <div className="room-header">
+                                                <div>
+                                                    <div className="room-name">{room.name}</div>
+                                                    <div className="room-creator">
+                                                        Создал: {room.creator}
+                                                    </div>
+                                                </div>
+                                                <div className="participant-count">
+                                                    👥 {getParticipantCount(room)}
+                                                </div>
+                                            </div>
+                                            <div className="room-description">
+                                                {room.description}
+                                            </div>
+                                            <div className="room-footer">
+                                                <div className="room-time">
+                                                    {formatTime(room.createdAt)}
+                                                </div>
+                                                <button className="join-btn">
+                                                    Присоединиться
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Сайдбар */}
+                        <div className="sidebar">
+                            {/* Создание комнаты */}
+                            <div className="create-room-card">
+                                <h3>Создать комнату</h3>
+                                <form onSubmit={handleCreateRoom}>
+                                    <div className="form-group">
+                                        <label className="form-label">Название</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="Планёрка команды"
+                                            value={roomName}
+                                            onChange={(e) => setRoomName(e.target.value)}
+                                            maxLength={50}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Описание (необязательно)</label>
+                                        <textarea
+                                            className="form-textarea"
+                                            placeholder="Обсуждение проекта..."
+                                            value={roomDescription}
+                                            onChange={(e) => setRoomDescription(e.target.value)}
+                                            maxLength={200}
+                                        />
+                                    </div>
+                                    <button 
+                                        type="submit" 
+                                        className="btn btn-primary" 
+                                        style={{ width: '100%' }}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Создание...' : 'Создать комнату'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Статистика */}
+                            <div className="stats-card">
+                                <h3>📊 Статистика</h3>
+                                <div className="stat-item">
+                                    <span className="stat-label">Активных комнат</span>
+                                    <span className="stat-value">{rooms.length}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Участников онлайн</span>
+                                    <span className="stat-value">
+                                        {rooms.reduce((sum, room) => sum + getParticipantCount(room), 0)}
+                                    </span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Ваш профиль</span>
+                                    <span className="stat-value">👤 {currentUser}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const LoginScreen = ({ onLogin, loading, error }) => {
+            const [name, setName] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onLogin(name);
+            };
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>🎥 Видеоконференции миллиардеров</h1>
+                        <p>HD видеозвонки • Неограниченное время • Бесплатно</p>
+                    </div>
+
+                    <div className="login-container">
+                        <h2>Добро пожаловать!</h2>
+                        <p>Введите ваше имя для начала</p>
+
+                        {error && <div className="error-message">{error}</div>}
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Ваше имя"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    maxLength={20}
+                                    disabled={loading}
+                                    autoFocus
+                                    style={{ textAlign: 'center', fontSize: '16px' }}
+                                />
+                            </div>
+                            <button 
+                                type="submit" 
+                                className="btn btn-primary"
+                                style={{ width: '100%', padding: '15px' }}
+                                disabled={loading || !name.trim()}
+                            >
+                                {loading ? 'Вход...' : 'Начать'}
+                            </button>
+                        </form>
+
+                        <div style={{ 
+                            marginTop: '30px', 
+                            padding: '20px', 
+                            background: 'rgba(76, 175, 80, 0.1)', 
+                            borderRadius: '15px', 
+                            fontSize: '14px',
+                            textAlign: 'left'
+                        }}>
+                            <strong style={{ color: '#2e7d32' }}>✅ Возможности:</strong>
+                            <div style={{ marginTop: '10px', color: '#666', lineHeight: '1.8' }}>
+                                🎥 HD видео и аудио<br/>
+                                👥 Неограниченное количество участников<br/>
+                                🖥️ Демонстрация экрана<br/>
+                                💬 Текстовый чат в видео<br/>
+                                🔒 Защищённое соединение<br/>
+                                📱 Работает на всех устройствах<br/>
+                                ⏰ Без ограничений по времени
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
