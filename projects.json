@@ -1,14 +1,5 @@
 [
   {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-01-02",
-    "tags": []
-  },
-  {
     "id": "checker",
     "title": "Checker",
     "description": "Описание проекта скоро появится",
