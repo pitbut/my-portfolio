@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Анализатор музыки - Ноты</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: rgba(255, 215, 0, 0.6);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .control-group label {
+            display: block;
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px;
+        }
+
+        select:hover, button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .speed-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 215, 0, 0.2);
+            outline: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffd700;
+            cursor: pointer;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .content-panel {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .content-panel.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notes-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .note-item {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+            animation: noteAppear 0.3s ease;
+        }
+
+        @keyframes noteAppear {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            perspective: 1000px;
+        }
+
+        .piano-keys {
+            display: flex;
+            position: relative;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .key {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .key.white {
+            width: 50px;
+            height: 200px;
+            background: linear-gradient(to bottom, #fff 0%, #f5f5f5 100%);
+            border: 1px solid #333;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .key.white:hover {
+            background: linear-gradient(to bottom, #f0f0f0 0%, #e5e5e5 100%);
+        }
+
+        .key.white.active {
+            background: linear-gradient(to bottom, #ffd700 0%, #ffed4e 100%);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            transform: translateY(2px);
+        }
+
+        .key.black {
+            width: 35px;
+            height: 130px;
+            background: linear-gradient(to bottom, #222 0%, #000 100%);
+            border: 1px solid #000;
+            border-radius: 0 0 3px 3px;
+            position: absolute;
+            z-index: 2;
+            margin-left: -17.5px;
+        }
+
+        .key.black:hover {
+            background: linear-gradient(to bottom, #333 0%, #111 100%);
+        }
+
+        .key.black.active {
+            background: linear-gradient(to bottom, #ffd700 0%, #ffed4e 100%);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            transform: translateY(2px);
+        }
+
+        .key-label {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #333;
+            pointer-events: none;
+        }
+
+        .key.black .key-label {
+            color: #ffd700;
+            bottom: 5px;
+        }
+
+        .guitar {
+            margin: 30px auto;
+            max-width: 900px;
+        }
+
+        .guitar-chords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chord-diagram {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .chord-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .chord-grid {
+            position: relative;
+            display: inline-block;
+        }
+
+        .chord-strings {
+            display: flex;
+            gap: 15px;
+        }
+
+        .chord-string {
+            width: 3px;
+            height: 120px;
+            background: #333;
+            position: relative;
+        }
+
+        .chord-frets {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .chord-fret-line {
+            width: 100%;
+            height: 2px;
+            background: #666;
+        }
+
+        .chord-fret-line:first-child {
+            background: #000;
+            height: 4px;
+        }
+
+        .chord-dot {
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border: 3px solid #333;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .chord-string-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .chord-mute {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .chord-open {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 15px;
+            border: 3px solid #333;
+            border-radius: 50%;
+            background: transparent;
+        }
+
+        .guitar-neck {
+            position: relative;
+            background: linear-gradient(to right, #3e2723 0%, #5d4037 50%, #3e2723 100%);
+            border-radius: 10px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .fret-markers {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 100%;
+            display: flex;
+            pointer-events: none;
+        }
+
+        .fret-line {
+            flex: 1;
+            border-right: 3px solid rgba(200, 200, 200, 0.3);
+            position: relative;
+        }
+
+        .fret-line::before {
+            content: attr(data-fret);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .fret-line:last-child {
+            border-right: none;
+        }
+
+        .string {
+            position: relative;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .string-label {
+            position: absolute;
+            left: -40px;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .string-line {
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, #888 0%, #ccc 50%, #888 100%);
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .string:nth-child(1) .string-line { height: 2px; }
+        .string:nth-child(2) .string-line { height: 2.5px; }
+        .string:nth-child(3) .string-line { height: 3px; }
+        .string:nth-child(4) .string-line { height: 3.5px; }
+        .string:nth-child(5) .string-line { height: 4px; }
+        .string:nth-child(6) .string-line { height: 4.5px; }
+
+        .guitar-note {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 215, 0, 0.9);
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1a1a2e;
+            font-size: 0.9em;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            animation: noteAppearGuitar 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .guitar-note.active {
+            display: flex;
+        }
+
+        @keyframes noteAppearGuitar {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .accordion {
+            margin: 30px auto;
+            max-width: 500px;
+        }
+
+        .accordion-keyboard {
+            background: linear-gradient(135deg, #8b0000 0%, #cd5c5c 100%);
+            border-radius: 15px;
+            padding: 40px 25px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .accordion-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            font-size: 1.3em;
+        }
+
+        .accordion-rows {
+            display: flex;
+            gap: 18px;
+            position: relative;
+        }
+
+        .accordion-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .accordion-column:nth-child(1),
+        .accordion-column:nth-child(3) {
+            margin-top: 30px;
+        }
+
+        .accordion-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            border: 3px solid #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.75em;
+            transition: all 0.1s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .accordion-btn.empty {
+            cursor: default;
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .accordion-btn.white {
+            background: linear-gradient(to bottom, #fff 0%, #f0f0f0 100%);
+            color: #1a1a2e;
+        }
+
+        .accordion-btn.black {
+            background: linear-gradient(to bottom, #222 0%, #000 100%);
+            color: #ffd700;
+        }
+
+        .accordion-btn:hover:not(.empty) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+        }
+
+        .accordion-btn.active {
+            background: linear-gradient(to bottom, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            transform: scale(0.95);
+            border-color: #ffd700;
+        }
+
+        .staff-notation {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            min-height: 300px;
+        }
+
+        .staff-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .staff-lines {
+            position: relative;
+            height: 200px;
+            margin: 40px 0;
+        }
+
+        .staff-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #333;
+            left: 0;
+        }
+
+        .staff-line:nth-child(1) { top: 0; }
+        .staff-line:nth-child(2) { top: 25%; }
+        .staff-line:nth-child(3) { top: 50%; }
+        .staff-line:nth-child(4) { top: 75%; }
+        .staff-line:nth-child(5) { top: 100%; }
+
+        .treble-clef {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 120px;
+            color: #333;
+            font-family: serif;
+        }
+
+        .note-staff {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: #333;
+            border-radius: 50%;
+            transform: translateY(-50%) rotate(-20deg);
+        }
+
+        .note-staff::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            bottom: 0;
+            width: 2px;
+            height: 60px;
+            background: #333;
+        }
+
+        .note-staff.active {
+            background: #ffd700;
+        }
+
+        .note-staff.active::after {
+            background: #ffd700;
+        }
+
+        .staff-info {
+            text-align: center;
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        #waveform {
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            color: #ffd700;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #ffd700;
+            font-size: 1.2em;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top: 4px solid #ffd700;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .piano-keys {
+                transform: scale(0.7);
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Анализатор музыки - Ноты</h1>
+            <p class="subtitle">Загрузите музыку и получите ноты для обучения на любом инструменте</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="audioFile" accept="audio/*">
+                <label for="audioFile" class="upload-btn">📁 Загрузить музыкальный файл</label>
+            </div>
+            <p style="margin-top: 15px; color: #aaa;">Поддерживаются форматы: MP3, WAV, OGG, M4A</p>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Анализируем музыку...</p>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="controls">
+                <div class="control-group">
+                    <label>⚙️ Режим отображения</label>
+                    <select id="displayMode">
+                        <option value="simple">Простые ноты (До, Ре, Ми...)</option>
+                        <option value="chords">Аккорды (Am, C, G...)</option>
+                        <option value="staff">Нотная запись</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>🎹 Инструмент для обучения</label>
+                    <select id="instrument">
+                        <option value="piano">Пианино</option>
+                        <option value="guitar">Гитара</option>
+                        <option value="accordion">Баян</option>
+                    </select>
+                </div>
+
+                <div class="control-group" id="guitarModeControl" style="display: none;">
+                    <label>🎸 Режим гитары</label>
+                    <select id="guitarMode">
+                        <option value="chords">Аккорды (диаграммы)</option>
+                        <option value="notes">Ноты (на грифе)</option>
+                    </select>
+                </div>
+
+                <div class="control-group" id="accordionNotationControl" style="display: none;">
+                    <label>🎼 Нотация баяна</label>
+                    <select id="accordionNotation">
+                        <option value="en">Английская (C, D, E...)</option>
+                        <option value="ru">Русская (До, Ре, Ми...)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>⏱️ Скорость воспроизведения</label>
+                    <div class="playback-controls">
+                        <span>0x</span>
+                        <input type="range" class="speed-slider" id="speedControl" min="0" max="1" step="0.1" value="0.5">
+                        <span id="speedValue">0.5x</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <button id="playPauseBtn">▶️ Воспроизвести</button>
+                </div>
+            </div>
+
+            <canvas id="waveform"></canvas>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="notes">Определенные ноты</div>
+                <div class="tab" data-tab="instrument">Визуализация на инструменте</div>
+                <div class="tab" data-tab="sequence">Последовательность клавиш</div>
+            </div>
+
+            <div id="notesPanel" class="content-panel active">
+                <div class="info-box">
+                    <strong>📊 Распознанные ноты:</strong> <span id="noteCount">0</span> нот
+                </div>
+                <div id="notesDisplay" class="notes-display"></div>
+            </div>
+
+            <div id="instrumentPanel" class="content-panel">
+                <div id="pianoView" class="piano"></div>
+                <div id="guitarView" class="guitar" style="display: none;"></div>
+                <div id="accordionView" class="accordion" style="display: none;"></div>
+            </div>
+
+            <div id="sequencePanel" class="content-panel">
+                <div class="info-box">
+                    <strong>🎼 Последовательность нажатия клавиш</strong><br>
+                    Следуйте за подсвеченными клавишами в такт музыке
+                </div>
+                <div id="sequenceDisplay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let audioBuffer;
+        let sourceNode;
+        let analyser;
+        let isPlaying = false;
+        let currentSpeed = 0.5;
+        let detectedNotes = [];
+        let noteSequence = [];
+        let currentNoteIndex = 0;
+
+        // Инициализация
+        const fileInput = document.getElementById('audioFile');
+        const loading = document.getElementById('loading');
+        const mainContent = document.getElementById('mainContent');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const speedControl = document.getElementById('speedControl');
+        const speedValue = document.getElementById('speedValue');
+        const displayMode = document.getElementById('displayMode');
+        const instrumentSelect = document.getElementById('instrument');
+
+        // Таблица частот для нот
+        const noteFrequencies = {
+            'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
+            'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.00,
+            'G#': 415.30, 'A': 440.00, 'A#': 466.16, 'B': 493.88
+        };
+
+        const noteNames = {
+            'ru': ['До', 'До#', 'Ре', 'Ре#', 'Ми', 'Фа', 'Фа#', 'Соль', 'Соль#', 'Ля', 'Ля#', 'Си'],
+            'en': ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        };
+
+        const chordPatterns = [
+            { name: 'Am', notes: ['A', 'C', 'E'] },
+            { name: 'C', notes: ['C', 'E', 'G'] },
+            { name: 'G', notes: ['G', 'B', 'D'] },
+            { name: 'F', notes: ['F', 'A', 'C'] },
+            { name: 'Em', notes: ['E', 'G', 'B'] },
+            { name: 'Dm', notes: ['D', 'F', 'A'] }
+        ];
+
+        // Обработка загрузки файла
+        fileInput.addEventListener('change', handleFileUpload);
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            loading.classList.add('active');
+            mainContent.style.display = 'none';
+
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const arrayBuffer = await file.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                await analyzeAudio();
+                displayResults();
+
+                loading.classList.remove('active');
+                mainContent.style.display = 'block';
+            } catch (error) {
+                console.error('Ошибка обработки файла:', error);
+                alert('Ошибка при загрузке файла. Попробуйте другой формат.');
+                loading.classList.remove('active');
+            }
+        }
+
+        // Анализ аудио
+        async function analyzeAudio() {
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 4096;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            // Простой анализ по времени
+            const sampleRate = audioBuffer.sampleRate;
+            const duration = audioBuffer.duration;
+            const step = 0.5; // Анализируем каждые 0.5 секунды
+
+            detectedNotes = [];
+            noteSequence = [];
+
+            for (let time = 0; time < duration; time += step) {
+                const note = detectNoteAtTime(time);
+                if (note) {
+                    detectedNotes.push({ note: note, time: time });
+                    noteSequence.push({ note: note, time: time, duration: step });
+                }
+            }
+
+            // Убираем дубликаты подряд идущих нот
+            const uniqueNotes = [];
+            let lastNote = null;
+            for (const item of detectedNotes) {
+                if (item.note !== lastNote) {
+                    uniqueNotes.push(item);
+                    lastNote = item.note;
+                }
+            }
+            detectedNotes = uniqueNotes;
+
+            drawWaveform();
+        }
+
+        // Определение ноты в конкретный момент времени
+        function detectNoteAtTime(time) {
+            const channelData = audioBuffer.getChannelData(0);
+            const sampleRate = audioBuffer.sampleRate;
+            const sampleIndex = Math.floor(time * sampleRate);
+
+            // Простой алгоритм определения частоты (autocorrelation)
+            const windowSize = 2048;
+            const samples = [];
+
+            for (let i = 0; i < windowSize && (sampleIndex + i) < channelData.length; i++) {
+                samples.push(channelData[sampleIndex + i]);
+            }
+
+            const frequency = autoCorrelate(samples, sampleRate);
+            if (frequency > 0) {
+                return frequencyToNote(frequency);
+            }
+
+            return null;
+        }
+
+        // Автокорреляция для определения частоты
+        function autoCorrelate(buffer, sampleRate) {
+            const SIZE = buffer.length;
+            const MAX_SAMPLES = Math.floor(SIZE / 2);
+            let best_offset = -1;
+            let best_correlation = 0;
+            let rms = 0;
+
+            for (let i = 0; i < SIZE; i++) {
+                const val = buffer[i];
+                rms += val * val;
+            }
+            rms = Math.sqrt(rms / SIZE);
+
+            if (rms < 0.01) return -1;
+
+            let lastCorrelation = 1;
+            for (let offset = 1; offset < MAX_SAMPLES; offset++) {
+                let correlation = 0;
+
+                for (let i = 0; i < MAX_SAMPLES; i++) {
+                    correlation += Math.abs((buffer[i]) - (buffer[i + offset]));
+                }
+
+                correlation = 1 - (correlation / MAX_SAMPLES);
+
+                if (correlation > 0.9 && correlation > lastCorrelation) {
+                    const foundGoodCorrelation = correlation > best_correlation;
+
+                    if (foundGoodCorrelation) {
+                        best_correlation = correlation;
+                        best_offset = offset;
+                    }
+                }
+
+                lastCorrelation = correlation;
+            }
+
+            if (best_offset === -1) return -1;
+
+            const frequency = sampleRate / best_offset;
+            return frequency;
+        }
+
+        // Преобразование частоты в ноту
+        function frequencyToNote(frequency) {
+            const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+            const noteIndex = Math.round(noteNum) + 9;
+            const octave = Math.floor((noteIndex + 3) / 12);
+            const note = noteNames.en[((noteIndex % 12) + 12) % 12];
+
+            return note;
+        }
+
+        // Отображение результатов
+        function displayResults() {
+            const mode = displayMode.value;
+            const notesDisplay = document.getElementById('notesDisplay');
+            const noteCount = document.getElementById('noteCount');
+
+            notesDisplay.innerHTML = '';
+
+            if (mode === 'simple') {
+                detectedNotes.forEach(item => {
+                    const noteIndex = noteNames.en.indexOf(item.note);
+                    if (noteIndex !== -1) {
+                        const ruNote = noteNames.ru[noteIndex];
+                        const div = document.createElement('div');
+                        div.className = 'note-item';
+                        div.textContent = ruNote;
+                        notesDisplay.appendChild(div);
+                    }
+                });
+            } else if (mode === 'chords') {
+                // Простое определение аккордов по тройкам нот
+                const chords = detectChords();
+                chords.forEach(chord => {
+                    const div = document.createElement('div');
+                    div.className = 'note-item';
+                    div.textContent = chord;
+                    notesDisplay.appendChild(div);
+                });
+            } else if (mode === 'staff') {
+                createStaffNotation();
+            }
+
+            noteCount.textContent = detectedNotes.length;
+            initInstrumentView();
+        }
+
+        // Создание нотной записи
+        function createStaffNotation() {
+            const notesDisplay = document.getElementById('notesDisplay');
+            
+            let html = '<div class="staff-notation">';
+            html += '<div class="staff-info"><strong>Нотная запись</strong> - распознанные ноты на нотном стане</div>';
+            html += '<div class="staff-container">';
+            html += '<div class="staff-lines">';
+            
+            // Рисуем 5 линеек нотного стана
+            for (let i = 0; i < 5; i++) {
+                html += '<div class="staff-line"></div>';
+            }
+            
+            // Скрипичный ключ
+            html += '<div class="treble-clef">𝄞</div>';
+            
+            // Позиции нот на нотном стане (от нижней линии до верхней)
+            const notePositions = {
+                'C': 125,  // под нижней линией
+                'D': 112.5,
+                'E': 100,  // на нижней линии
+                'F': 87.5,
+                'G': 75,   // на второй линии
+                'A': 62.5,
+                'B': 50,   // на средней линии
+                'C#': 125,
+                'D#': 112.5,
+                'F#': 87.5,
+                'G#': 62.5,
+                'A#': 62.5
+            };
+            
+            // Размещаем ноты
+            detectedNotes.forEach((item, index) => {
+                const position = notePositions[item.note] || 50;
+                const left = 120 + (index * 50);
+                if (left < 800) { // Ограничиваем чтобы не выходили за границы
+                    html += `<div class="note-staff" data-note="${item.note}" style="left: ${left}px; top: ${position}%;"></div>`;
+                }
+            });
+            
+            html += '</div>'; // staff-lines
+            html += '</div>'; // staff-container
+            html += '</div>'; // staff-notation
+            
+            notesDisplay.innerHTML = html;
+        }
+
+        // Определение аккордов
+        function detectChords() {
+            const chords = [];
+            const noteSet = new Set(detectedNotes.map(n => n.note));
+
+            chordPatterns.forEach(pattern => {
+                if (pattern.notes.every(note => noteSet.has(note))) {
+                    chords.push(pattern.name);
+                }
+            });
+
+            return chords.length > 0 ? chords : ['Аккорды не определены'];
+        }
+
+        // Инициализация вида инструмента
+        function initInstrumentView() {
+            const instrument = instrumentSelect.value;
+            const accordionNotationControl = document.getElementById('accordionNotationControl');
+            const guitarModeControl = document.getElementById('guitarModeControl');
+
+            document.getElementById('pianoView').style.display = 'none';
+            document.getElementById('guitarView').style.display = 'none';
+            document.getElementById('accordionView').style.display = 'none';
+            
+            // Показываем/скрываем контролы
+            accordionNotationControl.style.display = 'none';
+            guitarModeControl.style.display = 'none';
+            
+            if (instrument === 'accordion') {
+                accordionNotationControl.style.display = 'block';
+            } else if (instrument === 'guitar') {
+                guitarModeControl.style.display = 'block';
+            }
+
+            if (instrument === 'piano') {
+                document.getElementById('pianoView').style.display = 'block';
+                createPiano();
+            } else if (instrument === 'guitar') {
+                document.getElementById('guitarView').style.display = 'block';
+                createGuitar();
+            } else if (instrument === 'accordion') {
+                document.getElementById('accordionView').style.display = 'block';
+                createAccordion();
+            }
+
+            createSequenceDisplay();
+        }
+
+        // Создание пианино
+        function createPiano() {
+            const pianoView = document.getElementById('pianoView');
+            pianoView.innerHTML = '<div class="piano-keys" id="pianoKeys"></div>';
+
+            const pianoKeys = document.getElementById('pianoKeys');
+            const keys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const blackKeys = ['C#', 'D#', null, 'F#', 'G#', 'A#'];
+
+            for (let octave = 0; octave < 2; octave++) {
+                keys.forEach((key, index) => {
+                    const whiteKey = document.createElement('div');
+                    whiteKey.className = 'key white';
+                    whiteKey.dataset.note = key;
+
+                    const label = document.createElement('span');
+                    label.className = 'key-label';
+                    const noteIndex = noteNames.en.indexOf(key);
+                    label.textContent = noteNames.ru[noteIndex];
+                    whiteKey.appendChild(label);
+
+                    pianoKeys.appendChild(whiteKey);
+
+                    if (blackKeys[index]) {
+                        const blackKey = document.createElement('div');
+                        blackKey.className = 'key black';
+                        blackKey.dataset.note = blackKeys[index];
+                        blackKey.style.left = (index * 50 + 35) + (octave * 350) + 'px';
+
+                        const blackLabel = document.createElement('span');
+                        blackLabel.className = 'key-label';
+                        const blackNoteIndex = noteNames.en.indexOf(blackKeys[index]);
+                        blackLabel.textContent = noteNames.ru[blackNoteIndex];
+                        blackKey.appendChild(blackLabel);
+
+                        pianoKeys.appendChild(blackKey);
+                    }
+                });
+            }
+        }
+
+        // База данных аккордов для гитары
+        const guitarChords = {
+            'C': { name: 'C', positions: [
+                {string: 0, fret: 0, status: 'mute'},
+                {string: 1, fret: 3, status: 'press'},
+                {string: 2, fret: 2, status: 'press'},
+                {string: 3, fret: 0, status: 'open'},
+                {string: 4, fret: 1, status: 'press'},
+                {string: 5, fret: 0, status: 'open'}
+            ]},
+            'D': { name: 'D', positions: [
+                {string: 0, fret: 0, status: 'mute'},
+                {string: 1, fret: 0, status: 'mute'},
+                {string: 2, fret: 0, status: 'open'},
+                {string: 3, fret: 2, status: 'press'},
+                {string: 4, fret: 3, status: 'press'},
+                {string: 5, fret: 2, status: 'press'}
+            ]},
+            'E': { name: 'E', positions: [
+                {string: 0, fret: 0, status: 'open'},
+                {string: 1, fret: 2, status: 'press'},
+                {string: 2, fret: 2, status: 'press'},
+                {string: 3, fret: 1, status: 'press'},
+                {string: 4, fret: 0, status: 'open'},
+                {string: 5, fret: 0, status: 'open'}
+            ]},
+            'G': { name: 'G', positions: [
+                {string: 0, fret: 3, status: 'press'},
+                {string: 1, fret: 2, status: 'press'},
+                {string: 2, fret: 0, status: 'open'},
+                {string: 3, fret: 0, status: 'open'},
+                {string: 4, fret: 0, status: 'open'},
+                {string: 5, fret: 3, status: 'press'}
+            ]},
+            'A': { name: 'A', positions: [
+                {string: 0, fret: 0, status: 'mute'},
+                {string: 1, fret: 0, status: 'open'},
+                {string: 2, fret: 2, status: 'press'},
+                {string: 3, fret: 2, status: 'press'},
+                {string: 4, fret: 2, status: 'press'},
+                {string: 5, fret: 0, status: 'open'}
+            ]},
+            'Am': { name: 'Am', positions: [
+                {string: 0, fret: 0, status: 'mute'},
+                {string: 1, fret: 0, status: 'open'},
+                {string: 2, fret: 2, status: 'press'},
+                {string: 3, fret: 2, status: 'press'},
+                {string: 4, fret: 1, status: 'press'},
+                {string: 5, fret: 0, status: 'open'}
+            ]},
+            'Dm': { name: 'Dm', positions: [
+                {string: 0, fret: 0, status: 'mute'},
+                {string: 1, fret: 0, status: 'mute'},
+                {string: 2, fret: 0, status: 'open'},
+                {string: 3, fret: 2, status: 'press'},
+                {string: 4, fret: 3, status: 'press'},
+                {string: 5, fret: 1, status: 'press'}
+            ]},
+            'Em': { name: 'Em', positions: [
+                {string: 0, fret: 0, status: 'open'},
+                {string: 1, fret: 2, status: 'press'},
+                {string: 2, fret: 2, status: 'press'},
+                {string: 3, fret: 0, status: 'open'},
+                {string: 4, fret: 0, status: 'open'},
+                {string: 5, fret: 0, status: 'open'}
+            ]},
+            'F': { name: 'F', positions: [
+                {string: 0, fret: 1, status: 'press'},
+                {string: 1, fret: 3, status: 'press'},
+                {string: 2, fret: 3, status: 'press'},
+                {string: 3, fret: 2, status: 'press'},
+                {string: 4, fret: 1, status: 'press'},
+                {string: 5, fret: 1, status: 'press'}
+            ]},
+            'A7': { name: 'A7', positions: [
+                {string: 0, fret: 0, status: 'mute'},
+                {string: 1, fret: 0, status: 'open'},
+                {string: 2, fret: 2, status: 'press'},
+                {string: 3, fret: 0, status: 'open'},
+                {string: 4, fret: 2, status: 'press'},
+                {string: 5, fret: 0, status: 'open'}
+            ]}
+        };
+
+        // Создание гитары
+        function createGuitar() {
+            const guitarView = document.getElementById('guitarView');
+            const mode = document.getElementById('guitarMode').value;
+            
+            if (mode === 'chords') {
+                // Режим аккордов - показываем диаграммы
+                createGuitarChords();
+            } else {
+                // Режим нот - показываем гриф с нотами
+                createGuitarNeck();
+            }
+        }
+
+        // Создание диаграмм аккордов
+        function createGuitarChords() {
+            const guitarView = document.getElementById('guitarView');
+            let html = '<div class="guitar-chords">';
+            
+            // Определяем какие аккорды показывать (базовые популярные)
+            const displayChords = ['C', 'D', 'E', 'G', 'A', 'Am', 'Dm', 'Em'];
+            
+            displayChords.forEach(chordName => {
+                const chord = guitarChords[chordName];
+                if (chord) {
+                    html += createChordDiagram(chord);
+                }
+            });
+            
+            html += '</div>';
+            guitarView.innerHTML = html;
+        }
+
+        // Создание диаграммы одного аккорда
+        function createChordDiagram(chord) {
+            let html = '<div class="chord-diagram">';
+            html += `<div class="chord-name">${chord.name}</div>`;
+            html += '<div class="chord-grid" style="position: relative; padding-top: 40px;">';
+            
+            // Горизонтальные линии (лады)
+            html += '<div class="chord-frets">';
+            for (let i = 0; i < 5; i++) {
+                html += '<div class="chord-fret-line"></div>';
+            }
+            html += '</div>';
+            
+            // Вертикальные линии (струны)
+            html += '<div class="chord-strings" style="position: relative;">';
+            for (let i = 0; i < 6; i++) {
+                html += '<div class="chord-string" style="position: relative;">';
+                
+                const pos = chord.positions[i];
+                
+                // Метки сверху (открытая/заглушенная)
+                if (pos.status === 'open') {
+                    html += '<div class="chord-open"></div>';
+                } else if (pos.status === 'mute') {
+                    html += '<div class="chord-mute">×</div>';
+                }
+                
+                // Точки на ладах
+                if (pos.status === 'press' && pos.fret > 0) {
+                    const topPosition = (pos.fret - 0.5) * 30; // 30px между ладами
+                    html += `<div class="chord-dot" style="top: ${topPosition}px;"></div>`;
+                }
+                
+                html += '</div>';
+            }
+            html += '</div>';
+            
+            html += '</div>';
+            html += '</div>';
+            
+            return html;
+        }
+
+        // Создание грифа с нотами
+        function createGuitarNeck() {
+            const guitarView = document.getElementById('guitarView');
+            
+            // Массив струн гитары (от толстой к тонкой)
+            const strings = [
+                { name: 'E', openNote: 'E', frets: ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E'] },
+                { name: 'A', openNote: 'A', frets: ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A'] },
+                { name: 'D', openNote: 'D', frets: ['D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D'] },
+                { name: 'G', openNote: 'G', frets: ['G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G'] },
+                { name: 'B', openNote: 'B', frets: ['B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] },
+                { name: 'E', openNote: 'E', frets: ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E'] }
+            ];
+
+            const numFrets = 12;
+            
+            let html = '<div class="guitar-neck">';
+            
+            // Добавляем разметку ладов
+            html += '<div class="fret-markers">';
+            for (let i = 0; i <= numFrets; i++) {
+                html += `<div class="fret-line" data-fret="${i}"></div>`;
+            }
+            html += '</div>';
+            
+            // Создаем струны
+            strings.forEach((string, stringIndex) => {
+                html += `<div class="string">`;
+                html += `<span class="string-label">${string.name}</span>`;
+                html += `<div class="string-line">`;
+                
+                // Добавляем позиции для нот на каждом ладу
+                for (let fret = 0; fret <= numFrets; fret++) {
+                    const note = string.frets[fret];
+                    const position = (fret / numFrets) * 100;
+                    html += `<div class="guitar-note" data-string="${stringIndex}" data-fret="${fret}" data-note="${note}" style="left: ${position}%">${note}</div>`;
+                }
+                
+                html += `</div>`;
+                html += `</div>`;
+            });
+            
+            html += '</div>';
+            
+            guitarView.innerHTML = html;
+        }
+
+        // Создание баяна
+        function createAccordion() {
+            const accordionView = document.getElementById('accordionView');
+            const notation = document.getElementById('accordionNotation').value;
+            
+            // Правая клавиатура баяна - ТОЧНАЯ раскладка из вашего редактора
+            const RYAd_3 = [
+                {'nota': 'до2', 'black': false},
+                {'nota': 'ре♯2', 'black': true},
+                {'nota': 'фа♯2', 'black': true},
+                {'nota': 'ля2', 'black': false},
+                {'nota': 'до3', 'black': false},
+                {'nota': 'ре♯3', 'black': true},
+                {'nota': 'фа♯3', 'black': true},
+                {'nota': 'ля3', 'black': false},
+                {'nota': 'до4', 'black': false},
+                {'nota': 'ре♯4', 'black': true},
+                {'nota': 'фа♯4', 'black': true},
+                {'nota': 'ля4', 'black': false},
+                {'nota': 'до5', 'black': false},
+                {'nota': 'ре♯5', 'black': true},
+                {'nota': 'фа♯5', 'black': true},
+                {'nota': 'ля5', 'black': false},
+                {'nota': 'до6', 'black': false},
+                {'nota': 'ре♯6', 'black': true}
+            ];
+
+            const RYAd_2 = [
+                {'nota': 'си1', 'black': true},
+                {'nota': 'до♯2', 'black': true},
+                {'nota': 'ми2', 'black': false},
+                {'nota': 'соль2', 'black': false},
+                {'nota': 'ля♯2', 'black': true},
+                {'nota': 'до♯3', 'black': true},
+                {'nota': 'ми3', 'black': false},
+                {'nota': 'соль3', 'black': false},
+                {'nota': 'ля♯3', 'black': true},
+                {'nota': 'до♯4', 'black': true},
+                {'nota': 'ми4', 'black': false},
+                {'nota': 'соль4', 'black': false},
+                {'nota': 'ля♯4', 'black': true},
+                {'nota': 'до♯5', 'black': true},
+                {'nota': 'ми5', 'black': false},
+                {'nota': 'соль5', 'black': false},
+                {'nota': 'ля♯6', 'black': true},
+                {'nota': 'до♯6', 'black': true}
+            ];
+
+            const RYAd_1 = [
+                {'nota': 'си1', 'black': false},
+                {'nota': 'ре2', 'black': false},
+                {'nota': 'фа2', 'black': false},
+                {'nota': 'соль♯2', 'black': true},
+                {'nota': 'си2', 'black': false},
+                {'nota': 'ре3', 'black': false},
+                {'nota': 'фа3', 'black': false},
+                {'nota': 'соль♯3', 'black': true},
+                {'nota': 'си3', 'black': false},
+                {'nota': 'ре4', 'black': false},
+                {'nota': 'фа4', 'black': false},
+                {'nota': 'соль♯4', 'black': true},
+                {'nota': 'си5', 'black': false},
+                {'nota': 'ре5', 'black': false},
+                {'nota': 'фа5', 'black': false},
+                {'nota': 'соль♯5', 'black': true},
+                {'nota': 'си6', 'black': false},
+                {'nota': 'ре6', 'black': false}
+            ];
+
+            // Функция преобразования русских нот в английские
+            function ruToEn(nota) {
+                const notes = {
+                    'до': 'C', 'ре': 'D', 'ми': 'E', 'фа': 'F',
+                    'соль': 'G', 'ля': 'A', 'си': 'B'
+                };
+                
+                let result = nota;
+                for (const [ru, en] of Object.entries(notes)) {
+                    result = result.replace(ru, en);
+                }
+                result = result.replace('♯', '#');
+                return result;
+            }
+
+            // Функция для получения базовой ноты без октавы
+            function getBaseNote(nota) {
+                const enNota = ruToEn(nota);
+                // Убираем цифру октавы
+                return enNota.replace(/\d+/, '');
+            }
+
+            // Собираем все ряды в один массив
+            const accordionLayout = [RYAd_1, RYAd_2, RYAd_3];
+            const rowNames = ['1-й ряд', '2-й ряд', '3-й ряд'];
+
+            let html = '<div class="accordion-keyboard">';
+            html += '<h3 class="accordion-title">Правая клавиатура баяна<br>(3 ряда)</h3>';
+            html += '<div class="accordion-rows">';
+            
+            accordionLayout.forEach((row, colIndex) => {
+                html += '<div class="accordion-column">';
+                row.forEach((button, btnIndex) => {
+                    const displayNote = notation === 'ru' ? button.nota : ruToEn(button.nota);
+                    const baseNote = getBaseNote(button.nota);
+                    const buttonType = button.black ? 'black' : 'white';
+                    
+                    html += `<div class="accordion-btn ${buttonType}" 
+                                  data-note="${baseNote}" 
+                                  data-fullnote="${ruToEn(button.nota)}" 
+                                  data-col="${colIndex}" 
+                                  data-row="${btnIndex}">
+                        ${displayNote}
+                    </div>`;
+                });
+                html += '</div>';
+            });
+            
+            html += '</div>';
+            html += '<div style="text-align: center; margin-top: 20px; color: #fff; font-size: 0.9em;">1-й ряд &nbsp;&nbsp; 2-й ряд &nbsp;&nbsp; 3-й ряд</div>';
+            html += '</div>';
+            
+            accordionView.innerHTML = html;
+        }
+
+        // Создание дисплея последовательности
+        function createSequenceDisplay() {
+            const sequenceDisplay = document.getElementById('sequenceDisplay');
+            sequenceDisplay.innerHTML = '';
+
+            noteSequence.forEach((item, index) => {
+                const noteIndex = noteNames.en.indexOf(item.note);
+                if (noteIndex !== -1) {
+                    const div = document.createElement('div');
+                    div.className = 'note-item';
+                    div.style.opacity = '0.5';
+                    div.dataset.index = index;
+                    div.textContent = `${index + 1}. ${noteNames.ru[noteIndex]} (${item.time.toFixed(1)}s)`;
+                    sequenceDisplay.appendChild(div);
+                }
+            });
+        }
+
+        // Подсветка клавиш
+        function highlightKey(note) {
+            // Пианино
+            document.querySelectorAll('.key').forEach(key => {
+                key.classList.remove('active');
+                if (key.dataset.note === note) {
+                    key.classList.add('active');
+                    setTimeout(() => key.classList.remove('active'), 500);
+                }
+            });
+
+            // Гитара
+            const guitarMode = document.getElementById('guitarMode').value;
+            
+            if (guitarMode === 'chords') {
+                // Режим аккордов - подсвечиваем аккорд
+                highlightChord(note);
+            } else {
+                // Режим нот - подсвечиваем ноту на грифе
+                document.querySelectorAll('.guitar-note').forEach(guitarNote => {
+                    guitarNote.classList.remove('active');
+                });
+                
+                const firstNotePosition = document.querySelector(`.guitar-note[data-note="${note}"]`);
+                if (firstNotePosition) {
+                    firstNotePosition.classList.add('active');
+                    setTimeout(() => firstNotePosition.classList.remove('active'), 500);
+                }
+            }
+
+            // Баян - подсвечиваем все кнопки с данной нотой (без учета октавы)
+            document.querySelectorAll('.accordion-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.note === note && !btn.classList.contains('empty')) {
+                    btn.classList.add('active');
+                    setTimeout(() => btn.classList.remove('active'), 500);
+                }
+            });
+
+            // Подсветка в последовательности
+            const sequenceItems = document.querySelectorAll('#sequenceDisplay .note-item');
+            sequenceItems.forEach(item => item.style.opacity = '0.5');
+            if (sequenceItems[currentNoteIndex]) {
+                sequenceItems[currentNoteIndex].style.opacity = '1';
+                sequenceItems[currentNoteIndex].style.background = 'rgba(255, 215, 0, 0.3)';
+            }
+        }
+
+        // Подсветка аккорда
+        function highlightChord(note) {
+            // Определяем какой аккорд соответствует ноте
+            const noteToChord = {
+                'C': 'C', 'D': 'D', 'E': 'Em', 'F': 'F', 
+                'G': 'G', 'A': 'Am', 'B': 'Em'
+            };
+            
+            const chordName = noteToChord[note] || 'C';
+            
+            // Подсвечиваем соответствующую диаграмму
+            document.querySelectorAll('.chord-diagram').forEach(diagram => {
+                diagram.style.transform = 'scale(1)';
+                diagram.style.background = '#fff';
+            });
+            
+            const targetDiagram = Array.from(document.querySelectorAll('.chord-name'))
+                .find(name => name.textContent === chordName);
+            
+            if (targetDiagram) {
+                const diagram = targetDiagram.parentElement;
+                diagram.style.transform = 'scale(1.1)';
+                diagram.style.background = 'rgba(255, 215, 0, 0.2)';
+                diagram.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    diagram.style.transform = 'scale(1)';
+                    diagram.style.background = '#fff';
+                }, 500);
+            }
+        }
+
+        // Воспроизведение
+        playPauseBtn.addEventListener('click', togglePlayback);
+
+        function togglePlayback() {
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                startPlayback();
+            }
+        }
+
+        function startPlayback() {
+            if (!audioBuffer) return;
+            
+            // Защита от нулевой скорости
+            if (currentSpeed === 0) {
+                alert('Увеличьте скорость воспроизведения');
+                return;
+            }
+
+            sourceNode = audioContext.createBufferSource();
+            sourceNode.buffer = audioBuffer;
+            sourceNode.playbackRate.value = currentSpeed;
+            sourceNode.connect(audioContext.destination);
+
+            sourceNode.start(0);
+            isPlaying = true;
+            playPauseBtn.textContent = '⏸️ Пауза';
+
+            // Синхронизация подсветки
+            currentNoteIndex = 0;
+            const intervalTime = Math.max(100, 500 / currentSpeed); // Минимум 100мс
+            playbackInterval = setInterval(() => {
+                if (currentNoteIndex < noteSequence.length) {
+                    const note = noteSequence[currentNoteIndex].note;
+                    highlightKey(note);
+                    currentNoteIndex++;
+                }
+            }, intervalTime);
+
+            sourceNode.onended = () => {
+                stopPlayback();
+            };
+        }
+
+        function stopPlayback() {
+            if (sourceNode) {
+                sourceNode.stop();
+                sourceNode = null;
+            }
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+            }
+            isPlaying = false;
+            playPauseBtn.textContent = '▶️ Воспроизвести';
+            currentNoteIndex = 0;
+        }
+
+        // Контроль скорости
+        speedControl.addEventListener('input', (e) => {
+            currentSpeed = parseFloat(e.target.value);
+            speedValue.textContent = currentSpeed.toFixed(1) + 'x';
+
+            if (isPlaying && sourceNode && currentSpeed > 0) {
+                sourceNode.playbackRate.value = currentSpeed;
+            }
+            
+            // Если скорость 0 и играет музыка - останавливаем
+            if (currentSpeed === 0 && isPlaying) {
+                stopPlayback();
+            }
+        });
+
+        // Переключение режимов
+        displayMode.addEventListener('change', displayResults);
+        instrumentSelect.addEventListener('change', initInstrumentView);
+        
+        // Обработчик переключения нотации баяна
+        document.getElementById('accordionNotation').addEventListener('change', () => {
+            if (instrumentSelect.value === 'accordion') {
+                createAccordion();
+            }
+        });
+        
+        // Обработчик переключения режима гитары
+        document.getElementById('guitarMode').addEventListener('change', () => {
+            if (instrumentSelect.value === 'guitar') {
+                createGuitar();
+            }
+        });
+
+        // Табы
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(tabName + 'Panel').classList.add('active');
+            });
+        });
+
+        // Отрисовка волновой формы
+        function drawWaveform() {
+            const canvas = document.getElementById('waveform');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 100;
+
+            const data = audioBuffer.getChannelData(0);
+            const step = Math.ceil(data.length / canvas.width);
+            const amp = canvas.height / 2;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+
+            for (let i = 0; i < canvas.width; i++) {
+                let min = 1.0;
+                let max = -1.0;
+
+                for (let j = 0; j < step; j++) {
+                    const datum = data[(i * step) + j];
+                    if (datum < min) min = datum;
+                    if (datum > max) max = datum;
+                }
+
+                ctx.moveTo(i, (1 + min) * amp);
+                ctx.lineTo(i, (1 + max) * amp);
+            }
+
+            ctx.stroke();
+        }
+    </script>
+</body>
+</html>
