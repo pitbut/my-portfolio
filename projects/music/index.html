@@ -845,7 +845,10 @@
 
             <div id="notesPanel" class="content-panel active">
                 <div class="info-box">
-                    <strong>📊 Распознанные ноты:</strong> <span id="noteCount">0</span> нот
+                    <strong>📊 Распознанные ноты:</strong> <span id="noteCount">0</span> нот<br>
+                    <span style="font-size: 0.85em; color: #888; margin-top: 5px; display: inline-block;">
+                        (дубликаты автоматически удалены для удобства обучения)
+                    </span>
                 </div>
                 <div id="notesDisplay" class="notes-display"></div>
             </div>
@@ -968,13 +971,14 @@
             // Конвертируем аудио в MIDI-подобную структуру
             const sampleRate = audioBuffer.sampleRate;
             const duration = audioBuffer.duration;
-            const hopSize = 0.1; // Анализируем каждые 0.1 секунды
+            const hopSize = 0.15; // Анализируем каждые 0.15 секунды (оптимально)
 
             const midiData = []; // MIDI-подобная структура
             detectedNotes = [];
             noteSequence = [];
 
             console.log('🎵 Начинаем конвертацию аудио в MIDI...');
+            console.log(`📊 Длительность: ${duration.toFixed(2)} сек, шаг анализа: ${hopSize} сек`);
 
             for (let time = 0; time < duration; time += hopSize) {
                 const notes = detectNotesAtTime(time, hopSize);
@@ -991,7 +995,7 @@
                 }
             }
 
-            console.log(`✅ MIDI конвертация завершена! Найдено ${midiData.length} нот`);
+            console.log(`✅ MIDI конвертация завершена! Найдено ${midiData.length} сырых MIDI событий`);
 
             // Преобразуем MIDI данные в упрощенный формат для отображения
             processMidiData(midiData);
@@ -1051,7 +1055,7 @@
         // Находим пики в частотном спектре
         function findPeakFrequencies(spectrum, sampleRate) {
             const notes = [];
-            const threshold = Math.max(...spectrum) * 0.3; // 30% от максимума
+            const threshold = Math.max(...spectrum) * 0.4; // 40% от максимума (увеличено для фильтрации шума)
             const minFreq = 80;  // Минимальная частота (E2)
             const maxFreq = 1200; // Максимальная частота
 
@@ -1079,61 +1083,126 @@
                 }
             }
 
-            // Сортируем по силе сигнала и берем топ-3
+            // Сортируем по силе сигнала и берем только самую громкую ноту
             notes.sort((a, b) => b.velocity - a.velocity);
-            return notes.slice(0, 3); // Максимум 3 ноты одновременно
+            return notes.slice(0, 1); // Только одна самая сильная нота
         }
 
         // Обработка MIDI данных
         function processMidiData(midiData) {
-            // Группируем последовательные одинаковые ноты
-            const groupedNotes = [];
-            let currentNote = null;
-            let currentStart = 0;
-            let currentDuration = 0;
+            if (midiData.length === 0) {
+                detectedNotes = [];
+                noteSequence = [];
+                return;
+            }
 
-            midiData.forEach(midi => {
-                if (currentNote === midi.note) {
-                    currentDuration += midi.duration;
+            console.log(`🎼 Обрабатываем ${midiData.length} сырых MIDI событий...`);
+
+            // ШАГ 1: Группируем последовательные одинаковые ноты
+            const groupedNotes = [];
+            let currentNote = midiData[0].note;
+            let currentStart = midiData[0].startTime;
+            let currentDuration = midiData[0].duration;
+            let maxVelocity = midiData[0].velocity;
+
+            for (let i = 1; i < midiData.length; i++) {
+                const midi = midiData[i];
+                
+                // Если та же нота И она идет подряд (разрыв меньше 0.15 сек)
+                if (midi.note === currentNote && (midi.startTime - (currentStart + currentDuration)) < 0.15) {
+                    // Расширяем длительность
+                    currentDuration = midi.startTime + midi.duration - currentStart;
+                    maxVelocity = Math.max(maxVelocity, midi.velocity);
                 } else {
-                    if (currentNote !== null) {
-                        groupedNotes.push({
-                            note: currentNote,
-                            startTime: currentStart,
-                            duration: currentDuration
-                        });
-                    }
+                    // Сохраняем предыдущую ноту
+                    groupedNotes.push({
+                        note: currentNote,
+                        startTime: currentStart,
+                        duration: currentDuration,
+                        velocity: maxVelocity
+                    });
+                    
+                    // Начинаем новую ноту
                     currentNote = midi.note;
                     currentStart = midi.startTime;
                     currentDuration = midi.duration;
+                    maxVelocity = midi.velocity;
                 }
-            });
-
-            // Добавляем последнюю ноту
-            if (currentNote !== null) {
-                groupedNotes.push({
-                    note: currentNote,
-                    startTime: currentStart,
-                    duration: currentDuration
-                });
             }
 
-            // Убираем слишком короткие ноты (менее 0.2 секунды)
-            const filteredNotes = groupedNotes.filter(n => n.duration >= 0.2);
+            // Добавляем последнюю ноту
+            groupedNotes.push({
+                note: currentNote,
+                startTime: currentStart,
+                duration: currentDuration,
+                velocity: maxVelocity
+            });
+
+            console.log(`✅ После группировки: ${groupedNotes.length} нот`);
+
+            // ШАГ 2: Убираем слишком короткие ноты (шумы)
+            const filteredNotes = groupedNotes.filter(n => n.duration >= 0.25); // Минимум 0.25 секунды
+            
+            console.log(`✅ После фильтрации коротких нот: ${filteredNotes.length} нот`);
+
+            // ШАГ 3: Убираем слабые ноты (если одновременно играют несколько)
+            const cleanedNotes = [];
+            for (let i = 0; i < filteredNotes.length; i++) {
+                const current = filteredNotes[i];
+                let keep = true;
+                
+                // Проверяем, нет ли более громкой ноты в том же временном окне
+                for (let j = 0; j < filteredNotes.length; j++) {
+                    if (i === j) continue;
+                    
+                    const other = filteredNotes[j];
+                    const timeOverlap = !(current.startTime + current.duration < other.startTime || 
+                                         current.startTime > other.startTime + other.duration);
+                    
+                    // Если ноты накладываются по времени и другая громче
+                    if (timeOverlap && other.velocity > current.velocity * 1.5) {
+                        keep = false;
+                        break;
+                    }
+                }
+                
+                if (keep) {
+                    cleanedNotes.push(current);
+                }
+            }
+
+            console.log(`✅ После очистки слабых нот: ${cleanedNotes.length} нот`);
+
+            // ШАГ 4: Финальная дедупликация - убираем повторы подряд
+            const finalNotes = [];
+            let lastNote = null;
+            
+            for (const note of cleanedNotes) {
+                // Добавляем ноту только если она отличается от предыдущей
+                // ИЛИ если прошло достаточно времени (повторное нажатие)
+                if (lastNote === null || 
+                    note.note !== lastNote.note || 
+                    (note.startTime - lastNote.startTime) > 0.5) {
+                    finalNotes.push(note);
+                    lastNote = note;
+                }
+            }
+
+            console.log(`✅ Финальный результат: ${finalNotes.length} уникальных нот`);
 
             // Формируем финальные массивы
-            detectedNotes = filteredNotes.map(n => ({
+            detectedNotes = finalNotes.map(n => ({
                 note: n.note,
                 time: n.startTime
             }));
 
-            noteSequence = filteredNotes.map(n => ({
+            noteSequence = finalNotes.map(n => ({
                 note: n.note,
                 time: n.startTime,
                 duration: n.duration
             }));
 
-            console.log(`🎼 Обработано ${detectedNotes.length} уникальных нот`);
+            console.log(`🎵 Распознано нот: ${detectedNotes.length}`);
         }
 
         // Преобразование частоты в ноту
