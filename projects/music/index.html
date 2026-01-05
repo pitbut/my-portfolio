@@ -776,11 +776,13 @@
                 <label for="audioFile" class="upload-btn">📁 Загрузить музыкальный файл</label>
             </div>
             <p style="margin-top: 15px; color: #aaa;">Поддерживаются форматы: MP3, WAV, OGG, M4A</p>
+            <p style="margin-top: 5px; color: #ffd700; font-size: 0.9em;">🎵 Аудио будет автоматически конвертировано в MIDI для точного распознавания нот</p>
         </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Анализируем музыку...</p>
+            <p id="loadingText">Анализируем музыку...</p>
+            <p id="loadingStage" style="font-size: 0.9em; color: #aaa; margin-top: 10px;"></p>
         </div>
 
         <div id="mainContent" style="display: none;">
@@ -915,126 +917,223 @@
 
             loading.classList.add('active');
             mainContent.style.display = 'none';
+            
+            const loadingText = document.getElementById('loadingText');
+            const loadingStage = document.getElementById('loadingStage');
 
             try {
+                loadingText.textContent = 'Загружаем аудиофайл...';
+                loadingStage.textContent = '';
+                
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const arrayBuffer = await file.arrayBuffer();
+                
+                loadingText.textContent = 'Декодируем аудио...';
                 audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
+                loadingText.textContent = '🎵 Конвертируем аудио в MIDI формат...';
+                loadingStage.textContent = 'Это может занять некоторое время...';
+                
+                // Небольшая задержка чтобы UI обновился
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
                 await analyzeAudio();
+                
+                loadingText.textContent = '✅ MIDI конвертация завершена!';
+                loadingStage.textContent = 'Обрабатываем результаты...';
+                
                 displayResults();
 
                 loading.classList.remove('active');
                 mainContent.style.display = 'block';
             } catch (error) {
                 console.error('Ошибка обработки файла:', error);
-                alert('Ошибка при загрузке файла. Попробуйте другой формат.');
-                loading.classList.remove('active');
+                loadingText.textContent = '❌ Ошибка!';
+                loadingStage.textContent = 'Попробуйте другой файл';
+                setTimeout(() => {
+                    loading.classList.remove('active');
+                }, 2000);
             }
         }
 
-        // Анализ аудио
+        // Анализ аудио и конвертация в MIDI
         async function analyzeAudio() {
             analyser = audioContext.createAnalyser();
-            analyser.fftSize = 4096;
+            analyser.fftSize = 8192; // Увеличиваем для лучшей точности
+            analyser.smoothingTimeConstant = 0.8;
 
             const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+            const dataArray = new Float32Array(bufferLength);
 
-            // Простой анализ по времени
+            // Конвертируем аудио в MIDI-подобную структуру
             const sampleRate = audioBuffer.sampleRate;
             const duration = audioBuffer.duration;
-            const step = 0.5; // Анализируем каждые 0.5 секунды
+            const hopSize = 0.1; // Анализируем каждые 0.1 секунды
 
+            const midiData = []; // MIDI-подобная структура
             detectedNotes = [];
             noteSequence = [];
 
-            for (let time = 0; time < duration; time += step) {
-                const note = detectNoteAtTime(time);
-                if (note) {
-                    detectedNotes.push({ note: note, time: time });
-                    noteSequence.push({ note: note, time: time, duration: step });
+            console.log('🎵 Начинаем конвертацию аудио в MIDI...');
+
+            for (let time = 0; time < duration; time += hopSize) {
+                const notes = detectNotesAtTime(time, hopSize);
+                
+                if (notes && notes.length > 0) {
+                    notes.forEach(noteData => {
+                        midiData.push({
+                            note: noteData.note,
+                            velocity: noteData.velocity,
+                            startTime: time,
+                            duration: hopSize
+                        });
+                    });
                 }
             }
 
-            // Убираем дубликаты подряд идущих нот
-            const uniqueNotes = [];
-            let lastNote = null;
-            for (const item of detectedNotes) {
-                if (item.note !== lastNote) {
-                    uniqueNotes.push(item);
-                    lastNote = item.note;
-                }
-            }
-            detectedNotes = uniqueNotes;
+            console.log(`✅ MIDI конвертация завершена! Найдено ${midiData.length} нот`);
 
+            // Преобразуем MIDI данные в упрощенный формат для отображения
+            processMidiData(midiData);
             drawWaveform();
         }
 
-        // Определение ноты в конкретный момент времени
-        function detectNoteAtTime(time) {
+        // Определение нот в конкретный момент времени (улучшенный алгоритм)
+        function detectNotesAtTime(time, duration) {
             const channelData = audioBuffer.getChannelData(0);
             const sampleRate = audioBuffer.sampleRate;
-            const sampleIndex = Math.floor(time * sampleRate);
+            const startSample = Math.floor(time * sampleRate);
+            const windowSize = Math.floor(duration * sampleRate);
 
-            // Простой алгоритм определения частоты (autocorrelation)
-            const windowSize = 2048;
-            const samples = [];
-
-            for (let i = 0; i < windowSize && (sampleIndex + i) < channelData.length; i++) {
-                samples.push(channelData[sampleIndex + i]);
+            if (startSample + windowSize > channelData.length) {
+                return null;
             }
 
-            const frequency = autoCorrelate(samples, sampleRate);
-            if (frequency > 0) {
-                return frequencyToNote(frequency);
-            }
+            // Используем FFT для определения частот
+            const frequencies = performFFT(channelData, startSample, windowSize);
+            const detectedNotes = findPeakFrequencies(frequencies, sampleRate);
 
-            return null;
+            return detectedNotes;
         }
 
-        // Автокорреляция для определения частоты
-        function autoCorrelate(buffer, sampleRate) {
-            const SIZE = buffer.length;
-            const MAX_SAMPLES = Math.floor(SIZE / 2);
-            let best_offset = -1;
-            let best_correlation = 0;
-            let rms = 0;
-
-            for (let i = 0; i < SIZE; i++) {
-                const val = buffer[i];
-                rms += val * val;
-            }
-            rms = Math.sqrt(rms / SIZE);
-
-            if (rms < 0.01) return -1;
-
-            let lastCorrelation = 1;
-            for (let offset = 1; offset < MAX_SAMPLES; offset++) {
-                let correlation = 0;
-
-                for (let i = 0; i < MAX_SAMPLES; i++) {
-                    correlation += Math.abs((buffer[i]) - (buffer[i + offset]));
+        // Быстрое преобразование Фурье (упрощенное)
+        function performFFT(signal, start, size) {
+            const fftSize = Math.min(size, 4096);
+            const window = new Float32Array(fftSize);
+            
+            // Применяем окно Хэмминга
+            for (let i = 0; i < fftSize; i++) {
+                if (start + i < signal.length) {
+                    const hamming = 0.54 - 0.46 * Math.cos(2 * Math.PI * i / (fftSize - 1));
+                    window[i] = signal[start + i] * hamming;
                 }
+            }
 
-                correlation = 1 - (correlation / MAX_SAMPLES);
+            // Вычисляем спектр мощности
+            const spectrum = new Float32Array(fftSize / 2);
+            
+            for (let k = 0; k < fftSize / 2; k++) {
+                let real = 0;
+                let imag = 0;
+                
+                for (let n = 0; n < fftSize; n++) {
+                    const angle = -2 * Math.PI * k * n / fftSize;
+                    real += window[n] * Math.cos(angle);
+                    imag += window[n] * Math.sin(angle);
+                }
+                
+                spectrum[k] = Math.sqrt(real * real + imag * imag);
+            }
 
-                if (correlation > 0.9 && correlation > lastCorrelation) {
-                    const foundGoodCorrelation = correlation > best_correlation;
+            return spectrum;
+        }
 
-                    if (foundGoodCorrelation) {
-                        best_correlation = correlation;
-                        best_offset = offset;
+        // Находим пики в частотном спектре
+        function findPeakFrequencies(spectrum, sampleRate) {
+            const notes = [];
+            const threshold = Math.max(...spectrum) * 0.3; // 30% от максимума
+            const minFreq = 80;  // Минимальная частота (E2)
+            const maxFreq = 1200; // Максимальная частота
+
+            // Ищем локальные максимумы
+            for (let i = 5; i < spectrum.length - 5; i++) {
+                const freq = (i * sampleRate) / (spectrum.length * 2);
+                
+                if (freq < minFreq || freq > maxFreq) continue;
+                
+                // Проверяем, является ли это локальным максимумом
+                if (spectrum[i] > threshold &&
+                    spectrum[i] > spectrum[i-1] &&
+                    spectrum[i] > spectrum[i+1] &&
+                    spectrum[i] > spectrum[i-2] &&
+                    spectrum[i] > spectrum[i+2]) {
+                    
+                    const note = frequencyToNote(freq);
+                    const velocity = Math.min(127, Math.floor((spectrum[i] / Math.max(...spectrum)) * 127));
+                    
+                    notes.push({
+                        note: note,
+                        frequency: freq,
+                        velocity: velocity
+                    });
+                }
+            }
+
+            // Сортируем по силе сигнала и берем топ-3
+            notes.sort((a, b) => b.velocity - a.velocity);
+            return notes.slice(0, 3); // Максимум 3 ноты одновременно
+        }
+
+        // Обработка MIDI данных
+        function processMidiData(midiData) {
+            // Группируем последовательные одинаковые ноты
+            const groupedNotes = [];
+            let currentNote = null;
+            let currentStart = 0;
+            let currentDuration = 0;
+
+            midiData.forEach(midi => {
+                if (currentNote === midi.note) {
+                    currentDuration += midi.duration;
+                } else {
+                    if (currentNote !== null) {
+                        groupedNotes.push({
+                            note: currentNote,
+                            startTime: currentStart,
+                            duration: currentDuration
+                        });
                     }
+                    currentNote = midi.note;
+                    currentStart = midi.startTime;
+                    currentDuration = midi.duration;
                 }
+            });
 
-                lastCorrelation = correlation;
+            // Добавляем последнюю ноту
+            if (currentNote !== null) {
+                groupedNotes.push({
+                    note: currentNote,
+                    startTime: currentStart,
+                    duration: currentDuration
+                });
             }
 
-            if (best_offset === -1) return -1;
+            // Убираем слишком короткие ноты (менее 0.2 секунды)
+            const filteredNotes = groupedNotes.filter(n => n.duration >= 0.2);
 
-            const frequency = sampleRate / best_offset;
-            return frequency;
+            // Формируем финальные массивы
+            detectedNotes = filteredNotes.map(n => ({
+                note: n.note,
+                time: n.startTime
+            }));
+
+            noteSequence = filteredNotes.map(n => ({
+                note: n.note,
+                time: n.startTime,
+                duration: n.duration
+            }));
+
+            console.log(`🎼 Обработано ${detectedNotes.length} уникальных нот`);
         }
 
         // Преобразование частоты в ноту
