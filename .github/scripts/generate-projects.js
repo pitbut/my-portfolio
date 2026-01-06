@@ -23,22 +23,35 @@ folders.forEach(folder => {
     const infoPath = path.join(projectPath, 'info.json');
     const indexPath = path.join(projectPath, 'index.html');
     
-    if (!fs.existsSync(indexPath)) {
-        console.log(`⚠️  Пропускаю ${folder} - нет index.html`);
-        return;
-    }
-    
     let projectInfo;
+    let isExternalProject = false;
     
+    // Проверяем наличие info.json
     if (fs.existsSync(infoPath)) {
         try {
             projectInfo = JSON.parse(fs.readFileSync(infoPath, 'utf8'));
+            
+            // Проверяем является ли проект внешним (ссылка начинается с http)
+            if (projectInfo.link && (projectInfo.link.startsWith('http://') || projectInfo.link.startsWith('https://'))) {
+                isExternalProject = true;
+                console.log(`🌐 ${folder} - внешний проект (${projectInfo.link})`);
+            }
+            
             console.log(`✅ ${folder} - загружен из info.json`);
         } catch (error) {
             console.log(`❌ Ошибка чтения info.json в ${folder}: ${error.message}`);
             return;
         }
-    } else {
+    }
+    
+    // Для локальных проектов требуем index.html
+    if (!isExternalProject && !fs.existsSync(indexPath)) {
+        console.log(`⚠️  Пропускаю ${folder} - нет index.html (локальный проект)`);
+        return;
+    }
+    
+    // Если нет info.json - создаём базовую информацию
+    if (!projectInfo) {
         console.log(`ℹ️  ${folder} - создаю базовую информацию`);
         projectInfo = {
             title: folder.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -47,6 +60,7 @@ folders.forEach(folder => {
         };
     }
     
+    // Определяем путь к изображению
     let imagePath = 'https://via.placeholder.com/400x300/667eea/ffffff?text=' + 
                     encodeURIComponent(projectInfo.title || folder);
     
@@ -65,12 +79,13 @@ folders.forEach(folder => {
         imagePath = `projects/${folder}/${projectInfo.image}`;
     }
     
+    // Формируем объект проекта
     const project = {
         id: folder,
         title: projectInfo.title || folder,
         description: projectInfo.description || 'Описание проекта',
         image: imagePath,
-        link: `projects/${folder}/index.html`,
+        link: projectInfo.link || `projects/${folder}/index.html`, // Используем link из info.json если есть
         date: projectInfo.date || new Date().toISOString().split('T')[0],
         tags: projectInfo.tags || []
     };
@@ -78,8 +93,10 @@ folders.forEach(folder => {
     projects.push(project);
 });
 
+// Сортируем по дате
 projects.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+// Сохраняем в файл
 const outputPath = './projects.json';
 fs.writeFileSync(outputPath, JSON.stringify(projects, null, 2));
 
@@ -90,6 +107,6 @@ console.log(`💾 Файл сохранён: ${outputPath}`);
 if (projects.length > 0) {
     console.log('\n📋 Список проектов:');
     projects.forEach((p, i) => {
-        console.log(`   ${i + 1}. ${p.title} (${p.date})`);
+        console.log(`   ${i + 1}. ${p.title} (${p.date}) ${p.link.startsWith('http') ? '🌐' : '📁'}`);
     });
 }
