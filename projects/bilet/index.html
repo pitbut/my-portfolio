@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Генератор экзаменационных билетов</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.6/pizzip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.42.3/docxtemplater.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #ecf0f1;
+            border-bottom: 2px solid #bdc3c7;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: #d5dbdb;
+        }
+
+        .tab.active {
+            color: #2c3e50;
+            background: white;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .file-input {
+            border: 2px dashed #bdc3c7;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .file-input input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .ticket {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .ticket-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .question {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #3498db;
+            margin-right: 5px;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1 1 50%;
+            }
+        }
+
+        .file-name {
+            margin-top: 10px;
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #fadbd8;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            color: #c0392b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .close {
+            font-size: 35px;
+            font-weight: bold;
+            color: #95a5a6;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #e74c3c;
+        }
+
+        .api-option {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .api-option h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .api-option a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .api-option a:hover {
+            text-decoration: underline;
+        }
+
+        .step {
+            margin: 10px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .step::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Генератор экзаменационных билетов</h1>
+            <p>Создавайте профессиональные экзаменационные билеты с помощью ИИ</p>
+        </div>
+
+        <!-- API Settings -->
+        <div style="background: #2c3e50; padding: 15px 30px; color: white;">
+            <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <label style="color: white; font-size: 14px; margin-bottom: 5px; display: block;">🔑 API Ключ (для режимов с ИИ)</label>
+                    <input type="password" id="apiKey" placeholder="Вставьте ваш API ключ здесь" 
+                           style="width: 100%; padding: 8px; border: 2px solid #34495e; border-radius: 5px;">
+                </div>
+                <div style="min-width: 200px;">
+                    <label style="color: white; font-size: 14px; margin-bottom: 5px; display: block;">Провайдер ИИ</label>
+                    <select id="aiProvider" style="width: 100%; padding: 8px; border: 2px solid #34495e; border-radius: 5px;">
+                        <option value="anthropic">Claude (Anthropic)</option>
+                        <option value="gemini">Gemini (Google)</option>
+                    </select>
+                </div>
+                <button onclick="saveApiKey()" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; margin-top: 20px;">
+                    💾 Сохранить
+                </button>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
+                <span id="apiStatus">❌ API ключ не установлен</span> | 
+                <a href="#" onclick="showApiHelp(); return false;" style="color: #3498db;">Где взять API ключ?</a>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">📋 Готовые вопросы</button>
+            <button class="tab" onclick="switchTab(1)">🎯 Темы + ИИ</button>
+            <button class="tab" onclick="switchTab(2)">🤖 Автогенерация</button>
+            <button class="tab" onclick="switchTab(3)">📦 По блокам</button>
+        </div>
+
+        <!-- Режим 1: Готовые вопросы -->
+        <div class="tab-content active" id="tab-0">
+            <div class="info-box">
+                💡 <strong>Режим 1:</strong> Загрузите список готовых вопросов (один вопрос на строку)
+            </div>
+
+            <div class="form-group">
+                <label>Загрузите файл с вопросами (.txt)</label>
+                <div class="file-input" onclick="document.getElementById('file1').click()">
+                    <input type="file" id="file1" accept=".txt" onchange="loadQuestions(this)">
+                    <div>📁 Нажмите для выбора файла</div>
+                    <div class="file-name" id="fileName1"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Или введите вопросы вручную (один вопрос на строку)</label>
+                <textarea id="questions1" placeholder="Например:
+Что такое механика?
+Перечислите законы Ньютона.
+Объясните принцип работы двигателя внутреннего сгорания."></textarea>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Количество билетов</label>
+                    <input type="number" id="ticketCount1" value="20" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Вопросов в билете</label>
+                    <input type="number" id="questionsPerTicket1" value="3" min="1" max="10">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateTickets(1)">🎲 Сгенерировать билеты</button>
+        </div>
+
+        <!-- Режим 2: Темы + ИИ -->
+        <div class="tab-content" id="tab-1">
+            <div class="info-box">
+                💡 <strong>Режим 2:</strong> Загрузите темы, и ИИ сгенерирует вопросы по каждой теме
+            </div>
+
+            <div class="form-group">
+                <label>Предмет/Дисциплина</label>
+                <input type="text" id="subject2" placeholder="Например: Техническая механика">
+            </div>
+
+            <div class="form-group">
+                <label>Загрузите файл с темами (.txt)</label>
+                <div class="file-input" onclick="document.getElementById('file2').click()">
+                    <input type="file" id="file2" accept=".txt" onchange="loadTopics(this)">
+                    <div>📁 Нажмите для выбора файла</div>
+                    <div class="file-name" id="fileName2"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Или введите темы вручную (одна тема на строку)</label>
+                <textarea id="topics2" placeholder="Например:
+Статика твердого тела
+Кинематика точки
+Динамика материальной точки
+Сопротивление материалов"></textarea>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Количество билетов</label>
+                    <input type="number" id="ticketCount2" value="20" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Вопросов в билете</label>
+                    <input type="number" id="questionsPerTicket2" value="3" min="1" max="10">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateTickets(2)">🤖 Сгенерировать с ИИ</button>
+        </div>
+
+        <!-- Режим 3: Автогенерация -->
+        <div class="tab-content" id="tab-2">
+            <div class="info-box">
+                💡 <strong>Режим 3:</strong> Укажите только предмет и темы - ИИ сгенерирует все вопросы
+            </div>
+
+            <div class="form-group">
+                <label>Предмет/Дисциплина</label>
+                <input type="text" id="subject3" placeholder="Например: Материаловедение">
+            </div>
+
+            <div class="form-group">
+                <label>Примерные темы (необязательно)</label>
+                <textarea id="topics3" placeholder="Например:
+Кристаллическая структура металлов
+Термообработка сталей
+Коррозия и защита металлов
+Композиционные материалы
+
+Или оставьте пустым для полной автогенерации"></textarea>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Количество билетов</label>
+                    <input type="number" id="ticketCount3" value="20" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Вопросов в билете</label>
+                    <input type="number" id="questionsPerTicket3" value="3" min="1" max="10">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Уровень сложности</label>
+                <select id="difficulty3">
+                    <option value="базовый">Базовый</option>
+                    <option value="средний" selected>Средний</option>
+                    <option value="продвинутый">Продвинутый</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateTickets(3)">🤖 Автогенерация</button>
+        </div>
+
+        <!-- Режим 4: По блокам -->
+        <div class="tab-content" id="tab-3">
+            <div class="info-box">
+                💡 <strong>Режим 4:</strong> Вопросы сгруппированы по блокам (модулям), из каждого блока берется указанное количество вопросов
+            </div>
+
+            <div class="form-group">
+                <label>Блоки с вопросами (формат: [БЛОК] вопрос1, вопрос2, ...)</label>
+                <textarea id="blocks4" placeholder="[Блок 1: Основы]
+Что такое механика?
+Какие разделы включает механика?
+Определите понятие силы.
+
+[Блок 2: Законы]
+Сформулируйте первый закон Ньютона.
+Сформулируйте второй закон Ньютона.
+Что такое момент силы?"></textarea>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Количество билетов</label>
+                    <input type="number" id="ticketCount4" value="20" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Вопросов из каждого блока</label>
+                    <input type="number" id="questionsPerBlock4" value="1" min="1" max="5">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateTickets(4)">🎲 Сгенерировать по блокам</button>
+        </div>
+
+        <!-- Результаты -->
+        <div class="results" id="results">
+            <h2 style="margin-bottom: 20px;">Сгенерированные билеты</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-success" onclick="exportToWord()">📄 Экспорт в Word (простой)</button>
+                <button class="btn btn-secondary" onclick="downloadTemplate()">📥 Скачать шаблон Word</button>
+                <button class="btn btn-success" onclick="exportWithTemplate()">📋 Экспорт по шаблону</button>
+                <button class="btn btn-secondary" onclick="showTemplateHelp()">❓ Как работать с шаблоном</button>
+            </div>
+
+            <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                <strong>💡 Как использовать шаблон:</strong><br>
+                1. Нажмите <strong>"📥 Скачать шаблон Word"</strong> - получите готовый шаблон<br>
+                2. Откройте шаблон в Word и отредактируйте (название, логотип, шапку)<br>
+                3. <strong>Важно!</strong> Оставьте маркеры: <code>XXX</code> (для вопросов) и <code>{ticket_number}</code> (для номера)<br>
+                4. Сохраните отредактированный шаблон<br>
+                5. Нажмите <strong>"📋 Экспорт по шаблону"</strong> и выберите ваш шаблон<br>
+                6. Получите готовый документ со всеми билетами!
+            </div>
+
+            <div id="ticketsDisplay"></div>
+        </div>
+
+        <!-- Loader -->
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Генерация вопросов с помощью ИИ...</p>
+        </div>
+    </div>
+
+    <!-- Modal для инструкций API -->
+    <div id="apiModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔑 Как получить API ключ?</h2>
+                <span class="close" onclick="closeApiHelp()">&times;</span>
+            </div>
+
+            <div class="api-option">
+                <h3>1️⃣ Claude API (Anthropic) - Рекомендуется</h3>
+                <div class="step">Перейдите на <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a></div>
+                <div class="step">Зарегистрируйтесь или войдите в аккаунт</div>
+                <div class="step">Перейдите в раздел "API Keys"</div>
+                <div class="step">Нажмите "Create Key"</div>
+                <div class="step">Скопируйте ключ (начинается с sk-ant-...)</div>
+                <div class="step">Вставьте в поле "API Ключ" выше</div>
+                <p style="margin-top: 15px; color: #7f8c8d; font-size: 14px;">
+                    💰 Стоимость: ~$3 за 1 млн токенов (очень дешево)<br>
+                    🎁 Бесплатные кредиты: $5 при регистрации
+                </p>
+            </div>
+
+            <div class="api-option" style="border-left-color: #e74c3c;">
+                <h3>2️⃣ Google Gemini API - Альтернатива</h3>
+                <div class="step">Перейдите на <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a></div>
+                <div class="step">Войдите через Google аккаунт</div>
+                <div class="step">Нажмите "Create API key"</div>
+                <div class="step">Скопируйте ключ</div>
+                <div class="step">Вставьте в поле "API Ключ" и выберите "Gemini" в провайдере</div>
+                <p style="margin-top: 15px; color: #7f8c8d; font-size: 14px;">
+                    💰 Стоимость: Бесплатно до 60 запросов/минуту<br>
+                    🎁 Лимиты: Очень щедрые для тестирования
+                </p>
+            </div>
+
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #ffc107;">
+                <strong>⚠️ Важно:</strong><br>
+                • Не делитесь API ключом с другими<br>
+                • Ключ хранится только в вашем браузере<br>
+                • Для режима "Готовые вопросы" ключ не нужен<br>
+                • Режимы с ИИ требуют интернет-соединения
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal для инструкций по шаблонам -->
+    <div id="templateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📄 Как работать с шаблонами Word</h2>
+                <span class="close" onclick="closeTemplateHelp()">&times;</span>
+            </div>
+
+            <div style="background: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; color: #2c3e50;">🎯 Что такое шаблон?</h3>
+                <p>Шаблон - это документ Word с готовым оформлением (шапка, логотип, подписи), куда автоматически вставляются билеты и вопросы.</p>
+            </div>
+
+            <div class="api-option">
+                <h3>📋 Маркеры в шаблоне</h3>
+                <p>В шаблоне используются специальные маркеры, которые заменяются на данные:</p>
+                
+                <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px; border: 2px solid #ecf0f1;">
+                    <strong style="color: #e74c3c;">XXX</strong> или <strong style="color: #e74c3c;">{questions}</strong>
+                    <br>
+                    <span style="color: #7f8c8d;">→ Место куда вставятся ВСЕ вопросы билета</span>
+                    <br><br>
+                    <em>Пример:</em><br>
+                    <code style="background: #f8f9fa; padding: 5px;">XXX</code><br>
+                    Превратится в:<br>
+                    <code style="background: #f8f9fa; padding: 5px;">1. Что такое механика?<br>2. Перечислите законы Ньютона.<br>3. Объясните принцип работы двигателя.</code>
+                </div>
+
+                <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px; border: 2px solid #ecf0f1;">
+                    <strong style="color: #e74c3c;">{ticket_number}</strong>
+                    <br>
+                    <span style="color: #7f8c8d;">→ Номер билета</span>
+                    <br><br>
+                    <em>Пример:</em><br>
+                    <code style="background: #f8f9fa; padding: 5px;">БИЛЕТ № {ticket_number}</code><br>
+                    Превратится в:<br>
+                    <code style="background: #f8f9fa; padding: 5px;">БИЛЕТ № 1</code>, <code>БИЛЕТ № 2</code> и т.д.
+                </div>
+            </div>
+
+            <div class="api-option" style="border-left-color: #27ae60;">
+                <h3>✅ Пошаговая инструкция</h3>
+                <div class="step">Нажмите <strong>"📥 Скачать шаблон Word"</strong></div>
+                <div class="step">Откройте скачанный файл <code>шаблон_билета.docx</code> в Microsoft Word</div>
+                <div class="step">Отредактируйте шапку (название института, кафедры, дисциплины)</div>
+                <div class="step">Добавьте логотип, если нужно</div>
+                <div class="step"><strong>НЕ УДАЛЯЙТЕ</strong> маркеры <code>XXX</code> и <code>{ticket_number}</code>!</div>
+                <div class="step">Сохраните отредактированный шаблон</div>
+                <div class="step">В приложении нажмите <strong>"📋 Экспорт по шаблону"</strong></div>
+                <div class="step">Выберите ваш шаблон</div>
+                <div class="step">Получите готовый документ со ВСЕМИ билетами!</div>
+            </div>
+
+            <div style="background: #fadbd8; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #e74c3c;">
+                <strong>⚠️ Важные правила:</strong><br>
+                • Маркер <code>XXX</code> должен быть на отдельной строке<br>
+                • Оставьте пустые строки до и после <code>XXX</code><br>
+                • Не ставьте <code>XXX</code> внутри таблицы<br>
+                • Маркеры пишутся ЗАГЛАВНЫМИ буквами<br>
+                • Можно использовать <code>{questions}</code> вместо <code>XXX</code>
+            </div>
+
+            <div style="background: #d5f4e6; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #27ae60;">
+                <strong>💡 Пример правильного шаблона:</strong><br><br>
+                <code style="background: white; padding: 10px; display: block; white-space: pre-wrap;">МИНИСТЕРСТВО ОБРАЗОВАНИЯ
+
+ЭКЗАМЕНАЦИОННЫЙ БИЛЕТ № {ticket_number}
+
+Дисциплина: Техническая механика
+Курс: 2  Группа: ______
+
+
+XXX
+
+
+Преподаватель: _________  Дата: _______</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedTickets = [];
+        let currentMode = 1;
+        let apiKey = localStorage.getItem('ai_api_key') || '';
+        let aiProvider = localStorage.getItem('ai_provider') || 'anthropic';
+
+        // Инициализация при загрузке
+        window.onload = function() {
+            if (apiKey) {
+                document.getElementById('apiKey').value = apiKey;
+                document.getElementById('apiProvider').value = aiProvider;
+                updateApiStatus(true);
+            }
+        };
+
+        function saveApiKey() {
+            apiKey = document.getElementById('apiKey').value.trim();
+            aiProvider = document.getElementById('apiProvider').value;
+            
+            if (apiKey) {
+                localStorage.setItem('ai_api_key', apiKey);
+                localStorage.setItem('ai_provider', aiProvider);
+                updateApiStatus(true);
+                alert('✅ API ключ сохранен!');
+            } else {
+                alert('⚠️ Пожалуйста, введите API ключ');
+            }
+        }
+
+        function updateApiStatus(hasKey) {
+            const statusEl = document.getElementById('apiStatus');
+            if (hasKey) {
+                statusEl.innerHTML = '✅ API ключ установлен';
+                statusEl.style.color = '#27ae60';
+            } else {
+                statusEl.innerHTML = '❌ API ключ не установлен';
+                statusEl.style.color = '#e74c3c';
+            }
+        }
+
+        function showApiHelp() {
+            document.getElementById('apiModal').style.display = 'block';
+        }
+
+        function closeApiHelp() {
+            document.getElementById('apiModal').style.display = 'none';
+        }
+
+        function showTemplateHelp() {
+            document.getElementById('templateModal').style.display = 'block';
+        }
+
+        function closeTemplateHelp() {
+            document.getElementById('templateModal').style.display = 'none';
+        }
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const apiModal = document.getElementById('apiModal');
+            const templateModal = document.getElementById('templateModal');
+            if (event.target == apiModal) {
+                apiModal.style.display = 'none';
+            }
+            if (event.target == templateModal) {
+                templateModal.style.display = 'none';
+            }
+        }
+
+        async function downloadTemplate() {
+            // Создаем базовый шаблон билета
+            const templateContent = `МИНИСТЕРСТВО ВЫСШЕГО ОБРАЗОВАНИЯ, НАУКИ И ИННОВАЦИЙ
+РЕСПУБЛИКИ УЗБЕКИСТАН
+
+ТАШКЕНТСКИЙ ИНСТИТУТ ТЕКСТИЛЬНОЙ И ЛЕГКОЙ ПРОМЫШЛЕННОСТИ
+
+
+                                          «УТВЕРЖДАЮ»
+                                          Зав. кафедрой __________
+                                          «___» _________ 202__ г.
+
+
+
+ЭКЗАМЕНАЦИОННЫЙ БИЛЕТ № {ticket_number}
+
+
+Дисциплина: ______________________________________________________
+
+Направление: _____________________________________________________
+
+Курс: ________  Группа: ________  Семестр: ________
+
+
+
+XXX
+
+
+
+
+Преподаватель: ____________________ / _____________ /
+                      (подпись)              (Ф.И.О.)
+
+Дата составления: «___» _____________ 202__ г.
+
+
+
+
+═══════════════════════════════════════════════════════════════════
+
+ИНСТРУКЦИЯ:
+1. Отредактируйте этот шаблон в Word (название института, дисциплину и т.д.)
+2. НЕ УДАЛЯЙТЕ маркеры: XXX и {ticket_number}
+3. XXX - место куда вставятся все вопросы билета
+4. {ticket_number} - будет заменен на номер билета (1, 2, 3...)
+5. Сохраните отредактированный шаблон
+6. В приложении выберите "Экспорт по шаблону" и загрузите ваш файл
+`;
+
+            const blob = new Blob([templateContent], { type: 'text/plain;charset=utf-8' });
+            saveAs(blob, 'шаблон_билета.txt');
+            
+            alert('📥 Шаблон скачан!\n\n1. Откройте файл в Word\n2. Отредактируйте как нужно\n3. Сохраните как .docx\n4. Используйте в "Экспорт по шаблону"');
+        }
+
+        function switchTab(index) {
+            // Скрыть все вкладки
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Показать выбранную вкладку
+            document.querySelectorAll('.tab')[index].classList.add('active');
+            document.getElementById(`tab-${index}`).classList.add('active');
+            
+            // Скрыть результаты при переключении
+            document.getElementById('results').classList.remove('active');
+        }
+
+        function loadQuestions(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('questions1').value = e.target.result;
+                    document.getElementById('fileName1').textContent = `✓ Загружен: ${file.name}`;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function loadTopics(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('topics2').value = e.target.result;
+                    document.getElementById('fileName2').textContent = `✓ Загружен: ${file.name}`;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        async function generateTickets(mode) {
+            currentMode = mode;
+            let questions = [];
+            
+            try {
+                if (mode === 1) {
+                    // Режим 1: Готовые вопросы
+                    const text = document.getElementById('questions1').value.trim();
+                    if (!text) {
+                        alert('Пожалуйста, введите или загрузите вопросы!');
+                        return;
+                    }
+                    
+                    questions = text.split('\n').filter(q => q.trim());
+                    const ticketCount = parseInt(document.getElementById('ticketCount1').value);
+                    const questionsPerTicket = parseInt(document.getElementById('questionsPerTicket1').value);
+                    
+                    if (questions.length < questionsPerTicket) {
+                        alert(`Недостаточно вопросов! Нужно минимум ${questionsPerTicket} вопросов.`);
+                        return;
+                    }
+                    
+                    generatedTickets = generateTicketsFromQuestions(questions, ticketCount, questionsPerTicket);
+                    
+                } else if (mode === 2) {
+                    // Режим 2: Темы + ИИ
+                    const subject = document.getElementById('subject2').value.trim();
+                    const topicsText = document.getElementById('topics2').value.trim();
+                    
+                    if (!subject || !topicsText) {
+                        alert('Пожалуйста, заполните предмет и темы!');
+                        return;
+                    }
+                    
+                    const topics = topicsText.split('\n').filter(t => t.trim());
+                    const ticketCount = parseInt(document.getElementById('ticketCount2').value);
+                    const questionsPerTicket = parseInt(document.getElementById('questionsPerTicket2').value);
+                    
+                    showLoader(true);
+                    questions = await generateQuestionsFromTopics(subject, topics, ticketCount * questionsPerTicket);
+                    showLoader(false);
+                    
+                    generatedTickets = generateTicketsFromQuestions(questions, ticketCount, questionsPerTicket);
+                    
+                } else if (mode === 3) {
+                    // Режим 3: Автогенерация
+                    const subject = document.getElementById('subject3').value.trim();
+                    
+                    if (!subject) {
+                        alert('Пожалуйста, укажите предмет!');
+                        return;
+                    }
+                    
+                    const topicsText = document.getElementById('topics3').value.trim();
+                    const ticketCount = parseInt(document.getElementById('ticketCount3').value);
+                    const questionsPerTicket = parseInt(document.getElementById('questionsPerTicket3').value);
+                    const difficulty = document.getElementById('difficulty3').value;
+                    
+                    showLoader(true);
+                    questions = await autoGenerateQuestions(subject, topicsText, ticketCount * questionsPerTicket, difficulty);
+                    showLoader(false);
+                    
+                    generatedTickets = generateTicketsFromQuestions(questions, ticketCount, questionsPerTicket);
+                    
+                } else if (mode === 4) {
+                    // Режим 4: По блокам
+                    const blocksText = document.getElementById('blocks4').value.trim();
+                    
+                    if (!blocksText) {
+                        alert('Пожалуйста, введите блоки с вопросами!');
+                        return;
+                    }
+                    
+                    const blocks = parseBlocks(blocksText);
+                    const ticketCount = parseInt(document.getElementById('ticketCount4').value);
+                    const questionsPerBlock = parseInt(document.getElementById('questionsPerBlock4').value);
+                    
+                    generatedTickets = generateTicketsFromBlocks(blocks, ticketCount, questionsPerBlock);
+                }
+                
+                displayTickets();
+                document.getElementById('results').classList.add('active');
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                showLoader(false);
+                alert('Ошибка при генерации билетов: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        function generateTicketsFromQuestions(questions, ticketCount, questionsPerTicket) {
+            const tickets = [];
+            const availableQuestions = [...questions];
+            
+            // Перемешиваем вопросы
+            shuffleArray(availableQuestions);
+            
+            for (let i = 0; i < ticketCount; i++) {
+                const ticket = {
+                    number: i + 1,
+                    questions: []
+                };
+                
+                // Если вопросов не хватает, начинаем заново
+                if (availableQuestions.length < questionsPerTicket) {
+                    availableQuestions.push(...questions);
+                    shuffleArray(availableQuestions);
+                }
+                
+                // Берем нужное количество вопросов
+                for (let j = 0; j < questionsPerTicket; j++) {
+                    ticket.questions.push(availableQuestions.shift());
+                }
+                
+                tickets.push(ticket);
+            }
+            
+            return tickets;
+        }
+
+        function generateTicketsFromBlocks(blocks, ticketCount, questionsPerBlock) {
+            const tickets = [];
+            
+            for (let i = 0; i < ticketCount; i++) {
+                const ticket = {
+                    number: i + 1,
+                    questions: []
+                };
+                
+                // Из каждого блока берем случайные вопросы
+                blocks.forEach(block => {
+                    const shuffled = [...block.questions];
+                    shuffleArray(shuffled);
+                    
+                    for (let j = 0; j < Math.min(questionsPerBlock, shuffled.length); j++) {
+                        ticket.questions.push(shuffled[j]);
+                    }
+                });
+                
+                tickets.push(ticket);
+            }
+            
+            return tickets;
+        }
+
+        function parseBlocks(text) {
+            const blocks = [];
+            const lines = text.split('\n');
+            let currentBlock = null;
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                
+                if (line.startsWith('[') && line.includes(']')) {
+                    // Новый блок
+                    const blockName = line.substring(1, line.indexOf(']'));
+                    currentBlock = { name: blockName, questions: [] };
+                    blocks.push(currentBlock);
+                } else if (currentBlock) {
+                    // Вопрос в текущем блоке
+                    currentBlock.questions.push(line);
+                }
+            });
+            
+            return blocks;
+        }
+
+        async function generateQuestionsFromTopics(subject, topics, totalQuestions) {
+            if (!apiKey) {
+                alert('⚠️ Пожалуйста, установите API ключ для работы с ИИ!\nНажмите на ссылку "Где взять API ключ?" для получения инструкций.');
+                return [];
+            }
+
+            const questionsPerTopic = Math.ceil(totalQuestions / topics.length);
+            const allQuestions = [];
+            
+            for (const topic of topics) {
+                const prompt = `Ты преподаватель дисциплины "${subject}". Сгенерируй ${questionsPerTopic} экзаменационных вопросов по теме "${topic}". 
+
+Требования:
+- Вопросы должны быть конкретными и проверять понимание темы
+- Разный уровень сложности
+- Формат: просто список вопросов, по одному на строку
+- Без нумерации и дополнительного текста
+
+Вопросы:`;
+
+                try {
+                    let questions = [];
+                    
+                    if (aiProvider === 'anthropic') {
+                        // Claude API
+                        const response = await fetch("https://api.anthropic.com/v1/messages", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "x-api-key": apiKey,
+                                "anthropic-version": "2023-06-01"
+                            },
+                            body: JSON.stringify({
+                                model: "claude-sonnet-4-20250514",
+                                max_tokens: 1000,
+                                messages: [
+                                    { role: "user", content: prompt }
+                                ],
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Claude API error: ${response.status} - Проверьте правильность API ключа`);
+                        }
+
+                        const data = await response.json();
+                        questions = data.content[0].text.trim().split('\n').filter(q => q.trim());
+                        
+                    } else if (aiProvider === 'gemini') {
+                        // Gemini API
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [{
+                                        text: prompt
+                                    }]
+                                }],
+                                generationConfig: {
+                                    temperature: 0.7,
+                                    maxOutputTokens: 1000
+                                }
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.text();
+                            console.error('Gemini API error:', errorData);
+                            throw new Error(`Gemini API error: ${response.status} - ${errorData.substring(0, 100)}`);
+                        }
+
+                        const data = await response.json();
+                        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                            throw new Error('Некорректный ответ от Gemini API');
+                        }
+                        const text = data.candidates[0].content.parts[0].text;
+                        questions = text.trim().split('\n').filter(q => q.trim());
+                    }
+                    
+                    allQuestions.push(...questions);
+                    
+                } catch (error) {
+                    console.error('Ошибка при генерации вопросов для темы:', topic, error);
+                    alert(`Ошибка генерации: ${error.message}`);
+                    throw error;
+                }
+            }
+            
+            return allQuestions;
+        }
+
+        async function autoGenerateQuestions(subject, topicsText, totalQuestions, difficulty) {
+            if (!apiKey) {
+                alert('⚠️ Пожалуйста, установите API ключ для работы с ИИ!\nНажмите на ссылку "Где взять API ключ?" для получения инструкций.');
+                return [];
+            }
+
+            const prompt = topicsText 
+                ? `Ты преподаватель дисциплины "${subject}". Сгенерируй ${totalQuestions} экзаменационных вопросов с уровнем сложности "${difficulty}".
+
+Примерные темы для охвата:
+${topicsText}
+
+Требования:
+- Вопросы должны охватывать указанные темы
+- Уровень сложности: ${difficulty}
+- Разнообразные формулировки
+- Формат: просто список вопросов, по одному на строку
+- Без нумерации и дополнительного текста
+
+Вопросы:`
+                : `Ты преподаватель дисциплины "${subject}". Сгенерируй ${totalQuestions} экзаменационных вопросов с уровнем сложности "${difficulty}".
+
+Требования:
+- Вопросы должны охватывать основные разделы дисциплины
+- Уровень сложности: ${difficulty}
+- Разнообразные формулировки
+- Формат: просто список вопросов, по одному на строку
+- Без нумерации и дополнительного текста
+
+Вопросы:`;
+
+            try {
+                let questions = [];
+                
+                if (aiProvider === 'anthropic') {
+                    // Claude API
+                    const response = await fetch("https://api.anthropic.com/v1/messages", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "x-api-key": apiKey,
+                            "anthropic-version": "2023-06-01"
+                        },
+                        body: JSON.stringify({
+                            model: "claude-sonnet-4-20250514",
+                            max_tokens: 2000,
+                            messages: [
+                                { role: "user", content: prompt }
+                            ],
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Claude API error: ${response.status} - Проверьте правильность API ключа`);
+                    }
+
+                    const data = await response.json();
+                    questions = data.content[0].text.trim().split('\n').filter(q => q.trim());
+                    
+                } else if (aiProvider === 'gemini') {
+                    // Gemini API
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: prompt
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 1000
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.text();
+                        console.error('Gemini API error:', errorData);
+                        throw new Error(`Gemini API error: ${response.status} - ${errorData.substring(0, 100)}`);
+                    }
+
+                    const data = await response.json();
+                    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                        throw new Error('Некорректный ответ от Gemini API');
+                    }
+                    const text = data.candidates[0].content.parts[0].text;
+                    questions = text.trim().split('\n').filter(q => q.trim());
+                }
+                
+                return questions;
+                
+            } catch (error) {
+                alert(`Ошибка генерации: ${error.message}`);
+                throw new Error('Не удалось сгенерировать вопросы: ' + error.message);
+            }
+        }
+
+        function displayTickets() {
+            const display = document.getElementById('ticketsDisplay');
+            display.innerHTML = '';
+            
+            generatedTickets.forEach(ticket => {
+                const ticketDiv = document.createElement('div');
+                ticketDiv.className = 'ticket';
+                
+                let html = `<div class="ticket-header">Билет № ${ticket.number}</div>`;
+                
+                ticket.questions.forEach((question, index) => {
+                    html += `
+                        <div class="question">
+                            <span class="question-number">Вопрос ${index + 1}:</span>
+                            ${question}
+                        </div>
+                    `;
+                });
+                
+                ticketDiv.innerHTML = html;
+                display.appendChild(ticketDiv);
+            });
+        }
+
+        function exportToWord() {
+            if (generatedTickets.length === 0) {
+                alert('⚠️ Сначала сгенерируйте билеты!');
+                return;
+            }
+
+            let content = '';
+            
+            generatedTickets.forEach((ticket, index) => {
+                content += `═══════════════════════════════════════════════════════════\n`;
+                content += `              ЭКЗАМЕНАЦИОННЫЙ БИЛЕТ № ${ticket.number}\n`;
+                content += `═══════════════════════════════════════════════════════════\n\n`;
+                content += `Дисциплина: _____________________________________________\n\n`;
+                content += `Курс: _____  Группа: _____  Семестр: _____\n\n\n`;
+                
+                ticket.questions.forEach((question, qIndex) => {
+                    content += `${qIndex + 1}. ${question}\n\n`;
+                });
+                
+                content += `\n\n`;
+                content += `Преподаватель: __________________  Дата: __________\n`;
+                content += `\n\n\n`;
+                
+                // Разделитель между билетами (кроме последнего)
+                if (index < generatedTickets.length - 1) {
+                    content += `\n\n\n\n`;
+                }
+            });
+
+            // Создаем текстовый файл
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            saveAs(blob, 'все_экзаменационные_билеты.txt');
+            
+            alert('✅ Все билеты экспортированы в один файл!\n\n📝 Откройте файл .txt в Microsoft Word для форматирования:\n\n1. Откройте Word\n2. Файл → Открыть → выберите .txt файл\n3. Отформатируйте по своему вкусу\n4. Сохраните как .docx');
+        }
+
+        async function exportWithTemplate() {
+            if (generatedTickets.length === 0) {
+                alert('⚠️ Сначала сгенерируйте билеты!');
+                return;
+            }
+
+            // Запрос на загрузку шаблона
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.docx,.txt';
+            
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const reader = new FileReader();
+                    
+                    if (file.name.endsWith('.txt')) {
+                        // Текстовый шаблон
+                        reader.onload = function(e) {
+                            const template = e.target.result;
+                            let fullDocument = '';
+                            
+                            generatedTickets.forEach((ticket, index) => {
+                                const questionsText = ticket.questions
+                                    .map((q, i) => `${i + 1}. ${q}`)
+                                    .join('\n\n');
+                                
+                                let ticketText = template
+                                    .replace(/{ticket_number}/g, ticket.number)
+                                    .replace(/XXX/g, questionsText)
+                                    .replace(/{questions}/g, questionsText);
+                                
+                                fullDocument += ticketText;
+                                
+                                // Добавляем разделитель между билетами (кроме последнего)
+                                if (index < generatedTickets.length - 1) {
+                                    fullDocument += '\n\n\n═══════════════════════════════════════════════\n\n\n';
+                                }
+                            });
+                            
+                            const blob = new Blob([fullDocument], { type: 'text/plain;charset=utf-8' });
+                            saveAs(blob, 'все_билеты_по_шаблону.txt');
+                            
+                            alert('✅ Все билеты экспортированы в один файл!\n\nОткройте файл в Word для окончательного форматирования.');
+                        };
+                        
+                        reader.readAsText(file);
+                        
+                    } else if (file.name.endsWith('.docx')) {
+                        // Word шаблон (пока упрощенная версия)
+                        alert('📄 Для .docx шаблонов:\n\n1. Скачайте шаблон как .txt\n2. Отредактируйте в Word\n3. Сохраните как .docx\n4. Пока используйте текстовый экспорт\n\n(Полная поддержка .docx в разработке)');
+                    }
+                    
+                } catch (error) {
+                    alert('❌ Ошибка при работе с шаблоном: ' + error.message);
+                    console.error(error);
+                }
+            };
+            
+            input.click();
+        }
+
+        function showLoader(show) {
+            document.getElementById('loader').classList.toggle('active', show);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+    </script>
+</body>
+</html>
