@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-01-07",
+    "date": "2026-01-08",
     "tags": []
   },
   {
@@ -14,7 +14,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-01-07",
+    "date": "2026-01-08",
     "tags": []
   },
   {
@@ -23,7 +23,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/videokonferenciya/preview.jpg",
     "link": "projects/videokonferenciya/index.html",
-    "date": "2026-01-07",
+    "date": "2026-01-08",
     "tags": []
   },
   {
@@ -52,6 +52,21 @@
       "Наука",
       "Эксперимент",
       "Математика"
+    ]
+  },
+  {
+    "id": "biblioteka",
+    "title": "📚 Библиотека научных статей (Firebase)",
+    "description": "Реальная облачная библиотека на Firebase. Загрузка PDF до 10 МБ, реалтайм синхронизация, лайки, поиск. Все пользователи видят одну базу данных.",
+    "image": "projects/biblioteka/preview.jpg",
+    "link": "projects/biblioteka/index.html",
+    "date": "2025-01-08",
+    "tags": [
+      "Firebase",
+      "Firestore",
+      "Storage",
+      "PDF",
+      "Образование"
     ]
   },
   {
