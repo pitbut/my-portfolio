@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Библиотека научных статей</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #eef1ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e0e7ff;
+            border-color: #5145cd;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .categories {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .category-btn {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 1em;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 45px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+        }
+
+        .search-box::after {
+            content: "🔍";
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .article-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .article-category {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .article-title {
+            color: #333;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .article-author {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+
+        .article-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .keyword {
+            background: #f0f0f0;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .article-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: transform 0.2s;
+        }
+
+        .like-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .like-btn.liked {
+            animation: like 0.5s ease;
+        }
+
+        @keyframes like {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 1200px;
+            height: 90%;
+            margin: 2% auto;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 1.5em;
+        }
+
+        .close-btn {
+            font-size: 2em;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .link-display {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9em;
+            border: 2px solid #667eea;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .articles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 2000;
+            animation: slideIn 0.3s;
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+
+        .notification.success {
+            border-left: 5px solid #4caf50;
+        }
+
+        .notification.error {
+            border-left: 5px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Библиотека научных статей</h1>
+            <p class="subtitle">🔥 Работает на Firebase • Реальное облачное хранилище</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Боковая панель -->
+            <div class="sidebar">
+                <!-- Загрузка статьи -->
+                <div class="card">
+                    <h2>➕ Загрузить статью</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <p style="font-size: 3em; margin-bottom: 10px;">📄</p>
+                        <p style="color: #667eea; font-weight: 600; margin-bottom: 5px;">
+                            Перетащите PDF файл сюда
+                        </p>
+                        <p style="color: #999; font-size: 0.9em;">или нажмите для выбора</p>
+                        <p style="color: #ff6b6b; font-size: 0.85em; margin-top: 10px;">⚠️ Максимум 10 МБ</p>
+                        <input type="file" id="fileInput" accept=".pdf">
+                    </div>
+                    
+                    <div id="uploadForm" style="display: none; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Название статьи *</label>
+                            <input type="text" id="articleTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Автор *</label>
+                            <input type="text" id="articleAuthor" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Категория *</label>
+                            <select id="articleCategory">
+                                <option value="Инженерия">Инженерия</option>
+                                <option value="Математика">Математика</option>
+                                <option value="Физика">Физика</option>
+                                <option value="Информатика">Информатика</option>
+                                <option value="Химия">Химия</option>
+                                <option value="Биология">Биология</option>
+                                <option value="Медицина">Медицина</option>
+                                <option value="Экономика">Экономика</option>
+                                <option value="Другое">Другое</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ключевые слова (через запятую)</label>
+                            <textarea id="articleKeywords" placeholder="машинное обучение, нейронные сети, AI"></textarea>
+                        </div>
+                        <button class="btn" onclick="saveArticle()">💾 Сохранить статью</button>
+                        <button class="btn" style="background: #ccc; margin-top: 5px;" onclick="cancelUpload()">Отмена</button>
+                    </div>
+                </div>
+
+                <!-- Категории -->
+                <div class="card">
+                    <h2>📁 Категории</h2>
+                    <div class="categories" id="categories">
+                        <button class="category-btn active" onclick="filterByCategory('Все')">
+                            📚 Все статьи (<span id="countAll">0</span>)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Статистика -->
+                <div class="card">
+                    <h2>📊 Статистика</h2>
+                    <div class="stats-panel">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalArticles">0</div>
+                            <div class="stat-label">Статей</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalDownloads">0</div>
+                            <div class="stat-label">Загрузок</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalLikes">0</div>
+                            <div class="stat-label">Лайков</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основной контент -->
+            <div>
+                <div class="card" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">🔍 Поиск</h2>
+                        <button class="btn" style="padding: 8px 20px; width: auto; font-size: 0.9em;" onclick="refreshArticles()">
+                            🔄 Обновить
+                        </button>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Поиск по названию, автору или ключевым словам..." 
+                               onkeyup="searchArticles()">
+                    </div>
+                </div>
+
+                <div id="loadingIndicator" style="display: none; text-align: center; padding: 40px;">
+                    <div style="font-size: 3em; margin-bottom: 10px;">⏳</div>
+                    <p style="color: #667eea; font-size: 1.2em;">Загрузка библиотеки...</p>
+                </div>
+
+                <div class="articles-grid" id="articlesGrid">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <h2 style="color: #667eea; margin-bottom: 10px;">Библиотека пуста</h2>
+                        <p>Загрузите первую статью, чтобы начать работу</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра статьи -->
+    <div class="modal" id="articleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Просмотр статьи</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="action-buttons">
+                    <button class="action-btn btn-primary" onclick="downloadCurrentArticle()">
+                        ⬇️ Скачать PDF
+                    </button>
+                    <button class="action-btn btn-primary" onclick="likeCurrentArticle()">
+                        ❤️ Нравится (<span id="modalLikes">0</span>)
+                    </button>
+                    <button class="action-btn btn-secondary" onclick="shareCurrentArticle()">
+                        🔗 Получить ссылку
+                    </button>
+                </div>
+                
+                <div id="linkDisplay" class="link-display" style="display: none;">
+                    <strong>Ссылка на статью:</strong><br>
+                    <span id="shareLink"></span>
+                    <button class="btn" style="margin-top: 10px;" onclick="copyLink()">📋 Копировать</button>
+                </div>
+
+                <iframe id="pdfViewer" class="pdf-viewer"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // ============================================
+        // КОНФИГУРАЦИЯ FIREBASE
+        // ============================================
+        // Конфигурация из Firebase Console
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_CdDPMFsIoi6CFYYRLGQFWmChJ0Fc9lI",
+            authDomain: "biblioteka-29eff.firebaseapp.com",
+            projectId: "biblioteka-29eff",
+            storageBucket: "biblioteka-29eff.firebasestorage.app",
+            messagingSenderId: "87548054134",
+            appId: "1:87548054134:web:dcdc25602bbe1796ed2d57",
+            measurementId: "G-J8YVR4F7HE"
+        };
+
+        // Инициализация Firebase
+        let db, storage;
+        let isFirebaseInitialized = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            isFirebaseInitialized = true;
+            console.log('✅ Firebase инициализирован успешно');
+        } catch (error) {
+            console.error('❌ Ошибка инициализации Firebase:', error);
+            alert('⚠️ ВНИМАНИЕ: Необходимо настроить Firebase!\n\nОткройте index.html и замените firebaseConfig на ваши данные из Firebase Console.\n\nИнструкция в файле README.md');
+        }
+
+        // ============================================
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        // ============================================
+        let articles = [];
+        let currentArticleId = null;
+        let uploadedFile = null;
+        let isLoading = false;
+        let unsubscribe = null;
+
+        // ============================================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ============================================
+        window.onload = async function() {
+            if (!isFirebaseInitialized) {
+                showFirebaseSetupError();
+                return;
+            }
+
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('articlesGrid').style.display = 'none';
+            
+            // Подключаемся к реалтайм обновлениям
+            subscribeToArticles();
+            
+            // Проверка ссылки в URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+            if (articleId) {
+                setTimeout(() => openArticleById(articleId), 1000);
+            }
+        };
+
+        // ============================================
+        // FIRESTORE - РЕАЛТАЙМ ПОДПИСКА
+        // ============================================
+        function subscribeToArticles() {
+            unsubscribe = db.collection('articles')
+                .orderBy('uploadDate', 'desc')
+                .onSnapshot((snapshot) => {
+                    articles = [];
+                    snapshot.forEach((doc) => {
+                        articles.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    document.getElementById('articlesGrid').style.display = 'grid';
+                    
+                    renderArticles();
+                    updateCategories();
+                    updateStats();
+                }, (error) => {
+                    console.error('Ошибка загрузки:', error);
+                    showNotification('Ошибка подключения к базе данных', 'error');
+                });
+        }
+
+        // ============================================
+        // ЗАГРУЗКА ФАЙЛА
+        // ============================================
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.onclick = () => fileInput.click();
+
+        uploadArea.ondragover = (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        };
+
+        uploadArea.ondragleave = () => {
+            uploadArea.classList.remove('dragover');
+        };
+
+        uploadArea.ondrop = (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            handleFileSelect(file);
+        };
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            handleFileSelect(file);
+        };
+
+        function handleFileSelect(file) {
+            if (!file) return;
+            
+            if (file.type !== 'application/pdf') {
+                showNotification('Пожалуйста, выберите PDF файл', 'error');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) { // 10 МБ
+                showNotification('Файл слишком большой. Максимум 10 МБ', 'error');
+                return;
+            }
+
+            uploadedFile = file;
+            document.getElementById('uploadForm').style.display = 'block';
+            document.getElementById('uploadArea').style.display = 'none';
+            showNotification('Файл выбран! Заполните информацию', 'success');
+        }
+
+        function cancelUpload() {
+            uploadedFile = null;
+            document.getElementById('uploadForm').style.display = 'none';
+            document.getElementById('uploadArea').style.display = 'block';
+            fileInput.value = '';
+            document.getElementById('articleTitle').value = '';
+            document.getElementById('articleAuthor').value = '';
+            document.getElementById('articleKeywords').value = '';
+        }
+
+        // ============================================
+        // СОХРАНЕНИЕ СТАТЬИ В FIREBASE
+        // ============================================
+        async function saveArticle() {
+            const title = document.getElementById('articleTitle').value.trim();
+            const author = document.getElementById('articleAuthor').value.trim();
+            const category = document.getElementById('articleCategory').value;
+            const keywords = document.getElementById('articleKeywords').value.trim();
+
+            if (!title || !author) {
+                showNotification('Заполните обязательные поля', 'error');
+                return;
+            }
+
+            if (!uploadedFile) {
+                showNotification('Файл не выбран', 'error');
+                return;
+            }
+
+            if (!isFirebaseInitialized) {
+                showNotification('Firebase не настроен', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Загрузка в облако...';
+            btn.disabled = true;
+
+            try {
+                // Создаем уникальный ID
+                const articleId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // 1. Загружаем PDF в Firebase Storage
+                const storageRef = storage.ref(`articles/${articleId}.pdf`);
+                const uploadTask = await storageRef.put(uploadedFile);
+                
+                // 2. Получаем URL файла
+                const downloadURL = await uploadTask.ref.getDownloadURL();
+                
+                // 3. Сохраняем метаданные в Firestore
+                await db.collection('articles').doc(articleId).set({
+                    title: title,
+                    author: author,
+                    category: category,
+                    keywords: keywords.split(',').map(k => k.trim()).filter(k => k),
+                    pdfUrl: downloadURL,
+                    fileName: uploadedFile.name,
+                    fileSize: uploadedFile.size,
+                    likes: 0,
+                    downloads: 0,
+                    uploadDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    uploadDateDisplay: new Date().toLocaleDateString('ru-RU'),
+                    likedBy: []
+                });
+
+                cancelUpload();
+                showNotification('✅ Статья успешно загружена!', 'success');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                showNotification('Ошибка при загрузке: ' + error.message, 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ============================================
+        // ОТОБРАЖЕНИЕ СТАТЕЙ
+        // ============================================
+        function renderArticles(filteredArticles = null) {
+            const grid = document.getElementById('articlesGrid');
+            const articlesToShow = filteredArticles || articles;
+
+            if (articlesToShow.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <h2 style="color: #667eea; margin-bottom: 10px;">
+                            ${filteredArticles ? 'Ничего не найдено' : 'Библиотека пуста'}
+                        </h2>
+                        <p>${filteredArticles ? 'Попробуйте изменить параметры поиска' : 'Загрузите первую статью, чтобы начать работу'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = articlesToShow.map(article => {
+                const fileSizeMB = (article.fileSize / (1024 * 1024)).toFixed(2);
+                return `
+                    <div class="article-card" onclick="openArticle('${article.id}')">
+                        <div class="article-header">
+                            <span class="article-category">${article.category}</span>
+                        </div>
+                        <div class="article-title">${article.title}</div>
+                        <div class="article-author">👤 ${article.author}</div>
+                        <div class="article-keywords">
+                            ${article.keywords.map(k => `<span class="keyword">${k}</span>`).join('')}
+                        </div>
+                        <div style="font-size: 0.85em; color: #999; margin-top: 10px;">
+                            📄 ${fileSizeMB} МБ
+                        </div>
+                        <div class="article-stats">
+                            <div class="stat">
+                                <span>📅</span>
+                                <span>${article.uploadDateDisplay || 'Сегодня'}</span>
+                            </div>
+                            <div class="stat">
+                                <span>❤️</span>
+                                <span>${article.likes}</span>
+                            </div>
+                            <div class="stat">
+                                <span>⬇️</span>
+                                <span>${article.downloads}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // ОТКРЫТИЕ СТАТЬИ
+        // ============================================
+        async function openArticle(id) {
+            const article = articles.find(a => a.id === id);
+            if (!article) return;
+
+            currentArticleId = id;
+            document.getElementById('modalTitle').textContent = article.title;
+            document.getElementById('modalLikes').textContent = article.likes;
+            document.getElementById('articleModal').style.display = 'block';
+            document.getElementById('linkDisplay').style.display = 'none';
+            
+            // Показываем PDF через iframe
+            document.getElementById('pdfViewer').src = article.pdfUrl;
+        }
+
+        async function openArticleById(id) {
+            const article = articles.find(a => a.id === id);
+            if (article) {
+                await openArticle(id);
+            } else {
+                showNotification('Статья не найдена', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('articleModal').style.display = 'none';
+            currentArticleId = null;
+        }
+
+        // ============================================
+        // СКАЧИВАНИЕ СТАТЬИ
+        // ============================================
+        async function downloadCurrentArticle() {
+            if (!currentArticleId) return;
+            
+            const article = articles.find(a => a.id === currentArticleId);
+            if (!article) return;
+
+            try {
+                // Увеличиваем счетчик загрузок
+                await db.collection('articles').doc(currentArticleId).update({
+                    downloads: firebase.firestore.FieldValue.increment(1)
+                });
+
+                // Скачивание файла
+                const link = document.createElement('a');
+                link.href = article.pdfUrl;
+                link.download = article.fileName || `${article.title}.pdf`;
+                link.target = '_blank';
+                link.click();
+
+                showNotification('Файл загружен!', 'success');
+            } catch (error) {
+                console.error('Ошибка скачивания:', error);
+                showNotification('Ошибка при скачивании', 'error');
+            }
+        }
+
+        // ============================================
+        // ЛАЙКИ
+        // ============================================
+        async function likeCurrentArticle() {
+            if (!currentArticleId) return;
+            
+            const article = articles.find(a => a.id === currentArticleId);
+            if (!article) return;
+
+            const userId = getUserId();
+            const articleRef = db.collection('articles').doc(currentArticleId);
+            
+            try {
+                if (article.likedBy.includes(userId)) {
+                    // Убираем лайк
+                    await articleRef.update({
+                        likes: firebase.firestore.FieldValue.increment(-1),
+                        likedBy: firebase.firestore.FieldValue.arrayRemove(userId)
+                    });
+                    showNotification('Лайк убран', 'success');
+                } else {
+                    // Добавляем лайк
+                    await articleRef.update({
+                        likes: firebase.firestore.FieldValue.increment(1),
+                        likedBy: firebase.firestore.FieldValue.arrayUnion(userId)
+                    });
+                    showNotification('Спасибо за лайк!', 'success');
+                }
+                
+                // Обновляем отображение
+                const updatedArticle = articles.find(a => a.id === currentArticleId);
+                document.getElementById('modalLikes').textContent = updatedArticle.likes;
+                
+            } catch (error) {
+                console.error('Ошибка лайка:', error);
+                showNotification('Ошибка при добавлении лайка', 'error');
+            }
+        }
+
+        // ============================================
+        // ПОДЕЛИТЬСЯ ССЫЛКОЙ
+        // ============================================
+        function shareCurrentArticle() {
+            if (!currentArticleId) return;
+            
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?id=${currentArticleId}`;
+            
+            document.getElementById('shareLink').textContent = shareUrl;
+            document.getElementById('linkDisplay').style.display = 'block';
+            
+            showNotification('Ссылка сгенерирована!', 'success');
+        }
+
+        function copyLink() {
+            const linkText = document.getElementById('shareLink').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showNotification('Ссылка скопирована!', 'success');
+            });
+        }
+
+        // ============================================
+        // ПОИСК И ФИЛЬТРАЦИЯ
+        // ============================================
+        function searchArticles() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!query) {
+                renderArticles();
+                return;
+            }
+
+            const filtered = articles.filter(article => {
+                return article.title.toLowerCase().includes(query) ||
+                       article.author.toLowerCase().includes(query) ||
+                       article.keywords.some(k => k.toLowerCase().includes(query)) ||
+                       article.category.toLowerCase().includes(query);
+            });
+
+            renderArticles(filtered);
+        }
+
+        function filterByCategory(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (category === 'Все') {
+                renderArticles();
+            } else {
+                const filtered = articles.filter(a => a.category === category);
+                renderArticles(filtered);
+            }
+        }
+
+        // ============================================
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+        // ============================================
+        function updateCategories() {
+            const categories = {};
+            articles.forEach(article => {
+                categories[article.category] = (categories[article.category] || 0) + 1;
+            });
+
+            const categoriesDiv = document.getElementById('categories');
+            let html = `
+                <button class="category-btn active" onclick="filterByCategory('Все')">
+                    📚 Все статьи (<span id="countAll">${articles.length}</span>)
+                </button>
+            `;
+
+            const categoryIcons = {
+                'Инженерия': '⚙️',
+                'Математика': '📐',
+                'Физика': '🔬',
+                'Информатика': '💻',
+                'Химия': '🧪',
+                'Биология': '🧬',
+                'Медицина': '⚕️',
+                'Экономика': '💰',
+                'Другое': '📄'
+            };
+
+            Object.entries(categories).sort().forEach(([cat, count]) => {
+                const icon = categoryIcons[cat] || '📄';
+                html += `
+                    <button class="category-btn" onclick="filterByCategory('${cat}')">
+                        ${icon} ${cat} (${count})
+                    </button>
+                `;
+            });
+
+            categoriesDiv.innerHTML = html;
+        }
+
+        function updateStats() {
+            const totalDownloads = articles.reduce((sum, a) => sum + a.downloads, 0);
+            const totalLikes = articles.reduce((sum, a) => sum + a.likes, 0);
+
+            document.getElementById('totalArticles').textContent = articles.length;
+            document.getElementById('totalDownloads').textContent = totalDownloads;
+            document.getElementById('totalLikes').textContent = totalLikes;
+        }
+
+        async function refreshArticles() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Обновление...';
+            btn.disabled = true;
+
+            // Firebase автоматически обновляет через onSnapshot
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                showNotification('Библиотека обновлена!', 'success');
+            }, 1000);
+        }
+
+        // ============================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================
+        function getUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function showFirebaseSetupError() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('articlesGrid').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔥</div>
+                    <h2 style="color: #f44336; margin-bottom: 10px;">
+                        Firebase не настроен
+                    </h2>
+                    <p style="max-width: 600px; margin: 0 auto;">
+                        Откройте файл index.html и замените firebaseConfig на ваши данные из Firebase Console.<br><br>
+                        Подробная инструкция находится в файле README.md
+                    </p>
+                </div>
+            `;
+        }
+
+        // Закрытие модального окна
+        window.onclick = function(event) {
+            const modal = document.getElementById('articleModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        document.onkeydown = function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
+
+        // Очистка при закрытии страницы
+        window.onbeforeunload = function() {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        }
+    </script>
+</body>
+</html>
