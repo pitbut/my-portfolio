@@ -645,12 +645,32 @@
                     <button class="action-btn btn-secondary" onclick="shareCurrentArticle()">
                         🔗 Получить ссылку
                     </button>
+                    <button class="action-btn" style="background: #ffc107; color: #856404;" onclick="showCitation()">
+                        📖 Получить цитату
+                    </button>
                 </div>
                 
                 <div id="linkDisplay" class="link-display" style="display: none;">
                     <strong>Ссылка на статью:</strong><br>
                     <span id="shareLink"></span>
                     <button class="btn" style="margin-top: 10px;" onclick="copyLink()">📋 Копировать</button>
+                </div>
+
+                <!-- Блок для библиографической ссылки -->
+                <div id="citationDisplay" style="display: none; margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border: 2px solid #ffc107;">
+                    <strong style="color: #856404; font-size: 1.1em;">📖 Библиографическая ссылка для диссертации:</strong>
+                    <div style="margin: 10px 0;">
+                        <label style="color: #856404; font-weight: 600; margin-right: 10px;">Формат:</label>
+                        <select id="citationFormat" onchange="updateCitation()" style="padding: 8px 12px; border: 1px solid #ffc107; border-radius: 5px; font-size: 0.95em; background: white;">
+                            <option value="apa">APA Style (международный)</option>
+                            <option value="gost">ГОСТ 7.0.5-2008 (российский)</option>
+                            <option value="simple">Простой формат</option>
+                        </select>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 5px; margin: 10px 0; border: 1px solid #ffc107;">
+                        <code id="citationText" style="font-size: 0.95em; line-height: 1.8; color: #333; word-wrap: break-word; display: block;"></code>
+                    </div>
+                    <button class="btn" style="background: #ffc107; color: #856404; font-weight: 600; border: none;" onclick="copyCitation()">📋 Копировать цитату</button>
                 </div>
 
                 <iframe id="pdfViewer" class="pdf-viewer"></iframe>
@@ -958,6 +978,8 @@
 
         function closeModal() {
             document.getElementById('articleModal').style.display = 'none';
+            document.getElementById('citationDisplay').style.display = 'none';
+            document.getElementById('linkDisplay').style.display = 'none';
             currentArticleId = null;
         }
 
@@ -1048,6 +1070,61 @@
             const linkText = document.getElementById('shareLink').textContent;
             navigator.clipboard.writeText(linkText).then(() => {
                 showNotification('Ссылка скопирована!', 'success');
+            });
+        }
+
+        // ============================================
+        // БИБЛИОГРАФИЧЕСКИЕ ССЫЛКИ (ЦИТАТЫ)
+        // ============================================
+        function showCitation() {
+            if (!currentArticleId) return;
+            
+            document.getElementById('citationDisplay').style.display = 'block';
+            updateCitation();
+            
+            showNotification('Цитата сгенерирована!', 'success');
+        }
+
+        function updateCitation() {
+            if (!currentArticleId) return;
+            
+            const article = articles.find(a => a.id === currentArticleId);
+            if (!article) return;
+
+            const format = document.getElementById('citationFormat').value;
+            let citation = '';
+
+            const currentYear = new Date().getFullYear();
+            const uploadYear = article.uploadDateDisplay ? 
+                article.uploadDateDisplay.split('.')[2] || currentYear : currentYear;
+
+            switch(format) {
+                case 'apa':
+                    // APA Style: Автор. (Год). Название. Категория.
+                    citation = `${article.author} (${uploadYear}). ${article.title}. ${article.category}.`;
+                    break;
+                
+                case 'gost':
+                    // ГОСТ 7.0.5-2008: Автор. Название / Автор. – Категория, Год.
+                    citation = `${article.author}. ${article.title} / ${article.author}. – ${article.category}, ${uploadYear}.`;
+                    break;
+                
+                case 'simple':
+                    // Простой формат: Автор. Название. Год.
+                    citation = `${article.author}. ${article.title}. ${uploadYear}.`;
+                    break;
+            }
+
+            document.getElementById('citationText').textContent = citation;
+        }
+
+        function copyCitation() {
+            const citationText = document.getElementById('citationText').textContent;
+            navigator.clipboard.writeText(citationText).then(() => {
+                showNotification('Цитата скопирована в буфер обмена!', 'success');
+            }).catch(err => {
+                console.error('Ошибка копирования:', err);
+                showNotification('Ошибка копирования', 'error');
             });
         }
 
