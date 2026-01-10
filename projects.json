@@ -1,5 +1,23 @@
 [
   {
+    "id": "chat",
+    "title": "Chat",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/chat/preview.jpg",
+    "link": "projects/chat/index.html",
+    "date": "2026-01-10",
+    "tags": []
+  },
+  {
+    "id": "checker",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/checker/preview.jpg",
+    "link": "projects/checker/index.html",
+    "date": "2026-01-10",
+    "tags": []
+  },
+  {
     "id": "sobesednik",
     "title": "🎙️ Свободный Чат",
     "description": "AI собеседник с голосовым управлением и анимированным аватаром. Поддержка Groq, Google Gemini, OpenAI. 7 личностей включая Учителя. Голосовой ввод/вывод на русском языке.",
@@ -14,30 +32,12 @@
     ]
   },
   {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-01-09",
-    "tags": []
-  },
-  {
-    "id": "checker",
-    "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/checker/preview.jpg",
-    "link": "projects/checker/index.html",
-    "date": "2026-01-09",
-    "tags": []
-  },
-  {
     "id": "videokonferenciya",
     "title": "Videokonferenciya",
     "description": "Описание проекта скоро появится",
     "image": "projects/videokonferenciya/preview.jpg",
     "link": "projects/videokonferenciya/index.html",
-    "date": "2026-01-09",
+    "date": "2026-01-10",
     "tags": []
   },
   {
