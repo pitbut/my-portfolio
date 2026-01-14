@@ -1026,27 +1026,284 @@ function loadFromStorage() {
 
 // Download Firmware
 function downloadFirmware() {
-    const firmwareCode = `// ESP32 Universal Base Firmware
-// Upload this once via USB, then use web interface
+    // Запросить WiFi данные у пользователя
+    const ssid = prompt('Введи название твоего WiFi (SSID):');
+    if (!ssid) {
+        alert('❌ Отменено - не указан SSID');
+        return;
+    }
+    
+    const password = prompt('Введи пароль от WiFi:\n(или оставь пустым если сеть открытая)');
+    
+    const firmwareCode = `/*
+ * ESP32 Universal Constructor - Firmware v1.0
+ * https://www.robutpit.com/projects/esp32-constructor/
+ * 
+ * WiFi настроен для автоматического подключения!
+ * SSID: ${ssid}
+ */
 
 #include <WiFi.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 
-WebSocketsServer webSocket = WebSocketsServer(81);
+// WiFi настройки (прописаны в прошивке)
+const char* WIFI_SSID = "${ssid}";
+const char* WIFI_PASSWORD = "${password || ''}";
+
+// WebSocket сервер на порту 81
+WebSocketsServer wsServer(81);
+
+bool wifiConnected = false;
+bool wsConnected = false;
+unsigned long startTime = 0;
+
+// Конфигурация пинов
+struct PinConfig {
+    int pin;
+    String type;
+    String device;
+    String name;
+    int value;
+    int pwmChannel;
+};
+
+PinConfig pins[40];
+int configuredPins = 0;
 
 void setup() {
     Serial.begin(115200);
+    delay(2000);
     
-    // TODO: Add WiFi configuration
-    // TODO: Add WebSocket handlers
-    // TODO: Add OTA support
+    Serial.println("\\n\\n╔════════════════════════════════════════════╗");
+    Serial.println("║  ESP32 Universal Constructor v1.0         ║");
+    Serial.println("║  www.robutpit.com                          ║");
+    Serial.println("╚════════════════════════════════════════════╝\\n");
     
-    Serial.println("ESP32 Base Firmware Ready!");
+    startTime = millis();
+    pinMode(LED_BUILTIN, OUTPUT);
+    
+    // Подключение к WiFi
+    connectToWiFi();
+    
+    if (wifiConnected) {
+        wsServer.begin();
+        wsServer.onEvent(webSocketEvent);
+        Serial.println("✅ WebSocket сервер запущен на порту 81\\n");
+        printConnectionInfo();
+    } else {
+        Serial.println("❌ Не удалось подключиться к WiFi!");
+    }
+    
+    Serial.println("✅ Система готова!\\n");
 }
 
 void loop() {
-    webSocket.loop();
+    // Проверка WiFi
+    if (WiFi.status() != WL_CONNECTED) {
+        if (wifiConnected) {
+            Serial.println("⚠️  WiFi отключён! Переподключаюсь...");
+            wifiConnected = false;
+        }
+        connectToWiFi();
+        delay(5000);
+        return;
+    }
+    
+    wsServer.loop();
+    
+    // Статус каждые 5 секунд
+    static unsigned long lastStatus = 0;
+    if (millis() - lastStatus > 5000) {
+        sendStatus();
+        lastStatus = millis();
+    }
+    
+    // Мигание LED
+    static unsigned long lastBlink = 0;
+    if (millis() - lastBlink > 1000) {
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+        lastBlink = millis();
+    }
+}
+
+void connectToWiFi() {
+    Serial.println("📡 Подключаюсь к WiFi...");
+    Serial.print("   SSID: ");
+    Serial.println(WIFI_SSID);
+    
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    
+    Serial.print("   ");
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < 60) {
+        delay(500);
+        Serial.print(".");
+        attempts++;
+    }
+    Serial.println();
+    
+    if (WiFi.status() == WL_CONNECTED) {
+        wifiConnected = true;
+        Serial.println("✅ WiFi подключён!");
+        Serial.print("   IP адрес: ");
+        Serial.println(WiFi.localIP());
+        Serial.print("   Signal: ");
+        Serial.print(WiFi.RSSI());
+        Serial.println(" dBm");
+    } else {
+        wifiConnected = false;
+        Serial.println("❌ Не удалось подключиться");
+    }
+}
+
+void printConnectionInfo() {
+    Serial.println("┌──────────────────────────────────────────────┐");
+    Serial.println("│  КАК ПОДКЛЮЧИТЬСЯ:                           │");
+    Serial.println("├──────────────────────────────────────────────┤");
+    Serial.println("│  1. Открой: robutpit.com/projects/esp32-...  │");
+    Serial.println("│  2. Нажми: 🔌 Подключить ESP32               │");
+    Serial.print("│  3. Введи IP: ");
+    Serial.print(WiFi.localIP());
+    Serial.println("                      │");
+    Serial.println("└──────────────────────────────────────────────┘\\n");
+}
+
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+    switch(type) {
+        case WStype_DISCONNECTED:
+            Serial.printf("🔌 [%u] Отключился\\n", num);
+            wsConnected = false;
+            break;
+            
+        case WStype_CONNECTED: {
+            IPAddress ip = wsServer.remoteIP(num);
+            Serial.printf("🔌 [%u] Подключён: %d.%d.%d.%d\\n", num, ip[0], ip[1], ip[2], ip[3]);
+            wsConnected = true;
+            String welcome = "{\\"type\\":\\"connected\\",\\"message\\":\\"ESP32 готов!\\",\\"version\\":\\"1.0\\"}";
+            wsServer.sendTXT(num, welcome);
+            break;
+        }
+            
+        case WStype_TEXT: {
+            Serial.printf("📨 [%u] %s\\n", num, payload);
+            
+            DynamicJsonDocument doc(2048);
+            DeserializationError error = deserializeJson(doc, payload);
+            if (error) return;
+            
+            String cmdType = doc["type"].as<String>();
+            
+            if (cmdType == "ping") {
+                handlePing(num);
+            } else if (cmdType == "digital") {
+                handleDigital(num, doc);
+            } else if (cmdType == "pwm") {
+                handlePWM(num, doc);
+            } else if (cmdType == "read") {
+                handleRead(num, doc);
+            } else if (cmdType == "config") {
+                handleConfig(num, doc);
+            }
+            break;
+        }
+    }
+}
+
+void handlePing(uint8_t num) {
+    unsigned long uptime = (millis() - startTime) / 1000;
+    String pong = "{\\"type\\":\\"pong\\",\\"uptime\\":" + String(uptime) + "}";
+    wsServer.sendTXT(num, pong);
+}
+
+void handleDigital(uint8_t num, JsonDocument& doc) {
+    int pin = doc["pin"];
+    int value = doc["value"];
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, value);
+    Serial.printf("💡 GPIO %d = %s\\n", pin, value ? "HIGH" : "LOW");
+    String response = "{\\"type\\":\\"digital_response\\",\\"pin\\":" + String(pin) + ",\\"value\\":" + String(value) + "}";
+    wsServer.sendTXT(num, response);
+}
+
+void handlePWM(uint8_t num, JsonDocument& doc) {
+    int pin = doc["pin"];
+    int value = doc["value"];
+    int channel = doc["channel"] | 0;
+    int freq = doc["frequency"] | 5000;
+    
+    ledcSetup(channel, freq, 8);
+    ledcAttachPin(pin, channel);
+    ledcWrite(channel, value);
+    
+    Serial.printf("🎛️ PWM GPIO %d = %d (%d%%)\\n", pin, value, (value * 100) / 255);
+    String response = "{\\"type\\":\\"pwm_response\\",\\"pin\\":" + String(pin) + ",\\"value\\":" + String(value) + "}";
+    wsServer.sendTXT(num, response);
+}
+
+void handleRead(uint8_t num, JsonDocument& doc) {
+    int pin = doc["pin"];
+    String readType = doc["readType"] | "digital";
+    int value = 0;
+    
+    if (readType == "analog" || (pin >= 32 && pin <= 39)) {
+        pinMode(pin, INPUT);
+        value = analogRead(pin);
+    } else {
+        pinMode(pin, INPUT);
+        value = digitalRead(pin);
+    }
+    
+    String response = "{\\"type\\":\\"read_response\\",\\"pin\\":" + String(pin) + ",\\"value\\":" + String(value) + "}";
+    wsServer.sendTXT(num, response);
+}
+
+void handleConfig(uint8_t num, JsonDocument& doc) {
+    Serial.println("⚙️ Применяю конфигурацию...");
+    configuredPins = 0;
+    JsonObject config = doc["config"];
+    
+    for (JsonPair kv : config) {
+        if (configuredPins >= 40) break;
+        
+        int pin = String(kv.key().c_str()).toInt();
+        JsonObject pinData = kv.value();
+        
+        pins[configuredPins].pin = pin;
+        pins[configuredPins].type = pinData["type"].as<String>();
+        pins[configuredPins].device = pinData["device"].as<String>();
+        pins[configuredPins].name = pinData["name"].as<String>();
+        pins[configuredPins].pwmChannel = configuredPins;
+        
+        String type = pins[configuredPins].type;
+        if (type == "digital_out") {
+            pinMode(pin, OUTPUT);
+        } else if (type == "pwm") {
+            ledcSetup(configuredPins, 5000, 8);
+            ledcAttachPin(pin, configuredPins);
+        } else if (type == "digital_in") {
+            pinMode(pin, INPUT_PULLUP);
+        } else if (type == "adc") {
+            pinMode(pin, INPUT);
+        }
+        
+        Serial.printf("  📍 GPIO %d: %s\\n", pin, pins[configuredPins].name.c_str());
+        configuredPins++;
+    }
+    
+    Serial.printf("✅ Настроено %d пинов\\n", configuredPins);
+    String response = "{\\"type\\":\\"config_response\\",\\"status\\":\\"ok\\"}";
+    wsServer.sendTXT(num, response);
+}
+
+void sendStatus() {
+    if (!wsConnected) return;
+    unsigned long uptime = (millis() - startTime) / 1000;
+    String status = "{\\"type\\":\\"status\\",\\"uptime\\":" + String(uptime) + 
+                   ",\\"heap\\":" + String(ESP.getFreeHeap()) + 
+                   ",\\"rssi\\":" + String(WiFi.RSSI()) + "}";
+    wsServer.broadcastTXT(status);
 }
 `;
     
@@ -1060,7 +1317,7 @@ void loop() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    alert('✅ Базовая прошивка скачана!');
+    alert('✅ Прошивка скачана!\\n\\nWiFi SSID: ' + ssid + '\\n\\nТеперь:\\n1. Открой файл в Arduino IDE\\n2. Установи библиотеки (WebSockets, ArduinoJson)\\n3. Прошей ESP32\\n4. IP адрес появится в Serial Monitor');
 }
 
 function downloadInstructions() {
