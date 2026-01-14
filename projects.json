@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-01-10",
+    "date": "2026-01-14",
     "tags": []
   },
   {
@@ -14,7 +14,16 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-01-10",
+    "date": "2026-01-14",
+    "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-01-14",
     "tags": []
   },
   {
@@ -30,15 +39,6 @@
       "Python",
       "Flask"
     ]
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-01-10",
-    "tags": []
   },
   {
     "id": "snake",
@@ -66,6 +66,22 @@
       "Наука",
       "Эксперимент",
       "Математика"
+    ]
+  },
+  {
+    "id": "esp32",
+    "title": "🔌 ESP32 Universal Constructor",
+    "description": "Универсальный веб-конфигуратор для ESP32. Назначай пины, программируй визуально с блок-схемами, создавай сценарии действий, генерируй Arduino код и прошивай по воздуху. IoT без Arduino IDE!",
+    "image": "projects/esp32/preview.jpg",
+    "link": "projects/esp32/index.html",
+    "date": "2025-01-14",
+    "tags": [
+      "ESP32",
+      "IoT",
+      "Электроника",
+      "WebSocket",
+      "OTA",
+      "Визуальное программирование"
     ]
   },
   {
