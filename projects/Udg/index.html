@@ -1,0 +1,279 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDG Expert System</title>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --bg: #0D0D0D;
+            --card: #1A1A1A;
+            --border: #333;
+            --text: #E0E0E0;
+            --accent: #2ecc71;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .app-box {
+            width: 100%; max-width: 850px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: 5px solid var(--gold);
+            border-radius: 4px; padding: 30px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        h1 { font-size: 1.2rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin: 0; }
+        
+        /* Config Panel */
+        .config-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; background: #111; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
+        .full { grid-column: span 2; }
+        
+        label { display: block; font-size: 0.7rem; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; font-weight: bold; }
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 3px; box-sizing: border-box; font-size: 0.95rem; }
+        input:focus { border-color: var(--gold); outline: none; }
+        .hint { font-size: 0.65rem; color: #555; margin-top: 4px; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 2px; margin-bottom: 25px; background: #222; border-radius: 4px; overflow: hidden; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; color: #777; font-size: 0.8rem; text-transform: uppercase; transition: 0.3s; }
+        .tab.active { background: var(--gold); color: #000; font-weight: bold; }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.4s; }
+
+        .btn-run { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; letter-spacing: 1px; }
+
+        /* Result Area */
+        .results { margin-top: 30px; display: none; }
+        .res-card { background: #000; border-left: 4px solid var(--gold); padding: 20px; margin-bottom: 15px; }
+        .res-title { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; opacity: 0.8; }
+        .res-val { font-size: 1.4rem; font-weight: bold; font-family: monospace; }
+        
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .box { padding: 15px; background: #222; border-radius: 4px; }
+        .box-h { font-size: 0.7rem; color: #888; margin-bottom: 8px; text-transform: uppercase; }
+        .ideal { color: var(--accent); }
+        .real { color: var(--gold); }
+
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(5px);} to {opacity: 1; transform: translateY(0);} }
+    </style>
+</head>
+<body>
+
+<div class="app-box">
+    <div class="header">
+        <h1 id="ui-title">UDG EXPERT SYSTEM</h1>
+        <button onclick="toggleLang()" style="background:none; border:1px solid var(--gold); color:var(--gold); cursor:pointer; font-size:0.7rem;">RU/EN</button>
+    </div>
+
+    <div class="config-grid">
+        <div class="field"><label id="ui-n">Хар-ка N</label><input type="number" id="cfg-n" value="40"></div>
+        <div class="field"><label id="ui-ps">Винт станка Ps</label><input type="number" id="cfg-ps" value="6"></div>
+        <div class="field full"><label id="ui-discs">Диски (отверстия)</label><input type="text" id="cfg-discs" value="15,16,17,18,19,20,21,23,27,29,31,33,37,39,41,43,47,49,54,66"></div>
+        <div class="field full"><label id="ui-gears">Шестерни (зубья)</label><input type="text" id="cfg-gears" value="25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="setTab('simple')" id="t1">Простое</div>
+        <div class="tab" onclick="setTab('diff')" id="t2">Дифференциальное</div>
+        <div class="tab" onclick="setTab('spiral')" id="t3">Винт</div>
+    </div>
+
+    <div class="content">
+        <div id="simple" class="section active">
+            <div class="field"><label id="ui-z1">Число делений Z</label><input type="number" id="in-z1"></div>
+            <button class="btn-run" onclick="calcSimple()" id="ui-btn">Рассчитать</button>
+        </div>
+
+        <div id="diff" class="section">
+            <div class="field"><label id="ui-z2">Нужное Z</label><input type="number" id="in-z2"></div>
+            <div class="field"><label id="ui-za">Вспомогательное Za</label><input type="number" id="in-za"></div>
+            <button class="btn-run" onclick="calcDiff()">АНАЛИЗ ГИТАРЫ</button>
+        </div>
+
+        <div id="spiral" class="section">
+            <div class="field"><label id="ui-pw">Шаг спирали Pw</label><input type="number" id="in-pw"></div>
+            <button class="btn-run" onclick="calcSpiral()">АНАЛИЗ СПИРАЛИ</button>
+        </div>
+
+        <div id="results" class="results">
+            <div class="res-card">
+                <div class="res-title" id="ui-res-title">Теоретический идеал (i)</div>
+                <div id="res-i" class="res-val">0.00000</div>
+            </div>
+
+            <div class="compare-grid">
+                <div class="box">
+                    <div class="box-h" id="ui-ideal-h">Идеальные шестерни</div>
+                    <div id="res-ideal-gears" class="ideal" style="font-weight:bold;">---</div>
+                    <div class="hint" id="ui-ideal-hint">Точное соотношение</div>
+                </div>
+                <div class="box">
+                    <div class="box-h" id="ui-real-h">Из вашего набора</div>
+                    <div id="res-real-gears" class="real" style="font-weight:bold;">---</div>
+                    <div class="hint" id="ui-real-hint">Минимальная погрешность</div>
+                </div>
+            </div>
+            <div id="explanation" style="margin-top:20px; font-size:0.85rem; line-height:1.5; color:#888;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let lang = 'ru';
+    const dict = {
+        ru: {
+            title: "UDG EXPERT SYSTEM", uiN: "Характеристика N", uiPs: "Винт станка Ps", uiDiscs: "Ваши диски", uiGears: "Ваши шестерни",
+            t1: "Простое", t2: "Дифф.", t3: "Винт", uiZ1: "Делений Z", uiZ2: "Нужное Z", uiZa: "Вспомогательное Za", uiPw: "Шаг спирали Pw",
+            uiBtn: "Рассчитать", uiResTitle: "Целевое передаточное число (i)", uiIdealH: "Идеальный расчет", uiRealH: "Лучшее из вашего набора",
+            uiIdealHint: "Теоретические зубья", uiRealHint: "С учетом ваших шестерен",
+            expDiff: "Дифференциальное деление: Гитара связывает шпиндель и делительный диск. При Za > Z диск вращается по часовой.",
+            expSpiral: "Винтовое деление: Гитара связывает ходовой винт стола и шпиндель УДГ для нарезания спирали.",
+            turns: "об.", holes: "отв.", on: "на круге"
+        },
+        en: {
+            title: "UDG EXPERT SYSTEM", uiN: "Head Ratio N", uiPs: "Leadscrew Ps", uiDiscs: "Your Plates", uiGears: "Your Gears",
+            t1: "Simple", t2: "Diff.", t3: "Spiral", uiZ1: "Divisions Z", uiZ2: "Target Z", uiZa: "Auxiliary Za", uiPw: "Spiral Lead Pw",
+            uiBtn: "Calculate", uiResTitle: "Target gear ratio (i)", uiIdealH: "Theoretical Ideal", uiRealH: "Best from your set",
+            uiIdealHint: "Exact tooth counts", uiRealHint: "Based on available gears",
+            expDiff: "Differential indexing: Gear train links spindle and index plate. If Za > Z, plate rotates clockwise.",
+            expSpiral: "Spiral milling: Gear train links table leadscrew and UDG spindle to cut spirals.",
+            turns: "turns", holes: "holes", on: "on circle"
+        }
+    };
+
+    // Авто-сохранение в LocalStorage
+    const fields = ['cfg-n', 'cfg-ps', 'cfg-discs', 'cfg-gears'];
+    window.onload = () => {
+        fields.forEach(f => {
+            const saved = localStorage.getItem(f);
+            if(saved) document.getElementById(f).value = saved;
+            document.getElementById(f).addEventListener('input', (e) => localStorage.setItem(f, e.target.value));
+        });
+        updateUI();
+    };
+
+    function toggleLang() { lang = lang === 'ru' ? 'en' : 'ru'; updateUI(); }
+
+    function updateUI() {
+        const d = dict[lang];
+        document.getElementById('ui-title').innerText = d.title;
+        document.getElementById('ui-n').innerText = d.uiN;
+        document.getElementById('ui-ps').innerText = d.uiPs;
+        document.getElementById('ui-discs').innerText = d.uiDiscs;
+        document.getElementById('ui-gears').innerText = d.uiGears;
+        document.getElementById('t1').innerText = d.t1;
+        document.getElementById('t2').innerText = d.t2;
+        document.getElementById('t3').innerText = d.t3;
+        document.getElementById('ui-z1').innerText = d.uiZ1;
+        document.getElementById('ui-z2').innerText = d.uiZ2;
+        document.getElementById('ui-za').innerText = d.uiZa;
+        document.getElementById('ui-pw').innerText = d.uiPw;
+        document.getElementById('ui-btn').innerText = d.uiBtn;
+        document.getElementById('ui-res-title').innerText = d.uiResTitle;
+        document.getElementById('ui-ideal-h').innerText = d.uiIdealH;
+        document.getElementById('ui-real-h').innerText = d.uiRealH;
+        document.getElementById('ui-ideal-hint').innerText = d.uiIdealHint;
+        document.getElementById('ui-real-hint').innerText = d.uiRealHint;
+    }
+
+    function setTab(t) {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(t).classList.add('active');
+        document.getElementById('results').style.display = 'none';
+    }
+
+    // Вспомогательная функция для сокращения дроби
+    function getIdealGears(ratio) {
+        let bestError = 1;
+        let bestGears = "";
+        // Простой перебор стандартных значений от 20 до 120 для "идеальной" гитары
+        for(let a=20; a<=100; a+=5) {
+            for(let b=20; b<=100; b+=5) {
+                let err = Math.abs(ratio - a/b);
+                if(err < 0.0001) return `${a} / ${b}`;
+            }
+        }
+        return ratio.toFixed(4) + " (сложная дробь)";
+    }
+
+    function solveBest(target) {
+        const myGears = document.getElementById('cfg-gears').value.split(',').map(Number);
+        let best = { err: 1, txt: "---" };
+        target = Math.abs(target);
+
+        for(let a of myGears) for(let b of myGears) {
+            let err = Math.abs(target - a/b);
+            if(err < best.err) best = { err: err, txt: `${a} / ${b}` };
+        }
+        
+        for(let a of myGears) for(let b of myGears) for(let c of myGears) for(let d of myGears) {
+            let err = Math.abs(target - (a*c)/(b*d));
+            if(err < best.err) best = { err: err, txt: `(${a}×${c}) / (${b}×${d})` };
+        }
+        return best.txt + ` (err: ${best.err.toFixed(6)})`;
+    }
+
+    function calcSimple() {
+        const N = parseInt(document.getElementById('cfg-n').value);
+        const Z = parseInt(document.getElementById('in-z1').value);
+        const discs = document.getElementById('cfg-discs').value.split(',').map(Number);
+        if(!Z) return;
+
+        let whole = Math.floor(N/Z);
+        let rem = N % Z;
+        let res = "";
+
+        let match = null;
+        for(let h of discs) {
+            if((h * rem) % Z === 0) { match = {c: h, o: (h*rem)/Z}; break; }
+        }
+
+        document.getElementById('res-i').innerText = `Z = ${Z}`;
+        document.getElementById('res-ideal-gears').innerText = `${whole} ${dict[lang].turns}`;
+        document.getElementById('res-real-gears').innerText = match ? `${match.o} ${dict[lang].on} ${match.c}` : "---";
+        document.getElementById('results').style.display = 'block';
+    }
+
+    function calcDiff() {
+        const N = parseInt(document.getElementById('cfg-n').value);
+        const Z = parseFloat(document.getElementById('in-z2').value);
+        const Za = parseFloat(document.getElementById('in-za').value);
+        if(!Z || !Za) return;
+
+        let i = (Za - Z) * (N / Za);
+        document.getElementById('res-i').innerText = i.toFixed(5);
+        document.getElementById('res-ideal-gears').innerText = getIdealGears(Math.abs(i));
+        document.getElementById('res-real-gears').innerText = solveBest(i);
+        document.getElementById('explanation').innerText = dict[lang].expDiff;
+        document.getElementById('results').style.display = 'block';
+    }
+
+    function calcSpiral() {
+        const N = parseInt(document.getElementById('cfg-n').value);
+        const Ps = parseFloat(document.getElementById('cfg-ps').value);
+        const Pw = parseFloat(document.getElementById('in-pw').value);
+        if(!Pw) return;
+
+        let i = (N * Ps) / Pw;
+        document.getElementById('res-i').innerText = i.toFixed(5);
+        document.getElementById('res-ideal-gears').innerText = getIdealGears(i);
+        document.getElementById('res-real-gears').innerText = solveBest(i);
+        document.getElementById('explanation').innerText = dict[lang].expSpiral;
+        document.getElementById('results').style.display = 'block';
+    }
+</script>
+</body>
+</html>

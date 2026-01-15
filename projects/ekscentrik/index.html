@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эксцентрик-Про | 3 Кулачка</title>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --bg: #121212;
+            --card: #1E1E1E;
+            --text: #E0E0E0;
+            --border: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--gold);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+
+        h1 { color: var(--gold); font-size: 1.2rem; text-align: center; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.85rem; color: #999; margin-bottom: 8px; }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            background: #252525;
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus { border-color: var(--gold); outline: none; }
+
+        .btn-calc {
+            width: 100%;
+            padding: 15px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-calc:hover { background: #f1c40f; transform: scale(1.01); }
+
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid var(--gold);
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .result-label { font-size: 0.9rem; color: var(--gold); }
+        .result-value { font-size: 2.2rem; font-weight: bold; margin: 5px 0; }
+
+        .history {
+            margin-top: 25px;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+
+        .history h3 { font-size: 0.8rem; color: #666; text-transform: uppercase; }
+        .history-item { font-size: 0.75rem; color: #888; padding: 4px 0; border-bottom: 1px solid #222; }
+
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Эксцентрик-Мастер</h1>
+
+    <div class="form-group">
+        <label>Тип поверхности кулачков</label>
+        <select id="jawType">
+            <option value="sharp">Острые (вершина-точка)</option>
+            <option value="radius">Радиусные (стандартные)</option>
+            <option value="flat">С плоской площадкой</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Диаметр заготовки (D), мм</label>
+        <input type="number" id="diam" placeholder="Например: 40" step="0.001">
+    </div>
+
+    <div class="form-group">
+        <label>Требуемый эксцентриситет (e), мм</label>
+        <input type="number" id="ecc" placeholder="Например: 4" step="0.001">
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">Рассчитать подкладку</button>
+
+    <div id="result" class="result-box">
+        <div class="result-label">Толщина подкладки (S):</div>
+        <div class="result-value" id="sVal">0.000</div>
+        <div style="font-size: 0.75rem; color: #777;">Размер с учетом геометрии контакта</div>
+    </div>
+
+    <div class="history">
+        <h3>Последние расчеты</h3>
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<script>
+    window.onload = loadHistory;
+
+    function playSuccess() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.frequency.value = 600;
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function calculate() {
+        const type = document.getElementById('jawType').value;
+        const D = parseFloat(document.getElementById('diam').value);
+        const e = parseFloat(document.getElementById('ecc').value);
+
+        if (!D || !e || e >= D/2) {
+            alert("Пожалуйста, введите корректные данные (e < D/2)");
+            return;
+        }
+
+        let s = 0;
+
+        // ЛОГИКА РАСЧЕТА ЗАВИСИТ ОТ ФОРМЫ КУЛАЧКОВ
+        if (type === 'sharp') {
+            // Теоретический идеал для острых кулачков
+            s = 1.5 * e;
+        } else if (type === 'radius') {
+            // С учетом радиуса кулачков (уточненная формула)
+            s = 1.5 * e * (1 - (e / (8 * D)));
+        } else if (type === 'flat') {
+            // Для плоской площадки коэффициент немного выше из-за смещения точки контакта
+            s = 1.5 * e * (1 + (e / (4 * D)));
+        }
+
+        const finalS = s.toFixed(3);
+        document.getElementById('sVal').innerText = finalS + " мм";
+        document.getElementById('result').style.display = 'block';
+
+        playSuccess();
+        saveHistory(D, e, finalS);
+    }
+
+    function saveHistory(D, e, S) {
+        let h = JSON.parse(localStorage.getItem('eco_h') || '[]');
+        h.unshift(`${D}мм / ${e}мм → ${S}мм`);
+        if(h.length > 3) h.pop();
+        localStorage.setItem('eco_h', JSON.stringify(h));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        const h = JSON.parse(localStorage.getItem('eco_h') || '[]');
+        document.getElementById('historyList').innerHTML = h.map(i => `<div class="history-item">${i}</div>`).join('');
+    }
+</script>
+
+</body>
+</html>
