@@ -1,5 +1,14 @@
 [
   {
+    "id": "Udg",
+    "title": "Udg",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/Udg/preview.jpg",
+    "link": "projects/Udg/index.html",
+    "date": "2026-01-16",
+    "tags": []
+  },
+  {
     "id": "chat",
     "title": "Chat",
     "description": "Описание проекта скоро появится",
