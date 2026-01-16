@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-01-15",
+    "date": "2026-01-16",
     "tags": []
   },
   {
@@ -14,8 +14,24 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-01-15",
+    "date": "2026-01-16",
     "tags": []
+  },
+  {
+    "id": "ekscentrik",
+    "title": "Калькулятор точения эксцентрика",
+    "description": "Профессиональный инженерный калькулятор для расчета параметров механической обработки деталей на токарных станках. Включает табличный метод для острых кулачков с интерполяцией, упрощенные формулы для быстрых расчетов, расчет для прямоугольных деталей (зажим за отверстие и за внешний контур), интерактивную таблицу коэффициентов, визуализацию на Canvas, экспорт/импорт данных в JSON и общую схему всех методов расчета.",
+    "image": "projects/ekscentrik/preview.png",
+    "link": "projects/ekscentrik/index.html",
+    "date": "2026-01-16",
+    "tags": [
+      "Инженерия",
+      "Калькулятор",
+      "Механика",
+      "Токарная обработка",
+      "Образование",
+      "Визуализация"
+    ]
   },
   {
     "id": "videokonferenciya",
@@ -23,7 +39,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/videokonferenciya/preview.jpg",
     "link": "projects/videokonferenciya/index.html",
-    "date": "2026-01-15",
+    "date": "2026-01-16",
     "tags": []
   },
   {
