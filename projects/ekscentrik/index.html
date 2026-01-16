@@ -1,196 +1,1745 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Эксцентрик-Про | 3 Кулачка</title>
+    <title>Инженерные калькуляторы для механической обработки</title>
     <style>
-        :root {
-            --gold: #D4AF37;
-            --bg: #121212;
-            --card: #1E1E1E;
-            --text: #E0E0E0;
-            --border: #333;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
 
         .container {
-            width: 100%;
-            max-width: 450px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-top: 4px solid var(--gold);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            max-width: 1600px;
+            margin: 0 auto;
         }
 
-        h1 { color: var(--gold); font-size: 1.2rem; text-align: center; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
 
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 0.85rem; color: #999; margin-bottom: 8px; }
-        
-        select, input {
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #1e3c72;
+            border-color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .calculators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+        }
+
+        .calc-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .calc-title {
+            font-size: 20px;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2a5298;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calc-title::before {
+            content: '🔧';
+            font-size: 24px;
+        }
+
+        .method-selector {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .method-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1976D2;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="number"],
+        select {
             width: 100%;
             padding: 12px;
-            background: #252525;
-            border: 1px solid var(--border);
-            color: #fff;
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: 0.3s;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
         }
 
-        input:focus, select:focus { border-color: var(--gold); outline: none; }
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 8px rgba(42, 82, 152, 0.2);
+        }
 
-        .btn-calc {
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
             width: 100%;
             padding: 15px;
-            background: var(--gold);
-            color: #000;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
             border: none;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.3s;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
-        .btn-calc:hover { background: #f1c40f; transform: scale(1.01); }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.4);
+        }
 
-        .result-box {
-            margin-top: 25px;
+        button:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            background: #f0f4f8;
             padding: 20px;
-            background: rgba(212, 175, 55, 0.08);
-            border: 1px solid var(--gold);
-            border-radius: 6px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .results h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .results h3::before {
+            content: '📊';
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: #2a5298;
+        }
+
+        .formula-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .formula-box h4 {
+            color: #f57c00;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .comparison-box {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .comparison-box h4 {
+            color: #7b1fa2;
+            margin-bottom: 10px;
+        }
+
+        .comparison-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .recommendations {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .recommendations h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: center;
-            display: none;
-            animation: fadeIn 0.5s;
         }
 
-        .result-label { font-size: 0.9rem; color: var(--gold); }
-        .result-value { font-size: 2.2rem; font-weight: bold; margin: 5px 0; }
-
-        .history {
-            margin-top: 25px;
-            border-top: 1px solid #333;
-            padding-top: 15px;
+        th {
+            background: #2a5298;
+            color: white;
+            font-weight: 600;
         }
 
-        .history h3 { font-size: 0.8rem; color: #666; text-transform: uppercase; }
-        .history-item { font-size: 0.75rem; color: #888; padding: 4px 0; border-bottom: 1px solid #222; }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
 
-        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        tr:hover {
+            background: #e3f2fd;
+        }
+
+        .highlight-row {
+            background: #fff9c4 !important;
+            font-weight: bold;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 4px;
+            color: #856404;
+        }
+
+        .canvas-container {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .calculators {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Инженерные калькуляторы для механической обработки</h1>
+            <p>Точные расчеты для токарной обработки деталей</p>
+        </div>
 
-<div class="container">
-    <h1>Эксцентрик-Мастер</h1>
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('eccentric')">
+                Расчет эксцентрика
+            </button>
+            <button class="tab-button" onclick="switchTab('rectangle')">
+                Прямоугольная деталь (отверстие)
+            </button>
+            <button class="tab-button" onclick="switchTab('rectangleChuck')">
+                Прямоугольная деталь (зажим)
+            </button>
+            <button class="tab-button" onclick="switchTab('table')">
+                Таблица коэффициентов
+            </button>
+            <button class="tab-button" onclick="switchTab('overview')">
+                Общая схема
+            </button>
+        </div>
 
-    <div class="form-group">
-        <label>Тип поверхности кулачков</label>
-        <select id="jawType">
-            <option value="sharp">Острые (вершина-точка)</option>
-            <option value="radius">Радиусные (стандартные)</option>
-            <option value="flat">С плоской площадкой</option>
-        </select>
+        <!-- Вкладка: Расчет эксцентрика -->
+        <div id="eccentric" class="tab-content active">
+            <div class="calculators">
+                <div class="calc-card">
+                    <h2 class="calc-title">Расчет толщины подкладки</h2>
+                    
+                    <div class="method-selector">
+                        <label>Выберите метод расчета:</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="method" value="table" checked onchange="updateMethod()">
+                                <span>📊 Табличный (точный для острых кулачков)</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="method" value="simple" onchange="updateMethod()">
+                                <span>⚡ Упрощенный (быстрый)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="diameter">Диаметр заготовки D (мм):</label>
+                            <input type="number" id="diameter" value="50" step="0.1" min="0.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eccentricity">Эксцентриситет e (мм):</label>
+                            <input type="number" id="eccentricity" value="5" step="0.01" min="0.01">
+                        </div>
+                    </div>
+
+                    <div id="simpleMethodOptions" style="display:none;">
+                        <div class="form-group">
+                            <label for="chuckType">Тип патрона:</label>
+                            <select id="chuckType">
+                                <option value="2">Двухкулачковый (k=1.0)</option>
+                                <option value="3" selected>Трехкулачковый (k=1.5)</option>
+                                <option value="4">Четырехкулачковый (k=1.414)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="calculateEccentric()">Рассчитать толщину подкладки</button>
+
+                    <div id="eccResults" class="results" style="display:none;">
+                        <h3>Результаты расчета:</h3>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Относительный эксцентриситет A:</span>
+                            <span class="result-value" id="relativeEcc">-</span>
+                        </div>
+                        
+                        <div class="result-item" id="coefficientRow" style="display:none;">
+                            <span class="result-label">Коэффициент k (по таблице):</span>
+                            <span class="result-value" id="coefficient">-</span>
+                        </div>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Толщина подкладки t:</span>
+                            <span class="result-value" id="thickness" style="font-size: 1.3em; color: #d32f2f;">-</span>
+                        </div>
+
+                        <div class="formula-box">
+                            <h4>💡 Формулы расчета:</h4>
+                            <div id="formulaText"></div>
+                        </div>
+
+                        <div id="comparisonBox" class="comparison-box" style="display:none;">
+                            <h4>📐 Сравнение методов:</h4>
+                            <div id="comparisonContent"></div>
+                        </div>
+
+                        <div class="recommendations">
+                            <h4>✓ Рекомендации:</h4>
+                            <div id="recommendations"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-card">
+                    <h2 class="calc-title">Схема установки детали</h2>
+                    <div class="canvas-container">
+                        <canvas id="schemaCanvas" width="400" height="400"></canvas>
+                    </div>
+                    <div class="info-box">
+                        Красная пластинка показывает подкладку под один из кулачков для получения эксцентриситета.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка: Зажим прямоугольной детали в трехкулачковый патрон -->
+        <div id="rectangleChuck" class="tab-content">
+            <div class="calculators">
+                <div class="calc-card">
+                    <h2 class="calc-title">Зажим прямоугольной детали в трехкулачковый патрон</h2>
+                    
+                    <div class="info-box">
+                        При зажиме прямоугольной детали в трехкулачковый патрон необходимо подложить подкладки под два кулачка для обеспечения надежного зажима.
+                    </div>
+
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="rectWidth">Ширина детали a (мм):</label>
+                            <input type="number" id="rectWidth" value="50" step="0.1" min="0.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rectHeight">Высота детали b (мм):</label>
+                            <input type="number" id="rectHeight" value="30" step="0.1" min="0.1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chuckOrientation">Ориентация детали:</label>
+                        <select id="chuckOrientation">
+                            <option value="flat">Плоская сторона к кулачку</option>
+                            <option value="corner">Угол к кулачку</option>
+                        </select>
+                    </div>
+
+                    <button onclick="calculateRectangleChuck()">Рассчитать подкладки</button>
+
+                    <div id="rectChuckResults" class="results" style="display:none;">
+                        <h3>Результаты расчета:</h3>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Радиус описанной окружности R:</span>
+                            <span class="result-value" id="rectChuckRadius">-</span>
+                        </div>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Толщина подкладки t₁:</span>
+                            <span class="result-value" id="rectChuckT1" style="font-size: 1.2em; color: #d32f2f;">-</span>
+                        </div>
+                        
+                        <div class="result-item">
+                            <span class="result-label">Толщина подкладки t₂:</span>
+                            <span class="result-value" id="rectChuckT2" style="font-size: 1.2em; color: #d32f2f;">-</span>
+                        </div>
+
+                        <div class="formula-box">
+                            <h4>💡 Формулы расчета:</h4>
+                            <div id="rectChuckFormula"></div>
+                        </div>
+
+                        <div class="recommendations">
+                            <h4>✓ Рекомендации:</h4>
+                            <div id="rectChuckRecommendations"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-card">
+                    <h2 class="calc-title">Схема зажима</h2>
+                    <div class="canvas-container">
+                        <canvas id="rectChuckCanvas" width="400" height="400"></canvas>
+                    </div>
+                    <div class="info-box">
+                        Красные подкладки показывают толщину для обеспечения надежного зажима прямоугольной детали.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка: Прямоугольная деталь -->
+        <div id="rectangle" class="tab-content">
+            <div class="calculators">
+                <div class="calc-card">
+                    <h2 class="calc-title">Обработка прямоугольной детали</h2>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="lengthA">Длина детали A (мм):</label>
+                            <input type="number" id="lengthA" value="100" step="0.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="widthB">Ширина детали B (мм):</label>
+                            <input type="number" id="widthB" value="60" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="holeD">Диаметр отверстия d (мм):</label>
+                            <input type="number" id="holeD" value="20" step="0.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="offsetC">Смещение от центра (мм):</label>
+                            <input type="number" id="offsetC" value="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clampOrientation">Ориентация зажима:</label>
+                        <select id="clampOrientation">
+                            <option value="A">По длине (A)</option>
+                            <option value="B">По ширине (B)</option>
+                        </select>
+                    </div>
+
+                    <button onclick="calculateRectangle()">Рассчитать подкладку</button>
+
+                    <div id="rectResults" class="results" style="display:none;">
+                        <h3>Результаты расчета:</h3>
+                        <div class="result-item">
+                            <span class="result-label">Толщина подкладки S:</span>
+                            <span class="result-value" id="rectThickness">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Диаметр описанной окружности:</span>
+                            <span class="result-value" id="circumRadius">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Эксцентриситет e:</span>
+                            <span class="result-value" id="rectEcc">-</span>
+                        </div>
+
+                        <div class="formula-box">
+                            <h4>💡 Формулы расчета:</h4>
+                            <div class="formula">R = √[(A/2)² + (B/2)²]</div>
+                            <div class="formula" id="rectFormula">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-card">
+                    <h2 class="calc-title">Схема обработки</h2>
+                    <div class="canvas-container">
+                        <canvas id="rectCanvas" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка: Таблица коэффициентов -->
+        <div id="table" class="tab-content">
+            <div class="calc-card full-width">
+                <h2 class="calc-title">Таблица коэффициентов для острых кулачков</h2>
+                
+                <div class="info-box">
+                    <strong>Как пользоваться таблицей:</strong><br>
+                    1. Рассчитайте относительный эксцентриситет: A = e / D<br>
+                    2. Найдите ближайшее значение A в таблице<br>
+                    3. Используйте соответствующий коэффициент k<br>
+                    4. Толщина подкладки: t = k × D
+                </div>
+
+                <div class="table-container">
+                    <table id="coeffTable">
+                        <thead>
+                            <tr>
+                                <th>A</th>
+                                <th>k</th>
+                                <th>A</th>
+                                <th>k</th>
+                                <th>A</th>
+                                <th>k</th>
+                                <th>A</th>
+                                <th>k</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong> Таблица предназначена для острых кулачков трехкулачкового патрона. Для других типов кулачков используйте упрощенные формулы.
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка: Общая схема -->
+        <div id="overview" class="tab-content">
+            <div class="calc-card full-width">
+                <h2 class="calc-title">Общая схема всех методов расчета</h2>
+                
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="exportToJSON()" style="flex: 1; min-width: 200px;">
+                        💾 Сохранить все данные (JSON)
+                    </button>
+                    <button onclick="document.getElementById('importFile').click()" style="flex: 1; min-width: 200px;">
+                        📂 Загрузить данные (JSON)
+                    </button>
+                    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importFromJSON(event)">
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="overviewCanvas" width="800" height="600"></canvas>
+                </div>
+
+                <div class="info-box">
+                    <strong>Схема показывает:</strong><br>
+                    • Основные методы расчета толщины подкладки<br>
+                    • Применение для разных типов деталей<br>
+                    • Сравнение табличного и упрощенного методов<br>
+                    • Визуализацию всех типов зажима
+                </div>
+
+                <div id="overviewSummary" style="margin-top: 20px;">
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Диаметр заготовки (D), мм</label>
-        <input type="number" id="diam" placeholder="Например: 40" step="0.001">
-    </div>
+    <script>
+        // Данные для сохранения/загрузки
+        let calculationHistory = {
+            eccentric: [],
+            rectangle: [],
+            rectangleChuck: []
+        };
 
-    <div class="form-group">
-        <label>Требуемый эксцентриситет (e), мм</label>
-        <input type="number" id="ecc" placeholder="Например: 4" step="0.001">
-    </div>
-
-    <button class="btn-calc" onclick="calculate()">Рассчитать подкладку</button>
-
-    <div id="result" class="result-box">
-        <div class="result-label">Толщина подкладки (S):</div>
-        <div class="result-value" id="sVal">0.000</div>
-        <div style="font-size: 0.75rem; color: #777;">Размер с учетом геометрии контакта</div>
-    </div>
-
-    <div class="history">
-        <h3>Последние расчеты</h3>
-        <div id="historyList"></div>
-    </div>
-</div>
-
-<script>
-    window.onload = loadHistory;
-
-    function playSuccess() {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.frequency.value = 600;
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    }
-
-    function calculate() {
-        const type = document.getElementById('jawType').value;
-        const D = parseFloat(document.getElementById('diam').value);
-        const e = parseFloat(document.getElementById('ecc').value);
-
-        if (!D || !e || e >= D/2) {
-            alert("Пожалуйста, введите корректные данные (e < D/2)");
-            return;
+        // Экспорт в JSON
+        function exportToJSON() {
+            const data = {
+                version: "4.0",
+                date: new Date().toISOString(),
+                history: calculationHistory,
+                lastCalculations: {
+                    diameter: document.getElementById('diameter').value,
+                    eccentricity: document.getElementById('eccentricity').value,
+                    lengthA: document.getElementById('lengthA').value,
+                    widthB: document.getElementById('widthB').value,
+                    rectWidth: document.getElementById('rectWidth').value,
+                    rectHeight: document.getElementById('rectHeight').value
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `calculator_data_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Данные сохранены в файл JSON!');
         }
 
-        let s = 0;
-
-        // ЛОГИКА РАСЧЕТА ЗАВИСИТ ОТ ФОРМЫ КУЛАЧКОВ
-        if (type === 'sharp') {
-            // Теоретический идеал для острых кулачков
-            s = 1.5 * e;
-        } else if (type === 'radius') {
-            // С учетом радиуса кулачков (уточненная формула)
-            s = 1.5 * e * (1 - (e / (8 * D)));
-        } else if (type === 'flat') {
-            // Для плоской площадки коэффициент немного выше из-за смещения точки контакта
-            s = 1.5 * e * (1 + (e / (4 * D)));
+        // Импорт из JSON
+        function importFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.lastCalculations) {
+                        document.getElementById('diameter').value = data.lastCalculations.diameter || 50;
+                        document.getElementById('eccentricity').value = data.lastCalculations.eccentricity || 5;
+                        document.getElementById('lengthA').value = data.lastCalculations.lengthA || 100;
+                        document.getElementById('widthB').value = data.lastCalculations.widthB || 60;
+                        document.getElementById('rectWidth').value = data.lastCalculations.rectWidth || 50;
+                        document.getElementById('rectHeight').value = data.lastCalculations.rectHeight || 30;
+                    }
+                    
+                    if (data.history) {
+                        calculationHistory = data.history;
+                    }
+                    
+                    alert('✅ Данные загружены из файла!');
+                } catch (error) {
+                    alert('❌ Ошибка при загрузке файла: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
         }
 
-        const finalS = s.toFixed(3);
-        document.getElementById('sVal').innerText = finalS + " мм";
-        document.getElementById('result').style.display = 'block';
+        // Таблица коэффициентов для острых кулачков
+        const coefficientsTable = [
+            [0.005, 0.008], [0.055, 0.084], [0.105, 0.149], [0.155, 0.215],
+            [0.010, 0.015], [0.060, 0.090], [0.110, 0.156], [0.160, 0.221],
+            [0.015, 0.023], [0.065, 0.095], [0.115, 0.163], [0.165, 0.227],
+            [0.020, 0.030], [0.070, 0.102], [0.120, 0.169], [0.170, 0.234],
+            [0.025, 0.038], [0.075, 0.109], [0.125, 0.176], [0.175, 0.241],
+            [0.030, 0.045], [0.080, 0.116], [0.130, 0.182], [0.180, 0.248],
+            [0.035, 0.053], [0.085, 0.122], [0.135, 0.189], [0.185, 0.254],
+            [0.040, 0.060], [0.090, 0.129], [0.140, 0.195], [0.190, 0.260],
+            [0.045, 0.066], [0.095, 0.136], [0.145, 0.202], [0.195, 0.269],
+            [0.050, 0.073], [0.100, 0.143], [0.150, 0.208], [0.200, 0.276]
+        ];
 
-        playSuccess();
-        saveHistory(D, e, finalS);
-    }
+        // Переключение вкладок
+        function switchTab(tabName) {
+            // Скрыть все вкладки
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Деактивировать все кнопки
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Показать выбранную вкладку
+            document.getElementById(tabName).classList.add('active');
+            
+            // Активировать соответствующую кнопку
+            event.target.classList.add('active');
+            
+            // Отрисовка общей схемы при переходе на эту вкладку
+            if (tabName === 'overview') {
+                setTimeout(() => {
+                    drawOverview();
+                    updateOverviewSummary();
+                }, 100);
+            }
+        }
 
-    function saveHistory(D, e, S) {
-        let h = JSON.parse(localStorage.getItem('eco_h') || '[]');
-        h.unshift(`${D}мм / ${e}мм → ${S}мм`);
-        if(h.length > 3) h.pop();
-        localStorage.setItem('eco_h', JSON.stringify(h));
-        loadHistory();
-    }
+        // Обновление сводки на вкладке "Общая схема"
+        function updateOverviewSummary() {
+            const summary = document.getElementById('overviewSummary');
+            if (!summary) return;
+            
+            let html = '<div class="results"><h3>Сводка расчетов:</h3>';
+            
+            // Последние расчеты эксцентрика
+            if (calculationHistory.eccentric.length > 0) {
+                const last = calculationHistory.eccentric[calculationHistory.eccentric.length - 1];
+                html += `
+                    <div class="result-item">
+                        <span class="result-label">Последний расчет эксцентрика:</span>
+                        <span class="result-value">D=${last.diameter}мм, e=${last.eccentricity}мм, t=${last.thickness.toFixed(2)}мм</span>
+                    </div>
+                `;
+            }
+            
+            // Последние расчеты прямоугольной детали
+            if (calculationHistory.rectangleChuck.length > 0) {
+                const last = calculationHistory.rectangleChuck[calculationHistory.rectangleChuck.length - 1];
+                html += `
+                    <div class="result-item">
+                        <span class="result-label">Последний расчет прямоугольной детали:</span>
+                        <span class="result-value">a=${last.width}мм, b=${last.height}мм, t=${Math.max(last.t1, last.t2).toFixed(2)}мм</span>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div class="result-item">
+                    <span class="result-label">Всего расчетов:</span>
+                    <span class="result-value">${calculationHistory.eccentric.length + calculationHistory.rectangle.length + calculationHistory.rectangleChuck.length}</span>
+                </div>
+            </div>`;
+            
+            summary.innerHTML = html;
+        }
 
-    function loadHistory() {
-        const h = JSON.parse(localStorage.getItem('eco_h') || '[]');
-        document.getElementById('historyList').innerHTML = h.map(i => `<div class="history-item">${i}</div>`).join('');
-    }
-</script>
+        // Создание таблицы
+        function buildTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            const rows = coefficientsTable.length / 4;
+            for (let i = 0; i < rows; i++) {
+                const tr = document.createElement('tr');
+                for (let j = 0; j < 4; j++) {
+                    const idx = i + j * rows;
+                    if (idx < coefficientsTable.length) {
+                        const [a, k] = coefficientsTable[idx];
+                        tr.innerHTML += `<td>${a.toFixed(3)}</td><td>${k.toFixed(3)}</td>`;
+                    }
+                }
+                tbody.appendChild(tr);
+            }
+        }
 
+        // Линейная интерполяция коэффициента
+        function getCoefficient(A) {
+            let lower = null, upper = null;
+            
+            for (let i = 0; i < coefficientsTable.length; i++) {
+                const [a, k] = coefficientsTable[i];
+                if (a <= A) lower = [a, k];
+                if (a >= A && !upper) {
+                    upper = [a, k];
+                    break;
+                }
+            }
+
+            if (lower && lower[0] === A) return lower[1];
+            if (upper && upper[0] === A) return upper[1];
+            if (!lower) return coefficientsTable[0][1];
+            if (!upper) return coefficientsTable[coefficientsTable.length - 1][1];
+
+            const [a1, k1] = lower;
+            const [a2, k2] = upper;
+            const k = k1 + (k2 - k1) * (A - a1) / (a2 - a1);
+            
+            return k;
+        }
+
+        function updateMethod() {
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const simpleOptions = document.getElementById('simpleMethodOptions');
+            simpleOptions.style.display = method === 'simple' ? 'block' : 'none';
+        }
+
+        function calculateEccentric() {
+            const D = parseFloat(document.getElementById('diameter').value);
+            const e = parseFloat(document.getElementById('eccentricity').value);
+            const method = document.querySelector('input[name="method"]:checked').value;
+
+            if (isNaN(D) || isNaN(e) || D <= 0 || e <= 0) {
+                alert('Пожалуйста, введите корректные положительные значения!');
+                return;
+            }
+
+            const A = e / D;
+            let t, k, formulaHtml;
+            
+            if (method === 'table') {
+                k = getCoefficient(A);
+                t = k * D;
+                
+                formulaHtml = `
+                    <div class="formula">1. A = e / D = ${e} / ${D} = ${A.toFixed(4)}</div>
+                    <div class="formula">2. По таблице: k = ${k.toFixed(3)}</div>
+                    <div class="formula">3. t = k × D = ${k.toFixed(3)} × ${D} = ${t.toFixed(2)} мм</div>
+                `;
+                
+                document.getElementById('coefficientRow').style.display = 'flex';
+                document.getElementById('coefficient').textContent = k.toFixed(3);
+                
+                showComparison(e, D, t);
+                
+            } else {
+                const chuckType = parseInt(document.getElementById('chuckType').value);
+                
+                switch(chuckType) {
+                    case 2:
+                        k = 1.0;
+                        formulaHtml = `<div class="formula">t = e = ${e.toFixed(2)} мм</div>`;
+                        break;
+                    case 3:
+                        k = 1.5;
+                        formulaHtml = `<div class="formula">t = 1.5 × e = 1.5 × ${e} = ${(1.5 * e).toFixed(2)} мм</div>`;
+                        break;
+                    case 4:
+                        k = Math.sqrt(2);
+                        formulaHtml = `<div class="formula">t = √2 × e = 1.414 × ${e} = ${(k * e).toFixed(2)} мм</div>`;
+                        break;
+                }
+                
+                t = k * e;
+                
+                document.getElementById('coefficientRow').style.display = 'none';
+                document.getElementById('comparisonBox').style.display = 'none';
+            }
+
+            document.getElementById('relativeEcc').textContent = A.toFixed(4);
+            document.getElementById('thickness').textContent = t.toFixed(2) + ' мм';
+            document.getElementById('formulaText').innerHTML = formulaHtml;
+
+            generateRecommendations(t, e, D, A);
+            highlightTableRow(A);
+            drawSchema(D, e, t);
+
+            // Сохранение в историю
+            calculationHistory.eccentric.push({
+                date: new Date().toISOString(),
+                diameter: D,
+                eccentricity: e,
+                method: method,
+                coefficient: k,
+                thickness: t,
+                relativeEcc: A
+            });
+
+            document.getElementById('eccResults').style.display = 'block';
+        }
+
+        function showComparison(e, D, tableResult) {
+            const simple2 = e;
+            const simple3 = 1.5 * e;
+            const simple4 = Math.sqrt(2) * e;
+            
+            const html = `
+                <div class="comparison-item">
+                    <span>Табличный метод (точный):</span>
+                    <strong style="color: #d32f2f;">${tableResult.toFixed(2)} мм</strong>
+                </div>
+                <div class="comparison-item">
+                    <span>Двухкулачковый (t = e):</span>
+                    <span>${simple2.toFixed(2)} мм (разница: ${Math.abs(tableResult - simple2).toFixed(2)} мм)</span>
+                </div>
+                <div class="comparison-item">
+                    <span>Трехкулачковый (t = 1.5×e):</span>
+                    <span>${simple3.toFixed(2)} мм (разница: ${Math.abs(tableResult - simple3).toFixed(2)} мм)</span>
+                </div>
+                <div class="comparison-item">
+                    <span>Четырехкулачковый (t = √2×e):</span>
+                    <span>${simple4.toFixed(2)} мм (разница: ${Math.abs(tableResult - simple4).toFixed(2)} мм)</span>
+                </div>
+            `;
+            
+            document.getElementById('comparisonContent').innerHTML = html;
+            document.getElementById('comparisonBox').style.display = 'block';
+        }
+
+        function generateRecommendations(t, e, D, A) {
+            let html = '';
+            
+            if (t > 15) {
+                html += '⚠️ Толщина подкладки превышает 15 мм. Рекомендуется использовать составную подкладку.<br>';
+            }
+            
+            if (A > 0.15) {
+                html += '⚠️ Большой относительный эксцентриситет (A > 0.15). Проверьте надежность крепления.<br>';
+            }
+            
+            if (t < 1) {
+                html += '✓ Малая толщина подкладки. Обеспечьте плотное прилегание к кулачку.<br>';
+            }
+            
+            html += '✓ Материал подкладки: сталь 45, закаленная до HRC 45-50.<br>';
+            html += '✓ Точность изготовления: толщина ±0.05 мм, параллельность граней 0.02 мм.<br>';
+            html += '✓ Поверхность подкладки должна быть чистой и без заусенцев.';
+            
+            document.getElementById('recommendations').innerHTML = html;
+        }
+
+        function highlightTableRow(A) {
+            const tbody = document.getElementById('tableBody');
+            const rows = tbody.getElementsByTagName('tr');
+            
+            for (let row of rows) {
+                row.classList.remove('highlight-row');
+            }
+            
+            for (let row of rows) {
+                const cells = row.getElementsByTagName('td');
+                for (let i = 0; i < cells.length; i += 2) {
+                    const cellA = parseFloat(cells[i].textContent);
+                    if (Math.abs(cellA - A) < 0.01) {
+                        row.classList.add('highlight-row');
+                        return;
+                    }
+                }
+            }
+        }
+
+        function drawSchema(D, e, t) {
+            const canvas = document.getElementById('schemaCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 100 / D;
+            const radius = (D / 2) * scale;
+            
+            // Патрон
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius + 40, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Деталь
+            const offsetX = e * scale;
+            ctx.fillStyle = 'rgba(66, 165, 245, 0.3)';
+            ctx.strokeStyle = '#1976D2';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX + offsetX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            // Центры
+            ctx.fillStyle = '#d32f2f';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.arc(centerX + offsetX, centerY, 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Линия эксцентриситета
+            ctx.strokeStyle = '#d32f2f';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + offsetX, centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#d32f2f';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`e = ${e} мм`, centerX + offsetX/2 - 25, centerY - 10);
+
+            // Кулачки
+            const angles = [0, 120, 240];
+            for (let i = 0; i < 3; i++) {
+                const angle = (angles[i] - 90) * Math.PI / 180;
+                const x = centerX + Math.cos(angle) * (radius + 40);
+                const y = centerY + Math.sin(angle) * (radius + 40);
+                
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle + Math.PI/2);
+                
+                if (i === 0) {
+                    ctx.fillStyle = '#d32f2f';
+                    ctx.fillRect(-15, -5, 30, t * scale * 3);
+                    
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(-15, t * scale * 3 - 5, 30, 20);
+                    
+                    ctx.restore();
+                    ctx.fillStyle = '#d32f2f';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.fillText(`t = ${t.toFixed(1)} мм`, x + 20, y);
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(angle + Math.PI/2);
+                } else {
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(-15, -5, 30, 20);
+                }
+                
+                ctx.restore();
+            }
+
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('Центр патрона', centerX - 50, centerY + radius + 70);
+            ctx.fillText('Центр детали', centerX + offsetX - 45, centerY + radius + 70);
+        }
+
+        function calculateRectangle() {
+            const A = parseFloat(document.getElementById('lengthA').value);
+            const B = parseFloat(document.getElementById('widthB').value);
+            const d = parseFloat(document.getElementById('holeD').value);
+            const c = parseFloat(document.getElementById('offsetC').value);
+            const orientation = document.getElementById('clampOrientation').value;
+
+            if (isNaN(A) || isNaN(B) || isNaN(d)) {
+                alert('Пожалуйста, заполните все основные поля!');
+                return;
+            }
+
+            const R = Math.sqrt((A/2) * (A/2) + (B/2) * (B/2));
+            const e = Math.abs(c);
+            const S = 1.5 * e;
+
+            document.getElementById('rectThickness').textContent = S.toFixed(2) + ' мм';
+            document.getElementById('circumRadius').textContent = (R * 2).toFixed(2) + ' мм (Ø)';
+            document.getElementById('rectEcc').textContent = e.toFixed(2) + ' мм';
+            document.getElementById('rectFormula').textContent = 'S = 1.5 × e = 1.5 × ' + e.toFixed(2) + ' = ' + S.toFixed(2) + ' мм';
+
+            drawRectangle(A, B, d, c, orientation);
+            
+            // Сохранение в историю
+            calculationHistory.rectangle.push({
+                date: new Date().toISOString(),
+                lengthA: A,
+                widthB: B,
+                holeD: d,
+                offset: c,
+                orientation: orientation,
+                thickness: S,
+                radius: R,
+                eccentricity: e
+            });
+            
+            document.getElementById('rectResults').style.display = 'block';
+        }
+
+        function drawRectangle(A, B, d, c, orientation) {
+            const canvas = document.getElementById('rectCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = Math.min(300 / Math.max(A, B), 2);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            const R = Math.sqrt((A/2) * (A/2) + (B/2) * (B/2)) * scale;
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, R, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(
+                centerX - (A * scale) / 2,
+                centerY - (B * scale) / 2,
+                A * scale,
+                B * scale
+            );
+
+            const holeX = centerX + c * scale * (orientation === 'A' ? 0 : 1);
+            const holeY = centerY + c * scale * (orientation === 'A' ? 1 : 0);
+            
+            ctx.strokeStyle = '#d32f2f';
+            ctx.fillStyle = 'rgba(211, 47, 47, 0.1)';
+            ctx.beginPath();
+            ctx.arc(holeX, holeY, (d * scale) / 2, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#d32f2f';
+            ctx.beginPath();
+            ctx.arc(holeX, holeY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+
+            const yOffset = centerY - (B * scale) / 2 - 20;
+            ctx.beginPath();
+            ctx.moveTo(centerX - (A * scale) / 2, yOffset);
+            ctx.lineTo(centerX + (A * scale) / 2, yOffset);
+            ctx.stroke();
+            ctx.fillText(A + ' мм', centerX - 20, yOffset - 5);
+
+            const xOffset = centerX + (A * scale) / 2 + 20;
+            ctx.beginPath();
+            ctx.moveTo(xOffset, centerY - (B * scale) / 2);
+            ctx.lineTo(xOffset, centerY + (B * scale) / 2);
+            ctx.stroke();
+            ctx.save();
+            ctx.translate(xOffset + 15, centerY);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(B + ' мм', -15, 0);
+            ctx.restore();
+
+            if (c !== 0) {
+                ctx.strokeStyle = '#d32f2f';
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(holeX, holeY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                const midX = (centerX + holeX) / 2;
+                const midY = (centerY + holeY) / 2;
+                ctx.fillStyle = '#d32f2f';
+                ctx.fillText('c = ' + c + ' мм', midX + 5, midY - 5);
+            }
+
+            ctx.fillStyle = '#d32f2f';
+            ctx.fillText('d = ' + d + ' мм', holeX - 20, holeY - (d * scale) / 2 - 10);
+        }
+
+        // Расчет для зажима прямоугольной детали в трехкулачковый патрон
+        function calculateRectangleChuck() {
+            const a = parseFloat(document.getElementById('rectWidth').value);
+            const b = parseFloat(document.getElementById('rectHeight').value);
+            const orientation = document.getElementById('chuckOrientation').value;
+
+            if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) {
+                alert('Пожалуйста, введите корректные положительные значения!');
+                return;
+            }
+
+            let R, t1, t2, formulaHtml;
+            
+            if (orientation === 'flat') {
+                // Плоская сторона к кулачку
+                R = Math.sqrt((a/2) * (a/2) + (b/2) * (b/2));
+                
+                // Расстояние от центра до плоской грани
+                const h1 = b / 2;
+                const h2 = a / 2;
+                
+                // Для трехкулачкового патрона
+                // Один кулачок на плоской стороне, два на углах
+                t1 = R - h1; // Подкладка под кулачок на плоской стороне
+                t2 = 0; // Углы зажимаются без подкладок
+                
+                formulaHtml = `
+                    <div class="formula">R = √[(a/2)² + (b/2)²] = √[(${a}/2)² + (${b}/2)²] = ${R.toFixed(2)} мм</div>
+                    <div class="formula">h = b/2 = ${b}/2 = ${h1.toFixed(2)} мм</div>
+                    <div class="formula">t = R - h = ${R.toFixed(2)} - ${h1.toFixed(2)} = ${t1.toFixed(2)} мм</div>
+                    <div style="margin-top: 10px; font-size: 12px;">
+                        <strong>Схема зажима:</strong> Один кулачок с подкладкой на плоской стороне, два кулачка без подкладок на углах.
+                    </div>
+                `;
+            } else {
+                // Угол к кулачку
+                R = Math.sqrt((a/2) * (a/2) + (b/2) * (b/2));
+                
+                // Расстояние от центра до угла - это и есть R
+                // Расстояние от центра до плоской грани
+                const h = Math.min(a, b) / 2;
+                
+                // Два кулачка на углах без подкладок, один на плоской стороне
+                t1 = 0; // Углы без подкладок
+                t2 = R - h; // Подкладка под кулачок на плоской стороне
+                
+                formulaHtml = `
+                    <div class="formula">R = √[(a/2)² + (b/2)²] = √[(${a}/2)² + (${b}/2)²] = ${R.toFixed(2)} мм</div>
+                    <div class="formula">h = min(a,b)/2 = ${Math.min(a,b)}/2 = ${h.toFixed(2)} мм</div>
+                    <div class="formula">t = R - h = ${R.toFixed(2)} - ${h.toFixed(2)} = ${t2.toFixed(2)} мм</div>
+                    <div style="margin-top: 10px; font-size: 12px;">
+                        <strong>Схема зажима:</strong> Два кулачка без подкладок на углах, один кулачок с подкладкой на плоской стороне.
+                    </div>
+                `;
+            }
+
+            // Отображение результатов
+            document.getElementById('rectChuckRadius').textContent = R.toFixed(2) + ' мм';
+            document.getElementById('rectChuckT1').textContent = t1.toFixed(2) + ' мм' + (t1 === 0 ? ' (без подкладки)' : ' (с подкладкой)');
+            document.getElementById('rectChuckT2').textContent = t2.toFixed(2) + ' мм' + (t2 === 0 ? ' (без подкладок)' : ' (с подкладкой)');
+            document.getElementById('rectChuckFormula').innerHTML = formulaHtml;
+
+            // Рекомендации
+            let recommendations = '';
+            const maxT = Math.max(t1, t2);
+            
+            if (maxT > 10) {
+                recommendations += '⚠️ Большая толщина подкладки. Проверьте надежность зажима.<br>';
+            } else if (maxT > 0) {
+                recommendations += '✓ Оптимальная толщина подкладки.<br>';
+            }
+            
+            recommendations += '✓ Материал подкладок: сталь 45, закаленная до HRC 45-50.<br>';
+            recommendations += '✓ Обеспечьте равномерное усилие зажима на всех трех кулачках.<br>';
+            recommendations += '✓ Проверьте отсутствие зазоров между деталью и кулачками.<br>';
+            
+            if (a / b > 2 || b / a > 2) {
+                recommendations += '⚠️ Большое соотношение сторон. Рассмотрите возможность использования дополнительных опор.';
+            }
+            
+            document.getElementById('rectChuckRecommendations').innerHTML = recommendations;
+
+            // Визуализация
+            drawRectChuck(a, b, R, orientation === 'flat' ? t1 : t2);
+
+            // Сохранение в историю
+            calculationHistory.rectangleChuck.push({
+                date: new Date().toISOString(),
+                width: a,
+                height: b,
+                orientation: orientation,
+                radius: R,
+                t1: t1,
+                t2: t2
+            });
+
+            document.getElementById('rectChuckResults').style.display = 'block';
+        }
+
+        // Визуализация зажима прямоугольной детали
+        function drawRectChuck(a, b, R, t) {
+            const canvas = document.getElementById('rectChuckCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = Math.min(150 / Math.max(a, b), 2);
+
+            // Окружность патрона
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, R * scale + 50, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Прямоугольная деталь
+            ctx.fillStyle = 'rgba(66, 165, 245, 0.3)';
+            ctx.strokeStyle = '#1976D2';
+            ctx.lineWidth = 2;
+            ctx.fillRect(
+                centerX - (a * scale) / 2,
+                centerY - (b * scale) / 2,
+                a * scale,
+                b * scale
+            );
+            ctx.strokeRect(
+                centerX - (a * scale) / 2,
+                centerY - (b * scale) / 2,
+                a * scale,
+                b * scale
+            );
+
+            // Центр
+            ctx.fillStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Три кулачка с подкладками
+            const angles = [90, 210, 330]; // Позиции кулачков
+            
+            for (let i = 0; i < 3; i++) {
+                const angle = angles[i] * Math.PI / 180;
+                const dist = R * scale + 50;
+                const x = centerX + Math.cos(angle) * dist;
+                const y = centerY + Math.sin(angle) * dist;
+                
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle + Math.PI);
+                
+                // Первый кулачок (сверху) - с подкладкой или без
+                if (i === 0 && t > 0) {
+                    // Подкладка
+                    ctx.fillStyle = '#d32f2f';
+                    ctx.fillRect(-20, 0, 40, t * scale * 2);
+                    
+                    // Кулачок
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(-20, t * scale * 2, 40, 25);
+                    
+                    ctx.restore();
+                    ctx.fillStyle = '#d32f2f';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.fillText(`t = ${t.toFixed(1)} мм`, x - 30, y - 35);
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(angle + Math.PI);
+                } else {
+                    // Кулачок без подкладки
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(-20, 0, 40, 25);
+                    
+                    if (i !== 0) {
+                        ctx.restore();
+                        ctx.fillStyle = '#666';
+                        ctx.font = '10px Arial';
+                        ctx.fillText('без подкладки', x - 30, y + (i === 1 ? 40 : 40));
+                        ctx.save();
+                        ctx.translate(x, y);
+                        ctx.rotate(angle + Math.PI);
+                    }
+                }
+                
+                ctx.restore();
+            }
+
+            // Размеры детали
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText(`a = ${a} мм`, centerX - 25, centerY - (b * scale) / 2 - 10);
+            ctx.fillText(`b = ${b} мм`, centerX + (a * scale) / 2 + 10, centerY);
+            
+            // Радиус
+            ctx.strokeStyle = '#9c27b0';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + (a * scale) / 2, centerY - (b * scale) / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            ctx.fillStyle = '#9c27b0';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText(`R = ${R.toFixed(1)} мм`, centerX + 10, centerY - 20);
+        }
+
+        // Общая схема всех методов
+        function drawOverview() {
+            const canvas = document.getElementById('overviewCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Заголовок
+            ctx.fillStyle = '#1e3c72';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('Методы расчета толщины подкладки', 20, 30);
+            
+            // Метод 1: Табличный для круглых деталей
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('1. Табличный метод (круглая деталь)', 20, 70);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText('A = e/D, k из таблицы, t = k × D', 40, 95);
+            
+            // Небольшая схема
+            drawMiniSchema(ctx, 120, 130, 60, 'eccentric');
+            
+            // Метод 2: Упрощенный
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('2. Упрощенный метод', 20, 250);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText('2-кулачковый: t = e', 40, 275);
+            ctx.fillText('3-кулачковый: t = 1.5 × e', 40, 295);
+            ctx.fillText('4-кулачковый: t = √2 × e', 40, 315);
+            
+            // Метод 3: Прямоугольная деталь (отверстие)
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('3. Прямоугольная деталь (зажим за отверстие)', 350, 70);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText('R = √[(A/2)² + (B/2)²], S = 1.5 × e', 370, 95);
+            
+            drawMiniSchema(ctx, 480, 130, 60, 'rectangle');
+            
+            // Метод 4: Прямоугольная деталь (зажим за внешний контур)
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('4. Прямоугольная деталь (зажим за контур)', 350, 250);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText('R = √[(a/2)² + (b/2)²], t = R - h', 370, 275);
+            
+            drawMiniSchema(ctx, 480, 310, 60, 'rectChuck');
+            
+            // Сравнительная таблица
+            ctx.fillStyle = '#1e3c72';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('Сравнение методов', 20, 420);
+            
+            const tableData = [
+                ['Метод', 'Точность', 'Применение'],
+                ['Табличный', 'Высокая', 'Острые кулачки'],
+                ['Упрощенный', 'Средняя', 'Быстрый расчет'],
+                ['Прямоугольная', 'Высокая', 'Сложные детали']
+            ];
+            
+            let y = 450;
+            ctx.font = '12px Arial';
+            
+            for (let i = 0; i < tableData.length; i++) {
+                const row = tableData[i];
+                let x = 40;
+                
+                for (let j = 0; j < row.length; j++) {
+                    if (i === 0) {
+                        ctx.fillStyle = '#2a5298';
+                        ctx.fillRect(x - 5, y - 15, 150, 20);
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 12px Arial';
+                    } else {
+                        ctx.fillStyle = '#f0f4f8';
+                        ctx.fillRect(x - 5, y - 15, 150, 20);
+                        ctx.fillStyle = '#333';
+                        ctx.font = '12px Arial';
+                    }
+                    
+                    ctx.fillText(row[j], x, y);
+                    x += 160;
+                }
+                
+                y += 25;
+            }
+            
+            // Рекомендации
+            ctx.fillStyle = '#4caf50';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('✓ Рекомендации:', 20, 560);
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.fillText('• Материал подкладок: сталь 45, закаленная HRC 45-50', 40, 580);
+            ctx.fillText('• Точность изготовления: ±0.05 мм', 40, 595);
+        }
+
+        // Вспомогательная функция для рисования мини-схем
+        function drawMiniSchema(ctx, x, y, radius, type) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Окружность патрона
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            if (type === 'eccentric') {
+                // Деталь со смещением
+                ctx.fillStyle = 'rgba(66, 165, 245, 0.3)';
+                ctx.strokeStyle = '#1976D2';
+                ctx.beginPath();
+                ctx.arc(10, 0, radius * 0.6, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Подкладка
+                ctx.fillStyle = '#d32f2f';
+                ctx.fillRect(-radius - 5, -10, 15, 20);
+                
+            } else if (type === 'rectangle') {
+                // Прямоугольная деталь
+                const w = radius * 0.8;
+                const h = radius * 0.5;
+                ctx.fillStyle = 'rgba(66, 165, 245, 0.3)';
+                ctx.strokeStyle = '#1976D2';
+                ctx.fillRect(-w/2, -h/2, w, h);
+                ctx.strokeRect(-w/2, -h/2, w, h);
+                
+                // Отверстие
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = '#d32f2f';
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                
+            } else if (type === 'rectChuck') {
+                // Прямоугольная деталь в патроне
+                const w = radius * 0.6;
+                const h = radius * 0.4;
+                ctx.fillStyle = 'rgba(66, 165, 245, 0.3)';
+                ctx.strokeStyle = '#1976D2';
+                ctx.fillRect(-w/2, -h/2, w, h);
+                ctx.strokeRect(-w/2, -h/2, w, h);
+                
+                // Подкладка
+                ctx.fillStyle = '#d32f2f';
+                ctx.fillRect(-10, -radius - 5, 20, 15);
+            }
+            
+            ctx.restore();
+        }
+
+        function drawRectangle(A, B, d, c, orientation) {
+            const canvas = document.getElementById('rectCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = Math.min(300 / Math.max(A, B), 2);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            const R = Math.sqrt((A/2) * (A/2) + (B/2) * (B/2)) * scale;
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, R, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(
+                centerX - (A * scale) / 2,
+                centerY - (B * scale) / 2,
+                A * scale,
+                B * scale
+            );
+
+            const holeX = centerX + c * scale * (orientation === 'A' ? 0 : 1);
+            const holeY = centerY + c * scale * (orientation === 'A' ? 1 : 0);
+            
+            ctx.strokeStyle = '#d32f2f';
+            ctx.fillStyle = 'rgba(211, 47, 47, 0.1)';
+            ctx.beginPath();
+            ctx.arc(holeX, holeY, (d * scale) / 2, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#d32f2f';
+            ctx.beginPath();
+            ctx.arc(holeX, holeY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+
+            const yOffset = centerY - (B * scale) / 2 - 20;
+            ctx.beginPath();
+            ctx.moveTo(centerX - (A * scale) / 2, yOffset);
+            ctx.lineTo(centerX + (A * scale) / 2, yOffset);
+            ctx.stroke();
+            ctx.fillText(A + ' мм', centerX - 20, yOffset - 5);
+
+            const xOffset = centerX + (A * scale) / 2 + 20;
+            ctx.beginPath();
+            ctx.moveTo(xOffset, centerY - (B * scale) / 2);
+            ctx.lineTo(xOffset, centerY + (B * scale) / 2);
+            ctx.stroke();
+            ctx.save();
+            ctx.translate(xOffset + 15, centerY);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(B + ' мм', -15, 0);
+            ctx.restore();
+
+            if (c !== 0) {
+                ctx.strokeStyle = '#d32f2f';
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(holeX, holeY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                const midX = (centerX + holeX) / 2;
+                const midY = (centerY + holeY) / 2;
+                ctx.fillStyle = '#d32f2f';
+                ctx.fillText('c = ' + c + ' мм', midX + 5, midY - 5);
+            }
+
+            ctx.fillStyle = '#d32f2f';
+            ctx.fillText('d = ' + d + ' мм', holeX - 20, holeY - (d * scale) / 2 - 10);
+        }
+
+        // Инициализация
+        buildTable();
+        updateMethod();
+        
+        // Отрисовка общей схемы при загрузке
+        window.addEventListener('load', function() {
+            setTimeout(drawOverview, 500);
+        });
+    </script>
 </body>
 </html>

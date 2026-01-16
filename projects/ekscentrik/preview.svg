@@ -1,0 +1,139 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Фон с градиентом -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3c72;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2a5298;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Фон -->
+  <rect width="800" height="600" fill="url(#bgGradient)"/>
+  
+  <!-- Заголовок -->
+  <text x="400" y="60" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">
+    🔧 Калькулятор точения эксцентрика
+  </text>
+  
+  <!-- Карточка калькулятора -->
+  <rect x="50" y="100" width="350" height="450" rx="15" fill="white" filter="url(#shadow)"/>
+  
+  <!-- Иконка эксцентрика -->
+  <g transform="translate(225, 180)">
+    <!-- Патрон -->
+    <circle cx="0" cy="0" r="70" fill="none" stroke="#333" stroke-width="3"/>
+    
+    <!-- Деталь со смещением -->
+    <circle cx="15" cy="0" r="45" fill="rgba(66, 165, 245, 0.3)" stroke="#1976D2" stroke-width="2"/>
+    
+    <!-- Центры -->
+    <circle cx="0" cy="0" r="4" fill="#d32f2f"/>
+    <circle cx="15" cy="0" r="4" fill="#2196F3"/>
+    
+    <!-- Линия эксцентриситета -->
+    <line x1="0" y1="0" x2="15" y2="0" stroke="#d32f2f" stroke-width="2" stroke-dasharray="5,5"/>
+    
+    <!-- Подкладка -->
+    <rect x="-75" y="-8" width="12" height="16" fill="#d32f2f"/>
+    <rect x="-75" y="8" width="12" height="15" fill="#666"/>
+    
+    <!-- Текст -->
+    <text x="8" y="-15" font-family="Arial" font-size="12" fill="#d32f2f" font-weight="bold">e</text>
+    <text x="-95" y="5" font-family="Arial" font-size="11" fill="#d32f2f" font-weight="bold">t</text>
+  </g>
+  
+  <!-- Элементы интерфейса -->
+  <rect x="70" y="300" width="310" height="40" rx="8" fill="#f0f4f8"/>
+  <text x="225" y="327" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">Диаметр: 50 мм</text>
+  
+  <rect x="70" y="350" width="310" height="40" rx="8" fill="#f0f4f8"/>
+  <text x="225" y="377" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">Эксцентриситет: 5 мм</text>
+  
+  <!-- Кнопка -->
+  <rect x="70" y="410" width="310" height="50" rx="8" fill="#2a5298"/>
+  <text x="225" y="441" font-family="Arial" font-size="16" fill="white" font-weight="bold" text-anchor="middle">Рассчитать подкладку</text>
+  
+  <!-- Результат -->
+  <rect x="70" y="475" width="310" height="60" rx="8" fill="#e8f5e9"/>
+  <text x="225" y="500" font-family="Arial" font-size="12" fill="#2e7d32" text-anchor="middle">Результат:</text>
+  <text x="225" y="522" font-family="Arial" font-size="18" fill="#d32f2f" font-weight="bold" text-anchor="middle">t = 7.15 мм</text>
+  
+  <!-- Таблица коэффициентов -->
+  <rect x="430" y="100" width="320" height="200" rx="15" fill="white" filter="url(#shadow)"/>
+  <text x="590" y="130" font-family="Arial" font-size="18" font-weight="bold" fill="#1e3c72" text-anchor="middle">
+    Таблица коэффициентов
+  </text>
+  
+  <!-- Мини-таблица -->
+  <rect x="450" y="150" width="280" height="30" fill="#2a5298"/>
+  <text x="510" y="172" font-family="Arial" font-size="12" fill="white" font-weight="bold">A</text>
+  <text x="590" y="172" font-family="Arial" font-size="12" fill="white" font-weight="bold">k</text>
+  <text x="650" y="172" font-family="Arial" font-size="12" fill="white" font-weight="bold">A</text>
+  <text x="700" y="172" font-family="Arial" font-size="12" fill="white" font-weight="bold">k</text>
+  
+  <rect x="450" y="180" width="280" height="25" fill="#f9f9f9"/>
+  <text x="510" y="198" font-family="Arial" font-size="11" fill="#333">0.100</text>
+  <text x="590" y="198" font-family="Arial" font-size="11" fill="#333">0.143</text>
+  <text x="650" y="198" font-family="Arial" font-size="11" fill="#333">0.150</text>
+  <text x="700" y="198" font-family="Arial" font-size="11" fill="#333">0.208</text>
+  
+  <rect x="450" y="205" width="280" height="25" fill="white"/>
+  <text x="510" y="223" font-family="Arial" font-size="11" fill="#333">0.105</text>
+  <text x="590" y="223" font-family="Arial" font-size="11" fill="#333">0.149</text>
+  <text x="650" y="223" font-family="Arial" font-size="11" fill="#333">0.155</text>
+  <text x="700" y="223" font-family="Arial" font-size="11" fill="#333">0.215</text>
+  
+  <rect x="450" y="230" width="280" height="25" fill="#f9f9f9"/>
+  <text x="510" y="248" font-family="Arial" font-size="11" fill="#333">0.110</text>
+  <text x="590" y="248" font-family="Arial" font-size="11" fill="#333">0.156</text>
+  <text x="650" y="248" font-family="Arial" font-size="11" fill="#333">0.160</text>
+  <text x="700" y="248" font-family="Arial" font-size="11" fill="#333">0.221</text>
+  
+  <!-- Прямоугольная деталь -->
+  <rect x="430" y="320" width="320" height="230" rx="15" fill="white" filter="url(#shadow)"/>
+  <text x="590" y="350" font-family="Arial" font-size="18" font-weight="bold" fill="#1e3c72" text-anchor="middle">
+    Прямоугольная деталь
+  </text>
+  
+  <g transform="translate(590, 450)">
+    <!-- Окружность патрона -->
+    <circle cx="0" cy="0" r="60" fill="none" stroke="#ccc" stroke-width="1" stroke-dasharray="5,5"/>
+    
+    <!-- Прямоугольная деталь -->
+    <rect x="-40" y="-25" width="80" height="50" fill="rgba(66, 165, 245, 0.3)" stroke="#1976D2" stroke-width="2"/>
+    
+    <!-- Центр -->
+    <circle cx="0" cy="0" r="3" fill="#2196F3"/>
+    
+    <!-- Кулачки -->
+    <rect x="-10" y="-70" width="20" height="15" fill="#666"/>
+    <rect x="-65" y="20" width="15" height="20" fill="#666"/>
+    <rect x="50" y="20" width="15" height="20" fill="#666"/>
+    
+    <!-- Подкладка -->
+    <rect x="-8" y="-68" width="16" height="8" fill="#d32f2f"/>
+  </g>
+  
+  <!-- Версия и теги -->
+  <text x="50" y="580" font-family="Arial" font-size="14" fill="white" opacity="0.9">
+    v4.0 • Табличный метод • JSON экспорт • 5 калькуляторов
+  </text>
+  
+  <!-- Иконки функций -->
+  <g transform="translate(650, 570)">
+    <circle cx="0" cy="0" r="12" fill="rgba(255,255,255,0.2)"/>
+    <text x="0" y="5" font-size="16" text-anchor="middle">📊</text>
+    
+    <circle cx="35" cy="0" r="12" fill="rgba(255,255,255,0.2)"/>
+    <text x="35" y="5" font-size="16" text-anchor="middle">💾</text>
+    
+    <circle cx="70" cy="0" r="12" fill="rgba(255,255,255,0.2)"/>
+    <text x="70" y="5" font-size="16" text-anchor="middle">🎨</text>
+    
+    <circle cx="105" cy="0" r="12" fill="rgba(255,255,255,0.2)"/>
+    <text x="105" y="5" font-size="16" text-anchor="middle">📱</text>
+  </g>
+</svg>
