@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор конуса / Cone Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #667eea;
+            flex: 1;
+        }
+
+        .language-switcher {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .lang-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .calc-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .calc-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #764ba2;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .results {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: #764ba2;
+        }
+
+        .formula-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .formula-box h4 {
+            color: #f57c00;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .canvas-container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 4px;
+            color: #856404;
+        }
+
+        .variant-description {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #2e7d32;
+        }
+
+        @media (max-width: 1200px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .export-buttons button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="mainTitle">📐 Калькулятор конуса</h1>
+            <div class="language-switcher">
+                <button class="lang-btn active" onclick="switchLanguage('ru')">Русский</button>
+                <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Левая колонка: Ввод данных -->
+            <div class="calc-card">
+                <h2 class="calc-title" id="inputTitle">Ввод данных</h2>
+                
+                <div class="form-group">
+                    <label id="labelVariant">Вариант ввода данных:</label>
+                    <select id="inputVariant" onchange="updateInputFields()">
+                        <option value="1">По диаметрам и длине (D, d, L)</option>
+                        <option value="2">По длине, диаметру левого торца и конусности (L, D, C)</option>
+                        <option value="3">По длине, диаметру правого торца и конусности (L, d, C)</option>
+                        <option value="4">По длине, диаметру левого торца и углу уклона (L, D, α₁)</option>
+                        <option value="5">По длине, диаметру правого торца и углу уклона (L, d, α₁)</option>
+                        <option value="6">По длине, диаметру левого торца и углу конуса (L, D, α)</option>
+                        <option value="7">По длине, диаметру правого торца и углу конуса (L, d, α)</option>
+                        <option value="8">По диаметру левого, конусности и углу конуса (D, C, α)</option>
+                        <option value="9">По диаметру правого, конусности и углу конуса (d, C, α)</option>
+                    </select>
+                </div>
+
+                <div id="variantDescription" class="variant-description"></div>
+
+                <div id="inputFields">
+                    <!-- Поля ввода будут генерироваться динамически -->
+                </div>
+
+                <button onclick="calculateCone()" id="btnCalculate">Рассчитать</button>
+
+                <div id="results" class="results" style="display:none;">
+                    <h3 id="resultsTitle">Результаты расчета:</h3>
+                    <div id="resultsList"></div>
+
+                    <div class="formula-box">
+                        <h4>💡 <span id="labelFormulas">Использованные формулы</span>:</h4>
+                        <div id="formulasUsed"></div>
+                    </div>
+                </div>
+
+                <div class="export-buttons">
+                    <button onclick="exportToJSON()" id="btnExport">💾 Экспорт JSON</button>
+                    <button onclick="exportToCSV()" id="btnExportCSV">📊 Экспорт CSV</button>
+                </div>
+            </div>
+
+            <!-- Правая колонка: Визуализация -->
+            <div class="calc-card">
+                <h2 class="calc-title" id="visualTitle">Визуализация конуса</h2>
+                
+                <div class="canvas-container">
+                    <canvas id="coneCanvas" width="500" height="600"></canvas>
+                </div>
+
+                <div class="info-box" id="infoBox">
+                    <strong id="labelInfo">Основные формулы:</strong><br>
+                    C = (D - d) / L — конусность<br>
+                    C = 2·tg(α/2) — конусность через угол<br>
+                    tg(α₁) = (D - d) / (2L) — угол уклона<br>
+                    α = 2·arctg((D - d) / (2L)) — угол конуса
+                </div>
+
+                <div class="warning" id="warningBox">
+                    <strong>⚠️ <span id="labelNote">Обозначения</span>:</strong><br>
+                    D — диаметр левого (большого) торца<br>
+                    d — диаметр правого (малого) торца<br>
+                    L — длина конуса<br>
+                    C — конусность<br>
+                    α — угол конуса (полный)<br>
+                    α₁ — угол уклона (половинный)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Переводы
+        const translations = {
+            ru: {
+                mainTitle: '📐 Калькулятор конуса',
+                inputTitle: 'Ввод данных',
+                visualTitle: 'Визуализация конуса',
+                labelVariant: 'Вариант ввода данных:',
+                btnCalculate: 'Рассчитать',
+                resultsTitle: 'Результаты расчета:',
+                labelFormulas: 'Использованные формулы',
+                labelInfo: 'Основные формулы:',
+                labelNote: 'Обозначения',
+                btnExport: '💾 Экспорт JSON',
+                btnExportCSV: '📊 Экспорт CSV',
+                variants: {
+                    1: 'По диаметрам и длине (D, d, L)',
+                    2: 'По длине, диаметру левого торца и конусности (L, D, C)',
+                    3: 'По длине, диаметру правого торца и конусности (L, d, C)',
+                    4: 'По длине, диаметру левого торца и углу уклона (L, D, α₁)',
+                    5: 'По длине, диаметру правого торца и углу уклона (L, d, α₁)',
+                    6: 'По длине, диаметру левого торца и углу конуса (L, D, α)',
+                    7: 'По длине, диаметру правого торца и углу конуса (L, d, α)',
+                    8: 'По диаметру левого, конусности и углу конуса (D, C, α)',
+                    9: 'По диаметру правого, конусности и углу конуса (d, C, α)'
+                },
+                descriptions: {
+                    1: 'Введите диаметры обоих торцов и длину конуса',
+                    2: 'Введите длину, диаметр большого торца и конусность',
+                    3: 'Введите длину, диаметр малого торца и конусность',
+                    4: 'Введите длину, диаметр большого торца и угол уклона',
+                    5: 'Введите длину, диаметр малого торца и угол уклона',
+                    6: 'Введите длину, диаметр большого торца и полный угол конуса',
+                    7: 'Введите длину, диаметр малого торца и полный угол конуса',
+                    8: 'Введите диаметр большого торца, конусность и угол конуса',
+                    9: 'Введите диаметр малого торца, конусность и угол конуса'
+                },
+                labels: {
+                    D: 'Диаметр левого торца D (мм):',
+                    d: 'Диаметр правого торца d (мм):',
+                    L: 'Длина конуса L (мм):',
+                    C: 'Конусность C:',
+                    alpha: 'Угол конуса α (градусы):',
+                    alpha1: 'Угол уклона α₁ (градусы):'
+                }
+            },
+            en: {
+                mainTitle: '📐 Cone Calculator',
+                inputTitle: 'Input Data',
+                visualTitle: 'Cone Visualization',
+                labelVariant: 'Input variant:',
+                btnCalculate: 'Calculate',
+                resultsTitle: 'Calculation Results:',
+                labelFormulas: 'Formulas Used',
+                labelInfo: 'Main Formulas:',
+                labelNote: 'Notation',
+                btnExport: '💾 Export JSON',
+                btnExportCSV: '📊 Export CSV',
+                variants: {
+                    1: 'By diameters and length (D, d, L)',
+                    2: 'By length, left diameter and taper (L, D, C)',
+                    3: 'By length, right diameter and taper (L, d, C)',
+                    4: 'By length, left diameter and slope angle (L, D, α₁)',
+                    5: 'By length, right diameter and slope angle (L, d, α₁)',
+                    6: 'By length, left diameter and cone angle (L, D, α)',
+                    7: 'By length, right diameter and cone angle (L, d, α)',
+                    8: 'By left diameter, taper and cone angle (D, C, α)',
+                    9: 'By right diameter, taper and cone angle (d, C, α)'
+                },
+                descriptions: {
+                    1: 'Enter diameters of both ends and cone length',
+                    2: 'Enter length, large end diameter and taper',
+                    3: 'Enter length, small end diameter and taper',
+                    4: 'Enter length, large end diameter and slope angle',
+                    5: 'Enter length, small end diameter and slope angle',
+                    6: 'Enter length, large end diameter and full cone angle',
+                    7: 'Enter length, small end diameter and full cone angle',
+                    8: 'Enter large end diameter, taper and cone angle',
+                    9: 'Enter small end diameter, taper and cone angle'
+                },
+                labels: {
+                    D: 'Left end diameter D (mm):',
+                    d: 'Right end diameter d (mm):',
+                    L: 'Cone length L (mm):',
+                    C: 'Taper C:',
+                    alpha: 'Cone angle α (degrees):',
+                    alpha1: 'Slope angle α₁ (degrees):'
+                }
+            }
+        };
+
+        let currentLang = 'ru';
+        let calculationResults = {};
+
+        // Переключение языка
+        function switchLanguage(lang) {
+            currentLang = lang;
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const t = translations[lang];
+            
+            document.getElementById('mainTitle').textContent = t.mainTitle;
+            document.getElementById('inputTitle').textContent = t.inputTitle;
+            document.getElementById('visualTitle').textContent = t.visualTitle;
+            document.getElementById('labelVariant').textContent = t.labelVariant;
+            document.getElementById('btnCalculate').textContent = t.btnCalculate;
+            document.getElementById('resultsTitle').textContent = t.resultsTitle;
+            document.getElementById('labelFormulas').textContent = t.labelFormulas;
+            document.getElementById('btnExport').textContent = t.btnExport;
+            document.getElementById('btnExportCSV').textContent = t.btnExportCSV;
+            
+            // Обновляем варианты
+            const select = document.getElementById('inputVariant');
+            for (let i = 1; i <= 9; i++) {
+                select.options[i-1].text = t.variants[i];
+            }
+            
+            updateInputFields();
+        }
+
+        // Обновление полей ввода
+        function updateInputFields() {
+            const variant = parseInt(document.getElementById('inputVariant').value);
+            const t = translations[currentLang];
+            const fieldsContainer = document.getElementById('inputFields');
+            const descContainer = document.getElementById('variantDescription');
+            
+            descContainer.textContent = t.descriptions[variant];
+            fieldsContainer.innerHTML = '';
+            
+            let fields = [];
+            
+            switch(variant) {
+                case 1: // D, d, L
+                    fields = ['D', 'd', 'L'];
+                    break;
+                case 2: // L, D, C
+                    fields = ['L', 'D', 'C'];
+                    break;
+                case 3: // L, d, C
+                    fields = ['L', 'd', 'C'];
+                    break;
+                case 4: // L, D, α₁
+                    fields = ['L', 'D', 'alpha1'];
+                    break;
+                case 5: // L, d, α₁
+                    fields = ['L', 'd', 'alpha1'];
+                    break;
+                case 6: // L, D, α
+                    fields = ['L', 'D', 'alpha'];
+                    break;
+                case 7: // L, d, α
+                    fields = ['L', 'd', 'alpha'];
+                    break;
+                case 8: // D, C, α
+                    fields = ['D', 'C', 'alpha'];
+                    break;
+                case 9: // d, C, α
+                    fields = ['d', 'C', 'alpha'];
+                    break;
+            }
+            
+            fields.forEach(field => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.innerHTML = `
+                    <label>${t.labels[field]}</label>
+                    <input type="number" id="input${field}" step="0.001" min="0">
+                `;
+                fieldsContainer.appendChild(div);
+            });
+        }
+
+        // Расчет конуса
+        function calculateCone() {
+            const variant = parseInt(document.getElementById('inputVariant').value);
+            const t = translations[currentLang];
+            
+            let D, d, L, C, alpha, alpha1;
+            let formulas = [];
+            
+            try {
+                switch(variant) {
+                    case 1: // D, d, L
+                        D = parseFloat(document.getElementById('inputD').value);
+                        d = parseFloat(document.getElementById('inputd').value);
+                        L = parseFloat(document.getElementById('inputL').value);
+                        
+                        if (isNaN(D) || isNaN(d) || isNaN(L) || D <= 0 || d <= 0 || L <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        C = (D - d) / L;
+                        alpha1 = Math.atan((D - d) / (2 * L)) * 180 / Math.PI;
+                        alpha = 2 * alpha1;
+                        
+                        formulas.push(`C = (D - d) / L = (${D} - ${d}) / ${L} = ${C.toFixed(6)}`);
+                        formulas.push(`α₁ = arctg((D - d) / (2L)) = arctg((${D} - ${d}) / (2·${L})) = ${alpha1.toFixed(4)}°`);
+                        formulas.push(`α = 2·α₁ = 2·${alpha1.toFixed(4)} = ${alpha.toFixed(4)}°`);
+                        break;
+                        
+                    case 2: // L, D, C
+                        L = parseFloat(document.getElementById('inputL').value);
+                        D = parseFloat(document.getElementById('inputD').value);
+                        C = parseFloat(document.getElementById('inputC').value);
+                        
+                        if (isNaN(L) || isNaN(D) || isNaN(C) || L <= 0 || D <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        d = D - C * L;
+                        alpha = 2 * Math.atan(C / 2) * 180 / Math.PI;
+                        alpha1 = alpha / 2;
+                        
+                        formulas.push(`d = D - C·L = ${D} - ${C}·${L} = ${d.toFixed(4)}`);
+                        formulas.push(`α = 2·arctg(C/2) = 2·arctg(${C}/2) = ${alpha.toFixed(4)}°`);
+                        formulas.push(`α₁ = α/2 = ${alpha.toFixed(4)}/2 = ${alpha1.toFixed(4)}°`);
+                        break;
+                        
+                    case 3: // L, d, C
+                        L = parseFloat(document.getElementById('inputL').value);
+                        d = parseFloat(document.getElementById('inputd').value);
+                        C = parseFloat(document.getElementById('inputC').value);
+                        
+                        if (isNaN(L) || isNaN(d) || isNaN(C) || L <= 0 || d <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        D = d + C * L;
+                        alpha = 2 * Math.atan(C / 2) * 180 / Math.PI;
+                        alpha1 = alpha / 2;
+                        
+                        formulas.push(`D = d + C·L = ${d} + ${C}·${L} = ${D.toFixed(4)}`);
+                        formulas.push(`α = 2·arctg(C/2) = 2·arctg(${C}/2) = ${alpha.toFixed(4)}°`);
+                        formulas.push(`α₁ = α/2 = ${alpha.toFixed(4)}/2 = ${alpha1.toFixed(4)}°`);
+                        break;
+                        
+                    case 4: // L, D, α₁
+                        L = parseFloat(document.getElementById('inputL').value);
+                        D = parseFloat(document.getElementById('inputD').value);
+                        alpha1 = parseFloat(document.getElementById('inputalpha1').value);
+                        
+                        if (isNaN(L) || isNaN(D) || isNaN(alpha1) || L <= 0 || D <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        d = D - 2 * L * Math.tan(alpha1 * Math.PI / 180);
+                        C = (D - d) / L;
+                        alpha = 2 * alpha1;
+                        
+                        formulas.push(`d = D - 2·L·tg(α₁) = ${D} - 2·${L}·tg(${alpha1}°) = ${d.toFixed(4)}`);
+                        formulas.push(`C = (D - d) / L = (${D} - ${d.toFixed(4)}) / ${L} = ${C.toFixed(6)}`);
+                        formulas.push(`α = 2·α₁ = 2·${alpha1} = ${alpha.toFixed(4)}°`);
+                        break;
+                        
+                    case 5: // L, d, α₁
+                        L = parseFloat(document.getElementById('inputL').value);
+                        d = parseFloat(document.getElementById('inputd').value);
+                        alpha1 = parseFloat(document.getElementById('inputalpha1').value);
+                        
+                        if (isNaN(L) || isNaN(d) || isNaN(alpha1) || L <= 0 || d <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        D = d + 2 * L * Math.tan(alpha1 * Math.PI / 180);
+                        C = (D - d) / L;
+                        alpha = 2 * alpha1;
+                        
+                        formulas.push(`D = d + 2·L·tg(α₁) = ${d} + 2·${L}·tg(${alpha1}°) = ${D.toFixed(4)}`);
+                        formulas.push(`C = (D - d) / L = (${D.toFixed(4)} - ${d}) / ${L} = ${C.toFixed(6)}`);
+                        formulas.push(`α = 2·α₁ = 2·${alpha1} = ${alpha.toFixed(4)}°`);
+                        break;
+                        
+                    case 6: // L, D, α
+                        L = parseFloat(document.getElementById('inputL').value);
+                        D = parseFloat(document.getElementById('inputD').value);
+                        alpha = parseFloat(document.getElementById('inputalpha').value);
+                        
+                        if (isNaN(L) || isNaN(D) || isNaN(alpha) || L <= 0 || D <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        alpha1 = alpha / 2;
+                        d = D - 2 * L * Math.tan(alpha1 * Math.PI / 180);
+                        C = (D - d) / L;
+                        
+                        formulas.push(`α₁ = α/2 = ${alpha}/2 = ${alpha1.toFixed(4)}°`);
+                        formulas.push(`d = D - 2·L·tg(α₁) = ${D} - 2·${L}·tg(${alpha1.toFixed(4)}°) = ${d.toFixed(4)}`);
+                        formulas.push(`C = (D - d) / L = (${D} - ${d.toFixed(4)}) / ${L} = ${C.toFixed(6)}`);
+                        break;
+                        
+                    case 7: // L, d, α
+                        L = parseFloat(document.getElementById('inputL').value);
+                        d = parseFloat(document.getElementById('inputd').value);
+                        alpha = parseFloat(document.getElementById('inputalpha').value);
+                        
+                        if (isNaN(L) || isNaN(d) || isNaN(alpha) || L <= 0 || d <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        alpha1 = alpha / 2;
+                        D = d + 2 * L * Math.tan(alpha1 * Math.PI / 180);
+                        C = (D - d) / L;
+                        
+                        formulas.push(`α₁ = α/2 = ${alpha}/2 = ${alpha1.toFixed(4)}°`);
+                        formulas.push(`D = d + 2·L·tg(α₁) = ${d} + 2·${L}·tg(${alpha1.toFixed(4)}°) = ${D.toFixed(4)}`);
+                        formulas.push(`C = (D - d) / L = (${D.toFixed(4)} - ${d}) / ${L} = ${C.toFixed(6)}`);
+                        break;
+                        
+                    case 8: // D, C, α
+                        D = parseFloat(document.getElementById('inputD').value);
+                        C = parseFloat(document.getElementById('inputC').value);
+                        alpha = parseFloat(document.getElementById('inputalpha').value);
+                        
+                        if (isNaN(D) || isNaN(C) || isNaN(alpha) || D <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        alpha1 = alpha / 2;
+                        L = D / (C + 2 * Math.tan(alpha1 * Math.PI / 180));
+                        d = D - C * L;
+                        
+                        formulas.push(`α₁ = α/2 = ${alpha}/2 = ${alpha1.toFixed(4)}°`);
+                        formulas.push(`L = D / (C + 2·tg(α₁)) = ${D} / (${C} + 2·tg(${alpha1.toFixed(4)}°)) = ${L.toFixed(4)}`);
+                        formulas.push(`d = D - C·L = ${D} - ${C}·${L.toFixed(4)} = ${d.toFixed(4)}`);
+                        break;
+                        
+                    case 9: // d, C, α
+                        d = parseFloat(document.getElementById('inputd').value);
+                        C = parseFloat(document.getElementById('inputC').value);
+                        alpha = parseFloat(document.getElementById('inputalpha').value);
+                        
+                        if (isNaN(d) || isNaN(C) || isNaN(alpha) || d <= 0) {
+                            throw new Error(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                        }
+                        
+                        alpha1 = alpha / 2;
+                        L = d / (2 * Math.tan(alpha1 * Math.PI / 180) - C);
+                        D = d + C * L;
+                        
+                        formulas.push(`α₁ = α/2 = ${alpha}/2 = ${alpha1.toFixed(4)}°`);
+                        formulas.push(`L = d / (2·tg(α₁) - C) = ${d} / (2·tg(${alpha1.toFixed(4)}°) - ${C}) = ${L.toFixed(4)}`);
+                        formulas.push(`D = d + C·L = ${d} + ${C}·${L.toFixed(4)} = ${D.toFixed(4)}`);
+                        break;
+                }
+                
+                // Сохранение результатов
+                calculationResults = {
+                    D: D,
+                    d: d,
+                    L: L,
+                    C: C,
+                    alpha: alpha,
+                    alpha1: alpha1,
+                    variant: variant
+                };
+                
+                // Отображение результатов
+                displayResults(D, d, L, C, alpha, alpha1, formulas);
+                
+                // Визуализация
+                drawCone(D, d, L);
+                
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // Отображение результатов
+        function displayResults(D, d, L, C, alpha, alpha1, formulas) {
+            const t = translations[currentLang];
+            const resultsList = document.getElementById('resultsList');
+            const formulasUsed = document.getElementById('formulasUsed');
+            
+            resultsList.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">${t.labels.D}</span>
+                    <span class="result-value">${D.toFixed(4)} ${currentLang === 'ru' ? 'мм' : 'mm'}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">${t.labels.d}</span>
+                    <span class="result-value">${d.toFixed(4)} ${currentLang === 'ru' ? 'мм' : 'mm'}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">${t.labels.L}</span>
+                    <span class="result-value">${L.toFixed(4)} ${currentLang === 'ru' ? 'мм' : 'mm'}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">${t.labels.C}</span>
+                    <span class="result-value">${C.toFixed(6)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">${t.labels.alpha}</span>
+                    <span class="result-value">${alpha.toFixed(4)}°</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">${t.labels.alpha1}</span>
+                    <span class="result-value">${alpha1.toFixed(4)}°</span>
+                </div>
+            `;
+            
+            formulasUsed.innerHTML = formulas.map(f => `<div class="formula">${f}</div>`).join('');
+            
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // Визуализация конуса
+        function drawCone(D, d, L) {
+            const canvas = document.getElementById('coneCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const scale = Math.min(300 / L, 200 / D);
+            
+            const scaledL = L * scale;
+            const scaledD = D * scale;
+            const scaledd = d * scale;
+            
+            const startY = 100;
+            const endY = startY + scaledL;
+            
+            // Конус (контур)
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            
+            // Верхняя линия
+            ctx.beginPath();
+            ctx.moveTo(centerX - scaledD/2, startY);
+            ctx.lineTo(centerX - scaledd/2, endY);
+            ctx.stroke();
+            
+            // Нижняя линия
+            ctx.beginPath();
+            ctx.moveTo(centerX + scaledD/2, startY);
+            ctx.lineTo(centerX + scaledd/2, endY);
+            ctx.stroke();
+            
+            // Левый торец (эллипс)
+            ctx.strokeStyle = '#764ba2';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(centerX, startY, scaledD/2, scaledD/8, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Правый торец (эллипс)
+            ctx.beginPath();
+            ctx.ellipse(centerX, endY, scaledd/2, scaledd/8, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Осевая линия
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, startY);
+            ctx.lineTo(centerX, endY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Размерные линии и текст
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            
+            // D
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX - scaledD/2 - 20, startY);
+            ctx.lineTo(centerX + scaledD/2 + 20, startY);
+            ctx.stroke();
+            ctx.fillText(`D = ${D.toFixed(2)}`, centerX, startY - 10);
+            
+            // d
+            ctx.beginPath();
+            ctx.moveTo(centerX - scaledd/2 - 20, endY);
+            ctx.lineTo(centerX + scaledd/2 + 20, endY);
+            ctx.stroke();
+            ctx.fillText(`d = ${d.toFixed(2)}`, centerX, endY + 25);
+            
+            // L
+            ctx.strokeStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.moveTo(centerX + scaledD/2 + 40, startY);
+            ctx.lineTo(centerX + scaledD/2 + 40, endY);
+            ctx.stroke();
+            ctx.save();
+            ctx.translate(centerX + scaledD/2 + 60, (startY + endY) / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(`L = ${L.toFixed(2)}`, 0, 0);
+            ctx.restore();
+            
+            // Угол α
+            const angleRadius = 80;
+            ctx.strokeStyle = '#4caf50';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const angle1 = Math.atan((scaledD - scaledd) / (2 * scaledL));
+            ctx.arc(centerX, startY, angleRadius, Math.PI/2 - angle1, Math.PI/2 + angle1);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#4caf50';
+            ctx.font = '12px Arial';
+            ctx.fillText(`α = ${calculationResults.alpha.toFixed(2)}°`, centerX, startY + angleRadius + 20);
+            
+            // Угол α₁
+            ctx.strokeStyle = '#ff9800';
+            ctx.beginPath();
+            ctx.arc(centerX, startY, angleRadius - 20, Math.PI/2, Math.PI/2 + angle1);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#ff9800';
+            ctx.fillText(`α₁ = ${calculationResults.alpha1.toFixed(2)}°`, centerX + 40, startY + 40);
+            
+            // Конусность
+            ctx.fillStyle = '#9c27b0';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`C = ${calculationResults.C.toFixed(6)}`, centerX, endY + 50);
+        }
+
+        // Экспорт в JSON
+        function exportToJSON() {
+            if (Object.keys(calculationResults).length === 0) {
+                alert(currentLang === 'ru' ? 'Сначала выполните расчет!' : 'Calculate first!');
+                return;
+            }
+            
+            const data = {
+                version: '1.0',
+                date: new Date().toISOString(),
+                language: currentLang,
+                results: calculationResults
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cone_calculation_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Экспорт в CSV
+        function exportToCSV() {
+            if (Object.keys(calculationResults).length === 0) {
+                alert(currentLang === 'ru' ? 'Сначала выполните расчет!' : 'Calculate first!');
+                return;
+            }
+            
+            const csv = `Parameter,Value,Unit
+D (Left diameter),${calculationResults.D.toFixed(4)},mm
+d (Right diameter),${calculationResults.d.toFixed(4)},mm
+L (Length),${calculationResults.L.toFixed(4)},mm
+C (Taper),${calculationResults.C.toFixed(6)},-
+α (Cone angle),${calculationResults.alpha.toFixed(4)},degrees
+α₁ (Slope angle),${calculationResults.alpha1.toFixed(4)},degrees`;
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cone_calculation_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Инициализация
+        updateInputFields();
+    </script>
+</body>
+</html>

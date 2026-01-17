@@ -1,0 +1,129 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Фон с градиентом -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Фон -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Главный заголовок -->
+  <text x="600" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">
+    📐 Калькулятор конуса
+  </text>
+  
+  <!-- Подзаголовок -->
+  <text x="600" y="125" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.9)" text-anchor="middle">
+    9 вариантов расчета • Визуализация • Экспорт данных
+  </text>
+  
+  <!-- Левая карточка: Ввод данных -->
+  <rect x="50" y="170" width="520" height="400" rx="15" fill="white" filter="url(#shadow)"/>
+  
+  <!-- Заголовок левой карточки -->
+  <text x="310" y="210" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#667eea" text-anchor="middle">
+    Вариант ввода данных
+  </text>
+  
+  <!-- Выпадающий список -->
+  <rect x="80" y="230" width="460" height="45" rx="8" fill="#f5f5f5" stroke="#ddd" stroke-width="2"/>
+  <text x="310" y="260" font-family="Arial, sans-serif" font-size="16" fill="#333" text-anchor="middle">
+    По диаметрам и длине (D, d, L)
+  </text>
+  <text x="510" y="260" font-family="Arial, sans-serif" font-size="20" fill="#667eea">▼</text>
+  
+  <!-- Поля ввода -->
+  <rect x="80" y="300" width="220" height="45" rx="8" fill="white" stroke="#667eea" stroke-width="2"/>
+  <text x="95" y="328" font-family="Arial, sans-serif" font-size="14" fill="#333">D (мм): 50</text>
+  
+  <rect x="320" y="300" width="220" height="45" rx="8" fill="white" stroke="#667eea" stroke-width="2"/>
+  <text x="335" y="328" font-family="Arial, sans-serif" font-size="14" fill="#333">d (мм): 30</text>
+  
+  <rect x="80" y="360" width="460" height="45" rx="8" fill="white" stroke="#667eea" stroke-width="2"/>
+  <text x="95" y="388" font-family="Arial, sans-serif" font-size="14" fill="#333">L (мм): 100</text>
+  
+  <!-- Кнопка расчета -->
+  <defs>
+    <linearGradient id="buttonGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect x="80" y="425" width="460" height="55" rx="8" fill="url(#buttonGradient)"/>
+  <text x="310" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">
+    Рассчитать
+  </text>
+  
+  <!-- Результаты внизу -->
+  <rect x="80" y="495" width="460" height="60" rx="8" fill="#f0f4f8"/>
+  <text x="95" y="520" font-family="Arial, sans-serif" font-size="14" fill="#555">Конусность C:</text>
+  <text x="500" y="520" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#764ba2" text-anchor="end">0.200000</text>
+  <text x="95" y="545" font-family="Arial, sans-serif" font-size="14" fill="#555">Угол конуса α:</text>
+  <text x="500" y="545" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#764ba2" text-anchor="end">11.4232°</text>
+  
+  <!-- Правая карточка: Визуализация -->
+  <rect x="630" y="170" width="520" height="400" rx="15" fill="white" filter="url(#shadow)"/>
+  
+  <!-- Заголовок правой карточки -->
+  <text x="890" y="210" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#667eea" text-anchor="middle">
+    Визуализация конуса
+  </text>
+  
+  <!-- Конус -->
+  <g transform="translate(890, 380)">
+    <!-- Конус (контур) -->
+    <line x1="-100" y1="-120" x2="-60" y2="80" stroke="#667eea" stroke-width="3"/>
+    <line x1="100" y1="-120" x2="60" y2="80" stroke="#667eea" stroke-width="3"/>
+    
+    <!-- Верхний эллипс (D) -->
+    <ellipse cx="0" cy="-120" rx="100" ry="20" fill="none" stroke="#764ba2" stroke-width="2"/>
+    
+    <!-- Нижний эллипс (d) -->
+    <ellipse cx="0" cy="80" rx="60" ry="12" fill="none" stroke="#764ba2" stroke-width="2"/>
+    
+    <!-- Осевая линия -->
+    <line x1="0" y1="-120" x2="0" y2="80" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+    
+    <!-- Размерные линии D -->
+    <line x1="-100" y1="-135" x2="100" y2="-135" stroke="#667eea" stroke-width="1"/>
+    <text x="0" y="-145" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">D = 50</text>
+    
+    <!-- Размерные линии d -->
+    <line x1="-60" y1="95" x2="60" y2="95" stroke="#667eea" stroke-width="1"/>
+    <text x="0" y="115" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">d = 30</text>
+    
+    <!-- Размерная линия L -->
+    <line x1="120" y1="-120" x2="120" y2="80" stroke="#2196F3" stroke-width="1"/>
+    <text x="145" y="-15" font-family="Arial" font-size="14" fill="#333" transform="rotate(-90, 145, -15)">L = 100</text>
+    
+    <!-- Угол α -->
+    <path d="M 0,-120 A 60,60 0 0,1 30,-90" fill="none" stroke="#4caf50" stroke-width="2"/>
+    <text x="35" y="-85" font-family="Arial" font-size="12" fill="#4caf50">α</text>
+  </g>
+  
+  <!-- Иконки функций внизу -->
+  <g transform="translate(50, 590)">
+    <rect x="0" y="0" width="150" height="35" rx="8" fill="rgba(255,255,255,0.2)"/>
+    <text x="75" y="23" font-family="Arial" font-size="14" fill="white" text-anchor="middle">🌍 RU / EN</text>
+    
+    <rect x="170" y="0" width="150" height="35" rx="8" fill="rgba(255,255,255,0.2)"/>
+    <text x="245" y="23" font-family="Arial" font-size="14" fill="white" text-anchor="middle">💾 Export JSON</text>
+    
+    <rect x="340" y="0" width="150" height="35" rx="8" fill="rgba(255,255,255,0.2)"/>
+    <text x="415" y="23" font-family="Arial" font-size="14" fill="white" text-anchor="middle">📊 Export CSV</text>
+    
+    <rect x="510" y="0" width="180" height="35" rx="8" fill="rgba(255,255,255,0.2)"/>
+    <text x="600" y="23" font-family="Arial" font-size="14" fill="white" text-anchor="middle">📐 9 вариантов</text>
+  </g>
+  
+  <!-- Версия -->
+  <text x="1150" y="615" font-family="Arial" font-size="12" fill="rgba(255,255,255,0.8)" text-anchor="end">
+    v1.0 • 2026
+  </text>
+</svg>
