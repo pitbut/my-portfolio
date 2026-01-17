@@ -63,11 +63,6 @@
             color: white;
         }
 
-        .lang-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
         .tabs {
             display: flex;
             gap: 10px;
@@ -79,7 +74,6 @@
             padding: 12px 25px;
             background: rgba(255,255,255,0.2);
             color: white;
-            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
@@ -124,9 +118,6 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 3px solid #764ba2;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .form-group {
@@ -157,10 +148,31 @@
             box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
         }
 
-        .input-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover {
+            background: #e3f2fd;
         }
 
         button {
@@ -182,10 +194,6 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        button:active {
-            transform: translateY(0);
-        }
-
         .results {
             background: #f0f4f8;
             padding: 20px;
@@ -205,10 +213,6 @@
             border-bottom: 1px solid #ddd;
         }
 
-        .result-item:last-child {
-            border-bottom: none;
-        }
-
         .result-label {
             font-weight: 500;
             color: #555;
@@ -217,6 +221,45 @@
         .result-value {
             font-weight: 700;
             color: #764ba2;
+            font-size: 18px;
+        }
+
+        .instruction-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .instruction-box h4 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .instruction-step {
+            padding: 12px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 6px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .step-number {
+            background: #4caf50;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
         }
 
         .formula-box {
@@ -235,35 +278,9 @@
 
         .formula {
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 16px;
             color: #333;
             margin: 5px 0;
-        }
-
-        .gears-list {
-            background: #e8f5e9;
-            border-left: 4px solid #4caf50;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 4px;
-        }
-
-        .gears-list h4 {
-            color: #2e7d32;
-            margin-bottom: 10px;
-        }
-
-        .gear-option {
-            padding: 8px;
-            margin: 5px 0;
-            background: white;
-            border-radius: 4px;
-            border: 1px solid #4caf50;
-        }
-
-        .gear-option.best {
-            background: #c8e6c9;
-            border: 2px solid #2e7d32;
             font-weight: bold;
         }
 
@@ -285,50 +302,52 @@
             color: #856404;
         }
 
-        .gears-input {
+        .gears-list {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .gears-list h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .gear-option {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #4caf50;
+            font-size: 15px;
+        }
+
+        .gear-option.best {
+            background: #c8e6c9;
+            border: 3px solid #2e7d32;
+            font-weight: bold;
+        }
+
+        .disc-info {
             background: #f5f5f5;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-top: 10px;
         }
 
-        .gears-input h4 {
+        .disc-info h4 {
             color: #667eea;
             margin-bottom: 10px;
         }
 
-        .gears-input input {
-            width: 100%;
+        .disc-row {
             padding: 8px;
-            margin-bottom: 10px;
-        }
-
-        .gear-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .gear-chip {
-            padding: 6px 12px;
-            background: #667eea;
-            color: white;
-            border-radius: 20px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .gear-chip button {
-            width: auto;
-            padding: 0;
-            margin: 0;
-            background: none;
-            color: white;
-            font-size: 18px;
-            line-height: 1;
         }
 
         .canvas-container {
@@ -345,16 +364,8 @@
             height: auto;
         }
 
-        .full-width {
-            grid-column: 1 / -1;
-        }
-
         @media (max-width: 768px) {
             .calculators {
-                grid-template-columns: 1fr;
-            }
-            
-            .input-row {
                 grid-template-columns: 1fr;
             }
         }
@@ -363,25 +374,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 id="mainTitle">⚙️ Калькулятор делительной головки</h1>
+            <h1>⚙️ Калькулятор делительной головки</h1>
             <div class="language-switcher">
-                <button class="lang-btn active" onclick="switchLanguage('ru')">Русский</button>
-                <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+                <button class="lang-btn active">Русский</button>
+                <button class="lang-btn">English</button>
             </div>
         </div>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="switchTab('simple')" id="tabSimple">
+            <button class="tab-button active" onclick="switchTab('simple')">
                 Простое деление
             </button>
-            <button class="tab-button" onclick="switchTab('differential')" id="tabDifferential">
+            <button class="tab-button" onclick="switchTab('differential')">
                 Дифференциальное деление
             </button>
-            <button class="tab-button" onclick="switchTab('thread')" id="tabThread">
+            <button class="tab-button" onclick="switchTab('thread')">
                 Нарезание резьбы
-            </button>
-            <button class="tab-button" onclick="switchTab('settings')" id="tabSettings">
-                Настройки
             </button>
         </div>
 
@@ -389,47 +397,83 @@
         <div id="simple" class="tab-content active">
             <div class="calculators">
                 <div class="calc-card">
-                    <h2 class="calc-title" id="simpleTitle">📐 Простое деление</h2>
+                    <h2 class="calc-title">📐 Простое деление</h2>
                     
                     <div class="form-group">
-                        <label id="labelDivisions">Число делений (z):</label>
-                        <input type="number" id="simpleDivisions" value="6" min="1" step="1">
+                        <label>Число делений (z):</label>
+                        <input type="number" id="simpleDivisions" value="30" min="1" step="1">
                     </div>
 
                     <div class="form-group">
-                        <label id="labelRatio">Передаточное отношение головки (N):</label>
+                        <label>Передаточное отношение головки (N):</label>
                         <input type="number" id="simpleRatio" value="40" min="1" step="1">
                     </div>
 
-                    <button onclick="calculateSimple()" id="btnCalculateSimple">Рассчитать</button>
+                    <div class="form-group">
+                        <label>Выберите делительный диск:</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="discType" id="disc1" value="1" onchange="updateDiscSelection()">
+                                <label for="disc1">Диск 1: 15, 16, 17, 18, 19, 20</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="discType" id="disc2" value="2" onchange="updateDiscSelection()">
+                                <label for="disc2">Диск 2: 21, 23, 27, 29, 31, 33</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="discType" id="disc3" value="3" onchange="updateDiscSelection()">
+                                <label for="disc3">Диск 3: 37, 39, 41, 43, 47, 49</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="discType" id="discCustom" value="custom" checked onchange="updateDiscSelection()">
+                                <label for="discCustom">Свой диск</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="customHolesGroup">
+                        <label>Количество отверстий в диске:</label>
+                        <input type="number" id="customHoles" value="30" min="1" step="1">
+                    </div>
+
+                    <button onclick="calculateSimple()">Рассчитать</button>
 
                     <div id="simpleResults" class="results" style="display:none;">
-                        <h3 id="simpleResultsTitle">Результаты расчета:</h3>
+                        <h3>Результаты расчета:</h3>
                         
                         <div class="result-item">
-                            <span class="result-label" id="labelTurns">Число оборотов рукоятки:</span>
+                            <span class="result-label">Число оборотов рукоятки:</span>
                             <span class="result-value" id="simpleTurns">-</span>
                         </div>
 
                         <div class="formula-box">
-                            <h4>💡 <span id="labelFormula">Формула</span>:</h4>
+                            <h4>💡 Формула:</h4>
                             <div class="formula" id="simpleFormula">-</div>
                         </div>
 
-                        <div id="simplePlates" class="info-box">
-                            <h4 id="labelPlates">Подходящие делительные диски:</h4>
+                        <div id="simpleInstructions" class="instruction-box">
+                            <h4>📋 Пошаговая инструкция:</h4>
+                            <div id="instructionSteps"></div>
+                        </div>
+
+                        <div id="simplePlates" class="disc-info">
+                            <h4>Другие подходящие варианты:</h4>
                             <div id="simplePlatesList"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="calc-card">
-                    <h2 class="calc-title" id="simpleSchemaTitle">Схема простого деления</h2>
-                    <div class="canvas-container">
-                        <canvas id="simpleCanvas" width="400" height="400"></canvas>
+                    <h2 class="calc-title">Информация</h2>
+                    <div class="info-box">
+                        <strong>Простое деление</strong> используется когда число оборотов рукоятки получается целым числом или простой дробью, которую можно реализовать на стандартных делительных дисках.
                     </div>
-                    <div class="info-box" id="simpleInfo">
-                        Простое деление используется когда число оборотов рукоятки получается целым числом или простой дробью.
+                    
+                    <div class="disc-info">
+                        <h4>Стандартные делительные диски:</h4>
+                        <div class="disc-row"><strong>Диск 1:</strong> 15, 16, 17, 18, 19, 20 отверстий</div>
+                        <div class="disc-row"><strong>Диск 2:</strong> 21, 23, 27, 29, 31, 33 отверстия</div>
+                        <div class="disc-row"><strong>Диск 3:</strong> 37, 39, 41, 43, 47, 49 отверстий</div>
                     </div>
                 </div>
             </div>
@@ -439,58 +483,80 @@
         <div id="differential" class="tab-content">
             <div class="calculators">
                 <div class="calc-card">
-                    <h2 class="calc-title" id="diffTitle">⚙️ Дифференциальное деление</h2>
+                    <h2 class="calc-title">⚙️ Дифференциальное деление</h2>
                     
                     <div class="form-group">
-                        <label id="labelDiffDivisions">Требуемое число делений (z):</label>
+                        <label>Требуемое число делений (z):</label>
                         <input type="number" id="diffDivisions" value="127" min="1" step="1">
                     </div>
 
                     <div class="form-group">
-                        <label id="labelDiffRatio">Передаточное отношение головки (N):</label>
+                        <label>Передаточное отношение головки (N):</label>
                         <input type="number" id="diffRatio" value="40" min="1" step="1">
                     </div>
 
                     <div class="form-group">
-                        <label id="labelApproxDivisions">Близкое число делений (z₀):</label>
+                        <label>Близкое число делений (z₀):</label>
                         <input type="number" id="approxDivisions" value="120" min="1" step="1">
-                        <small id="diffHelp">Или оставьте пустым для автоподбора</small>
+                        <small style="color: #666;">Оставьте пустым для автоподбора</small>
                     </div>
 
-                    <button onclick="calculateDifferential()" id="btnCalculateDiff">Рассчитать</button>
+                    <button onclick="calculateDifferential()">Рассчитать</button>
+
+                    <div id="diffCheckSection" class="disc-info" style="display:none; margin-top: 20px; background: #fff9e6; border: 2px solid #ffc107;">
+                        <h4 style="color: #f57c00;">🔍 Проверка своих шестерен</h4>
+                        <div class="form-group">
+                            <label>Введите ваши шестерни:</label>
+                            <input type="text" id="checkDiffGears" placeholder="Например: 25-50 или 20-40-30-60">
+                            <small style="color: #666;">Формат: a-b (1 пара) или a-b-c-d (2 пары)</small>
+                        </div>
+                        <button onclick="checkUserGears('diff')" style="background: #ffc107;">Проверить</button>
+                        <div id="diffCheckResult"></div>
+                    </div>
 
                     <div id="diffResults" class="results" style="display:none;">
-                        <h3 id="diffResultsTitle">Результаты расчета:</h3>
+                        <h3>Результаты расчета:</h3>
                         
                         <div class="result-item">
-                            <span class="result-label" id="labelDiffTurns">Обороты рукоятки:</span>
+                            <span class="result-label">Обороты рукоятки (для z₀):</span>
                             <span class="result-value" id="diffTurns">-</span>
                         </div>
 
                         <div class="result-item">
-                            <span class="result-label" id="labelGearRatio">Передаточное отношение гитары:</span>
+                            <span class="result-label">Передаточное отношение гитары:</span>
                             <span class="result-value" id="gearRatio">-</span>
                         </div>
 
                         <div class="formula-box">
-                            <h4>💡 <span id="labelDiffFormula">Формулы</span>:</h4>
+                            <h4>💡 Формулы:</h4>
                             <div id="diffFormula"></div>
                         </div>
 
+                        <div id="diffInstructions" class="instruction-box">
+                            <h4>📋 Пошаговая инструкция:</h4>
+                            <div id="diffInstructionSteps"></div>
+                        </div>
+
                         <div id="diffGears" class="gears-list">
-                            <h4 id="labelGearOptions">Варианты подбора шестерен:</h4>
+                            <h4>⚙️ Варианты подбора шестерен:</h4>
                             <div id="diffGearsList"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="calc-card">
-                    <h2 class="calc-title" id="diffSchemaTitle">Схема дифференциального деления</h2>
-                    <div class="canvas-container">
-                        <canvas id="diffCanvas" width="400" height="400"></canvas>
+                    <h2 class="calc-title">Информация</h2>
+                    <div class="info-box">
+                        <strong>Дифференциальное деление</strong> применяется когда простое деление невозможно (нет подходящих делительных дисков). Используется дополнительная сменная гитара, которая поворачивает делительный диск во время работы.
                     </div>
-                    <div class="info-box" id="diffInfo">
-                        Дифференциальное деление применяется когда простое деление невозможно. Используется дополнительная сменная гитара.
+                    
+                    <div class="warning">
+                        <strong>⚠️ Важно:</strong> При дифференциальном делении фиксатор делительного диска должен быть выключен!
+                    </div>
+
+                    <div class="disc-info">
+                        <h4>Доступные шестерни:</h4>
+                        <div class="disc-row">20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 зубьев</div>
                     </div>
                 </div>
             </div>
@@ -500,206 +566,88 @@
         <div id="thread" class="tab-content">
             <div class="calculators">
                 <div class="calc-card">
-                    <h2 class="calc-title" id="threadTitle">🔩 Нарезание резьбы</h2>
+                    <h2 class="calc-title">🔩 Нарезание резьбы</h2>
                     
                     <div class="form-group">
-                        <label id="labelThreadPitch">Требуемый шаг резьбы (Р, мм):</label>
+                        <label>Требуемый шаг резьбы (P, мм):</label>
                         <input type="number" id="threadPitch" value="2" step="0.01" min="0.01">
                     </div>
 
                     <div class="form-group">
-                        <label id="labelScrewPitch">Шаг ходового винта станка (t, мм):</label>
+                        <label>Шаг ходового винта станка (t, мм):</label>
                         <input type="number" id="screwPitch" value="6" step="0.1" min="0.1">
                     </div>
 
                     <div class="form-group">
-                        <label id="labelThreadType">Тип резьбы:</label>
+                        <label>Тип резьбы:</label>
                         <select id="threadType">
-                            <option value="metric">Метрическая</option>
-                            <option value="inch">Дюймовая (tpi)</option>
+                            <option value="metric">Метрическая (мм)</option>
+                            <option value="inch">Дюймовая (ниток на дюйм)</option>
                             <option value="modular">Модульная</option>
                         </select>
                     </div>
 
-                    <button onclick="calculateThread()" id="btnCalculateThread">Рассчитать</button>
+                    <button onclick="calculateThread()">Рассчитать</button>
+
+                    <div id="threadCheckSection" class="disc-info" style="display:none; margin-top: 20px; background: #fff9e6; border: 2px solid #ffc107;">
+                        <h4 style="color: #f57c00;">🔍 Проверка своих шестерен</h4>
+                        <div class="form-group">
+                            <label>Введите ваши шестерни:</label>
+                            <input type="text" id="checkThreadGears" placeholder="Например: 25-50 или 20-40-30-60">
+                            <small style="color: #666;">Формат: a-b (1 пара) или a-b-c-d (2 пары)</small>
+                        </div>
+                        <button onclick="checkUserGears('thread')" style="background: #ffc107;">Проверить</button>
+                        <div id="threadCheckResult"></div>
+                    </div>
 
                     <div id="threadResults" class="results" style="display:none;">
-                        <h3 id="threadResultsTitle">Результаты расчета:</h3>
+                        <h3>Результаты расчета:</h3>
                         
                         <div class="result-item">
-                            <span class="result-label" id="labelThreadRatio">Передаточное отношение:</span>
+                            <span class="result-label">Передаточное отношение:</span>
                             <span class="result-value" id="threadRatio">-</span>
                         </div>
 
                         <div class="formula-box">
-                            <h4>💡 <span id="labelThreadFormula">Формула</span>:</h4>
+                            <h4>💡 Формула:</h4>
                             <div id="threadFormula"></div>
                         </div>
 
+                        <div id="threadInstructions" class="instruction-box">
+                            <h4>📋 Пошаговая инструкция:</h4>
+                            <div id="threadInstructionSteps"></div>
+                        </div>
+
                         <div id="threadGears" class="gears-list">
-                            <h4 id="labelThreadGearOptions">Варианты подбора шестерен:</h4>
+                            <h4>⚙️ Варианты подбора шестерен:</h4>
                             <div id="threadGearsList"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="calc-card">
-                    <h2 class="calc-title" id="threadSchemaTitle">Схема нарезания резьбы</h2>
-                    <div class="canvas-container">
-                        <canvas id="threadCanvas" width="400" height="300"></canvas>
+                    <h2 class="calc-title">Информация</h2>
+                    <div class="info-box">
+                        <strong>Нарезание резьбы</strong> требует установки сменной гитары для получения требуемого шага резьбы. Передаточное отношение определяется отношением шагов.
                     </div>
-                    <div class="info-box" id="threadInfo">
-                        Для нарезания резьбы используется сменная гитара для получения требуемого шага.
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Вкладка: Настройки -->
-        <div id="settings" class="tab-content">
-            <div class="calc-card full-width">
-                <h2 class="calc-title" id="settingsTitle">⚙️ Настройки</h2>
-                
-                <div class="gears-input">
-                    <h4 id="labelAvailableGears">Доступные шестерни (количество зубьев):</h4>
-                    <input type="text" id="gearInput" placeholder="Например: 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100">
-                    <button onclick="addGears()" id="btnAddGears">Добавить шестерни</button>
                     
-                    <div class="gear-chips" id="gearChips"></div>
-                </div>
-
-                <div class="gears-input">
-                    <h4 id="labelStandardPlates">Стандартные делительные диски:</h4>
-                    <div id="platesInfo" class="info-box">
-                        <strong>Диск 1:</strong> 15, 16, 17, 18, 19, 20<br>
-                        <strong>Диск 2:</strong> 21, 23, 27, 29, 31, 33<br>
-                        <strong>Диск 3:</strong> 37, 39, 41, 43, 47, 49
+                    <div class="disc-info">
+                        <h4>Формулы для разных типов резьбы:</h4>
+                        <div class="disc-row"><strong>Метрическая:</strong> i = P / t</div>
+                        <div class="disc-row"><strong>Дюймовая:</strong> i = (25.4 / P) / (25.4 / t)</div>
+                        <div class="disc-row"><strong>Модульная:</strong> i = (π × m) / t</div>
                     </div>
-                </div>
 
-                <div class="gears-input">
-                    <h4 id="labelPresets">Быстрые настройки:</h4>
-                    <button onclick="loadPreset('standard')" id="btnPresetStandard">Стандартный набор</button>
-                    <button onclick="loadPreset('extended')" style="margin-top: 10px;" id="btnPresetExtended">Расширенный набор</button>
-                </div>
-
-                <div style="margin-top: 20px; display: flex; gap: 10px;">
-                    <button onclick="exportSettings()" id="btnExport">💾 Экспорт настроек</button>
-                    <button onclick="document.getElementById('importFile').click()" id="btnImport">📂 Импорт настроек</button>
-                    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importSettings(event)">
+                    <div class="disc-info">
+                        <h4>Доступные шестерни:</h4>
+                        <div class="disc-row">20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 зубьев</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Переводы
-        const translations = {
-            ru: {
-                mainTitle: '⚙️ Калькулятор делительной головки',
-                tabSimple: 'Простое деление',
-                tabDifferential: 'Дифференциальное деление',
-                tabThread: 'Нарезание резьбы',
-                tabSettings: 'Настройки',
-                simpleTitle: '📐 Простое деление',
-                labelDivisions: 'Число делений (z):',
-                labelRatio: 'Передаточное отношение головки (N):',
-                btnCalculateSimple: 'Рассчитать',
-                simpleResultsTitle: 'Результаты расчета:',
-                labelTurns: 'Число оборотов рукоятки:',
-                labelFormula: 'Формула',
-                labelPlates: 'Подходящие делительные диски:',
-                simpleSchemaTitle: 'Схема простого деления',
-                simpleInfo: 'Простое деление используется когда число оборотов рукоятки получается целым числом или простой дробью.',
-                diffTitle: '⚙️ Дифференциальное деление',
-                labelDiffDivisions: 'Требуемое число делений (z):',
-                labelDiffRatio: 'Передаточное отношение головки (N):',
-                labelApproxDivisions: 'Близкое число делений (z₀):',
-                diffHelp: 'Или оставьте пустым для автоподбора',
-                btnCalculateDiff: 'Рассчитать',
-                diffResultsTitle: 'Результаты расчета:',
-                labelDiffTurns: 'Обороты рукоятки:',
-                labelGearRatio: 'Передаточное отношение гитары:',
-                labelDiffFormula: 'Формулы',
-                labelGearOptions: 'Варианты подбора шестерен:',
-                diffSchemaTitle: 'Схема дифференциального деления',
-                diffInfo: 'Дифференциальное деление применяется когда простое деление невозможно. Используется дополнительная сменная гитара.',
-                threadTitle: '🔩 Нарезание резьбы',
-                labelThreadPitch: 'Требуемый шаг резьбы (Р, мм):',
-                labelScrewPitch: 'Шаг ходового винта станка (t, мм):',
-                labelThreadType: 'Тип резьбы:',
-                btnCalculateThread: 'Рассчитать',
-                threadResultsTitle: 'Результаты расчета:',
-                labelThreadRatio: 'Передаточное отношение:',
-                labelThreadFormula: 'Формула',
-                labelThreadGearOptions: 'Варианты подбора шестерен:',
-                threadSchemaTitle: 'Схема нарезания резьбы',
-                threadInfo: 'Для нарезания резьбы используется сменная гитара для получения требуемого шага.',
-                settingsTitle: '⚙️ Настройки',
-                labelAvailableGears: 'Доступные шестерни (количество зубьев):',
-                btnAddGears: 'Добавить шестерни',
-                labelStandardPlates: 'Стандартные делительные диски:',
-                labelPresets: 'Быстрые настройки:',
-                btnPresetStandard: 'Стандартный набор',
-                btnPresetExtended: 'Расширенный набор',
-                btnExport: '💾 Экспорт настроек',
-                btnImport: '📂 Импорт настроек'
-            },
-            en: {
-                mainTitle: '⚙️ Dividing Head Calculator',
-                tabSimple: 'Simple Indexing',
-                tabDifferential: 'Differential Indexing',
-                tabThread: 'Thread Cutting',
-                tabSettings: 'Settings',
-                simpleTitle: '📐 Simple Indexing',
-                labelDivisions: 'Number of divisions (z):',
-                labelRatio: 'Head ratio (N):',
-                btnCalculateSimple: 'Calculate',
-                simpleResultsTitle: 'Calculation Results:',
-                labelTurns: 'Handle turns:',
-                labelFormula: 'Formula',
-                labelPlates: 'Suitable index plates:',
-                simpleSchemaTitle: 'Simple Indexing Scheme',
-                simpleInfo: 'Simple indexing is used when the number of handle turns is a whole number or simple fraction.',
-                diffTitle: '⚙️ Differential Indexing',
-                labelDiffDivisions: 'Required divisions (z):',
-                labelDiffRatio: 'Head ratio (N):',
-                labelApproxDivisions: 'Approximate divisions (z₀):',
-                diffHelp: 'Or leave empty for auto-selection',
-                btnCalculateDiff: 'Calculate',
-                diffResultsTitle: 'Calculation Results:',
-                labelDiffTurns: 'Handle turns:',
-                labelGearRatio: 'Change gear ratio:',
-                labelDiffFormula: 'Formulas',
-                labelGearOptions: 'Gear selection options:',
-                diffSchemaTitle: 'Differential Indexing Scheme',
-                diffInfo: 'Differential indexing is used when simple indexing is impossible. Additional change gears are required.',
-                threadTitle: '🔩 Thread Cutting',
-                labelThreadPitch: 'Required thread pitch (P, mm):',
-                labelScrewPitch: 'Leadscrew pitch (t, mm):',
-                labelThreadType: 'Thread type:',
-                btnCalculateThread: 'Calculate',
-                threadResultsTitle: 'Calculation Results:',
-                labelThreadRatio: 'Gear ratio:',
-                labelThreadFormula: 'Formula',
-                labelThreadGearOptions: 'Gear selection options:',
-                threadSchemaTitle: 'Thread Cutting Scheme',
-                threadInfo: 'Change gears are used to obtain the required thread pitch.',
-                settingsTitle: '⚙️ Settings',
-                labelAvailableGears: 'Available gears (number of teeth):',
-                btnAddGears: 'Add Gears',
-                labelStandardPlates: 'Standard index plates:',
-                labelPresets: 'Quick presets:',
-                btnPresetStandard: 'Standard set',
-                btnPresetExtended: 'Extended set',
-                btnExport: '💾 Export Settings',
-                btnImport: '📂 Import Settings'
-            }
-        };
-
-        let currentLang = 'ru';
-        let availableGears = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
-
         // Стандартные делительные диски
         const indexPlates = [
             [15, 16, 17, 18, 19, 20],
@@ -707,41 +655,8 @@
             [37, 39, 41, 43, 47, 49]
         ];
 
-        // Переключение языка
-        function switchLanguage(lang) {
-            currentLang = lang;
-            
-            // Обновляем активную кнопку
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Применяем переводы
-            const t = translations[lang];
-            Object.keys(t).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
-                        element.value = t[key];
-                    } else {
-                        element.textContent = t[key];
-                    }
-                }
-            });
-            
-            // Обновляем опции select
-            const threadType = document.getElementById('threadType');
-            if (lang === 'en') {
-                threadType.options[0].text = 'Metric';
-                threadType.options[1].text = 'Inch (tpi)';
-                threadType.options[2].text = 'Module';
-            } else {
-                threadType.options[0].text = 'Метрическая';
-                threadType.options[1].text = 'Дюймовая (tpi)';
-                threadType.options[2].text = 'Модульная';
-            }
-        }
+        // Доступные шестерни
+        const availableGears = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
         // Переключение вкладок
         function switchTab(tabName) {
@@ -757,7 +672,13 @@
             event.target.classList.add('active');
         }
 
-        // НОД (наибольший общий делитель)
+        // Обновление выбора диска
+        function updateDiscSelection() {
+            const customSelected = document.getElementById('discCustom').checked;
+            document.getElementById('customHolesGroup').style.display = customSelected ? 'block' : 'none';
+        }
+
+        // НОД
         function gcd(a, b) {
             return b === 0 ? a : gcd(b, a % b);
         }
@@ -771,84 +692,381 @@
             };
         }
 
-        // Расчет простого деления
+        // Расчет для конкретного диска
+        function calculateForDisc(N, z, discHoles) {
+            const totalHoles = N * discHoles / z;
+            
+            if (Math.abs(totalHoles - Math.round(totalHoles)) > 0.0001) {
+                return null;
+            }
+            
+            const holesInt = Math.round(totalHoles);
+            const fullTurns = Math.floor(holesInt / discHoles);
+            const remainderHoles = holesInt % discHoles;
+            const gapHoles = remainderHoles > 0 ? remainderHoles - 1 : 0;
+            
+            return {
+                discHoles: discHoles,
+                totalHoles: holesInt,
+                fullTurns: fullTurns,
+                remainderHoles: remainderHoles,
+                gapHoles: gapHoles
+            };
+        }
+
+        // ============ ПРОСТОЕ ДЕЛЕНИЕ ============
         function calculateSimple() {
             const z = parseInt(document.getElementById('simpleDivisions').value);
             const N = parseInt(document.getElementById('simpleRatio').value);
             
             if (isNaN(z) || isNaN(N) || z <= 0 || N <= 0) {
-                alert(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                alert('Введите корректные значения!');
                 return;
             }
             
             const fraction = reduceFraction(N, z);
             const turns = N / z;
             
-            // Формула
             const formula = `n = N / z = ${N} / ${z} = ${fraction.num}/${fraction.den}` + 
-                           (turns % 1 === 0 ? ` = ${turns}` : '');
+                           (turns % 1 === 0 ? ` = ${turns}` : ` ≈ ${turns.toFixed(4)}`);
             
             document.getElementById('simpleTurns').textContent = 
-                turns % 1 === 0 ? `${turns}` : `${fraction.num}/${fraction.den} ≈ ${turns.toFixed(4)}`;
+                turns % 1 === 0 ? `${turns} оборотов` : `${fraction.num}/${fraction.den} оборота`;
             document.getElementById('simpleFormula').textContent = formula;
             
-            // Подбор дисков
-            findSuitablePlates(fraction.num, fraction.den);
+            const selectedDisc = document.querySelector('input[name="discType"]:checked').value;
+            let selectedDiscHoles = null;
             
-            // Визуализация
-            drawSimpleIndexing(z, turns);
+            if (selectedDisc === 'custom') {
+                selectedDiscHoles = parseInt(document.getElementById('customHoles').value);
+                if (isNaN(selectedDiscHoles) || selectedDiscHoles <= 0) {
+                    alert('Введите корректное количество отверстий!');
+                    return;
+                }
+            }
+            
+            let mainResult = null;
+            if (selectedDiscHoles) {
+                mainResult = calculateForDisc(N, z, selectedDiscHoles);
+                if (!mainResult) {
+                    alert(`Диск с ${selectedDiscHoles} отверстиями НЕ подходит!\n\nВыберите другой диск.`);
+                    document.getElementById('simpleResults').style.display = 'none';
+                    return;
+                }
+            } else {
+                const discIndex = parseInt(selectedDisc) - 1;
+                for (let holes of indexPlates[discIndex]) {
+                    mainResult = calculateForDisc(N, z, holes);
+                    if (mainResult) {
+                        selectedDiscHoles = holes;
+                        break;
+                    }
+                }
+                
+                if (!mainResult) {
+                    alert('Ни один диск из выбранного набора не подходит!');
+                    document.getElementById('simpleResults').style.display = 'none';
+                    return;
+                }
+            }
+            
+            createSimpleInstructions(mainResult, N, z);
+            findAllSuitablePlates(N, z, selectedDiscHoles);
             
             document.getElementById('simpleResults').style.display = 'block';
         }
 
-        // Поиск подходящих дисков
-        function findSuitablePlates(num, den) {
-            const platesList = document.getElementById('simplePlatesList');
-            platesList.innerHTML = '';
+        function createSimpleInstructions(result, N, z) {
+            const div = document.getElementById('instructionSteps');
+            div.innerHTML = '';
             
-            let found = false;
+            let stepNum = 1;
+            
+            div.innerHTML += `
+                <div class="instruction-step" style="background: #e3f2fd;">
+                    <div class="step-number">📀</div>
+                    <div>Используйте диск с <strong>${result.discHoles} отверстиями</strong></div>
+                </div>
+            `;
+            
+            if (result.fullTurns > 0) {
+                div.innerHTML += `
+                    <div class="instruction-step">
+                        <div class="step-number">${stepNum++}</div>
+                        <div>Сделайте <strong>${result.fullTurns} ${result.fullTurns === 1 ? 'полный оборот' : 'полных оборота'}</strong> рукоятки</div>
+                    </div>
+                `;
+            }
+            
+            if (result.remainderHoles > 0) {
+                div.innerHTML += `
+                    <div class="instruction-step">
+                        <div class="step-number">${stepNum++}</div>
+                        <div>${result.fullTurns > 0 ? 'Затем ' : ''}Пропустите <strong>${result.remainderHoles} ${result.remainderHoles === 1 ? 'отверстие' : 'отверстия'}</strong></div>
+                    </div>
+                    <div class="instruction-step" style="background: #fff9e6;">
+                        <div class="step-number">ℹ️</div>
+                        <div>Между фиксаторами должно быть <strong>${result.gapHoles} свободных ${result.gapHoles === 1 ? 'отверстие' : 'отверстий'}</strong></div>
+                    </div>
+                `;
+            }
+            
+            div.innerHTML += `
+                <div class="instruction-step" style="background: #c8e6c9;">
+                    <div class="step-number">🔄</div>
+                    <div>Повторите эти действия <strong>${z} раз</strong></div>
+                </div>
+            `;
+        }
+
+        function findAllSuitablePlates(N, z, excludeHoles) {
+            const list = document.getElementById('simplePlatesList');
+            list.innerHTML = '';
+            
+            let foundOptions = [];
             
             indexPlates.forEach((plate, index) => {
                 plate.forEach(holes => {
-                    if (holes % den === 0) {
-                        const step = holes / den * num;
-                        if (step === Math.floor(step)) {
-                            platesList.innerHTML += `<div class="gear-option">
-                                ${currentLang === 'ru' ? 'Диск' : 'Plate'} ${index + 1}: ${holes} ${currentLang === 'ru' ? 'отверстий' : 'holes'}, 
-                                ${currentLang === 'ru' ? 'шаг' : 'step'}: ${step} ${currentLang === 'ru' ? 'отверстий' : 'holes'}
-                            </div>`;
-                            found = true;
-                        }
+                    if (holes === excludeHoles) return;
+                    
+                    const result = calculateForDisc(N, z, holes);
+                    if (result) {
+                        foundOptions.push({
+                            disc: `Диск ${index + 1}`,
+                            ...result
+                        });
                     }
                 });
             });
             
-            if (!found) {
-                platesList.innerHTML = `<div class="warning">
-                    ${currentLang === 'ru' ? 
-                        'Подходящие диски не найдены. Используйте дифференциальное деление.' :
-                        'No suitable plates found. Use differential indexing.'}
-                </div>`;
+            if (foundOptions.length > 0) {
+                foundOptions.forEach(option => {
+                    let text = `<strong>${option.disc}</strong>: ${option.discHoles} отверстий<br>`;
+                    
+                    if (option.fullTurns > 0) {
+                        text += `→ ${option.fullTurns} оборот${option.fullTurns > 1 ? 'а' : ''}`;
+                        if (option.remainderHoles > 0) {
+                            text += ` + ${option.remainderHoles} отверст${option.remainderHoles === 1 ? 'ие' : 'ия'}`;
+                        }
+                    } else {
+                        text += `→ ${option.remainderHoles} отверст${option.remainderHoles === 1 ? 'ие' : 'ия'}`;
+                    }
+                    
+                    if (option.remainderHoles > 0) {
+                        text += `<br>→ Между фиксаторами: <strong>${option.gapHoles}</strong>`;
+                    }
+                    
+                    list.innerHTML += `<div class="disc-row" style="background: #f0f4f8; border-left: 3px solid #2196F3; padding: 12px;">${text}</div>`;
+                });
+            } else {
+                list.innerHTML = '<div class="disc-row" style="background: #fff9e6;">ℹ️ Других подходящих дисков не найдено</div>';
             }
         }
 
-        // Расчет дифференциального деления
+        // ============ ПРОВЕРКА ПОЛЬЗОВАТЕЛЬСКИХ ШЕСТЕРЕН ============
+        function checkUserGears(type) {
+            const inputId = type === 'diff' ? 'checkDiffGears' : 'checkThreadGears';
+            const resultId = type === 'diff' ? 'diffCheckResult' : 'threadCheckResult';
+            
+            const input = document.getElementById(inputId).value.trim();
+            const resultDiv = document.getElementById(resultId);
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div class="warning" style="margin-top: 15px;">Введите шестерни для проверки!</div>';
+                return;
+            }
+            
+            // Получаем требуемое передаточное отношение
+            let targetNum, targetDen, targetValue;
+            
+            if (type === 'diff') {
+                const z = parseInt(document.getElementById('diffDivisions').value);
+                const N = parseInt(document.getElementById('diffRatio').value);
+                let z0 = parseInt(document.getElementById('approxDivisions').value);
+                
+                if (isNaN(z) || isNaN(N)) {
+                    resultDiv.innerHTML = '<div class="warning" style="margin-top: 15px;">Сначала рассчитайте дифференциальное деление!</div>';
+                    return;
+                }
+                
+                if (isNaN(z0)) {
+                    z0 = findClosestDivisible(z, N);
+                }
+                
+                const gearNum = z - z0;
+                const gearDen = z0;
+                const gearFraction = reduceFraction(Math.abs(gearNum), gearDen);
+                
+                targetNum = gearFraction.num;
+                targetDen = gearFraction.den;
+                targetValue = targetNum / targetDen;
+            } else {
+                const P = parseFloat(document.getElementById('threadPitch').value);
+                const t = parseFloat(document.getElementById('screwPitch').value);
+                const threadType = document.getElementById('threadType').value;
+                
+                if (isNaN(P) || isNaN(t)) {
+                    resultDiv.innerHTML = '<div class="warning" style="margin-top: 15px;">Сначала рассчитайте нарезание резьбы!</div>';
+                    return;
+                }
+                
+                let ratio = P / t;
+                if (threadType === 'inch') {
+                    ratio = (25.4 / P) / (25.4 / t);
+                } else if (threadType === 'modular') {
+                    ratio = (Math.PI * P) / t;
+                }
+                
+                const multiplier = 1000;
+                const num = Math.round(ratio * multiplier);
+                const den = multiplier;
+                const fraction = reduceFraction(num, den);
+                
+                targetNum = fraction.num;
+                targetDen = fraction.den;
+                targetValue = targetNum / targetDen;
+            }
+            
+            // Парсим введенные шестерни
+            const parts = input.split('-').map(x => parseInt(x.trim()));
+            
+            if (parts.some(isNaN)) {
+                resultDiv.innerHTML = '<div class="warning" style="margin-top: 15px;">Неверный формат! Используйте: 25-50 или 20-40-30-60</div>';
+                return;
+            }
+            
+            let actualValue, actualNum, actualDen, gearType;
+            
+            if (parts.length === 2) {
+                // Одна пара
+                const [a, b] = parts;
+                actualValue = a / b;
+                const fraction = reduceFraction(a, b);
+                actualNum = fraction.num;
+                actualDen = fraction.den;
+                gearType = 'single';
+            } else if (parts.length === 4) {
+                // Две пары
+                const [a, b, c, d] = parts;
+                actualValue = (a * c) / (b * d);
+                const num = a * c;
+                const den = b * d;
+                const fraction = reduceFraction(num, den);
+                actualNum = fraction.num;
+                actualDen = fraction.den;
+                gearType = 'double';
+            } else {
+                resultDiv.innerHTML = '<div class="warning" style="margin-top: 15px;">Неверное количество чисел! Введите 2 числа (1 пара) или 4 числа (2 пары)</div>';
+                return;
+            }
+            
+            // Рассчитываем ошибку
+            const error = Math.abs(actualValue - targetValue) / targetValue;
+            const errorPercent = (error * 100).toFixed(4);
+            const isExact = error < 0.0001;
+            
+            // Оценка качества
+            let quality, qualityColor, recommendation;
+            if (isExact) {
+                quality = "ОТЛИЧНО";
+                qualityColor = "#2e7d32";
+                recommendation = "Ваши шестерни дают ТОЧНОЕ передаточное отношение! Используйте их!";
+            } else if (error < 0.001) {
+                quality = "ОЧЕНЬ ХОРОШО";
+                qualityColor = "#4caf50";
+                recommendation = "Ошибка менее 0.1% - это очень точно! Можно использовать.";
+            } else if (error < 0.01) {
+                quality = "ПРИЕМЛЕМО";
+                qualityColor = "#ff9800";
+                recommendation = "Ошибка менее 1% - приемлемо для большинства задач.";
+            } else if (error < 0.05) {
+                quality = "УДОВЛЕТВОРИТЕЛЬНО";
+                qualityColor = "#ff5722";
+                recommendation = "Ошибка 1-5% - может быть приемлемо для некритичных задач.";
+            } else {
+                quality = "ВЫСОКАЯ ОШИБКА";
+                qualityColor = "#f44336";
+                recommendation = "Ошибка более 5% - рекомендуется подобрать другие шестерни!";
+            }
+            
+            // Формируем результат
+            let html = '<div class="gears-list" style="margin-top: 15px; border-color: ' + qualityColor + ';">';
+            html += '<h4 style="color: ' + qualityColor + ';">Результат проверки:</h4>';
+            
+            // Ваши шестерни
+            html += '<div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">';
+            if (gearType === 'single') {
+                html += `<div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Ваши шестерни: a = ${parts[0]}, b = ${parts[1]}</div>`;
+                html += `<div style="color: #666;">Передача: ${parts[0]}/${parts[1]}</div>`;
+            } else {
+                html += `<div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Ваши шестерни: a = ${parts[0]}, b = ${parts[1]}, c = ${parts[2]}, d = ${parts[3]}</div>`;
+                html += `<div style="color: #666;">Передача: (${parts[0]} × ${parts[2]}) / (${parts[1]} × ${parts[3]})</div>`;
+            }
+            html += '</div>';
+            
+            // Сравнение
+            html += '<div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 10px 0;">';
+            html += '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr style="border-bottom: 2px solid #ddd;">';
+            html += '<th style="padding: 8px; text-align: left;">Параметр</th>';
+            html += '<th style="padding: 8px; text-align: right;">Требуется</th>';
+            html += '<th style="padding: 8px; text-align: right;">Получится</th>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td style="padding: 8px;"><strong>Дробь:</strong></td>';
+            html += `<td style="padding: 8px; text-align: right;">${targetNum}/${targetDen}</td>`;
+            html += `<td style="padding: 8px; text-align: right;">${actualNum}/${actualDen}</td>`;
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td style="padding: 8px;"><strong>Десятичное:</strong></td>';
+            html += `<td style="padding: 8px; text-align: right;">${targetValue.toFixed(6)}</td>`;
+            html += `<td style="padding: 8px; text-align: right;">${actualValue.toFixed(6)}</td>`;
+            html += '</tr>';
+            html += '</table>';
+            html += '</div>';
+            
+            // Ошибка и оценка
+            html += '<div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid ' + qualityColor + ';">';
+            html += `<div style="font-size: 20px; font-weight: bold; color: ${qualityColor}; margin-bottom: 10px;">`;
+            if (isExact) {
+                html += `✓ ${quality} - ОШИБКА: 0% (ТОЧНО)`;
+            } else {
+                html += `${quality} - ОШИБКА: ${errorPercent}%`;
+            }
+            html += '</div>';
+            html += `<div style="font-size: 16px; color: #333;">${recommendation}</div>`;
+            html += '</div>';
+            
+            // Дополнительная информация
+            if (!isExact) {
+                const diff = Math.abs(actualValue - targetValue);
+                html += '<div class="info-box" style="margin-top: 10px;">';
+                html += `<strong>Отклонение:</strong> ${diff.toFixed(8)}<br>`;
+                html += `<strong>Абсолютная разница:</strong> ${(diff * 1000).toFixed(6)} (×10⁻³)`;
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            resultDiv.innerHTML = html;
+        }
+
+        // ============ ДИФФЕРЕНЦИАЛЬНОЕ ДЕЛЕНИЕ ============
         function calculateDifferential() {
             const z = parseInt(document.getElementById('diffDivisions').value);
             const N = parseInt(document.getElementById('diffRatio').value);
             let z0 = parseInt(document.getElementById('approxDivisions').value);
             
             if (isNaN(z) || isNaN(N) || z <= 0 || N <= 0) {
-                alert(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                alert('Введите корректные значения!');
                 return;
             }
             
-            // Автоподбор близкого числа
+            // Автоподбор z0 если не указан
             if (isNaN(z0) || z0 <= 0) {
                 z0 = findClosestDivisible(z, N);
             }
             
-            // Обороты рукоятки
             const fraction = reduceFraction(N, z0);
             const turns = N / z0;
             
@@ -857,28 +1075,22 @@
             const gearDen = z0;
             const gearFraction = reduceFraction(Math.abs(gearNum), gearDen);
             
-            // Формулы
             const formula = `
                 <div class="formula">n = N / z₀ = ${N} / ${z0} = ${fraction.num}/${fraction.den}</div>
                 <div class="formula">i = (z - z₀) / z₀ = (${z} - ${z0}) / ${z0} = ${gearNum}/${gearDen} = ${gearFraction.num}/${gearFraction.den}</div>
             `;
             
-            document.getElementById('diffTurns').textContent = 
-                turns % 1 === 0 ? `${turns}` : `${fraction.num}/${fraction.den}`;
+            document.getElementById('diffTurns').textContent = `${fraction.num}/${fraction.den}`;
             document.getElementById('diffFormula').innerHTML = formula;
-            document.getElementById('gearRatio').textContent = 
-                `${gearFraction.num}/${gearFraction.den} ${gearNum < 0 ? '(обратное)' : ''}`;
+            document.getElementById('gearRatio').textContent = `${gearFraction.num}/${gearFraction.den}`;
             
-            // Подбор шестерен
+            createDiffInstructions(fraction, gearFraction, z, z0, gearNum < 0);
             findGearCombinations(gearFraction.num, gearFraction.den, 'diff');
             
-            // Визуализация
-            drawDifferentialIndexing(z, z0);
-            
             document.getElementById('diffResults').style.display = 'block';
+            document.getElementById('diffCheckSection').style.display = 'block';
         }
 
-        // Поиск ближайшего делимого числа
         function findClosestDivisible(z, N) {
             let closest = z;
             let minDiff = Infinity;
@@ -886,11 +1098,9 @@
             for (let candidate = Math.max(1, z - 20); candidate <= z + 20; candidate++) {
                 if (candidate === z) continue;
                 
-                const turns = N / candidate;
                 const fraction = reduceFraction(N, candidate);
-                
-                // Проверяем, есть ли подходящий диск
                 let hasSuitablePlate = false;
+                
                 indexPlates.forEach(plate => {
                     plate.forEach(holes => {
                         if (holes % fraction.den === 0) {
@@ -911,44 +1121,79 @@
             return closest;
         }
 
-        // Подбор комбинаций шестерен
+        function createDiffInstructions(fraction, gearFraction, z, z0, isReverse) {
+            const div = document.getElementById('diffInstructionSteps');
+            div.innerHTML = '';
+            
+            div.innerHTML += `
+                <div class="instruction-step" style="background: #ffe0b2;">
+                    <div class="step-number">⚠️</div>
+                    <div><strong>Выключите фиксатор делительного диска!</strong></div>
+                </div>
+                <div class="instruction-step" style="background: #e3f2fd;">
+                    <div class="step-number">⚙️</div>
+                    <div>Установите сменную гитару с отношением <strong>${gearFraction.num}/${gearFraction.den}</strong> ${isReverse ? '(обратное)' : ''}</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <div>Поворачивайте рукоятку на <strong>${fraction.num}/${fraction.den} оборота</strong></div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <div>Диск будет автоматически подстраиваться через гитару</div>
+                </div>
+                <div class="instruction-step" style="background: #c8e6c9;">
+                    <div class="step-number">🔄</div>
+                    <div>Повторите <strong>${z} раз</strong> для всех делений</div>
+                </div>
+            `;
+        }
+
         function findGearCombinations(targetNum, targetDen, type) {
             const listElement = document.getElementById(type === 'diff' ? 'diffGearsList' : 'threadGearsList');
             listElement.innerHTML = '';
             
             const combinations = [];
+            const targetValue = targetNum / targetDen;
             
-            // Простое соотношение (1 пара)
+            // Ищем точные решения - 1 пара
             availableGears.forEach(a => {
                 availableGears.forEach(b => {
+                    const value = a / b;
                     const fraction = reduceFraction(a, b);
+                    
                     if (fraction.num === targetNum && fraction.den === targetDen) {
                         combinations.push({
                             type: 'single',
                             gears: [[a, b]],
+                            value: value,
                             error: 0,
-                            exact: true
+                            exact: true,
+                            actualRatio: `${fraction.num}/${fraction.den}`
                         });
                     }
                 });
             });
             
-            // Составное соотношение (2 пары)
-            if (combinations.length === 0) {
-                availableGears.forEach(a1 => {
-                    availableGears.forEach(b1 => {
-                        availableGears.forEach(a2 => {
-                            availableGears.forEach(b2 => {
-                                const num = a1 * a2;
-                                const den = b1 * b2;
+            // Ищем точные решения - 2 пары
+            if (combinations.filter(c => c.exact).length < 5) {
+                availableGears.forEach(a => {
+                    availableGears.forEach(b => {
+                        availableGears.forEach(c => {
+                            availableGears.forEach(d => {
+                                const num = a * c;
+                                const den = b * d;
+                                const value = num / den;
                                 const fraction = reduceFraction(num, den);
                                 
                                 if (fraction.num === targetNum && fraction.den === targetDen) {
                                     combinations.push({
                                         type: 'double',
-                                        gears: [[a1, b1], [a2, b2]],
+                                        gears: [[a, b], [c, d]],
+                                        value: value,
                                         error: 0,
-                                        exact: true
+                                        exact: true,
+                                        actualRatio: `${fraction.num}/${fraction.den}`
                                     });
                                 }
                             });
@@ -957,39 +1202,47 @@
                 });
             }
             
-            // Приближенные решения если точных нет
-            if (combinations.length === 0) {
-                const targetValue = targetNum / targetDen;
-                
+            // Ищем приближенные решения если точных мало
+            if (combinations.filter(c => c.exact).length < 3) {
                 // 1 пара приближенная
                 availableGears.forEach(a => {
                     availableGears.forEach(b => {
                         const value = a / b;
                         const error = Math.abs(value - targetValue) / targetValue;
-                        if (error < 0.05) { // погрешность до 5%
+                        
+                        if (error > 0.0001 && error < 0.05) {
+                            const fraction = reduceFraction(a, b);
                             combinations.push({
                                 type: 'single',
                                 gears: [[a, b]],
+                                value: value,
                                 error: error,
-                                exact: false
+                                exact: false,
+                                actualRatio: `${fraction.num}/${fraction.den}`
                             });
                         }
                     });
                 });
                 
                 // 2 пары приближенные
-                availableGears.forEach(a1 => {
-                    availableGears.forEach(b1 => {
-                        availableGears.forEach(a2 => {
-                            availableGears.forEach(b2 => {
-                                const value = (a1 * a2) / (b1 * b2);
+                availableGears.forEach(a => {
+                    availableGears.forEach(b => {
+                        availableGears.forEach(c => {
+                            availableGears.forEach(d => {
+                                const num = a * c;
+                                const den = b * d;
+                                const value = num / den;
                                 const error = Math.abs(value - targetValue) / targetValue;
-                                if (error < 0.02) { // погрешность до 2%
+                                
+                                if (error > 0.0001 && error < 0.02) {
+                                    const fraction = reduceFraction(num, den);
                                     combinations.push({
                                         type: 'double',
-                                        gears: [[a1, b1], [a2, b2]],
+                                        gears: [[a, b], [c, d]],
+                                        value: value,
                                         error: error,
-                                        exact: false
+                                        exact: false,
+                                        actualRatio: `${fraction.num}/${fraction.den}`
                                     });
                                 }
                             });
@@ -998,8 +1251,31 @@
                 });
             }
             
-            // Сортировка: сначала точные, потом по убыванию точности
-            combinations.sort((a, b) => {
+            // Убираем дубликаты
+            const unique = [];
+            const seen = new Set();
+            
+            for (const combo of combinations) {
+                let key;
+                if (combo.type === 'single') {
+                    key = `${combo.gears[0][0]}-${combo.gears[0][1]}`;
+                } else {
+                    // Сортируем пары для исключения дубликатов
+                    const sorted = [[combo.gears[0][0], combo.gears[0][1]], [combo.gears[1][0], combo.gears[1][1]]].sort((a, b) => {
+                        if (a[0] !== b[0]) return a[0] - b[0];
+                        return a[1] - b[1];
+                    });
+                    key = `${sorted[0][0]}-${sorted[0][1]}-${sorted[1][0]}-${sorted[1][1]}`;
+                }
+                
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(combo);
+                }
+            }
+            
+            // Сортировка: точные первые, потом по ошибке
+            unique.sort((a, b) => {
                 if (a.exact && !b.exact) return -1;
                 if (!a.exact && b.exact) return 1;
                 if (a.type === 'single' && b.type === 'double') return -1;
@@ -1007,45 +1283,63 @@
                 return a.error - b.error;
             });
             
-            // Вывод (ограничение до 10 лучших)
-            combinations.slice(0, 10).forEach((combo, index) => {
+            // Выводим результаты (максимум 15)
+            unique.slice(0, 15).forEach((combo, index) => {
                 let html = '<div class="gear-option';
-                if (index === 0 && combo.exact) html += ' best';
+                if (index === 0 && combo.exact) {
+                    html += ' best';
+                }
                 html += '">';
                 
-                if (combo.type === 'single') {
-                    html += `${combo.gears[0][0]} / ${combo.gears[0][1]}`;
+                // Заголовок
+                if (combo.exact) {
+                    html += '<div style="color: #2e7d32; font-weight: bold; margin-bottom: 5px;">✓ Точное решение</div>';
                 } else {
-                    html += `(${combo.gears[0][0]} × ${combo.gears[1][0]}) / (${combo.gears[0][1]} × ${combo.gears[1][1]})`;
+                    html += '<div style="color: #ff6f00; font-weight: bold; margin-bottom: 5px;">≈ Приближенное</div>';
                 }
                 
-                if (!combo.exact) {
-                    html += ` <small>(${currentLang === 'ru' ? 'погрешность' : 'error'}: ${(combo.error * 100).toFixed(2)}%)</small>`;
-                } else if (index === 0) {
-                    html += ` <strong>✓ ${currentLang === 'ru' ? 'Точное' : 'Exact'}</strong>`;
+                // Шестерни
+                if (combo.type === 'single') {
+                    html += `<div style="font-size: 16px; margin: 5px 0;">a = <strong>${combo.gears[0][0]}</strong>, b = <strong>${combo.gears[0][1]}</strong></div>`;
+                    html += `<div style="color: #666;">Передача: ${combo.gears[0][0]}/${combo.gears[0][1]}</div>`;
+                } else {
+                    html += `<div style="font-size: 16px; margin: 5px 0;">a = <strong>${combo.gears[0][0]}</strong>, b = <strong>${combo.gears[0][1]}</strong>, c = <strong>${combo.gears[1][0]}</strong>, d = <strong>${combo.gears[1][1]}</strong></div>`;
+                    html += `<div style="color: #666;">Передача: (${combo.gears[0][0]} × ${combo.gears[1][0]}) / (${combo.gears[0][1]} × ${combo.gears[1][1]})</div>`;
                 }
+                
+                // Соотношение и ошибка
+                html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;">`;
+                html += `<strong>Отношение:</strong> ${combo.actualRatio} = ${combo.value.toFixed(6)}<br>`;
+                html += `<strong>Требуется:</strong> ${targetNum}/${targetDen} = ${targetValue.toFixed(6)}<br>`;
+                
+                if (combo.exact) {
+                    html += `<strong style="color: #2e7d32;">Ошибка: 0% (точно)</strong>`;
+                } else {
+                    const errorPercent = (combo.error * 100).toFixed(4);
+                    const errorColor = combo.error < 0.001 ? '#4caf50' : combo.error < 0.01 ? '#ff9800' : '#f44336';
+                    html += `<strong style="color: ${errorColor};">Ошибка: ${errorPercent}%</strong>`;
+                }
+                html += `</div>`;
                 
                 html += '</div>';
                 listElement.innerHTML += html;
             });
             
-            if (combinations.length === 0) {
-                listElement.innerHTML = `<div class="warning">
-                    ${currentLang === 'ru' ?
-                        'Не найдено подходящих комбинаций. Добавьте шестерни в настройках.' :
-                        'No suitable combinations found. Add gears in settings.'}
-                </div>`;
+            if (unique.length === 0) {
+                listElement.innerHTML = '<div class="warning">Не найдено подходящих комбинаций шестерен. Попробуйте проверить свои шестерни ниже.</div>';
+            } else if (unique.length > 15) {
+                listElement.innerHTML += `<div class="info-box" style="margin-top: 10px;">Показано 15 лучших вариантов из ${unique.length} найденных</div>`;
             }
         }
 
-        // Расчет нарезания резьбы
+        // ============ НАРЕЗАНИЕ РЕЗЬБЫ ============
         function calculateThread() {
             const P = parseFloat(document.getElementById('threadPitch').value);
             const t = parseFloat(document.getElementById('screwPitch').value);
             const threadType = document.getElementById('threadType').value;
             
             if (isNaN(P) || isNaN(t) || P <= 0 || t <= 0) {
-                alert(currentLang === 'ru' ? 'Введите корректные значения!' : 'Enter valid values!');
+                alert('Введите корректные значения!');
                 return;
             }
             
@@ -1053,323 +1347,58 @@
             let formula = `i = P / t = ${P} / ${t} = ${ratio.toFixed(4)}`;
             
             if (threadType === 'inch') {
-                // Для дюймовой резьбы (число ниток на дюйм)
                 ratio = (25.4 / P) / (25.4 / t);
-                formula = `i = (25.4 / P) / (25.4 / t) = (25.4 / ${P}) / (25.4 / ${t}) = ${ratio.toFixed(4)}`;
+                formula = `i = (25.4 / P) / (25.4 / t) = ${ratio.toFixed(4)}`;
             } else if (threadType === 'modular') {
-                // Для модульной резьбы
                 ratio = (Math.PI * P) / t;
                 formula = `i = (π × m) / t = (π × ${P}) / ${t} = ${ratio.toFixed(4)}`;
             }
             
-            // Преобразуем в дробь
             const multiplier = 1000;
             const num = Math.round(ratio * multiplier);
             const den = multiplier;
             const fraction = reduceFraction(num, den);
             
-            document.getElementById('threadRatio').textContent = 
-                `${fraction.num}/${fraction.den} ≈ ${ratio.toFixed(4)}`;
+            document.getElementById('threadRatio').textContent = `${fraction.num}/${fraction.den} ≈ ${ratio.toFixed(4)}`;
             document.getElementById('threadFormula').innerHTML = `<div class="formula">${formula}</div>`;
             
-            // Подбор шестерен
+            createThreadInstructions(fraction, P, t, threadType);
             findGearCombinations(fraction.num, fraction.den, 'thread');
             
-            // Визуализация
-            drawThreadCutting(P, t);
-            
             document.getElementById('threadResults').style.display = 'block';
+            document.getElementById('threadCheckSection').style.display = 'block';
         }
 
-        // Добавление шестерен
-        function addGears() {
-            const input = document.getElementById('gearInput').value;
-            const gears = input.split(',').map(g => parseInt(g.trim())).filter(g => !isNaN(g) && g > 0);
+        function createThreadInstructions(fraction, P, t, threadType) {
+            const div = document.getElementById('threadInstructionSteps');
+            div.innerHTML = '';
             
-            gears.forEach(gear => {
-                if (!availableGears.includes(gear)) {
-                    availableGears.push(gear);
-                }
-            });
-            
-            availableGears.sort((a, b) => a - b);
-            updateGearChips();
-            
-            document.getElementById('gearInput').value = '';
-        }
-
-        // Обновление чипов шестерен
-        function updateGearChips() {
-            const container = document.getElementById('gearChips');
-            container.innerHTML = '';
-            
-            availableGears.forEach(gear => {
-                const chip = document.createElement('div');
-                chip.className = 'gear-chip';
-                chip.innerHTML = `
-                    ${gear}
-                    <button onclick="removeGear(${gear})">×</button>
-                `;
-                container.appendChild(chip);
-            });
-        }
-
-        // Удаление шестерни
-        function removeGear(gear) {
-            availableGears = availableGears.filter(g => g !== gear);
-            updateGearChips();
-        }
-
-        // Загрузка пресетов
-        function loadPreset(type) {
-            if (type === 'standard') {
-                availableGears = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
-            } else if (type === 'extended') {
-                availableGears = [15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 127];
-            }
-            updateGearChips();
-        }
-
-        // Экспорт настроек
-        function exportSettings() {
-            const data = {
-                version: '1.0',
-                date: new Date().toISOString(),
-                availableGears: availableGears,
-                language: currentLang
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `dividing_head_settings_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Импорт настроек
-        function importSettings(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.availableGears) {
-                        availableGears = data.availableGears;
-                        updateGearChips();
-                    }
-                    if (data.language) {
-                        switchLanguage(data.language);
-                    }
-                    alert(currentLang === 'ru' ? 'Настройки загружены!' : 'Settings loaded!');
-                } catch (error) {
-                    alert(currentLang === 'ru' ? 'Ошибка загрузки файла!' : 'Error loading file!');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // Визуализация простого деления
-        function drawSimpleIndexing(z, turns) {
-            const canvas = document.getElementById('simpleCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = 120;
-            
-            // Делительный диск
-            ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            // Деления
-            for (let i = 0; i < z; i++) {
-                const angle = (i * 2 * Math.PI / z) - Math.PI / 2;
-                const x1 = centerX + Math.cos(angle) * (radius - 15);
-                const y1 = centerY + Math.sin(angle) * (radius - 15);
-                const x2 = centerX + Math.cos(angle) * radius;
-                const y2 = centerY + Math.sin(angle) * radius;
-                
-                ctx.strokeStyle = '#764ba2';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
-                
-                // Номера
-                const x3 = centerX + Math.cos(angle) * (radius + 25);
-                const y3 = centerY + Math.sin(angle) * (radius + 25);
-                ctx.fillStyle = '#333';
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(i + 1, x3, y3);
-            }
-            
-            // Центр
-            ctx.fillStyle = '#667eea';
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Рукоятка
-            const handleAngle = (turns * 2 * Math.PI) - Math.PI / 2;
-            const hx = centerX + Math.cos(handleAngle) * 60;
-            const hy = centerY + Math.sin(handleAngle) * 60;
-            
-            ctx.strokeStyle = '#d32f2f';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(hx, hy);
-            ctx.stroke();
-            
-            ctx.fillStyle = '#d32f2f';
-            ctx.beginPath();
-            ctx.arc(hx, hy, 6, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Подпись
-            ctx.fillStyle = '#333';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`z = ${z}, n = ${turns.toFixed(2)}`, centerX, canvas.height - 20);
-        }
-
-        // Визуализация дифференциального деления
-        function drawDifferentialIndexing(z, z0) {
-            const canvas = document.getElementById('diffCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            // Основная головка
-            ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(centerX - 80, centerY, 60, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('N', centerX - 80, centerY);
-            
-            // Шпиндель
-            ctx.strokeStyle = '#764ba2';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(centerX + 80, centerY, 60, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            ctx.fillText('z', centerX + 80, centerY);
-            
-            // Сменные шестерни (гитара)
-            ctx.strokeStyle = '#4caf50';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY - 80, 30, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(centerX, centerY + 80, 30, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            ctx.fillStyle = '#4caf50';
-            ctx.font = '12px Arial';
-            ctx.fillText('a', centerX, centerY - 80);
-            ctx.fillText('b', centerX, centerY + 80);
-            
-            // Соединения
-            ctx.strokeStyle = '#999';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            
-            ctx.beginPath();
-            ctx.moveTo(centerX - 20, centerY);
-            ctx.lineTo(centerX, centerY - 50);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY + 50);
-            ctx.lineTo(centerX + 20, centerY);
-            ctx.stroke();
-            
-            ctx.setLineDash([]);
-            
-            // Подпись
-            ctx.fillStyle = '#333';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`z = ${z}, z₀ = ${z0}`, centerX, canvas.height - 20);
-        }
-
-        // Визуализация нарезания резьбы
-        function drawThreadCutting(P, t) {
-            const canvas = document.getElementById('threadCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            // Ходовой винт
-            ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(50, centerY);
-            ctx.lineTo(canvas.width - 50, centerY);
-            ctx.stroke();
-            
-            // Резьба на винте
-            for (let x = 70; x < canvas.width - 50; x += 20) {
-                ctx.strokeStyle = '#764ba2';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(x, centerY - 15);
-                ctx.lineTo(x + 10, centerY - 5);
-                ctx.lineTo(x + 10, centerY + 5);
-                ctx.lineTo(x + 20, centerY + 15);
-                ctx.stroke();
-            }
-            
-            // Сменные шестерни
-            ctx.strokeStyle = '#4caf50';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(centerX - 60, centerY - 80, 35, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(centerX + 60, centerY - 80, 35, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            ctx.fillStyle = '#4caf50';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('a', centerX - 60, centerY - 80);
-            ctx.fillText('b', centerX + 60, centerY - 80);
-            
-            // Подписи
-            ctx.fillStyle = '#333';
-            ctx.font = '14px Arial';
-            ctx.fillText(`P = ${P} ${currentLang === 'ru' ? 'мм' : 'mm'}`, centerX, 30);
-            ctx.fillText(`t = ${t} ${currentLang === 'ru' ? 'мм' : 'mm'}`, centerX, canvas.height - 10);
+            div.innerHTML += `
+                <div class="instruction-step" style="background: #e3f2fd;">
+                    <div class="step-number">📏</div>
+                    <div>Требуемый шаг: <strong>${P} мм</strong>, шаг винта: <strong>${t} мм</strong></div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <div>Установите сменную гитару с отношением <strong>${fraction.num}/${fraction.den}</strong></div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <div>Установите резец на требуемый угол резьбы</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <div>Включите винторезный механизм станка</div>
+                </div>
+                <div class="instruction-step" style="background: #c8e6c9;">
+                    <div class="step-number">✓</div>
+                    <div>Нарезайте резьбу с установленным передаточным отношением</div>
+                </div>
+            `;
         }
 
         // Инициализация
-        updateGearChips();
-        loadPreset('standard');
+        updateDiscSelection();
     </script>
 </body>
 </html>
