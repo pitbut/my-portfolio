@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-01-17",
+    "date": "2026-03-27",
     "tags": []
   },
   {
@@ -14,8 +14,31 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-01-17",
+    "date": "2026-03-27",
     "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-03-27",
+    "tags": []
+  },
+  {
+    "id": "robot-delivery",
+    "title": "GPS Доставщик",
+    "description": "Управление роботом через карту с любого устройства в интернете",
+    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=GPS%20%D0%94%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D1%89%D0%B8%D0%BA",
+    "link": "projects/robot-delivery/index.html",
+    "date": "2026-03-26",
+    "tags": [
+      "ESP32",
+      "GPS",
+      "robotics",
+      "IoT"
+    ]
   },
   {
     "id": "cone-calculator",
@@ -31,15 +54,6 @@
       "Визуализация",
       "Двуязычный"
     ]
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-01-17",
-    "tags": []
   },
   {
     "id": "Udg",
