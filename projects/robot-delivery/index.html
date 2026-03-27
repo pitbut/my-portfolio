@@ -201,12 +201,20 @@ async function poll() {
     const r = await fetch(API+"/api/status");
     const d = await r.json();
     const rob=d.robot, tgt=d.target;
-    robotOnline = rob.fix===true;
-    document.getElementById("s-gps").textContent   = rob.fix ? "✅ Есть" : "⏳ Нет";
-    document.getElementById("s-pos").textContent   = rob.lat ? rob.lat.toFixed(6)+", "+rob.lon.toFixed(6) : "—";
-    document.getElementById("s-dist").textContent  = rob.dist>0 ? rob.dist.toFixed(0)+" м" : "—";
+    const online = d.online === true;
+
+    robotOnline = rob.fix===true && online;
+
+    document.getElementById("s-gps").textContent = !online
+      ? "⚫ Офлайн"
+      : (rob.fix ? "✅ Есть" : "⏳ Нет");
+    document.getElementById("s-pos").textContent  = (online && rob.lat)
+      ? rob.lat.toFixed(6)+", "+rob.lon.toFixed(6) : "—";
+    document.getElementById("s-dist").textContent = (online && rob.dist>0)
+      ? rob.dist.toFixed(0)+" м" : "—";
     document.getElementById("status-text").textContent = rob.status||"—";
-    if (rob.lat && rob.lon) {
+
+    if (online && rob.lat && rob.lon) {
       if (!centeredOnce) { map.setView([rob.lat,rob.lon],18); centeredOnce=true; }
       if (!robotMarker) robotMarker = L.marker([rob.lat,rob.lon],{icon:mkRobot}).bindPopup("Робот").addTo(map);
       else robotMarker.setLatLng([rob.lat,rob.lon]);
@@ -216,7 +224,7 @@ async function poll() {
     document.getElementById("status-text").textContent = "Нет связи с сервером";
   }
 }
-setInterval(poll, 1500);
+setInterval(poll, 1000);
 poll();
 </script>
 </body>
