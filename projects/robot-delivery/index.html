@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPS Доставщик — robutpit.com</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: sans-serif; background: #0f0f1a; color: #e2e8f0;
+       display: flex; flex-direction: column; height: 100vh; }
+#topbar { padding: 10px 16px; background: #1a1a2e;
+          border-bottom: 1px solid #2d2d4e; flex-shrink: 0; }
+#topbar h2 { font-size: 15px; color: #ff6b6b; margin-bottom: 5px; }
+#info { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 12px; line-height: 1.8; }
+#info b { color: #a78bfa; }
+#status-text { color: #fbbf24; font-weight: 600; }
+.tabs { display: flex; gap: 4px; margin: 8px 0 0; }
+.tab { padding: 5px 14px; border-radius: 6px 6px 0 0; border: none;
+       cursor: pointer; font-size: 12px; font-weight: 600;
+       background: #2d2d4e; color: #a0a0c0; }
+.tab.active { background: #0f0f1a; color: #ff6b6b; border-bottom: 2px solid #ff6b6b; }
+.panel { display: none; padding: 8px 0 4px; }
+.panel.active { display: block; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { padding: 7px 16px; border-radius: 7px; border: none;
+       cursor: pointer; font-size: 12px; font-weight: 600; }
+.btn-go { background: #16a34a; color: #fff; }
+.btn-go:disabled { background: #374151; color: #6b7280; cursor: default; }
+.btn-stop-gps { background: #dc2626; color: #fff; }
+.dpad { display: grid; grid-template-columns: repeat(3, 56px);
+        grid-template-rows: repeat(3, 56px); gap: 5px; margin: 6px 0; }
+.db { background: #1e2a4a; border: 1px solid #3b4a6e; border-radius: 10px;
+      color: #e2e8f0; font-size: 22px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      user-select: none; -webkit-user-select: none; touch-action: none; }
+.db:active, .db.pressed { background: #2563eb; border-color: #60a5fa; }
+.db.stop { background: #3b1e1e; border-color: #7f1d1d; font-size: 16px; }
+.db.stop:active, .db.stop.pressed { background: #dc2626; }
+.db.empty { opacity: 0; pointer-events: none; }
+.mode-badge { display: inline-block; padding: 2px 10px; border-radius: 10px;
+              font-size: 11px; font-weight: 600; margin-left: 8px; }
+.m-gps    { background: #14532d; color: #86efac; }
+.m-manual { background: #1e3a5f; color: #93c5fd; }
+.hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
+#map { flex: 1; min-height: 0; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h2>🤖 GPS Доставщик <span class="mode-badge m-gps" id="badge">GPS</span></h2>
+  <div id="info">
+    <div>GPS: <b id="s-gps">—</b></div>
+    <div>Позиция: <b id="s-pos">—</b></div>
+    <div>Цель: <b id="s-tgt">не задана</b></div>
+    <div>До цели: <b id="s-dist">—</b></div>
+    <div>Статус: <span id="status-text">—</span></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-gps"    onclick="showTab('gps')">🗺 GPS маршрут</button>
+    <button class="tab"        id="tab-manual" onclick="showTab('manual')">🕹 Ручное</button>
+  </div>
+
+  <div class="panel active" id="panel-gps">
+    <div class="btns">
+      <button class="btn btn-go"      id="btn-go"  onclick="sendGo()"      disabled>▶ Старт</button>
+      <button class="btn btn-stop-gps"             onclick="sendStopGps()">■ Стоп</button>
+    </div>
+    <div class="hint">Кликни точку на карте → нажми Старт.</div>
+  </div>
+
+  <div class="panel" id="panel-manual">
+    <div class="dpad">
+      <div class="db empty"></div>
+      <div class="db" data-cmd="fwd">▲</div>
+      <div class="db empty"></div>
+      <div class="db" data-cmd="left">◀</div>
+      <div class="db stop" data-cmd="stop">⏹</div>
+      <div class="db" data-cmd="right">▶</div>
+      <div class="db empty"></div>
+      <div class="db" data-cmd="back">▼</div>
+      <div class="db empty"></div>
+    </div>
+    <div class="hint">Удерживай кнопку — едет. Отпустил — стоп. GPS маршрут сбрасывается.</div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  ВСТАВЬ СВОЙ URL С RENDER.COM
+const API = "https://YOUR-APP.onrender.com";
+// ══════════════════════════════════════════════
+
+const map = L.map("map").setView([41.2995, 69.2401], 16);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  { maxZoom:19, attribution:"© OpenStreetMap" }).addTo(map);
+
+const mkRobot  = L.divIcon({ className:"", html:'<div style="font-size:26px">🤖</div>', iconAnchor:[13,13] });
+const mkTarget = L.divIcon({ className:"", html:'<div style="font-size:26px">🎯</div>', iconAnchor:[13,13] });
+
+let robotMarker=null, targetMarker=null;
+let tgtLat=null, tgtLon=null;
+let robotOnline=false, centeredOnce=false;
+
+map.on("click", e => {
+  tgtLat = e.latlng.lat; tgtLon = e.latlng.lng;
+  if (targetMarker) map.removeLayer(targetMarker);
+  targetMarker = L.marker([tgtLat,tgtLon],{icon:mkTarget}).bindPopup("Цель").addTo(map);
+  document.getElementById("s-tgt").textContent = tgtLat.toFixed(6)+", "+tgtLon.toFixed(6);
+  document.getElementById("btn-go").disabled = !robotOnline;
+});
+
+function showTab(name) {
+  ["gps","manual"].forEach(n => {
+    document.getElementById("tab-"+n).classList.toggle("active", n===name);
+    document.getElementById("panel-"+n).classList.toggle("active", n===name);
+  });
+  if (name==="manual") sendManual("stop");
+}
+
+function setBadge(mode) {
+  const b = document.getElementById("badge");
+  b.textContent = mode==="gps" ? "GPS" : "РУЧНОЕ";
+  b.className = "mode-badge " + (mode==="gps" ? "m-gps" : "m-manual");
+}
+
+async function sendGo() {
+  if (!tgtLat) return;
+  await fetch(API+"/api/target", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({lat:tgtLat, lon:tgtLon})
+  });
+  document.getElementById("btn-go").disabled = true;
+  document.getElementById("status-text").textContent = "Команда отправлена...";
+  setBadge("gps");
+}
+
+async function sendStopGps() {
+  await fetch(API+"/api/target/cancel", {method:"POST"});
+  document.getElementById("btn-go").disabled = (!robotOnline || tgtLat===null);
+}
+
+async function sendManual(cmd) {
+  try {
+    await fetch(API+"/api/manual", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({cmd})
+    });
+    if (cmd !== "stop") setBadge("manual");
+  } catch(e) {}
+}
+
+// D-pad: удержание = повтор каждые 300мс, отпустил = стоп
+let holdTimer = null;
+document.querySelectorAll(".db[data-cmd]").forEach(btn => {
+  const cmd = btn.dataset.cmd;
+  function start(e) {
+    e.preventDefault();
+    btn.classList.add("pressed");
+    sendManual(cmd);
+    if (cmd !== "stop") holdTimer = setInterval(() => sendManual(cmd), 300);
+  }
+  function end(e) {
+    e.preventDefault();
+    btn.classList.remove("pressed");
+    clearInterval(holdTimer); holdTimer = null;
+    if (cmd !== "stop") sendManual("stop");
+  }
+  btn.addEventListener("mousedown",   start);
+  btn.addEventListener("touchstart",  start, {passive:false});
+  btn.addEventListener("mouseup",     end);
+  btn.addEventListener("mouseleave",  end);
+  btn.addEventListener("touchend",    end);
+  btn.addEventListener("touchcancel", end);
+});
+
+// Клавиатура (WASD / стрелки) — удобно с ноутбука
+const keyMap = {
+  ArrowUp:"fwd", KeyW:"fwd", ArrowDown:"back", KeyS:"back",
+  ArrowLeft:"left", KeyA:"left", ArrowRight:"right", KeyD:"right"
+};
+const held = new Set();
+document.addEventListener("keydown", e => {
+  if (!keyMap[e.code] || held.has(e.code)) return;
+  held.add(e.code);
+  sendManual(keyMap[e.code]);
+});
+document.addEventListener("keyup", e => {
+  if (!keyMap[e.code]) return;
+  held.delete(e.code);
+  if (held.size === 0) sendManual("stop");
+});
+
+// Опрос состояния
+async function poll() {
+  try {
+    const r = await fetch(API+"/api/status");
+    const d = await r.json();
+    const rob=d.robot, tgt=d.target;
+    robotOnline = rob.fix===true;
+    document.getElementById("s-gps").textContent   = rob.fix ? "✅ Есть" : "⏳ Нет";
+    document.getElementById("s-pos").textContent   = rob.lat ? rob.lat.toFixed(6)+", "+rob.lon.toFixed(6) : "—";
+    document.getElementById("s-dist").textContent  = rob.dist>0 ? rob.dist.toFixed(0)+" м" : "—";
+    document.getElementById("status-text").textContent = rob.status||"—";
+    if (rob.lat && rob.lon) {
+      if (!centeredOnce) { map.setView([rob.lat,rob.lon],18); centeredOnce=true; }
+      if (!robotMarker) robotMarker = L.marker([rob.lat,rob.lon],{icon:mkRobot}).bindPopup("Робот").addTo(map);
+      else robotMarker.setLatLng([rob.lat,rob.lon]);
+    }
+    if (!tgt.active) document.getElementById("btn-go").disabled = !robotOnline||tgtLat===null;
+  } catch(e) {
+    document.getElementById("status-text").textContent = "Нет связи с сервером";
+  }
+}
+setInterval(poll, 1500);
+poll();
+</script>
+</body>
+</html>
