@@ -1,0 +1,7 @@
+{
+  "title": "Grand Dice Casino",
+  "description": "Онлайн казино с игрой в кубики. Регистрация, верификация по email, ввод/вывод средств с OTP защитой, тестовый режим и панель администратора.",
+  "tags": ["Casino", "Game", "Flask", "Python"],
+  "date": "2026-05-08",
+  "image": "preview.png"
+}
