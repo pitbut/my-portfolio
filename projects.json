@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-05-08",
+    "date": "2026-07-25",
     "tags": []
   },
   {
@@ -14,8 +14,32 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-05-08",
+    "date": "2026-07-25",
     "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-07-25",
+    "tags": []
+  },
+  {
+    "id": "vr-cafe",
+    "title": "☕ VR Cafe",
+    "description": "Концепт виртуального кафе в браузере — атмосферное 3D-пространство, в котором можно посидеть за столиком, осмотреться и почувствовать себя в реальном кафе, не выходя из дома.",
+    "image": "projects/vr-cafe/preview.jpg",
+    "link": "https://vr-cafe-a073.onrender.com",
+    "date": "2026-07-24",
+    "tags": [
+      "VR",
+      "3D",
+      "Three.js",
+      "WebXR",
+      "Концепт"
+    ]
   },
   {
     "id": "grand-dice",
@@ -30,15 +54,6 @@
       "Flask",
       "Python"
     ]
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-05-08",
-    "tags": []
   },
   {
     "id": "robot-delivery",
