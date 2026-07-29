@@ -46,6 +46,15 @@
     ]
   },
   {
+    "id": "shares",
+    "title": "Shares",
+    "description": "Описание проекта скоро появится",
+    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=Shares",
+    "link": "projects/shares/index.html",
+    "date": "2026-07-29",
+    "tags": []
+  },
+  {
     "id": "videokonferenciya",
     "title": "Videokonferenciya",
     "description": "Описание проекта скоро появится",
