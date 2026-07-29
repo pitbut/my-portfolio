@@ -1,11 +1,25 @@
 [
   {
+    "id": "balka",
+    "title": "Расчёт балки (сопромат)",
+    "description": "Интерактивный расчёт балки на изгиб: до 4 опор, сосредоточенные силы и моменты, распределённые нагрузки. Считает статически определимые и неопределимые балки методом конечных элементов, строит эпюры Q(x)/M(x)/прогибов и формирует расчётно-пояснительную записку в Word с заданием, ходом решения, формулами и рисунками.",
+    "image": "projects/balka/preview.jpg",
+    "link": "https://beam-calc.onrender.com",
+    "date": "2026-07-29",
+    "tags": [
+      "Инженерия",
+      "Сопромат",
+      "Python",
+      "Flask"
+    ]
+  },
+  {
     "id": "chat",
     "title": "Chat",
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-07-25",
+    "date": "2026-07-29",
     "tags": []
   },
   {
@@ -14,7 +28,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-07-25",
+    "date": "2026-07-29",
     "tags": []
   },
   {
@@ -23,7 +37,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/videokonferenciya/preview.jpg",
     "link": "projects/videokonferenciya/index.html",
-    "date": "2026-07-25",
+    "date": "2026-07-29",
     "tags": []
   },
   {
