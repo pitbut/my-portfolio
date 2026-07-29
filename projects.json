@@ -1,9 +1,12 @@
 [
   {
-  "name": "shares",
+  "id": "shares",
   "title": "Акции сайта",
-  "path": "projects/shares/index.html",
-  "date": "2026-07-29"
+  "description": "Купи символическую акцию сайта, следи за графиком цены, приглашай друзей и следи за рейтингом держателей.",
+  "image": "projects/shares/preview.jpg",
+  "link": "projects/shares/index.html",
+  "date": "2026-07-29",
+  "tags": ["Веб", "Cloudflare", "JavaScript"]
   },
   {
     "id": "balka",
