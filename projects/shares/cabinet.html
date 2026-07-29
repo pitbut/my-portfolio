@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет — Акции сайта</title>
+    <link rel="stylesheet" href="css/shares.css">
+</head>
+<body>
+    <div class="container">
+        <div class="topbar">
+            <div class="logo">robutpit.shares</div>
+            <div>
+                <a class="link-inline" href="index.html" style="margin-right:10px;">На главную</a>
+                <button class="secondary" id="logout-btn">Выйти</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 id="cab-name" style="font-size:18px; margin-bottom:6px;"></h2>
+            <span class="rank-badge" id="cab-rank"></span>
+        </div>
+
+        <div class="metrics">
+            <div class="card">
+                <div class="metric-label">Твоих акций</div>
+                <div class="metric-value" id="cab-shares">—</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Переходы по ссылке</div>
+                <div class="metric-value" id="cab-refviews">—</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Приглашено друзей</div>
+                <div class="metric-value" id="cab-reffriends">—</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <strong>Твоя реферальная ссылка</strong>
+            <div class="referral-link-row" style="margin-top:10px;">
+                <input type="text" id="cab-ref-link" readonly>
+                <button class="secondary" id="cab-copy-ref">Копировать</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <strong>Выставить акции на продажу</strong>
+            <div class="buy-row" style="margin-top:10px;">
+                <input type="number" id="sell-qty" placeholder="кол-во" min="1">
+                <input type="number" id="sell-price" placeholder="цена за акцию" step="0.01" min="0.01">
+                <button id="sell-btn">Выставить</button>
+            </div>
+            <div class="error-msg" id="sell-error"></div>
+        </div>
+
+        <div class="card">
+            <strong>Стакан заявок</strong>
+            <table class="orderbook" style="margin-top:10px;" id="orderbook-table"></table>
+        </div>
+
+        <div class="card">
+            <strong>Сообщения от администратора</strong>
+            <div id="messages-list" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/cabinet.js"></script>
+</body>
+</html>
