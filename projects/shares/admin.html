@@ -50,6 +50,18 @@
             </div>
 
             <div class="card">
+                <strong data-i18n="referral_bonus_title">Бонус за регистрацию</strong>
+                <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="referral_bonus_hint">Акция начисляется за подтверждённую регистрацию (не за покупку). Если регистрация была по реферальной ссылке, эта акция делится: доля ниже уходит пригласившему, остальное — новому участнику.</p>
+                <div class="buy-row" style="margin-top:10px;">
+                    <input type="number" id="signup-bonus-input" data-i18n-placeholder="signup_bonus_placeholder" placeholder="акций за регистрацию" min="0" step="0.01">
+                    <input type="number" id="referral-rate-input" data-i18n-placeholder="referral_rate_placeholder" placeholder="доля рефереру, %" min="0" max="100" step="0.1">
+                    <button id="referral-bonus-btn" data-i18n="save_referral_bonus_button">Сохранить</button>
+                </div>
+                <p style="font-size:13px; margin-top:8px;" id="referral-bonus-current"></p>
+                <div class="error-msg" id="referral-bonus-error"></div>
+            </div>
+
+            <div class="card">
                 <strong data-i18n="admin_dividends_title">Дивиденды держателям (бонусные акции)</strong>
                 <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="admin_dividends_hint">Раз в месяц часть акций начисляется всем держателям бесплатно, пропорционально их доле — без денег, только бонусные акции.</p>
                 <div class="buy-row" style="margin-top:10px;">

@@ -25,12 +25,21 @@ const I18N = {
         register_submit: "Зарегистрироваться",
         already_have_account: "Уже есть аккаунт?",
         login_link: "Войти",
+        check_email_message: "Почти готово! Проверь почту и перейди по ссылке в письме, чтобы подтвердить email — после этого начислится акция за регистрацию и откроется вход в кабинет.",
+        dev_verify_link_label: "(тест: подтвердить без письма)",
 
         login_title: "Вход",
         password_label_simple: "Пароль",
         login_submit: "Войти",
         no_account: "Нет аккаунта?",
         register_link: "Зарегистрироваться",
+        resend_verification_button: "Отправить письмо ещё раз",
+        resend_verification_sent: "Если аккаунт с такой почтой существует и ещё не подтверждён — письмо отправлено.",
+
+        verify_title: "Подтверждение email",
+        verify_in_progress: "Проверяем ссылку…",
+        verify_success: "Email подтверждён! Акция за регистрацию начислена, входим в кабинет…",
+        verify_missing_token: "В ссылке не хватает токена подтверждения — открой её из письма ещё раз.",
 
         rank_label: "Место в рейтинге: #{rank}",
         shares_held_label: "Твоих акций",
@@ -84,6 +93,13 @@ const I18N = {
         dividend_distribute_success: "Начислено {shares} акц. на {holders} держателей",
         dividend_history_row: "{date} · +{shares} акц. на {holders} держателей",
 
+        referral_bonus_title: "Бонус за регистрацию",
+        referral_bonus_hint: "Акция начисляется за подтверждённую регистрацию (не за покупку). Если регистрация была по реферальной ссылке, эта акция делится: доля ниже уходит пригласившему, остальное — новому участнику.",
+        signup_bonus_placeholder: "акций за регистрацию",
+        referral_rate_placeholder: "доля рефереру, % (например 5)",
+        save_referral_bonus_button: "Сохранить",
+        referral_bonus_current: "Сейчас: {shares} акц. за регистрацию, из них {rate}% рефереру",
+
         admin_title: "robutpit.shares · admin",
         access_denied: "У этого аккаунта нет прав администратора.",
         users_title: "Держатели акций",
@@ -127,12 +143,21 @@ const I18N = {
         register_submit: "Sign up",
         already_have_account: "Already have an account?",
         login_link: "Log in",
+        check_email_message: "Almost done! Check your email and follow the link to confirm it — your signup share will be credited and you'll be able to log in.",
+        dev_verify_link_label: "(test: confirm without an email)",
 
         login_title: "Log in",
         password_label_simple: "Password",
         login_submit: "Log in",
         no_account: "Don't have an account?",
         register_link: "Sign up",
+        resend_verification_button: "Resend confirmation email",
+        resend_verification_sent: "If an account with that email exists and isn't confirmed yet, an email has been sent.",
+
+        verify_title: "Email confirmation",
+        verify_in_progress: "Checking the link…",
+        verify_success: "Email confirmed! Your signup share was credited, logging you in…",
+        verify_missing_token: "This link is missing a confirmation token — open it again from the email.",
 
         rank_label: "Rank: #{rank}",
         shares_held_label: "Your shares",
@@ -185,6 +210,13 @@ const I18N = {
         no_dividend_history: "no distributions yet",
         dividend_distribute_success: "Distributed {shares} shares to {holders} holders",
         dividend_history_row: "{date} · +{shares} shares to {holders} holders",
+
+        referral_bonus_title: "Signup bonus",
+        referral_bonus_hint: "A share is credited for a confirmed registration (not for a purchase). If the signup came through a referral link, that share is split: the rate below goes to the referrer, the rest to the new participant.",
+        signup_bonus_placeholder: "shares per signup",
+        referral_rate_placeholder: "referrer's share, % (e.g. 5)",
+        save_referral_bonus_button: "Save",
+        referral_bonus_current: "Currently: {shares} shares per signup, {rate}% of that goes to the referrer",
 
         admin_title: "robutpit.shares · admin",
         access_denied: "This account doesn't have admin access.",

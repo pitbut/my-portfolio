@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://www.robutpit.com/projects/shares/verify.html">
+    <title>Подтверждение email — Акции сайта</title>
+    <link rel="stylesheet" href="css/shares.css">
+</head>
+<body>
+    <div class="container" style="max-width:420px;">
+        <div class="topbar">
+            <div class="logo">robutpit.shares</div>
+        </div>
+        <div class="card">
+            <h2 style="margin-bottom:16px; font-size:18px;" data-i18n="verify_title">Подтверждение email</h2>
+            <p style="font-size:14px;" id="verify-status" data-i18n="verify_in_progress">Проверяем ссылку…</p>
+            <div class="error-msg" id="verify-error"></div>
+            <p style="margin-top:14px; font-size:13px;">
+                <a class="link-inline" href="login.html" data-i18n="login_link">Войти</a>
+            </p>
+        </div>
+    </div>
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        (async function () {
+            const statusEl = document.getElementById("verify-status");
+            const errorEl = document.getElementById("verify-error");
+            const token = new URLSearchParams(window.location.search).get("token");
+            if (!token) {
+                statusEl.textContent = "";
+                errorEl.textContent = t("verify_missing_token");
+                return;
+            }
+            try {
+                const data = await api("/api/verify-email", { method: "POST", body: { token: token } });
+                localStorage.setItem("shares_token", data.token);
+                statusEl.textContent = t("verify_success");
+                setTimeout(function () {
+                    window.location.href = "cabinet.html";
+                }, 1200);
+            } catch (e) {
+                statusEl.textContent = "";
+                errorEl.textContent = e.message;
+            }
+        })();
+    </script>
+</body>
+</html>

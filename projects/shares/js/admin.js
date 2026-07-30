@@ -26,6 +26,41 @@ document.getElementById("valuation-btn").addEventListener("click", async functio
     }
 });
 
+async function loadReferralBonusSettings() {
+    try {
+        const data = await api("/api/admin/referral-bonus");
+        document.getElementById("signup-bonus-input").value = data.signup_bonus_shares;
+        document.getElementById("referral-rate-input").value = Math.round(data.referral_signup_bonus_rate * 1000) / 10;
+        document.getElementById("referral-bonus-current").textContent = t("referral_bonus_current", {
+            shares: data.signup_bonus_shares,
+            rate: Math.round(data.referral_signup_bonus_rate * 1000) / 10,
+        });
+    } catch (e) {
+        // недостаточно прав или не загрузилось — просто оставляем поле пустым
+    }
+}
+
+document.getElementById("referral-bonus-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("referral-bonus-error");
+    errorEl.textContent = "";
+    try {
+        const ratePercent = parseFloat(document.getElementById("referral-rate-input").value);
+        const res = await api("/api/admin/referral-bonus", {
+            method: "POST",
+            body: {
+                signup_bonus_shares: parseFloat(document.getElementById("signup-bonus-input").value),
+                referral_signup_bonus_rate: ratePercent / 100,
+            },
+        });
+        document.getElementById("referral-bonus-current").textContent = t("referral_bonus_current", {
+            shares: res.signup_bonus_shares,
+            rate: Math.round(res.referral_signup_bonus_rate * 1000) / 10,
+        });
+    } catch (e) {
+        errorEl.textContent = e.message;
+    }
+});
+
 function renderDividendHistory(rows) {
     const box = document.getElementById("dividend-history");
     box.innerHTML = rows
@@ -93,7 +128,7 @@ async function loadUsersList() {
                     "<tr data-user-id='" + u.id + "'>" +
                         "<td>" + escapeHtml(u.display_name) + "</td>" +
                         "<td>" + escapeHtml(u.email) + "</td>" +
-                        "<td>" + u.shares_held + "</td>" +
+                        "<td>" + Number(u.shares_held).toFixed(2) + "</td>" +
                         "<td>" + u.created_at.slice(0, 10) + "</td>" +
                     "</tr>"
                 );
@@ -116,14 +151,14 @@ async function openUserDetail(userId) {
     document.getElementById("user-detail-card").classList.remove("detail-hidden");
     document.getElementById("detail-name").textContent = data.user.display_name;
     document.getElementById("detail-email").textContent = data.user.email;
-    document.getElementById("detail-shares").textContent = data.shares_held;
+    document.getElementById("detail-shares").textContent = Number(data.shares_held).toFixed(2);
     document.getElementById("detail-referred").textContent = data.referred_friends;
 
     document.getElementById("detail-ledger").innerHTML = data.ledger
         .map(function (l) {
             return (
                 "<div class='ledger-row'>" +
-                    l.acquired_at.slice(0, 16) + " · " + l.quantity + " акц. · $" + l.price_paid.toFixed(2) +
+                    l.acquired_at.slice(0, 16) + " · " + Number(l.quantity).toFixed(2) + " акц. · $" + l.price_paid.toFixed(2) +
                     " · " + l.source +
                 "</div>"
             );
@@ -157,4 +192,5 @@ if (!authToken()) {
     loadUsersList();
     loadValuation();
     loadDividendHistory();
+    loadReferralBonusSettings();
 }

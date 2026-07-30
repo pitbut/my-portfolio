@@ -21,7 +21,11 @@ async function api(path, options) {
     });
 
     const data = await res.json().catch(function () { return {}; });
-    if (!res.ok) throw new Error(data.error || "Ошибка запроса");
+    if (!res.ok) {
+        const err = new Error(data.error || "Ошибка запроса");
+        err.data = data; // например, data.needs_verification — email ещё не подтверждён
+        throw err;
+    }
     return data;
 }
 

@@ -11,6 +11,8 @@
 const PRIMARY_SUPPLY_LIMIT = 10000; // сколько акций максимум может продать сам проект напрямую
 const DEFAULT_VALUATION = 10000; // используется, пока админ ни разу не задавал оценку ($1 за акцию)
 const DEFAULT_MONTHLY_DIVIDEND_POOL = 100; // бонусных акций в месяц, пока админ не задал своё значение
+const DEFAULT_SIGNUP_BONUS_SHARES = 1; // акций за подтверждённую регистрацию, пока админ не задал своё значение
+const DEFAULT_REFERRAL_SIGNUP_RATE = 0.05; // доля этой акции (5%), уходящая пригласившему
 const PLATFORM_FEE_RATE = 0.07; // 7% комиссия платформы на вторичном рынке
 
 function corsHeaders(env) {
@@ -109,6 +111,53 @@ async function currentPrimaryPrice(env) {
     valuation,
     total_shares_outstanding: totalShares,
   };
+}
+
+// Сколько акций начисляется за подтверждённую регистрацию, и какая доля из
+// них (0..1) уходит пригласившему, если регистрация была по реферальной
+// ссылке. Оба параметра настраиваются админом (см. handleAdminSetReferralBonus).
+async function getSignupBonusShares(env) {
+  const row = await env.DB.prepare(`SELECT value FROM site_settings WHERE key = 'signup_bonus_shares'`).first();
+  const value = row ? parseFloat(row.value) : DEFAULT_SIGNUP_BONUS_SHARES;
+  return value >= 0 ? value : DEFAULT_SIGNUP_BONUS_SHARES;
+}
+
+async function getReferralSignupRate(env) {
+  const row = await env.DB.prepare(`SELECT value FROM site_settings WHERE key = 'referral_signup_bonus_rate'`).first();
+  const value = row ? parseFloat(row.value) : DEFAULT_REFERRAL_SIGNUP_RATE;
+  return value >= 0 && value <= 1 ? value : DEFAULT_REFERRAL_SIGNUP_RATE;
+}
+
+// Отправка письма с подтверждением email — единственное место, куда нужно
+// подключить реального провайдера (см. DEPLOY.md, "Подтверждение email").
+// Пока RESEND_API_KEY не задан как секрет воркера, письмо реально не уходит —
+// но токен подтверждения уже сохранён в БД, так что для тестирования можно
+// подтвердить регистрацию, просто открыв verifyLink вручную.
+async function sendVerificationEmail(env, toEmail, token) {
+  const verifyLink = `https://www.robutpit.com/projects/shares/verify.html?token=${encodeURIComponent(token)}`;
+  if (!env.RESEND_API_KEY) {
+    console.log("RESEND_API_KEY не задан — письмо не отправлено, ссылка для ручной проверки:", verifyLink);
+    return { sent: false, verifyLink };
+  }
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: env.EMAIL_FROM || "Акции сайта <onboarding@resend.dev>",
+        to: [toEmail],
+        subject: "Подтверди email — Акции сайта",
+        html: `<p>Чтобы подтвердить регистрацию и получить акцию за регистрацию, перейди по ссылке:</p><p><a href="${verifyLink}">${verifyLink}</a></p>`,
+      }),
+    });
+    return { sent: res.ok, verifyLink };
+  } catch (err) {
+    console.log("Не удалось отправить письмо подтверждения:", String(err));
+    return { sent: false, verifyLink };
+  }
 }
 
 // Пул дивидендов на месяц (в акциях, не в деньгах) — настраивается админом,
@@ -242,6 +291,9 @@ async function matchNewBuyOrder(env, buyOrder) {
 
 // --- Роуты ------------------------------------------------------------
 
+// Регистрация НЕ выдаёт сессию и НЕ начисляет акцию сразу — сначала нужно
+// подтвердить email (см. handleVerifyEmail), иначе на бесплатную акцию за
+// регистрацию можно было бы штамповать сколько угодно одноразовых почт.
 async function handleRegister(request, env) {
   const { email, password, display_name, language, ref } = await request.json();
   if (!email || !password || password.length < 8) {
@@ -258,23 +310,29 @@ async function handleRegister(request, env) {
 
   const passwordHash = await hashPassword(password);
   const referralCode = randomReferralCode();
+  const verificationToken = randomToken();
 
-  const result = await env.DB.prepare(
-    `INSERT INTO users (email, password_hash, display_name, language, referral_code, referred_by)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  )
-    .bind(email, passwordHash, display_name || email.split("@")[0], language || "ru", referralCode, referrerId)
-    .run();
-
-  const userId = result.meta.last_row_id;
-  const token = randomToken();
   await env.DB.prepare(
-    `INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, datetime('now', '+30 days'))`
+    `INSERT INTO users (email, password_hash, display_name, language, referral_code, referred_by, verification_token, verification_sent_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`
   )
-    .bind(token, userId)
+    .bind(email, passwordHash, display_name || email.split("@")[0], language || "ru", referralCode, referrerId, verificationToken)
     .run();
 
-  return json({ token, user: { id: userId, email, display_name, referral_code: referralCode } }, 201, env);
+  const emailResult = await sendVerificationEmail(env, email, verificationToken);
+
+  return json(
+    {
+      ok: true,
+      needs_verification: true,
+      message: "Проверь почту и перейди по ссылке, чтобы подтвердить email и получить акцию за регистрацию.",
+      // Пока реальный email-провайдер не подключён (см. DEPLOY.md), отдаём
+      // ссылку прямо в ответе, чтобы можно было потестировать без почты.
+      dev_verify_link: emailResult.sent ? undefined : emailResult.verifyLink,
+    },
+    201,
+    env
+  );
 }
 
 async function handleLogin(request, env) {
@@ -282,6 +340,9 @@ async function handleLogin(request, env) {
   const user = await env.DB.prepare(`SELECT * FROM users WHERE email = ?`).bind(email).first();
   if (!user || !(await verifyPassword(password, user.password_hash))) {
     return json({ error: "неверный email или пароль" }, 401, env);
+  }
+  if (!user.email_verified) {
+    return json({ error: "email ещё не подтверждён — проверь почту", needs_verification: true }, 403, env);
   }
   const token = randomToken();
   await env.DB.prepare(
@@ -294,6 +355,73 @@ async function handleLogin(request, env) {
     200,
     env
   );
+}
+
+// Подтверждение email по ссылке из письма. Именно здесь, один раз, начисляется
+// акция за регистрацию — если регистрация была по реферальной ссылке, она
+// делится между новым участником и пригласившим по ставке referral_signup_bonus_rate
+// (например, 0.95 новому участнику и 0.05 пригласившему).
+async function handleVerifyEmail(request, env) {
+  const { token } = await request.json();
+  if (!token) return json({ error: "не указан токен подтверждения" }, 400, env);
+
+  const user = await env.DB.prepare(`SELECT * FROM users WHERE verification_token = ?`).bind(token).first();
+  if (!user) return json({ error: "ссылка подтверждения недействительна или уже использована" }, 404, env);
+
+  if (!user.email_verified) {
+    const bonusShares = await getSignupBonusShares(env);
+    const referralRate = await getReferralSignupRate(env);
+    const hasReferrer = !!user.referred_by;
+    const referrerShare = hasReferrer ? Math.round(bonusShares * referralRate * 1e6) / 1e6 : 0;
+    const ownShare = Math.round((bonusShares - referrerShare) * 1e6) / 1e6;
+
+    const statements = [
+      env.DB.prepare(`UPDATE users SET email_verified = 1, verification_token = NULL WHERE id = ?`).bind(user.id),
+    ];
+    if (ownShare > 0) {
+      statements.push(
+        env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, 0, 'bonus')`)
+          .bind(user.id, ownShare)
+      );
+    }
+    if (hasReferrer && referrerShare > 0) {
+      statements.push(
+        env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, 0, 'bonus')`)
+          .bind(user.referred_by, referrerShare)
+      );
+    }
+    await env.DB.batch(statements);
+  }
+
+  const token2 = randomToken();
+  await env.DB.prepare(
+    `INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, datetime('now', '+30 days'))`
+  )
+    .bind(token2, user.id)
+    .run();
+
+  return json(
+    { token: token2, user: { id: user.id, email: user.email, display_name: user.display_name, referral_code: user.referral_code } },
+    200,
+    env
+  );
+}
+
+async function handleResendVerification(request, env) {
+  const { email } = await request.json();
+  const user = await env.DB.prepare(`SELECT * FROM users WHERE email = ?`).bind(email).first();
+  // Не сообщаем, существует ли такой email — просто отвечаем "ок" в обоих случаях.
+  if (!user || user.email_verified) return json({ ok: true }, 200, env);
+
+  const verificationToken = randomToken();
+  await env.DB.prepare(
+    `UPDATE users SET verification_token = ?, verification_sent_at = datetime('now') WHERE id = ?`
+  )
+    .bind(verificationToken, user.id)
+    .run();
+  const emailResult = await sendVerificationEmail(env, user.email, verificationToken);
+
+  return json({ ok: true, dev_verify_link: emailResult.sent ? undefined : emailResult.verifyLink }, 200, env);
 }
 
 async function handleStats(env) {
@@ -369,22 +497,15 @@ async function handlePaymentWebhook(request, env) {
 
   // TODO: здесь должна быть проверка подписи/статуса от провайдера перед зачислением
 
+  // Реферальный бонус здесь больше не начисляется — он выдаётся один раз, в
+  // момент подтверждения email при регистрации (см. handleVerifyEmail), а не
+  // за покупку. Первичная покупка просто зачисляет купленное количество.
   await env.DB.batch([
     env.DB.prepare(`UPDATE purchase_intents SET status = 'paid', paid_at = datetime('now') WHERE id = ?`).bind(orderId),
     env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, ?, 'primary')`)
       .bind(intent.user_id, intent.quantity, intent.price_per_share),
     env.DB.prepare(`UPDATE site_stats SET value = value + ? WHERE key = 'total_shares_sold_primary'`).bind(intent.quantity),
   ]);
-
-  // Неденежный бонус пригласившему (см. концепцию: только неденежные плюшки)
-  const buyer = await env.DB.prepare(`SELECT referred_by FROM users WHERE id = ?`).bind(intent.user_id).first();
-  if (buyer && buyer.referred_by) {
-    await env.DB.prepare(
-      `INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, 1, 0, 'bonus')`
-    )
-      .bind(buyer.referred_by)
-      .run();
-  }
 
   return json({ ok: true }, 200, env);
 }
@@ -473,8 +594,8 @@ async function handleTransfer(request, env) {
   if (!user) return json({ error: "требуется вход" }, 401, env);
 
   const { to, quantity, note } = await request.json();
-  const qty = parseInt(quantity, 10);
-  if (!to || !String(to).trim() || !qty || qty < 1) {
+  const qty = parseFloat(quantity);
+  if (!to || !String(to).trim() || !qty || qty <= 0) {
     return json({ error: "укажи получателя (email или реферальный код) и количество акций" }, 400, env);
   }
 
@@ -619,6 +740,41 @@ async function handleAdminSetDividendPool(request, env) {
   return json({ ok: true, monthly_pool: value }, 200, env);
 }
 
+// Админ настраивает, сколько акций даётся за подтверждённую регистрацию и
+// какая доля из них уходит пригласившему при регистрации по реферальной ссылке.
+async function handleAdminSetReferralBonus(request, env) {
+  const admin = await requireAdmin(request, env);
+  if (!admin) return json({ error: "требуется доступ администратора" }, 403, env);
+
+  const { signup_bonus_shares, referral_signup_bonus_rate } = await request.json();
+  const shares = parseFloat(signup_bonus_shares);
+  const rate = parseFloat(referral_signup_bonus_rate);
+  if (isNaN(shares) || shares < 0) return json({ error: "укажи корректное количество акций за регистрацию" }, 400, env);
+  if (isNaN(rate) || rate < 0 || rate > 1) return json({ error: "доля рефереру должна быть от 0 до 1 (например, 0.05 = 5%)" }, 400, env);
+
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT INTO site_settings (key, value) VALUES ('signup_bonus_shares', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+    ).bind(String(shares)),
+    env.DB.prepare(
+      `INSERT INTO site_settings (key, value) VALUES ('referral_signup_bonus_rate', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+    ).bind(String(rate)),
+  ]);
+
+  return json({ ok: true, signup_bonus_shares: shares, referral_signup_bonus_rate: rate }, 200, env);
+}
+
+async function handleAdminGetReferralBonus(request, env) {
+  const admin = await requireAdmin(request, env);
+  if (!admin) return json({ error: "требуется доступ администратора" }, 403, env);
+
+  const shares = await getSignupBonusShares(env);
+  const rate = await getReferralSignupRate(env);
+  return json({ signup_bonus_shares: shares, referral_signup_bonus_rate: rate }, 200, env);
+}
+
 // Ручное начисление дивидендов прямо сейчас (например, в конце месяца, если
 // автоматический cron ещё не настроен в Cloudflare). Можно передать свой
 // размер пула через body.pool, иначе используется настроенный monthly_pool.
@@ -723,9 +879,9 @@ async function handleCreateSellOrder(request, env) {
   if (!user) return json({ error: "требуется вход" }, 401, env);
 
   const { quantity, price_per_share } = await request.json();
-  const qty = parseInt(quantity, 10);
+  const qty = parseFloat(quantity);
   const price = parseFloat(price_per_share);
-  if (!qty || qty < 1 || !price || price <= 0) return json({ error: "некорректные параметры" }, 400, env);
+  if (!qty || qty <= 0 || !price || price <= 0) return json({ error: "некорректные параметры" }, 400, env);
 
   const holdings = await env.DB.prepare(
     `SELECT COALESCE(SUM(quantity), 0) as total FROM shares_ledger WHERE user_id = ?`
@@ -759,9 +915,9 @@ async function handleCreateBuyOrder(request, env) {
   if (!user) return json({ error: "требуется вход" }, 401, env);
 
   const { quantity, price_per_share } = await request.json();
-  const qty = parseInt(quantity, 10);
+  const qty = parseFloat(quantity);
   const price = parseFloat(price_per_share);
-  if (!qty || qty < 1 || !price || price <= 0) return json({ error: "некорректные параметры" }, 400, env);
+  if (!qty || qty <= 0 || !price || price <= 0) return json({ error: "некорректные параметры" }, 400, env);
 
   // Примечание: оплата за buy-заявку на вторичном рынке должна списываться
   // через тот же платёжный провайдер при фактическом исполнении сделки —
@@ -817,6 +973,8 @@ export default {
     try {
       if (url.pathname === "/api/register" && request.method === "POST") return await handleRegister(request, env);
       if (url.pathname === "/api/login" && request.method === "POST") return await handleLogin(request, env);
+      if (url.pathname === "/api/verify-email" && request.method === "POST") return await handleVerifyEmail(request, env);
+      if (url.pathname === "/api/resend-verification" && request.method === "POST") return await handleResendVerification(request, env);
       if (url.pathname === "/api/stats" && request.method === "GET") return await handleStats(env);
       if (url.pathname === "/api/view" && request.method === "POST") return await handleTrackView(request, env);
       if (url.pathname === "/api/purchase/intent" && request.method === "POST") return await handlePurchaseIntent(request, env);
@@ -836,6 +994,8 @@ export default {
       if (url.pathname === "/api/admin/dividends/pool" && request.method === "POST") return await handleAdminSetDividendPool(request, env);
       if (url.pathname === "/api/admin/dividends/distribute" && request.method === "POST") return await handleAdminDistributeDividendsNow(request, env);
       if (url.pathname === "/api/admin/dividends" && request.method === "GET") return await handleAdminDividendHistory(request, env);
+      if (url.pathname === "/api/admin/referral-bonus" && request.method === "GET") return await handleAdminGetReferralBonus(request, env);
+      if (url.pathname === "/api/admin/referral-bonus" && request.method === "POST") return await handleAdminSetReferralBonus(request, env);
       const userDetailMatch = url.pathname.match(/^\/api\/admin\/users\/(\d+)$/);
       if (userDetailMatch && request.method === "GET") return await handleAdminUserDetail(request, env, userDetailMatch[1]);
 

@@ -11,7 +11,7 @@ async function loadCabinet() {
         myUserId = c.user_id;
         document.getElementById("cab-name").textContent = c.display_name;
         document.getElementById("cab-rank").textContent = t("rank_label", { rank: c.rank });
-        document.getElementById("cab-shares").textContent = c.shares_held;
+        document.getElementById("cab-shares").textContent = Number(c.shares_held).toFixed(2);
         document.getElementById("cab-refviews").textContent = c.referral_views;
         document.getElementById("cab-reffriends").textContent = c.referred_friends;
         document.getElementById("cab-ref-link").value = myReferralLink(c.referral_code);
@@ -24,13 +24,13 @@ async function loadCabinet() {
 }
 
 function renderDividends(total, recent) {
-    document.getElementById("dividends-total").textContent = total;
+    document.getElementById("dividends-total").textContent = Number(total).toFixed(2);
     const box = document.getElementById("dividends-history");
     box.innerHTML = recent
         .map(function (d) {
             return (
                 "<div class='transfer-row'>" +
-                    t("dividend_row", { qty: d.quantity }) +
+                    t("dividend_row", { qty: Number(d.quantity).toFixed(2) }) +
                     "<span style='color:#999;'> · " + d.acquired_at.slice(0, 16) + "</span>" +
                 "</div>"
             );
@@ -48,7 +48,7 @@ function renderTransferHistory(transfers) {
                 : t("transfer_received_from", { name: tr.counterparty });
             return (
                 "<div class='transfer-row'>" +
-                    sign + tr.quantity + " · " + escapeHtml(label) +
+                    sign + Number(tr.quantity).toFixed(2) + " · " + escapeHtml(label) +
                     "<span style='color:#999;'> · " + tr.created_at.slice(0, 16) + "</span>" +
                 "</div>"
             );
@@ -67,10 +67,10 @@ async function loadOrderbook() {
         rows.push(
             "<tr>" +
                 "<td class='sell'" + (s ? " data-user='" + s.user_id + "' data-name=\"" + escapeAttr(s.display_name) + "\"" : "") + ">" +
-                    (s ? "$" + s.price_per_share.toFixed(2) + " × " + s.qty + " (" + escapeHtml(s.display_name) + ")" : "") +
+                    (s ? "$" + s.price_per_share.toFixed(2) + " × " + Number(s.qty).toFixed(2) + " (" + escapeHtml(s.display_name) + ")" : "") +
                 "</td>" +
                 "<td class='buy'" + (b ? " data-user='" + b.user_id + "' data-name=\"" + escapeAttr(b.display_name) + "\"" : "") + ">" +
-                    (b ? "$" + b.price_per_share.toFixed(2) + " × " + b.qty + " (" + escapeHtml(b.display_name) + ")" : "") +
+                    (b ? "$" + b.price_per_share.toFixed(2) + " × " + Number(b.qty).toFixed(2) + " (" + escapeHtml(b.display_name) + ")" : "") +
                 "</td>" +
             "</tr>"
         );
@@ -116,7 +116,7 @@ document.getElementById("sell-btn").addEventListener("click", async function () 
         await api("/api/orders/sell", {
             method: "POST",
             body: {
-                quantity: parseInt(document.getElementById("sell-qty").value, 10),
+                quantity: parseFloat(document.getElementById("sell-qty").value),
                 price_per_share: parseFloat(document.getElementById("sell-price").value),
             },
         });
@@ -136,11 +136,11 @@ document.getElementById("transfer-btn").addEventListener("click", async function
             method: "POST",
             body: {
                 to: document.getElementById("transfer-to").value.trim(),
-                quantity: parseInt(document.getElementById("transfer-qty").value, 10),
+                quantity: parseFloat(document.getElementById("transfer-qty").value),
             },
         });
         errorEl.style.color = "#1e824c";
-        errorEl.textContent = t("transfer_success", { qty: res.transferred, name: res.to });
+        errorEl.textContent = t("transfer_success", { qty: Number(res.transferred).toFixed(2), name: res.to });
         document.getElementById("transfer-to").value = "";
         document.getElementById("transfer-qty").value = "";
         loadCabinet();

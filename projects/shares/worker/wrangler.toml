@@ -10,6 +10,7 @@ database_id = "ЗАМЕНИ_НА_ID_ПОСЛЕ_wrangler_d1_create"
 [vars]
 ALLOWED_ORIGIN = "https://www.robutpit.com"
 PAYMENT_CHECKOUT_BASE_URL = "https://checkout.example/pending"
+EMAIL_FROM = "Акции сайта <onboarding@resend.dev>"
 
 # Автоматическое ежемесячное начисление дивидендов (бонусными акциями,
 # без денег) — 00:05 UTC 1-го числа каждого месяца, см. scheduled() в src/index.js.
@@ -21,3 +22,8 @@ crons = ["5 0 1 * *"]
 #   wrangler secret put PAYME_SECRET_KEY
 #   wrangler secret put CLICK_MERCHANT_ID
 #   wrangler secret put CLICK_SECRET_KEY
+#   wrangler secret put RESEND_API_KEY   — для отправки писем подтверждения email
+#                                          (см. DEPLOY.md, "Подтверждение email").
+#                                          Пока не задан — письма не уходят, но
+#                                          ссылка подтверждения приходит в ответе
+#                                          API как dev_verify_link, для тестов.
