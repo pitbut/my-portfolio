@@ -56,9 +56,12 @@ button:hover { opacity: 0.9; }
 
 .chart-wrap { position: relative; height: 220px; margin-bottom: 20px; }
 
-.buy-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.buy-row { display: flex; gap: 8px; margin-bottom: 20px; align-items: flex-end; }
 .buy-row input[type=number] { width: 90px; }
 .buy-row button { flex: 1; }
+
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-group label { font-size: 11px; color: #888; white-space: nowrap; }
 
 .referral-link-row { display: flex; gap: 8px; margin-bottom: 8px; }
 .referral-link-row input { flex: 1; }
