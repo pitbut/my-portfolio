@@ -15,6 +15,8 @@ const DEFAULT_SIGNUP_BONUS_SHARES = 1; // акций за подтверждён
 const DEFAULT_REFERRAL_SIGNUP_RATE = 0.05; // доля этой акции (5%), уходящая пригласившему
 const PLATFORM_FEE_RATE = 0.07; // 7% комиссия платформы на вторичном рынке
 const VIEW_DEDUP_MINUTES = 30; // один IP считается за один просмотр не чаще раза в этот период
+const VERIFICATION_TTL_HOURS = 24; // сколько живёт ссылка подтверждения email
+const PASSWORD_RESET_TTL_HOURS = 1; // сколько живёт ссылка восстановления пароля (короче — это чувствительнее)
 
 function corsHeaders(env) {
   return {
@@ -136,16 +138,15 @@ async function getReferralSignupRate(env) {
   return value >= 0 && value <= 1 ? value : DEFAULT_REFERRAL_SIGNUP_RATE;
 }
 
-// Отправка письма с подтверждением email — единственное место, куда нужно
-// подключить реального провайдера (см. DEPLOY.md, "Подтверждение email").
-// Пока RESEND_API_KEY не задан как секрет воркера, письмо реально не уходит —
-// но токен подтверждения уже сохранён в БД, так что для тестирования можно
-// подтвердить регистрацию, просто открыв verifyLink вручную.
-async function sendVerificationEmail(env, toEmail, token) {
-  const verifyLink = `https://www.robutpit.com/projects/shares/verify.html?token=${encodeURIComponent(token)}`;
+// Единственное место, куда нужно подключить реального провайдера почты
+// (см. DEPLOY.md, "Подтверждение email"). Пока RESEND_API_KEY не задан как
+// секрет воркера, письма реально не уходят — но нужная ссылка возвращается
+// вызывающей функции (poле link), так что подтверждение/сброс пароля можно
+// протестировать, просто открыв её вручную.
+async function sendEmail(env, { to, subject, html }) {
   if (!env.RESEND_API_KEY) {
-    console.log("RESEND_API_KEY не задан — письмо не отправлено, ссылка для ручной проверки:", verifyLink);
-    return { sent: false, verifyLink };
+    console.log("RESEND_API_KEY не задан — письмо не отправлено:", subject, to);
+    return { sent: false };
   }
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -156,16 +157,36 @@ async function sendVerificationEmail(env, toEmail, token) {
       },
       body: JSON.stringify({
         from: env.EMAIL_FROM || "Акции сайта <onboarding@resend.dev>",
-        to: [toEmail],
-        subject: "Подтверди email — Акции сайта",
-        html: `<p>Чтобы подтвердить регистрацию и получить акцию за регистрацию, перейди по ссылке:</p><p><a href="${verifyLink}">${verifyLink}</a></p>`,
+        to: [to],
+        subject,
+        html,
       }),
     });
-    return { sent: res.ok, verifyLink };
+    return { sent: res.ok };
   } catch (err) {
-    console.log("Не удалось отправить письмо подтверждения:", String(err));
-    return { sent: false, verifyLink };
+    console.log("Не удалось отправить письмо:", String(err));
+    return { sent: false };
   }
+}
+
+async function sendVerificationEmail(env, toEmail, token) {
+  const verifyLink = `https://www.robutpit.com/projects/shares/verify.html?token=${encodeURIComponent(token)}`;
+  const result = await sendEmail(env, {
+    to: toEmail,
+    subject: "Подтверди email — Акции сайта",
+    html: `<p>Чтобы подтвердить регистрацию и получить акцию за регистрацию, перейди по ссылке (действует ${VERIFICATION_TTL_HOURS} ч.):</p><p><a href="${verifyLink}">${verifyLink}</a></p>`,
+  });
+  return { ...result, link: verifyLink };
+}
+
+async function sendPasswordResetEmail(env, toEmail, token) {
+  const resetLink = `https://www.robutpit.com/projects/shares/reset-password.html?token=${encodeURIComponent(token)}`;
+  const result = await sendEmail(env, {
+    to: toEmail,
+    subject: "Восстановление пароля — Акции сайта",
+    html: `<p>Чтобы задать новый пароль, перейди по ссылке (действует ${PASSWORD_RESET_TTL_HOURS} ч.):</p><p><a href="${resetLink}">${resetLink}</a></p><p>Если ты не запрашивал(а) восстановление пароля — просто проигнорируй это письмо.</p>`,
+  });
+  return { ...result, link: resetLink };
 }
 
 // Пул дивидендов на месяц (в акциях, не в деньгах) — настраивается админом,
@@ -336,7 +357,7 @@ async function handleRegister(request, env) {
       message: "Проверь почту и перейди по ссылке, чтобы подтвердить email и получить акцию за регистрацию.",
       // Пока реальный email-провайдер не подключён (см. DEPLOY.md), отдаём
       // ссылку прямо в ответе, чтобы можно было потестировать без почты.
-      dev_verify_link: emailResult.sent ? undefined : emailResult.verifyLink,
+      dev_verify_link: emailResult.sent ? undefined : emailResult.link,
     },
     201,
     env
@@ -375,6 +396,15 @@ async function handleVerifyEmail(request, env) {
 
   const user = await env.DB.prepare(`SELECT * FROM users WHERE verification_token = ?`).bind(token).first();
   if (!user) return json({ error: "ссылка подтверждения недействительна или уже использована" }, 404, env);
+
+  const expired = await env.DB.prepare(
+    `SELECT 1 as x WHERE datetime(?, '+${VERIFICATION_TTL_HOURS} hours') < datetime('now')`
+  )
+    .bind(user.verification_sent_at)
+    .first();
+  if (expired) {
+    return json({ error: "ссылка подтверждения устарела — запроси письмо ещё раз", expired: true }, 410, env);
+  }
 
   if (!user.email_verified) {
     const bonusShares = await getSignupBonusShares(env);
@@ -429,7 +459,61 @@ async function handleResendVerification(request, env) {
     .run();
   const emailResult = await sendVerificationEmail(env, user.email, verificationToken);
 
-  return json({ ok: true, dev_verify_link: emailResult.sent ? undefined : emailResult.verifyLink }, 200, env);
+  return json({ ok: true, dev_verify_link: emailResult.sent ? undefined : emailResult.link }, 200, env);
+}
+
+// Восстановление пароля по ссылке из письма. Как и в handleResendVerification,
+// намеренно не сообщаем, существует ли такой email — иначе по ответу можно
+// было бы перебором узнавать зарегистрированные адреса.
+async function handleForgotPassword(request, env) {
+  const { email } = await request.json();
+  if (!email) return json({ error: "укажи email" }, 400, env);
+
+  const user = await env.DB.prepare(`SELECT * FROM users WHERE email = ?`).bind(email).first();
+  if (!user) return json({ ok: true }, 200, env);
+
+  const resetToken = randomToken();
+  await env.DB.prepare(
+    `UPDATE users SET password_reset_token = ?, password_reset_sent_at = datetime('now') WHERE id = ?`
+  )
+    .bind(resetToken, user.id)
+    .run();
+  const emailResult = await sendPasswordResetEmail(env, user.email, resetToken);
+
+  return json({ ok: true, dev_reset_link: emailResult.sent ? undefined : emailResult.link }, 200, env);
+}
+
+// Установка нового пароля по токену из письма. Токен одноразовый и живёт
+// PASSWORD_RESET_TTL_HOURS — короче, чем токен подтверждения email, потому что
+// смена пароля чувствительнее к перехвату ссылки. После смены пароля все
+// существующие сессии этого пользователя завершаются — если ссылку кто-то
+// перехватил и уже был залогинен под чужим аккаунтом, его выкинет.
+async function handleResetPassword(request, env) {
+  const { token, password } = await request.json();
+  if (!token) return json({ error: "не указан токен восстановления" }, 400, env);
+  if (!password || password.length < 8) return json({ error: "пароль должен быть не короче 8 символов" }, 400, env);
+
+  const user = await env.DB.prepare(`SELECT * FROM users WHERE password_reset_token = ?`).bind(token).first();
+  if (!user) return json({ error: "ссылка восстановления недействительна или уже использована" }, 404, env);
+
+  const expired = await env.DB.prepare(
+    `SELECT 1 as x WHERE datetime(?, '+${PASSWORD_RESET_TTL_HOURS} hours') < datetime('now')`
+  )
+    .bind(user.password_reset_sent_at)
+    .first();
+  if (expired) {
+    return json({ error: "ссылка восстановления устарела — запроси новую", expired: true }, 410, env);
+  }
+
+  const passwordHash = await hashPassword(password);
+  await env.DB.batch([
+    env.DB.prepare(
+      `UPDATE users SET password_hash = ?, password_reset_token = NULL, password_reset_sent_at = NULL WHERE id = ?`
+    ).bind(passwordHash, user.id),
+    env.DB.prepare(`DELETE FROM sessions WHERE user_id = ?`).bind(user.id),
+  ]);
+
+  return json({ ok: true }, 200, env);
 }
 
 async function handleStats(env) {
@@ -1008,6 +1092,8 @@ export default {
       if (url.pathname === "/api/login" && request.method === "POST") return await handleLogin(request, env);
       if (url.pathname === "/api/verify-email" && request.method === "POST") return await handleVerifyEmail(request, env);
       if (url.pathname === "/api/resend-verification" && request.method === "POST") return await handleResendVerification(request, env);
+      if (url.pathname === "/api/forgot-password" && request.method === "POST") return await handleForgotPassword(request, env);
+      if (url.pathname === "/api/reset-password" && request.method === "POST") return await handleResetPassword(request, env);
       if (url.pathname === "/api/stats" && request.method === "GET") return await handleStats(env);
       if (url.pathname === "/api/view" && request.method === "POST") return await handleTrackView(request, env);
       if (url.pathname === "/api/purchase/intent" && request.method === "POST") return await handlePurchaseIntent(request, env);

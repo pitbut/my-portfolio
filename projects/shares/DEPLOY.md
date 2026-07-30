@@ -4,8 +4,9 @@
 ```
 schema.sql           — схема базы данных Cloudflare D1
 worker/               — Cloudflare Worker (API)
-index.html, cabinet.html, admin.html, login.html,
-register.html, instructions.html, css/, js/  — статичный фронтенд (уже лежит здесь же, в projects/shares/)
+index.html, cabinet.html, admin.html, login.html, register.html,
+verify.html, forgot-password.html, reset-password.html,
+instructions.html, css/, js/  — статичный фронтенд (уже лежит здесь же, в projects/shares/)
 ```
 
 ## 1. Установка Wrangler (CLI Cloudflare)
@@ -201,7 +202,29 @@ false }`, не трогая счётчик. Это не защита от VPN/п
 антифрод, но обычное "закрыл-открыл вкладку" и очистку `localStorage` он уже
 полностью останавливает.
 
-## 10. Что дальше стоит добавить (не реализовано в этой версии)
+## 10. Восстановление пароля и срок жизни ссылок
+
+- **`POST /api/forgot-password { email }`** (страница `forgot-password.html`,
+  ссылка «Забыли пароль?» на `login.html`) — если такой email существует,
+  генерирует одноразовый `password_reset_token`, сохраняет его и отправляет
+  письмо со ссылкой на `reset-password.html?token=...`. Специально не
+  сообщает, существует ли email — иначе по ответу можно было бы перебором
+  узнавать зарегистрированные адреса.
+- **`POST /api/reset-password { token, password }`** (страница
+  `reset-password.html`) — проверяет токен и что он не старше
+  `PASSWORD_RESET_TTL_HOURS` (1 час — короче, чем токен подтверждения email,
+  потому что смена пароля чувствительнее к перехвату ссылки), задаёт новый
+  пароль и **разлогинивает все существующие сессии** пользователя (`DELETE
+  FROM sessions`) — если ссылку кто-то перехватил, его выкинет.
+- Токен подтверждения email (`verification_token`) теперь тоже ограничен по
+  времени — `VERIFICATION_TTL_HOURS` (24 часа); просроченная ссылка возвращает
+  `410` с `expired: true`, дальше нужно запросить письмо заново через
+  `/api/resend-verification`.
+- Как и с подтверждением email, пока `RESEND_API_KEY` не задан — письмо
+  восстановления реально не уходит, но ссылка возвращается в ответе как
+  `dev_reset_link`, чтобы протестировать без почты.
+
+## 11. Что дальше стоит добавить (не реализовано в этой версии)
 - Оплата за buy-заявки на вторичном рынке (сейчас предполагается,
   что списание при покупке на вторичном рынке нужно оформить как
   ещё один `purchase_intent` перед вызовом `/api/orders/buy` — по
@@ -212,11 +235,8 @@ false }`, не трогая счётчик. Это не защита от VPN/п
   на en/es/pt/uz/ar — сейчас переведены только `ru` и `en`, остальные языки
   автоматически показывают русский текст как запасной вариант (см. функцию
   `t()` в `js/i18n.js`).
-- Rate-limiting на `/api/register`, `/api/login` и `/api/resend-verification`
-  от брутфорса и спама письмами.
-- Срок жизни `verification_token` сейчас не ограничен — если это важно,
-  добавь проверку `verification_sent_at` (например, токен считается истёкшим
-  через 24 часа) в `handleVerifyEmail`.
+- Rate-limiting на `/api/register`, `/api/login`, `/api/resend-verification`
+  и `/api/forgot-password` от брутфорса и спама письмами.
 
 ## Юридическая рамка (не менять без пересмотра)
 - Дивиденды — ТОЛЬКО бонусные акции (см. п.7), никогда не денежная выплата.

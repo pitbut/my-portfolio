@@ -41,6 +41,18 @@ const I18N = {
         verify_success: "Email подтверждён! Акция за регистрацию начислена, входим в кабинет…",
         verify_missing_token: "В ссылке не хватает токена подтверждения — открой её из письма ещё раз.",
 
+        forgot_password_link: "Забыли пароль?",
+        forgot_password_title: "Восстановление пароля",
+        forgot_password_hint: "Укажи email, с которым регистрировался(лась) — пришлём ссылку для установки нового пароля.",
+        forgot_password_submit: "Отправить ссылку",
+        forgot_password_sent: "Если аккаунт с такой почтой существует — письмо со ссылкой для смены пароля отправлено.",
+
+        reset_password_title: "Новый пароль",
+        new_password_label: "Новый пароль (минимум 8 символов)",
+        reset_password_submit: "Сохранить пароль",
+        reset_password_success: "Пароль изменён! Переходим на страницу входа…",
+        reset_missing_token: "В ссылке не хватает токена восстановления — открой её из письма ещё раз.",
+
         rank_label: "Место в рейтинге: #{rank}",
         shares_held_label: "Твоих акций",
         referral_views_label: "Переходы по ссылке",
@@ -158,6 +170,18 @@ const I18N = {
         verify_in_progress: "Checking the link…",
         verify_success: "Email confirmed! Your signup share was credited, logging you in…",
         verify_missing_token: "This link is missing a confirmation token — open it again from the email.",
+
+        forgot_password_link: "Forgot your password?",
+        forgot_password_title: "Password recovery",
+        forgot_password_hint: "Enter the email you registered with — we'll send a link to set a new password.",
+        forgot_password_submit: "Send link",
+        forgot_password_sent: "If an account with that email exists, an email with a password reset link has been sent.",
+
+        reset_password_title: "New password",
+        new_password_label: "New password (min. 8 characters)",
+        reset_password_submit: "Save password",
+        reset_password_success: "Password changed! Redirecting to the login page…",
+        reset_missing_token: "This link is missing a reset token — open it again from the email.",
 
         rank_label: "Rank: #{rank}",
         shares_held_label: "Your shares",
