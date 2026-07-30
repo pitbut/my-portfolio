@@ -1,5 +1,123 @@
 let selectedUserId = null;
 
+async function loadValuation() {
+    try {
+        const stats = await api("/api/stats");
+        document.getElementById("valuation-input").value = stats.valuation;
+        document.getElementById("valuation-current").textContent =
+            t("valuation_current", { valuation: stats.valuation, price: stats.price.toFixed(2) });
+    } catch (e) {
+        // не критично для остальной страницы — просто оставляем поле пустым
+    }
+}
+
+document.getElementById("valuation-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("valuation-error");
+    errorEl.textContent = "";
+    try {
+        const res = await api("/api/admin/valuation", {
+            method: "POST",
+            body: { total_valuation: parseFloat(document.getElementById("valuation-input").value) },
+        });
+        document.getElementById("valuation-current").textContent =
+            t("valuation_current", { valuation: res.total_valuation, price: res.price_per_share.toFixed(2) });
+    } catch (e) {
+        errorEl.textContent = e.message;
+    }
+});
+
+async function loadReferralBonusSettings() {
+    try {
+        const data = await api("/api/admin/referral-bonus");
+        document.getElementById("signup-bonus-input").value = data.signup_bonus_shares;
+        document.getElementById("referral-rate-input").value = Math.round(data.referral_signup_bonus_rate * 1000) / 10;
+        document.getElementById("referral-bonus-current").textContent = t("referral_bonus_current", {
+            shares: data.signup_bonus_shares,
+            rate: Math.round(data.referral_signup_bonus_rate * 1000) / 10,
+        });
+    } catch (e) {
+        // недостаточно прав или не загрузилось — просто оставляем поле пустым
+    }
+}
+
+document.getElementById("referral-bonus-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("referral-bonus-error");
+    errorEl.textContent = "";
+    try {
+        const ratePercent = parseFloat(document.getElementById("referral-rate-input").value);
+        const res = await api("/api/admin/referral-bonus", {
+            method: "POST",
+            body: {
+                signup_bonus_shares: parseFloat(document.getElementById("signup-bonus-input").value),
+                referral_signup_bonus_rate: ratePercent / 100,
+            },
+        });
+        document.getElementById("referral-bonus-current").textContent = t("referral_bonus_current", {
+            shares: res.signup_bonus_shares,
+            rate: Math.round(res.referral_signup_bonus_rate * 1000) / 10,
+        });
+    } catch (e) {
+        errorEl.textContent = e.message;
+    }
+});
+
+function renderDividendHistory(rows) {
+    const box = document.getElementById("dividend-history");
+    box.innerHTML = rows
+        .map(function (d) {
+            return (
+                "<div class='ledger-row'>" +
+                    escapeHtml(t("dividend_history_row", { date: d.created_at.slice(0, 16), shares: d.total_shares, holders: d.total_holders })) +
+                "</div>"
+            );
+        })
+        .join("") || "<div class='ledger-row'>" + t("no_dividend_history") + "</div>";
+}
+
+async function loadDividendHistory() {
+    try {
+        const data = await api("/api/admin/dividends");
+        renderDividendHistory(data.distributions);
+        document.getElementById("dividend-pool-input").value = data.monthly_pool;
+    } catch (e) {
+        // недостаточно прав или не загрузилось — просто оставляем пустым
+    }
+}
+
+document.getElementById("dividend-pool-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("dividend-error");
+    errorEl.textContent = "";
+    try {
+        const res = await api("/api/admin/dividends/pool", {
+            method: "POST",
+            body: { monthly_pool: parseInt(document.getElementById("dividend-pool-input").value, 10) },
+        });
+        errorEl.style.color = "#1e824c";
+        errorEl.textContent = t("save_dividend_pool_button") + ": " + res.monthly_pool;
+    } catch (e) {
+        errorEl.style.color = "#c0392b";
+        errorEl.textContent = e.message;
+    }
+});
+
+document.getElementById("dividend-distribute-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("dividend-error");
+    errorEl.textContent = "";
+    if (!window.confirm(t("distribute_confirm"))) return;
+    try {
+        const poolValue = document.getElementById("dividend-pool-input").value;
+        const body = poolValue ? { pool: parseInt(poolValue, 10) } : {};
+        const res = await api("/api/admin/dividends/distribute", { method: "POST", body: body });
+        errorEl.style.color = "#1e824c";
+        errorEl.textContent = t("dividend_distribute_success", { shares: res.distributed, holders: res.holders });
+        loadDividendHistory();
+        loadUsersList();
+    } catch (e) {
+        errorEl.style.color = "#c0392b";
+        errorEl.textContent = e.message;
+    }
+});
+
 async function loadUsersList() {
     try {
         const data = await api("/api/admin/users");
@@ -7,15 +125,20 @@ async function loadUsersList() {
         body.innerHTML = data.users
             .map(function (u) {
                 return (
-                    "<tr onclick='openUserDetail(" + u.id + ")'>" +
-                        "<td>" + u.display_name + "</td>" +
-                        "<td>" + u.email + "</td>" +
-                        "<td>" + u.shares_held + "</td>" +
+                    "<tr data-user-id='" + u.id + "'>" +
+                        "<td>" + escapeHtml(u.display_name) + "</td>" +
+                        "<td>" + escapeHtml(u.email) + "</td>" +
+                        "<td>" + Number(u.shares_held).toFixed(2) + "</td>" +
                         "<td>" + u.created_at.slice(0, 10) + "</td>" +
                     "</tr>"
                 );
             })
             .join("");
+        body.querySelectorAll("tr[data-user-id]").forEach(function (row) {
+            row.addEventListener("click", function () {
+                openUserDetail(parseInt(row.getAttribute("data-user-id"), 10));
+            });
+        });
     } catch (e) {
         document.getElementById("admin-content").classList.add("detail-hidden");
         document.getElementById("access-denied").classList.remove("detail-hidden");
@@ -28,25 +151,25 @@ async function openUserDetail(userId) {
     document.getElementById("user-detail-card").classList.remove("detail-hidden");
     document.getElementById("detail-name").textContent = data.user.display_name;
     document.getElementById("detail-email").textContent = data.user.email;
-    document.getElementById("detail-shares").textContent = data.shares_held;
+    document.getElementById("detail-shares").textContent = Number(data.shares_held).toFixed(2);
     document.getElementById("detail-referred").textContent = data.referred_friends;
 
     document.getElementById("detail-ledger").innerHTML = data.ledger
         .map(function (l) {
             return (
                 "<div class='ledger-row'>" +
-                    l.acquired_at.slice(0, 16) + " · " + l.quantity + " акц. · $" + l.price_paid.toFixed(2) +
+                    l.acquired_at.slice(0, 16) + " · " + Number(l.quantity).toFixed(2) + " акц. · $" + l.price_paid.toFixed(2) +
                     " · " + l.source +
                 "</div>"
             );
         })
-        .join("") || "<div class='ledger-row'>нет операций</div>";
+        .join("") || "<div class='ledger-row'>" + t("no_operations") + "</div>";
 
     document.getElementById("detail-messages").innerHTML = data.messages
         .map(function (m) {
-            return "<div class='msg-item'>" + m.body + "<div class='msg-date'>" + m.created_at.slice(0, 16) + "</div></div>";
+            return "<div class='msg-item'>" + escapeHtml(m.body) + "<div class='msg-date'>" + m.created_at.slice(0, 16) + "</div></div>";
         })
-        .join("") || "<div class='msg-item'>сообщений пока не было</div>";
+        .join("") || "<div class='msg-item'>" + t("no_sent_messages") + "</div>";
 }
 
 document.getElementById("send-message-btn").addEventListener("click", async function () {
@@ -67,4 +190,7 @@ if (!authToken()) {
     window.location.href = "login.html";
 } else {
     loadUsersList();
+    loadValuation();
+    loadDividendHistory();
+    loadReferralBonusSettings();
 }

@@ -3,11 +3,11 @@ let priceChart = null;
 function renderAuthArea() {
     const area = document.getElementById("auth-area");
     if (authToken()) {
-        area.innerHTML = '<a class="link-inline" href="cabinet.html" style="margin-left:10px;">Кабинет</a>';
+        area.innerHTML = '<a class="link-inline" href="cabinet.html" style="margin-left:10px;">' + t("nav_cabinet") + '</a>';
     } else {
         area.innerHTML =
-            '<a class="link-inline" href="login.html" style="margin-left:10px;">Войти</a>' +
-            '<a class="link-inline" href="register.html" style="margin-left:10px;">Регистрация</a>';
+            '<a class="link-inline" href="login.html" style="margin-left:10px;">' + t("nav_login") + '</a>' +
+            '<a class="link-inline" href="register.html" style="margin-left:10px;">' + t("nav_register") + '</a>';
     }
 }
 
@@ -56,14 +56,27 @@ async function loadReferral() {
     try {
         const cabinet = await api("/api/cabinet");
         document.getElementById("ref-link").value = myReferralLink(cabinet.referral_code);
-        document.getElementById("ref-stats").textContent =
-            "По твоей ссылке заходили " + cabinet.referral_views + " раз · приглашено друзей: " + cabinet.referred_friends;
+        document.getElementById("ref-stats").textContent = t("referral_stats", {
+            views: cabinet.referral_views,
+            friends: cabinet.referred_friends,
+        });
     } catch (e) {
         // токен истёк — тихо игнорируем на главной странице
     }
 }
 
+// Не считаем повторным просмотром каждое сворачивание/разворачивание вкладки —
+// на мобильных браузер часто перезагружает страницу при возврате из фона,
+// и trackView() запускался бы заново за доли секунды. Поэтому считаем не чаще
+// одного просмотра с одного браузера за VIEW_THROTTLE_MS.
+const VIEW_THROTTLE_MS = 30 * 60 * 1000; // 30 минут
+
 function trackView() {
+    const last = parseInt(localStorage.getItem("shares_last_view") || "0", 10);
+    const now = Date.now();
+    if (now - last < VIEW_THROTTLE_MS) return;
+    localStorage.setItem("shares_last_view", String(now));
+
     const ref = getReferralCodeFromUrl();
     const path = ref ? "/api/view?ref=" + encodeURIComponent(ref) : "/api/view";
     api(path, { method: "POST" }).catch(function () {});

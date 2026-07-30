@@ -19,20 +19,71 @@
 <body>
     <div class="container" style="max-width: 900px;">
         <div class="topbar">
-            <div class="logo">robutpit.shares · admin</div>
-            <a class="link-inline" href="index.html">На главную</a>
+            <div class="logo" data-i18n="admin_title">robutpit.shares · admin</div>
+            <div>
+                <select id="lang-select">
+                    <option value="ru">RU</option>
+                    <option value="en">EN</option>
+                    <option value="es">ES</option>
+                    <option value="pt">PT</option>
+                    <option value="uz">UZ</option>
+                    <option value="ar">AR</option>
+                </select>
+                <a class="link-inline" href="index.html" data-i18n="nav_home">На главную</a>
+            </div>
         </div>
 
-        <div id="access-denied" class="card detail-hidden">
+        <div id="access-denied" class="card detail-hidden" data-i18n="access_denied">
             У этого аккаунта нет прав администратора.
         </div>
 
         <div id="admin-content">
             <div class="card">
-                <strong>Держатели акций</strong>
+                <strong data-i18n="valuation_title">Оценка проекта и цена акции</strong>
+                <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="valuation_hint">Укажи общую сумму — оценку стоимости всего проекта. Она делится поровну на все 10 000 акций — так и получается цена одной акции.</p>
+                <div class="buy-row" style="margin-top:10px;">
+                    <input type="number" id="valuation-input" data-i18n-placeholder="valuation_placeholder" placeholder="общая сумма, $" min="1" step="0.01">
+                    <button id="valuation-btn" data-i18n="save_valuation_button">Сохранить</button>
+                </div>
+                <p style="font-size:13px; margin-top:8px;" id="valuation-current"></p>
+                <div class="error-msg" id="valuation-error"></div>
+            </div>
+
+            <div class="card">
+                <strong data-i18n="referral_bonus_title">Бонус за регистрацию</strong>
+                <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="referral_bonus_hint">Акция начисляется за подтверждённую регистрацию (не за покупку). Если регистрация была по реферальной ссылке, эта акция делится: доля ниже уходит пригласившему, остальное — новому участнику.</p>
+                <div class="buy-row" style="margin-top:10px;">
+                    <input type="number" id="signup-bonus-input" data-i18n-placeholder="signup_bonus_placeholder" placeholder="акций за регистрацию" min="0" step="0.01">
+                    <input type="number" id="referral-rate-input" data-i18n-placeholder="referral_rate_placeholder" placeholder="доля рефереру, %" min="0" max="100" step="0.1">
+                    <button id="referral-bonus-btn" data-i18n="save_referral_bonus_button">Сохранить</button>
+                </div>
+                <p style="font-size:13px; margin-top:8px;" id="referral-bonus-current"></p>
+                <div class="error-msg" id="referral-bonus-error"></div>
+            </div>
+
+            <div class="card">
+                <strong data-i18n="admin_dividends_title">Дивиденды держателям (бонусные акции)</strong>
+                <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="admin_dividends_hint">Раз в месяц часть акций начисляется всем держателям бесплатно, пропорционально их доле — без денег, только бонусные акции.</p>
+                <div class="buy-row" style="margin-top:10px;">
+                    <input type="number" id="dividend-pool-input" data-i18n-placeholder="dividend_pool_placeholder" placeholder="размер пула, акций/мес" min="0" step="1">
+                    <button class="secondary" id="dividend-pool-btn" data-i18n="save_dividend_pool_button">Сохранить пул</button>
+                    <button id="dividend-distribute-btn" data-i18n="distribute_now_button">Начислить сейчас</button>
+                </div>
+                <div class="error-msg" id="dividend-error"></div>
+                <strong style="font-size:13px; display:block; margin-top:14px;" data-i18n="dividend_history_title">История начислений</strong>
+                <div id="dividend-history" style="margin-top:8px;"></div>
+            </div>
+
+            <div class="card">
+                <strong data-i18n="users_title">Держатели акций</strong>
                 <table class="admin-users" style="margin-top:12px;">
                     <thead>
-                        <tr><th>Имя</th><th>Email</th><th>Акций</th><th>Регистрация</th></tr>
+                        <tr>
+                            <th data-i18n="col_name">Имя</th>
+                            <th data-i18n="col_email">Email</th>
+                            <th data-i18n="col_shares">Акций</th>
+                            <th data-i18n="col_date">Регистрация</th>
+                        </tr>
                     </thead>
                     <tbody id="users-table-body"></tbody>
                 </table>
@@ -41,25 +92,26 @@
             <div class="card detail-hidden" id="user-detail-card">
                 <h3 id="detail-name" style="font-size:16px; margin-bottom:6px;"></h3>
                 <p style="font-size:13px; color:#666; margin-bottom:10px;" id="detail-email"></p>
-                <p style="font-size:13px; margin-bottom:4px;">Акций: <strong id="detail-shares"></strong></p>
-                <p style="font-size:13px; margin-bottom:14px;">Приглашено друзей: <strong id="detail-referred"></strong></p>
+                <p style="font-size:13px; margin-bottom:4px;"><span data-i18n="col_shares">Акций</span>: <strong id="detail-shares"></strong></p>
+                <p style="font-size:13px; margin-bottom:14px;"><span data-i18n="referred_friends_label">Приглашено друзей</span>: <strong id="detail-referred"></strong></p>
 
-                <strong style="font-size:13px;">История операций</strong>
+                <strong style="font-size:13px;" data-i18n="history_title">История операций</strong>
                 <div id="detail-ledger" style="margin:8px 0 16px;"></div>
 
-                <strong style="font-size:13px;">Написать сообщение</strong>
+                <strong style="font-size:13px;" data-i18n="message_title">Написать сообщение</strong>
                 <div class="buy-row" style="margin-top:8px;">
-                    <input type="text" id="message-body" placeholder="Текст сообщения" style="flex:1;">
-                    <button id="send-message-btn">Отправить</button>
+                    <input type="text" id="message-body" data-i18n-placeholder="message_placeholder" placeholder="Текст сообщения" style="flex:1;">
+                    <button id="send-message-btn" data-i18n="send_button">Отправить</button>
                 </div>
                 <div class="error-msg" id="message-error"></div>
 
-                <strong style="font-size:13px; display:block; margin-top:16px;">Отправленные сообщения</strong>
+                <strong style="font-size:13px; display:block; margin-top:16px;" data-i18n="sent_messages_title">Отправленные сообщения</strong>
                 <div id="detail-messages"></div>
             </div>
         </div>
     </div>
 
+    <script src="js/i18n.js"></script>
     <script src="js/api.js"></script>
     <script src="js/admin.js"></script>
 </body>

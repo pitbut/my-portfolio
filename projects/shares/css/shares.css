@@ -93,3 +93,9 @@ table.orderbook { width: 100%; font-size: 13px; border-collapse: collapse; }
 table.orderbook td { padding: 4px 8px; }
 table.orderbook .sell { color: #c0392b; }
 table.orderbook .buy { color: #1e824c; }
+table.orderbook td[data-user]:hover { background: #f4f5f7; border-radius: 6px; }
+
+.detail-hidden { display: none; }
+
+.msg-row .reply-btn { padding: 4px 8px; font-size: 11px; margin-top: 4px; }
+.transfer-row { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #eee; }

@@ -21,7 +21,11 @@ async function api(path, options) {
     });
 
     const data = await res.json().catch(function () { return {}; });
-    if (!res.ok) throw new Error(data.error || "Ошибка запроса");
+    if (!res.ok) {
+        const err = new Error(data.error || "Ошибка запроса");
+        err.data = data; // например, data.needs_verification — email ещё не подтверждён
+        throw err;
+    }
     return data;
 }
 
@@ -32,4 +36,12 @@ function getReferralCodeFromUrl() {
 
 function myReferralLink(code) {
     return "https://www.robutpit.com/projects/shares/?ref=" + code;
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function escapeAttr(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 }
