@@ -50,6 +50,19 @@
             </div>
 
             <div class="card">
+                <strong data-i18n="admin_dividends_title">Дивиденды держателям (бонусные акции)</strong>
+                <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="admin_dividends_hint">Раз в месяц часть акций начисляется всем держателям бесплатно, пропорционально их доле — без денег, только бонусные акции.</p>
+                <div class="buy-row" style="margin-top:10px;">
+                    <input type="number" id="dividend-pool-input" data-i18n-placeholder="dividend_pool_placeholder" placeholder="размер пула, акций/мес" min="0" step="1">
+                    <button class="secondary" id="dividend-pool-btn" data-i18n="save_dividend_pool_button">Сохранить пул</button>
+                    <button id="dividend-distribute-btn" data-i18n="distribute_now_button">Начислить сейчас</button>
+                </div>
+                <div class="error-msg" id="dividend-error"></div>
+                <strong style="font-size:13px; display:block; margin-top:14px;" data-i18n="dividend_history_title">История начислений</strong>
+                <div id="dividend-history" style="margin-top:8px;"></div>
+            </div>
+
+            <div class="card">
                 <strong data-i18n="users_title">Держатели акций</strong>
                 <table class="admin-users" style="margin-top:12px;">
                     <thead>

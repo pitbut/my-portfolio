@@ -11,6 +11,11 @@ database_id = "ЗАМЕНИ_НА_ID_ПОСЛЕ_wrangler_d1_create"
 ALLOWED_ORIGIN = "https://www.robutpit.com"
 PAYMENT_CHECKOUT_BASE_URL = "https://checkout.example/pending"
 
+# Автоматическое ежемесячное начисление дивидендов (бонусными акциями,
+# без денег) — 00:05 UTC 1-го числа каждого месяца, см. scheduled() в src/index.js.
+[triggers]
+crons = ["5 0 1 * *"]
+
 # Секреты (не хранить в этом файле, задавать командой ниже):
 #   wrangler secret put PAYME_MERCHANT_ID
 #   wrangler secret put PAYME_SECRET_KEY

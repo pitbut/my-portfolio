@@ -26,6 +26,63 @@ document.getElementById("valuation-btn").addEventListener("click", async functio
     }
 });
 
+function renderDividendHistory(rows) {
+    const box = document.getElementById("dividend-history");
+    box.innerHTML = rows
+        .map(function (d) {
+            return (
+                "<div class='ledger-row'>" +
+                    escapeHtml(t("dividend_history_row", { date: d.created_at.slice(0, 16), shares: d.total_shares, holders: d.total_holders })) +
+                "</div>"
+            );
+        })
+        .join("") || "<div class='ledger-row'>" + t("no_dividend_history") + "</div>";
+}
+
+async function loadDividendHistory() {
+    try {
+        const data = await api("/api/admin/dividends");
+        renderDividendHistory(data.distributions);
+        document.getElementById("dividend-pool-input").value = data.monthly_pool;
+    } catch (e) {
+        // недостаточно прав или не загрузилось — просто оставляем пустым
+    }
+}
+
+document.getElementById("dividend-pool-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("dividend-error");
+    errorEl.textContent = "";
+    try {
+        const res = await api("/api/admin/dividends/pool", {
+            method: "POST",
+            body: { monthly_pool: parseInt(document.getElementById("dividend-pool-input").value, 10) },
+        });
+        errorEl.style.color = "#1e824c";
+        errorEl.textContent = t("save_dividend_pool_button") + ": " + res.monthly_pool;
+    } catch (e) {
+        errorEl.style.color = "#c0392b";
+        errorEl.textContent = e.message;
+    }
+});
+
+document.getElementById("dividend-distribute-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("dividend-error");
+    errorEl.textContent = "";
+    if (!window.confirm(t("distribute_confirm"))) return;
+    try {
+        const poolValue = document.getElementById("dividend-pool-input").value;
+        const body = poolValue ? { pool: parseInt(poolValue, 10) } : {};
+        const res = await api("/api/admin/dividends/distribute", { method: "POST", body: body });
+        errorEl.style.color = "#1e824c";
+        errorEl.textContent = t("dividend_distribute_success", { shares: res.distributed, holders: res.holders });
+        loadDividendHistory();
+        loadUsersList();
+    } catch (e) {
+        errorEl.style.color = "#c0392b";
+        errorEl.textContent = e.message;
+    }
+});
+
 async function loadUsersList() {
     try {
         const data = await api("/api/admin/users");
@@ -99,4 +156,5 @@ if (!authToken()) {
 } else {
     loadUsersList();
     loadValuation();
+    loadDividendHistory();
 }

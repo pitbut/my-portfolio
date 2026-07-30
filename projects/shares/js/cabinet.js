@@ -16,10 +16,26 @@ async function loadCabinet() {
         document.getElementById("cab-reffriends").textContent = c.referred_friends;
         document.getElementById("cab-ref-link").value = myReferralLink(c.referral_code);
         renderTransferHistory(c.transfers || []);
+        renderDividends(c.dividends_total || 0, c.dividends_recent || []);
     } catch (e) {
         localStorage.removeItem("shares_token");
         window.location.href = "login.html";
     }
+}
+
+function renderDividends(total, recent) {
+    document.getElementById("dividends-total").textContent = total;
+    const box = document.getElementById("dividends-history");
+    box.innerHTML = recent
+        .map(function (d) {
+            return (
+                "<div class='transfer-row'>" +
+                    t("dividend_row", { qty: d.quantity }) +
+                    "<span style='color:#999;'> · " + d.acquired_at.slice(0, 16) + "</span>" +
+                "</div>"
+            );
+        })
+        .join("") || "<div class='transfer-row' style='color:#999;'>" + t("no_dividends") + "</div>";
 }
 
 function renderTransferHistory(transfers) {

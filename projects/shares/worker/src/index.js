@@ -2,13 +2,15 @@
 // Деплой: wrangler deploy (см. wrangler.toml)
 //
 // ВАЖНО (юридическая рамка, не менять без пересмотра всей схемы):
-//  - Здесь никогда не начисляются денежные дивиденды из прибыли/рекламы.
+//  - Дивиденды — это ТОЛЬКО бонусные акции, никогда не деньги (см. distributeDividends).
 //  - Обратный выкуп акций деньгами проекта не производится — только
-//    сведение продавца с покупателем на вторичном рынке (см. matchSellOrder/matchBuyOrder).
+//    сведение продавца с покупателем на вторичном рынке (см. matchSellOrder/matchBuyOrder)
+//    либо прямая передача акций между участниками (см. handleTransfer).
 //  - PLATFORM_FEE — комиссия платформы за посредничество на вторичном рынке.
 
-const PRIMARY_SUPPLY_LIMIT = 10000;
+const PRIMARY_SUPPLY_LIMIT = 10000; // сколько акций максимум может продать сам проект напрямую
 const DEFAULT_VALUATION = 10000; // используется, пока админ ни разу не задавал оценку ($1 за акцию)
+const DEFAULT_MONTHLY_DIVIDEND_POOL = 100; // бонусных акций в месяц, пока админ не задал своё значение
 const PLATFORM_FEE_RATE = 0.07; // 7% комиссия платформы на вторичном рынке
 
 function corsHeaders(env) {
@@ -85,12 +87,74 @@ async function getTotalValuation(env) {
   return value > 0 ? value : DEFAULT_VALUATION;
 }
 
+// Сколько акций вообще существует прямо сейчас — включая первичные покупки,
+// бонусы за рефералов и бонусные акции-дивиденды (растёт со временем, как при
+// обычном stock dividend/bonus issue: доля каждого держателя не размывается,
+// потому что дивиденды начисляются всем держателям пропорционально).
+async function totalOutstandingShares(env) {
+  const row = await env.DB.prepare(`SELECT COALESCE(SUM(quantity), 0) as total FROM shares_ledger`).first();
+  return row.total > 0 ? row.total : 0;
+}
+
 async function currentPrimaryPrice(env) {
   const stat = await env.DB.prepare(`SELECT value FROM site_stats WHERE key = 'total_shares_sold_primary'`).first();
   const sold = stat ? stat.value : 0;
   const valuation = await getTotalValuation(env);
-  const price = valuation / PRIMARY_SUPPLY_LIMIT;
-  return { price: Math.round(price * 100) / 100, sold, remaining: PRIMARY_SUPPLY_LIMIT - sold, valuation };
+  const totalShares = (await totalOutstandingShares(env)) || PRIMARY_SUPPLY_LIMIT;
+  const price = valuation / totalShares;
+  return {
+    price: Math.round(price * 100) / 100,
+    sold,
+    remaining: PRIMARY_SUPPLY_LIMIT - sold,
+    valuation,
+    total_shares_outstanding: totalShares,
+  };
+}
+
+// Пул дивидендов на месяц (в акциях, не в деньгах) — настраивается админом,
+// используется и ручным /api/admin/dividends/distribute, и автоматическим cron'ом.
+async function getMonthlyDividendPool(env) {
+  const row = await env.DB.prepare(`SELECT value FROM site_settings WHERE key = 'monthly_dividend_pool'`).first();
+  const value = row ? parseInt(row.value, 10) : DEFAULT_MONTHLY_DIVIDEND_POOL;
+  return value >= 0 ? value : DEFAULT_MONTHLY_DIVIDEND_POOL;
+}
+
+// Дивиденды = бесплатные бонусные акции, никогда не деньги. Раздаются всем
+// текущим держателям строго пропорционально их доле в общем количестве акций;
+// остаток от округления вниз просто не раздаётся в этом месяце.
+async function distributeDividends(env, poolSize, note) {
+  const pool = Math.max(0, Math.floor(poolSize || 0));
+  if (pool <= 0) return { distributed: 0, holders: 0 };
+
+  const holdings = await env.DB.prepare(
+    `SELECT user_id, SUM(quantity) as total FROM shares_ledger GROUP BY user_id HAVING total > 0`
+  ).all();
+  const totalOutstanding = holdings.results.reduce(function (sum, h) { return sum + h.total; }, 0);
+  if (totalOutstanding <= 0) return { distributed: 0, holders: 0 };
+
+  const statements = [];
+  let distributed = 0;
+  let holdersCount = 0;
+  for (const h of holdings.results) {
+    const allotment = Math.floor((pool * h.total) / totalOutstanding);
+    if (allotment > 0) {
+      statements.push(
+        env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, 0, 'dividend')`)
+          .bind(h.user_id, allotment)
+      );
+      distributed += allotment;
+      holdersCount += 1;
+    }
+  }
+  if (statements.length === 0) return { distributed: 0, holders: 0 };
+
+  statements.push(
+    env.DB.prepare(`INSERT INTO dividend_distributions (total_shares, total_holders, note) VALUES (?, ?, ?)`)
+      .bind(distributed, holdersCount, note || null)
+  );
+  await env.DB.batch(statements);
+
+  return { distributed, holders: holdersCount };
 }
 
 // --- Матчинг вторичного рынка --------------------------------------------
@@ -119,6 +183,10 @@ async function matchNewSellOrder(env, sellOrder) {
         .bind(tradeQty, tradeQty, buy.id),
       env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, ?, 'secondary')`)
         .bind(buy.user_id, tradeQty, buy.price_per_share),
+      // Списываем проданное количество у продавца — без этой строки акции
+      // задваивались бы (продавец формально оставался их держателем).
+      env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, ?, 'secondary')`)
+        .bind(sellOrder.user_id, -tradeQty, buy.price_per_share),
     ]);
 
     remaining -= tradeQty;
@@ -154,6 +222,10 @@ async function matchNewBuyOrder(env, buyOrder) {
         .bind(tradeQty, tradeQty, sell.id),
       env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, ?, 'secondary')`)
         .bind(buyOrder.user_id, tradeQty, sell.price_per_share),
+      // Списываем проданное количество у продавца — без этой строки акции
+      // задваивались бы (продавец формально оставался их держателем).
+      env.DB.prepare(`INSERT INTO shares_ledger (user_id, quantity, price_paid, source) VALUES (?, ?, ?, 'secondary')`)
+        .bind(sell.user_id, -tradeQty, sell.price_per_share),
     ]);
 
     remaining -= tradeQty;
@@ -225,7 +297,7 @@ async function handleLogin(request, env) {
 }
 
 async function handleStats(env) {
-  const { price, sold, remaining, valuation } = await currentPrimaryPrice(env);
+  const { price, sold, remaining, valuation, total_shares_outstanding } = await currentPrimaryPrice(env);
   const viewsRow = await env.DB.prepare(`SELECT value FROM site_stats WHERE key = 'total_views'`).first();
   return json(
     {
@@ -233,6 +305,7 @@ async function handleStats(env) {
       sold_primary: sold,
       remaining_primary: remaining,
       total_supply: PRIMARY_SUPPLY_LIMIT,
+      total_shares_outstanding,
       total_views: viewsRow.value,
       valuation,
     },
@@ -359,6 +432,19 @@ async function handleCabinet(request, env) {
     .bind(user.id, user.id, user.id, user.id)
     .all();
 
+  // Дивиденды — бонусные акции, начисленные бесплатно (см. distributeDividends).
+  const dividendsTotal = await env.DB.prepare(
+    `SELECT COALESCE(SUM(quantity), 0) as total FROM shares_ledger WHERE user_id = ? AND source = 'dividend'`
+  )
+    .bind(user.id)
+    .first();
+  const dividendsRecent = await env.DB.prepare(
+    `SELECT quantity, acquired_at FROM shares_ledger WHERE user_id = ? AND source = 'dividend'
+     ORDER BY acquired_at DESC LIMIT 12`
+  )
+    .bind(user.id)
+    .all();
+
   return json(
     {
       user_id: user.id,
@@ -370,6 +456,8 @@ async function handleCabinet(request, env) {
       referral_views: referralViews.cnt,
       referred_friends: referredCount.cnt,
       transfers: transfers.results,
+      dividends_total: dividendsTotal.total,
+      dividends_recent: dividendsRecent.results,
     },
     200,
     env
@@ -510,6 +598,52 @@ async function handleAdminSetValuation(request, env) {
 
   const { price } = await currentPrimaryPrice(env);
   return json({ ok: true, total_valuation: value, price_per_share: price }, 200, env);
+}
+
+// Админ настраивает размер месячного пула дивидендов (в акциях, не в деньгах).
+async function handleAdminSetDividendPool(request, env) {
+  const admin = await requireAdmin(request, env);
+  if (!admin) return json({ error: "требуется доступ администратора" }, 403, env);
+
+  const { monthly_pool } = await request.json();
+  const value = parseInt(monthly_pool, 10);
+  if (isNaN(value) || value < 0) return json({ error: "укажи корректный размер пула (0 или больше)" }, 400, env);
+
+  await env.DB.prepare(
+    `INSERT INTO site_settings (key, value) VALUES ('monthly_dividend_pool', ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+  )
+    .bind(String(value))
+    .run();
+
+  return json({ ok: true, monthly_pool: value }, 200, env);
+}
+
+// Ручное начисление дивидендов прямо сейчас (например, в конце месяца, если
+// автоматический cron ещё не настроен в Cloudflare). Можно передать свой
+// размер пула через body.pool, иначе используется настроенный monthly_pool.
+async function handleAdminDistributeDividendsNow(request, env) {
+  const admin = await requireAdmin(request, env);
+  if (!admin) return json({ error: "требуется доступ администратора" }, 403, env);
+
+  const body = await request.json().catch(function () { return {}; });
+  const pool = body && body.pool != null ? parseInt(body.pool, 10) : await getMonthlyDividendPool(env);
+  if (isNaN(pool) || pool < 0) return json({ error: "некорректный размер пула" }, 400, env);
+
+  const result = await distributeDividends(env, pool, "ручное начисление администратором");
+  return json({ ok: true, distributed: result.distributed, holders: result.holders }, 200, env);
+}
+
+async function handleAdminDividendHistory(request, env) {
+  const admin = await requireAdmin(request, env);
+  if (!admin) return json({ error: "требуется доступ администратора" }, 403, env);
+
+  const rows = await env.DB.prepare(
+    `SELECT id, total_shares, total_holders, note, created_at FROM dividend_distributions
+     ORDER BY created_at DESC LIMIT 24`
+  ).all();
+  const monthlyPool = await getMonthlyDividendPool(env);
+  return json({ distributions: rows.results, monthly_pool: monthlyPool }, 200, env);
 }
 
 async function handleAdminSendMessage(request, env) {
@@ -699,6 +833,9 @@ export default {
       if (url.pathname === "/api/admin/users" && request.method === "GET") return await handleAdminUsersList(request, env);
       if (url.pathname === "/api/admin/message" && request.method === "POST") return await handleAdminSendMessage(request, env);
       if (url.pathname === "/api/admin/valuation" && request.method === "POST") return await handleAdminSetValuation(request, env);
+      if (url.pathname === "/api/admin/dividends/pool" && request.method === "POST") return await handleAdminSetDividendPool(request, env);
+      if (url.pathname === "/api/admin/dividends/distribute" && request.method === "POST") return await handleAdminDistributeDividendsNow(request, env);
+      if (url.pathname === "/api/admin/dividends" && request.method === "GET") return await handleAdminDividendHistory(request, env);
       const userDetailMatch = url.pathname.match(/^\/api\/admin\/users\/(\d+)$/);
       if (userDetailMatch && request.method === "GET") return await handleAdminUserDetail(request, env, userDetailMatch[1]);
 
@@ -706,5 +843,14 @@ export default {
     } catch (err) {
       return json({ error: "internal error", detail: String(err) }, 500, env);
     }
+  },
+
+  // Автоматическое ежемесячное начисление дивидендов бонусными акциями —
+  // расписание задаётся в wrangler.toml ([triggers] crons), например
+  // "5 0 1 * *" (00:05 UTC 1-го числа каждого месяца). Деньги здесь никогда
+  // не участвуют — только акции, пропорционально текущим держателям.
+  async scheduled(event, env, ctx) {
+    const pool = await getMonthlyDividendPool(env);
+    await distributeDividends(env, pool, "автоматическое ежемесячное начисление (cron)");
   },
 };

@@ -32,15 +32,16 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at TEXT NOT NULL
 );
 
--- Одна запись = один "пакет" акций, купленных/переданных за одну операцию.
+-- Одна запись = один "пакет" акций, купленных/переданных/начисленных за одну операцию.
 -- transfer_out/transfer_in — прямая передача акций между двумя участниками (см. таблицу transfers).
+-- dividend — бонусные акции-дивиденды, начисленные бесплатно (см. distributeDividends, НИКОГДА не деньги).
 CREATE TABLE IF NOT EXISTS shares_ledger (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id),
   quantity INTEGER NOT NULL,
   price_paid REAL NOT NULL,
   acquired_at TEXT NOT NULL DEFAULT (datetime('now')),
-  source TEXT NOT NULL CHECK (source IN ('primary','secondary','bonus','transfer_in','transfer_out'))
+  source TEXT NOT NULL CHECK (source IN ('primary','secondary','bonus','transfer_in','transfer_out','dividend'))
 );
 
 -- Заявки на продажу (вторичный рынок)
@@ -106,6 +107,18 @@ CREATE TABLE IF NOT EXISTS site_settings (
 );
 
 INSERT OR IGNORE INTO site_settings (key, value) VALUES ('total_valuation', '10000');
+-- monthly_dividend_pool — сколько бонусных акций (не денег!) раздаётся всем держателям
+-- за месяц, пропорционально их доле (см. distributeDividends в worker/src/index.js).
+INSERT OR IGNORE INTO site_settings (key, value) VALUES ('monthly_dividend_pool', '100');
+
+-- История начислений дивидендов (бонусных акций, без денег) держателям.
+CREATE TABLE IF NOT EXISTS dividend_distributions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  total_shares INTEGER NOT NULL,
+  total_holders INTEGER NOT NULL,
+  note TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
 -- Прямая передача акций от одного участника другому. Любая покупка/продажа/дарение
 -- акций между людьми — это в итоге такая передача: деньгами или иным способом
