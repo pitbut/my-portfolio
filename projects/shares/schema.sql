@@ -174,6 +174,16 @@ CREATE TABLE IF NOT EXISTS referral_views (
   viewed_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Дедупликация просмотров по IP (хранится хэш, не сам адрес) — без этого
+-- один и тот же посетитель мог бы бесконечно накручивать total_views, просто
+-- закрывая и открывая вкладку (localStorage на клиенте это не остановит,
+-- его легко обойти очисткой данных браузера/приватной вкладкой).
+-- См. handleTrackView в worker/src/index.js.
+CREATE TABLE IF NOT EXISTS view_dedup (
+  ip_hash TEXT PRIMARY KEY,
+  last_counted_at TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_sell_orders_status_price ON sell_orders(status, price_per_share);
 CREATE INDEX IF NOT EXISTS idx_buy_orders_status_price ON buy_orders(status, price_per_share);
 CREATE INDEX IF NOT EXISTS idx_shares_ledger_user ON shares_ledger(user_id);

@@ -14,6 +14,7 @@ const DEFAULT_MONTHLY_DIVIDEND_POOL = 100; // бонусных акций в м�
 const DEFAULT_SIGNUP_BONUS_SHARES = 1; // акций за подтверждённую регистрацию, пока админ не задал своё значение
 const DEFAULT_REFERRAL_SIGNUP_RATE = 0.05; // доля этой акции (5%), уходящая пригласившему
 const PLATFORM_FEE_RATE = 0.07; // 7% комиссия платформы на вторичном рынке
+const VIEW_DEDUP_MINUTES = 30; // один IP считается за один просмотр не чаще раза в этот период
 
 function corsHeaders(env) {
   return {
@@ -38,6 +39,13 @@ function hexToBuf(hex) {
   const arr = new Uint8Array(hex.length / 2);
   for (let i = 0; i < arr.length; i++) arr[i] = parseInt(hex.substr(i * 2, 2), 16);
   return arr.buffer;
+}
+
+// Хэшируем IP перед сохранением — для дедупликации просмотров сырой адрес
+// хранить не нужно, а хэш всё ещё позволяет узнать "тот же это IP или нет".
+async function hashIp(ip) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip));
+  return bufToHex(digest);
 }
 
 async function hashPassword(password, saltHex) {
@@ -442,17 +450,42 @@ async function handleStats(env) {
   );
 }
 
+// Дедупликация по IP: закрыть и снова открыть вкладку (или почистить
+// localStorage/зайти в приватном режиме) не должно накручивать total_views —
+// один и тот же IP засчитывается не чаще раза в VIEW_DEDUP_MINUTES минут.
+// Клиентский троттлинг в main.js — это только "не дёргать API лишний раз",
+// настоящая защита от накрутки — здесь, на сервере.
 async function handleTrackView(request, env) {
   const url = new URL(request.url);
   const ref = url.searchParams.get("ref");
-  await env.DB.prepare(`UPDATE site_stats SET value = value + 1 WHERE key = 'total_views'`).run();
+  const ip = request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || "unknown";
+  const ipHash = await hashIp(ip);
+
+  const recent = await env.DB.prepare(
+    `SELECT 1 FROM view_dedup WHERE ip_hash = ? AND last_counted_at > datetime('now', '-${VIEW_DEDUP_MINUTES} minutes')`
+  )
+    .bind(ipHash)
+    .first();
+
+  if (recent) {
+    return json({ ok: true, counted: false }, 200, env);
+  }
+
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE site_stats SET value = value + 1 WHERE key = 'total_views'`),
+    env.DB.prepare(
+      `INSERT INTO view_dedup (ip_hash, last_counted_at) VALUES (?, datetime('now'))
+       ON CONFLICT(ip_hash) DO UPDATE SET last_counted_at = excluded.last_counted_at`
+    ).bind(ipHash),
+  ]);
+
   if (ref) {
     const referrer = await env.DB.prepare(`SELECT id FROM users WHERE referral_code = ?`).bind(ref).first();
     if (referrer) {
       await env.DB.prepare(`INSERT INTO referral_views (referrer_id) VALUES (?)`).bind(referrer.id).run();
     }
   }
-  return json({ ok: true }, 200, env);
+  return json({ ok: true, counted: true }, 200, env);
 }
 
 // Создаёт "намерение покупки" — реальный платёж проводится через Payme/Click,
