@@ -1,0 +1,18 @@
+name = "robutpit-shares-api"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "site_shares_db"
+database_id = "ЗАМЕНИ_НА_ID_ПОСЛЕ_wrangler_d1_create"
+
+[vars]
+ALLOWED_ORIGIN = "https://www.robutpit.com"
+PAYMENT_CHECKOUT_BASE_URL = "https://checkout.example/pending"
+
+# Секреты (не хранить в этом файле, задавать командой ниже):
+#   wrangler secret put PAYME_MERCHANT_ID
+#   wrangler secret put PAYME_SECRET_KEY
+#   wrangler secret put CLICK_MERCHANT_ID
+#   wrangler secret put CLICK_SECRET_KEY

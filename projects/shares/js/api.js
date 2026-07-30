@@ -33,3 +33,11 @@ function getReferralCodeFromUrl() {
 function myReferralLink(code) {
     return "https://www.robutpit.com/projects/shares/?ref=" + code;
 }
+
+function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function escapeAttr(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}

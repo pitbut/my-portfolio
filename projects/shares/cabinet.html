@@ -11,8 +11,16 @@
         <div class="topbar">
             <div class="logo">robutpit.shares</div>
             <div>
-                <a class="link-inline" href="index.html" style="margin-right:10px;">На главную</a>
-                <button class="secondary" id="logout-btn">Выйти</button>
+                <select id="lang-select">
+                    <option value="ru">RU</option>
+                    <option value="en">EN</option>
+                    <option value="es">ES</option>
+                    <option value="pt">PT</option>
+                    <option value="uz">UZ</option>
+                    <option value="ar">AR</option>
+                </select>
+                <a class="link-inline" href="index.html" style="margin-right:10px;" data-i18n="nav_home">На главную</a>
+                <button class="secondary" id="logout-btn" data-i18n="nav_logout">Выйти</button>
             </div>
         </div>
 
@@ -23,48 +31,72 @@
 
         <div class="metrics">
             <div class="card">
-                <div class="metric-label">Твоих акций</div>
+                <div class="metric-label" data-i18n="shares_held_label">Твоих акций</div>
                 <div class="metric-value" id="cab-shares">—</div>
             </div>
             <div class="card">
-                <div class="metric-label">Переходы по ссылке</div>
+                <div class="metric-label" data-i18n="referral_views_label">Переходы по ссылке</div>
                 <div class="metric-value" id="cab-refviews">—</div>
             </div>
             <div class="card">
-                <div class="metric-label">Приглашено друзей</div>
+                <div class="metric-label" data-i18n="referred_friends_label">Приглашено друзей</div>
                 <div class="metric-value" id="cab-reffriends">—</div>
             </div>
         </div>
 
         <div class="card">
-            <strong>Твоя реферальная ссылка</strong>
+            <strong data-i18n="your_referral_link">Твоя реферальная ссылка</strong>
             <div class="referral-link-row" style="margin-top:10px;">
                 <input type="text" id="cab-ref-link" readonly>
-                <button class="secondary" id="cab-copy-ref">Копировать</button>
+                <button class="secondary" id="cab-copy-ref" data-i18n="copy_button">Копировать</button>
             </div>
         </div>
 
         <div class="card">
-            <strong>Выставить акции на продажу</strong>
+            <strong data-i18n="sell_title">Выставить акции на продажу</strong>
             <div class="buy-row" style="margin-top:10px;">
-                <input type="number" id="sell-qty" placeholder="кол-во" min="1">
-                <input type="number" id="sell-price" placeholder="цена за акцию" step="0.01" min="0.01">
-                <button id="sell-btn">Выставить</button>
+                <input type="number" id="sell-qty" data-i18n-placeholder="qty_placeholder" placeholder="кол-во" min="1">
+                <input type="number" id="sell-price" data-i18n-placeholder="price_placeholder" placeholder="цена за акцию" step="0.01" min="0.01">
+                <button id="sell-btn" data-i18n="sell_button">Выставить</button>
             </div>
             <div class="error-msg" id="sell-error"></div>
         </div>
 
         <div class="card">
-            <strong>Стакан заявок</strong>
+            <strong data-i18n="orderbook_title">Стакан заявок</strong>
+            <p style="font-size:12px; color:#888; margin-top:6px;" data-i18n="orderbook_hint">Нажми на заявку, чтобы написать участнику и договориться о сделке.</p>
             <table class="orderbook" style="margin-top:10px;" id="orderbook-table"></table>
         </div>
 
+        <div class="card detail-hidden" id="compose-card">
+            <strong data-i18n="compose_title">Написать участнику</strong>
+            <p style="font-size:13px; margin:8px 0;" id="compose-to"></p>
+            <div class="buy-row">
+                <input type="text" id="compose-body" data-i18n-placeholder="message_placeholder" placeholder="Текст сообщения" style="flex:1;">
+                <button id="compose-send-btn" data-i18n="send_button">Отправить</button>
+            </div>
+            <div class="error-msg" id="compose-error"></div>
+        </div>
+
         <div class="card">
-            <strong>Сообщения от администратора</strong>
+            <strong data-i18n="transfer_title">Передать акции другому участнику</strong>
+            <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="transfer_hint">Покупка и продажа акций происходит напрямую между участниками: об оплате вы договариваетесь сами, а здесь просто переводите нужное количество акций на аккаунт другого участника.</p>
+            <div class="buy-row" style="margin-top:10px;">
+                <input type="text" id="transfer-to" data-i18n-placeholder="transfer_to_placeholder" placeholder="email или реферальный код получателя" style="flex:2;">
+                <input type="number" id="transfer-qty" data-i18n-placeholder="qty_placeholder" placeholder="кол-во" min="1" style="width:90px;">
+                <button id="transfer-btn" data-i18n="transfer_button">Передать</button>
+            </div>
+            <div class="error-msg" id="transfer-error"></div>
+            <div id="transfer-history" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="card">
+            <strong data-i18n="messages_title">Сообщения</strong>
             <div id="messages-list" style="margin-top:10px;"></div>
         </div>
     </div>
 
+    <script src="js/i18n.js"></script>
     <script src="js/api.js"></script>
     <script src="js/cabinet.js"></script>
 </body>

@@ -1,5 +1,31 @@
 let selectedUserId = null;
 
+async function loadValuation() {
+    try {
+        const stats = await api("/api/stats");
+        document.getElementById("valuation-input").value = stats.valuation;
+        document.getElementById("valuation-current").textContent =
+            t("valuation_current", { valuation: stats.valuation, price: stats.price.toFixed(2) });
+    } catch (e) {
+        // не критично для остальной страницы — просто оставляем поле пустым
+    }
+}
+
+document.getElementById("valuation-btn").addEventListener("click", async function () {
+    const errorEl = document.getElementById("valuation-error");
+    errorEl.textContent = "";
+    try {
+        const res = await api("/api/admin/valuation", {
+            method: "POST",
+            body: { total_valuation: parseFloat(document.getElementById("valuation-input").value) },
+        });
+        document.getElementById("valuation-current").textContent =
+            t("valuation_current", { valuation: res.total_valuation, price: res.price_per_share.toFixed(2) });
+    } catch (e) {
+        errorEl.textContent = e.message;
+    }
+});
+
 async function loadUsersList() {
     try {
         const data = await api("/api/admin/users");
@@ -7,15 +33,20 @@ async function loadUsersList() {
         body.innerHTML = data.users
             .map(function (u) {
                 return (
-                    "<tr onclick='openUserDetail(" + u.id + ")'>" +
-                        "<td>" + u.display_name + "</td>" +
-                        "<td>" + u.email + "</td>" +
+                    "<tr data-user-id='" + u.id + "'>" +
+                        "<td>" + escapeHtml(u.display_name) + "</td>" +
+                        "<td>" + escapeHtml(u.email) + "</td>" +
                         "<td>" + u.shares_held + "</td>" +
                         "<td>" + u.created_at.slice(0, 10) + "</td>" +
                     "</tr>"
                 );
             })
             .join("");
+        body.querySelectorAll("tr[data-user-id]").forEach(function (row) {
+            row.addEventListener("click", function () {
+                openUserDetail(parseInt(row.getAttribute("data-user-id"), 10));
+            });
+        });
     } catch (e) {
         document.getElementById("admin-content").classList.add("detail-hidden");
         document.getElementById("access-denied").classList.remove("detail-hidden");
@@ -40,13 +71,13 @@ async function openUserDetail(userId) {
                 "</div>"
             );
         })
-        .join("") || "<div class='ledger-row'>нет операций</div>";
+        .join("") || "<div class='ledger-row'>" + t("no_operations") + "</div>";
 
     document.getElementById("detail-messages").innerHTML = data.messages
         .map(function (m) {
-            return "<div class='msg-item'>" + m.body + "<div class='msg-date'>" + m.created_at.slice(0, 16) + "</div></div>";
+            return "<div class='msg-item'>" + escapeHtml(m.body) + "<div class='msg-date'>" + m.created_at.slice(0, 16) + "</div></div>";
         })
-        .join("") || "<div class='msg-item'>сообщений пока не было</div>";
+        .join("") || "<div class='msg-item'>" + t("no_sent_messages") + "</div>";
 }
 
 document.getElementById("send-message-btn").addEventListener("click", async function () {
@@ -67,4 +98,5 @@ if (!authToken()) {
     window.location.href = "login.html";
 } else {
     loadUsersList();
+    loadValuation();
 }

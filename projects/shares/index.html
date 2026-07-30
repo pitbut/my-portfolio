@@ -20,21 +20,22 @@
                     <option value="uz">UZ</option>
                     <option value="ar">AR</option>
                 </select>
+                <a class="link-inline" href="instructions.html" style="margin-left:10px;" data-i18n="nav_instructions">Как это работает</a>
                 <span id="auth-area"></span>
             </div>
         </div>
 
         <div class="metrics">
             <div class="card">
-                <div class="metric-label">Цена акции</div>
+                <div class="metric-label" data-i18n="price_label">Цена акции</div>
                 <div class="metric-value" id="stat-price">—</div>
             </div>
             <div class="card">
-                <div class="metric-label">Продано / всего</div>
+                <div class="metric-label" data-i18n="sold_label">Продано / всего</div>
                 <div class="metric-value" id="stat-sold">—</div>
             </div>
             <div class="card">
-                <div class="metric-label">Просмотров сайта</div>
+                <div class="metric-label" data-i18n="views_label">Просмотров сайта</div>
                 <div class="metric-value" id="stat-views">—</div>
             </div>
         </div>
@@ -48,28 +49,30 @@
         <div class="card">
             <div class="buy-row">
                 <input type="number" id="buy-qty" value="1" min="1">
-                <button id="buy-btn">Купить акцию</button>
+                <button id="buy-btn" data-i18n="buy_button">Купить акцию</button>
             </div>
             <div class="error-msg" id="buy-error"></div>
         </div>
 
         <div class="card">
-            <strong>Пригласи друзей</strong>
+            <strong data-i18n="referral_title">Пригласи друзей</strong>
             <div class="referral-link-row" style="margin-top:10px;">
-                <input type="text" id="ref-link" readonly value="войди в кабинет, чтобы получить ссылку">
-                <button class="secondary" id="copy-ref">Копировать</button>
+                <input type="text" id="ref-link" readonly data-i18n-placeholder="referral_placeholder" value="">
+                <button class="secondary" id="copy-ref" data-i18n="copy_button">Копировать</button>
             </div>
             <div class="referral-stats" id="ref-stats"></div>
         </div>
 
-        <div class="disclaimer">
+        <div class="disclaimer" data-i18n="disclaimer">
             Символический цифровой сертификат участника проекта. Не является ценной бумагой,
             не даёт прав на прибыль компании и не гарантирует обратный выкуп со стороны проекта.
-            Продажа между пользователями возможна только через встречные заявки на вторичном рынке (см. кабинет).
+            Любая продажа, покупка или дарение акций — это прямая передача акций между самими
+            участниками (см. кабинет), деньгами вы договариваетесь между собой сами.
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
 </body>

@@ -1,0 +1,477 @@
+// Словарь на 6 языков: ru, en, es, pt, uz, ar
+const I18N = {
+    ru: {
+        nav_home: "На главную",
+        nav_cabinet: "Кабинет",
+        nav_login: "Войти",
+        nav_register: "Регистрация",
+        nav_logout: "Выйти",
+
+        price_label: "Цена акции",
+        sold_label: "Продано / всего",
+        views_label: "Просмотров сайта",
+        buy_button: "Купить акцию",
+        referral_title: "Пригласи друзей",
+        referral_placeholder: "войди в кабинет, чтобы получить ссылку",
+        copy_button: "Копировать",
+        referral_stats: "По твоей ссылке заходили {views} раз · приглашено друзей: {friends}",
+        disclaimer: "Символический цифровой сертификат участника проекта. Не является ценной бумагой, не даёт прав на прибыль компании и не гарантирует обратный выкуп со стороны проекта. Любая продажа, покупка или дарение акций — это прямая передача акций между самими участниками (см. кабинет), деньгами вы договариваетесь между собой сами.",
+        nav_instructions: "Как это работает",
+
+        register_title: "Регистрация",
+        name_label: "Имя",
+        email_label: "Email",
+        password_label: "Пароль (минимум 8 символов)",
+        register_submit: "Зарегистрироваться",
+        already_have_account: "Уже есть аккаунт?",
+        login_link: "Войти",
+
+        login_title: "Вход",
+        password_label_simple: "Пароль",
+        login_submit: "Войти",
+        no_account: "Нет аккаунта?",
+        register_link: "Зарегистрироваться",
+
+        rank_label: "Место в рейтинге: #{rank}",
+        shares_held_label: "Твоих акций",
+        referral_views_label: "Переходы по ссылке",
+        referred_friends_label: "Приглашено друзей",
+        your_referral_link: "Твоя реферальная ссылка",
+        sell_title: "Выставить акции на продажу",
+        qty_placeholder: "кол-во",
+        price_placeholder: "цена за акцию",
+        sell_button: "Выставить",
+        orderbook_title: "Стакан заявок",
+        orderbook_selling: "Продают",
+        orderbook_buying: "Покупают",
+        orderbook_hint: "Нажми на заявку, чтобы написать участнику и договориться о сделке.",
+        compose_title: "Написать участнику",
+        compose_to: "Кому: {name}",
+        transfer_title: "Передать акции другому участнику",
+        transfer_hint: "Покупка и продажа акций происходит напрямую между участниками: об оплате вы договариваетесь сами (переводом, наличными — как удобно), а здесь просто переводите нужное количество акций на аккаунт другого участника.",
+        transfer_to_placeholder: "email или реферальный код получателя",
+        transfer_button: "Передать",
+        transfer_success: "Передано {qty} акц. пользователю {name}",
+        transfer_sent_to: "Передано пользователю {name}",
+        transfer_received_from: "Получено от {name}",
+        no_transfers: "передач пока не было",
+        messages_title: "Сообщения",
+        no_messages: "сообщений пока нет",
+        from_admin: "Администрация",
+        from_user: "{name}",
+        reply_button: "Ответить",
+
+        valuation_title: "Оценка проекта и цена акции",
+        valuation_hint: "Укажи общую сумму — оценку стоимости всего проекта (например, выросшую за счёт привлечённой рекламы). Эта сумма делится поровну на все 10 000 акций — так и получается цена одной акции.",
+        valuation_placeholder: "общая сумма, $",
+        save_valuation_button: "Сохранить",
+        valuation_current: "Текущая оценка: ${valuation} → цена одной акции: ${price}",
+
+        admin_title: "robutpit.shares · admin",
+        access_denied: "У этого аккаунта нет прав администратора.",
+        users_title: "Держатели акций",
+        col_name: "Имя",
+        col_email: "Email",
+        col_shares: "Акций",
+        col_date: "Регистрация",
+        history_title: "История операций",
+        no_operations: "нет операций",
+        message_title: "Написать сообщение",
+        message_placeholder: "Текст сообщения",
+        send_button: "Отправить",
+        sent_messages_title: "Отправленные сообщения",
+        no_sent_messages: "сообщений пока не было",
+
+        error_email_password_required: "email и пароль (мин. 8 символов) обязательны",
+        error_generic: "Ошибка запроса",
+    },
+    en: {
+        nav_home: "Home",
+        nav_cabinet: "Dashboard",
+        nav_login: "Log in",
+        nav_register: "Sign up",
+        nav_logout: "Log out",
+
+        price_label: "Share price",
+        sold_label: "Sold / total",
+        views_label: "Site views",
+        buy_button: "Buy a share",
+        referral_title: "Invite friends",
+        referral_placeholder: "log in to get your link",
+        copy_button: "Copy",
+        referral_stats: "Your link was opened {views} times · friends invited: {friends}",
+        disclaimer: "A symbolic digital certificate of project participation. Not a security, does not grant rights to company profits, and does not guarantee buyback by the project. Any sale, purchase, or gift of shares is simply a direct transfer of shares between participants (see dashboard) — payment is arranged between the parties themselves.",
+        nav_instructions: "How it works",
+
+        register_title: "Sign up",
+        name_label: "Name",
+        email_label: "Email",
+        password_label: "Password (min. 8 characters)",
+        register_submit: "Sign up",
+        already_have_account: "Already have an account?",
+        login_link: "Log in",
+
+        login_title: "Log in",
+        password_label_simple: "Password",
+        login_submit: "Log in",
+        no_account: "Don't have an account?",
+        register_link: "Sign up",
+
+        rank_label: "Rank: #{rank}",
+        shares_held_label: "Your shares",
+        referral_views_label: "Link visits",
+        referred_friends_label: "Friends invited",
+        your_referral_link: "Your referral link",
+        sell_title: "List shares for sale",
+        qty_placeholder: "quantity",
+        price_placeholder: "price per share",
+        sell_button: "List",
+        orderbook_title: "Order book",
+        orderbook_selling: "Selling",
+        orderbook_buying: "Buying",
+        orderbook_hint: "Click an order to message that participant and arrange a deal.",
+        compose_title: "Message a participant",
+        compose_to: "To: {name}",
+        transfer_title: "Transfer shares to another participant",
+        transfer_hint: "Buying and selling shares happens directly between participants: you arrange payment yourselves (bank transfer, cash — whatever works), and here you just transfer the agreed quantity of shares to the other participant's account.",
+        transfer_to_placeholder: "recipient's email or referral code",
+        transfer_button: "Transfer",
+        transfer_success: "Transferred {qty} shares to {name}",
+        transfer_sent_to: "Sent to {name}",
+        transfer_received_from: "Received from {name}",
+        no_transfers: "no transfers yet",
+        messages_title: "Messages",
+        no_messages: "no messages yet",
+        from_admin: "Admin",
+        from_user: "{name}",
+        reply_button: "Reply",
+
+        valuation_title: "Project valuation and share price",
+        valuation_hint: "Enter the total sum — the valuation of the whole project (for example, grown thanks to advertising you attracted). This sum is split evenly across all 10,000 shares — that's how the price of one share is formed.",
+        valuation_placeholder: "total valuation, $",
+        save_valuation_button: "Save",
+        valuation_current: "Current valuation: ${valuation} → price per share: ${price}",
+
+        admin_title: "robutpit.shares · admin",
+        access_denied: "This account doesn't have admin access.",
+        users_title: "Shareholders",
+        col_name: "Name",
+        col_email: "Email",
+        col_shares: "Shares",
+        col_date: "Joined",
+        history_title: "Transaction history",
+        no_operations: "no transactions",
+        message_title: "Send a message",
+        message_placeholder: "Message text",
+        send_button: "Send",
+        sent_messages_title: "Sent messages",
+        no_sent_messages: "no messages sent yet",
+
+        error_email_password_required: "email and password (min. 8 chars) are required",
+        error_generic: "Request error",
+    },
+    es: {
+        nav_home: "Inicio",
+        nav_cabinet: "Panel",
+        nav_login: "Iniciar sesión",
+        nav_register: "Registrarse",
+        nav_logout: "Cerrar sesión",
+
+        price_label: "Precio de la acción",
+        sold_label: "Vendidas / total",
+        views_label: "Visitas al sitio",
+        buy_button: "Comprar una acción",
+        referral_title: "Invita a tus amigos",
+        referral_placeholder: "inicia sesión para obtener tu enlace",
+        copy_button: "Copiar",
+        referral_stats: "Tu enlace fue visitado {views} veces · amigos invitados: {friends}",
+        disclaimer: "Un certificado digital simbólico de participación en el proyecto. No es un valor, no otorga derechos sobre las ganancias de la empresa y no garantiza la recompra por parte del proyecto. Las ventas entre usuarios solo son posibles mediante órdenes coincidentes en el mercado secundario (ver panel).",
+
+        register_title: "Registrarse",
+        name_label: "Nombre",
+        email_label: "Correo electrónico",
+        password_label: "Contraseña (mín. 8 caracteres)",
+        register_submit: "Registrarse",
+        already_have_account: "¿Ya tienes una cuenta?",
+        login_link: "Iniciar sesión",
+
+        login_title: "Iniciar sesión",
+        password_label_simple: "Contraseña",
+        login_submit: "Iniciar sesión",
+        no_account: "¿No tienes cuenta?",
+        register_link: "Registrarse",
+
+        rank_label: "Posición: #{rank}",
+        shares_held_label: "Tus acciones",
+        referral_views_label: "Visitas al enlace",
+        referred_friends_label: "Amigos invitados",
+        your_referral_link: "Tu enlace de referido",
+        sell_title: "Poner acciones en venta",
+        qty_placeholder: "cantidad",
+        price_placeholder: "precio por acción",
+        sell_button: "Publicar",
+        orderbook_title: "Libro de órdenes",
+        orderbook_selling: "Vendiendo",
+        orderbook_buying: "Comprando",
+        messages_title: "Mensajes del administrador",
+        no_messages: "aún no hay mensajes",
+
+        admin_title: "robutpit.shares · admin",
+        access_denied: "Esta cuenta no tiene acceso de administrador.",
+        users_title: "Accionistas",
+        col_name: "Nombre",
+        col_email: "Correo",
+        col_shares: "Acciones",
+        col_date: "Registro",
+        history_title: "Historial de operaciones",
+        no_operations: "sin operaciones",
+        message_title: "Escribir un mensaje",
+        message_placeholder: "Texto del mensaje",
+        send_button: "Enviar",
+        sent_messages_title: "Mensajes enviados",
+        no_sent_messages: "aún no se han enviado mensajes",
+
+        error_email_password_required: "correo y contraseña (mín. 8 caracteres) son obligatorios",
+        error_generic: "Error en la solicitud",
+    },
+    pt: {
+        nav_home: "Início",
+        nav_cabinet: "Painel",
+        nav_login: "Entrar",
+        nav_register: "Cadastrar",
+        nav_logout: "Sair",
+
+        price_label: "Preço da ação",
+        sold_label: "Vendidas / total",
+        views_label: "Visualizações do site",
+        buy_button: "Comprar uma ação",
+        referral_title: "Convide amigos",
+        referral_placeholder: "entre para obter seu link",
+        copy_button: "Copiar",
+        referral_stats: "Seu link foi acessado {views} vezes · amigos convidados: {friends}",
+        disclaimer: "Um certificado digital simbólico de participação no projeto. Não é um valor mobiliário, não concede direitos sobre os lucros da empresa e não garante recompra pelo projeto. Vendas entre usuários só são possíveis por meio de ordens correspondentes no mercado secundário (veja o painel).",
+
+        register_title: "Cadastrar",
+        name_label: "Nome",
+        email_label: "Email",
+        password_label: "Senha (mín. 8 caracteres)",
+        register_submit: "Cadastrar",
+        already_have_account: "Já tem uma conta?",
+        login_link: "Entrar",
+
+        login_title: "Entrar",
+        password_label_simple: "Senha",
+        login_submit: "Entrar",
+        no_account: "Não tem conta?",
+        register_link: "Cadastrar",
+
+        rank_label: "Posição: #{rank}",
+        shares_held_label: "Suas ações",
+        referral_views_label: "Acessos ao link",
+        referred_friends_label: "Amigos convidados",
+        your_referral_link: "Seu link de indicação",
+        sell_title: "Colocar ações à venda",
+        qty_placeholder: "quantidade",
+        price_placeholder: "preço por ação",
+        sell_button: "Anunciar",
+        orderbook_title: "Livro de ordens",
+        orderbook_selling: "Vendendo",
+        orderbook_buying: "Comprando",
+        messages_title: "Mensagens do administrador",
+        no_messages: "nenhuma mensagem ainda",
+
+        admin_title: "robutpit.shares · admin",
+        access_denied: "Esta conta não tem acesso de administrador.",
+        users_title: "Acionistas",
+        col_name: "Nome",
+        col_email: "Email",
+        col_shares: "Ações",
+        col_date: "Cadastro",
+        history_title: "Histórico de operações",
+        no_operations: "sem operações",
+        message_title: "Escrever mensagem",
+        message_placeholder: "Texto da mensagem",
+        send_button: "Enviar",
+        sent_messages_title: "Mensagens enviadas",
+        no_sent_messages: "nenhuma mensagem enviada ainda",
+
+        error_email_password_required: "email e senha (mín. 8 caracteres) são obrigatórios",
+        error_generic: "Erro na solicitação",
+    },
+    uz: {
+        nav_home: "Bosh sahifa",
+        nav_cabinet: "Shaxsiy kabinet",
+        nav_login: "Kirish",
+        nav_register: "Ro'yxatdan o'tish",
+        nav_logout: "Chiqish",
+
+        price_label: "Aksiya narxi",
+        sold_label: "Sotilgan / jami",
+        views_label: "Sayt ko'rishlari",
+        buy_button: "Aksiya sotib olish",
+        referral_title: "Do'stlaringizni taklif qiling",
+        referral_placeholder: "havolani olish uchun tizimga kiring",
+        copy_button: "Nusxalash",
+        referral_stats: "Havolangiz {views} marta ochilgan · taklif qilingan do'stlar: {friends}",
+        disclaimer: "Loyihada ishtirok etishning ramziy raqamli sertifikati. Qimmatli qog'oz emas, kompaniya foydasiga huquq bermaydi va loyiha tomonidan qayta sotib olishni kafolatlamaydi. Foydalanuvchilar o'rtasidagi sotuvlar faqat ikkilamchi bozordagi mos buyurtmalar orqali amalga oshiriladi (kabinetga qarang).",
+
+        register_title: "Ro'yxatdan o'tish",
+        name_label: "Ism",
+        email_label: "Email",
+        password_label: "Parol (kamida 8 belgi)",
+        register_submit: "Ro'yxatdan o'tish",
+        already_have_account: "Akkauntingiz bormi?",
+        login_link: "Kirish",
+
+        login_title: "Kirish",
+        password_label_simple: "Parol",
+        login_submit: "Kirish",
+        no_account: "Akkauntingiz yo'qmi?",
+        register_link: "Ro'yxatdan o'tish",
+
+        rank_label: "Reyting o'rni: #{rank}",
+        shares_held_label: "Aksiyalaringiz",
+        referral_views_label: "Havola o'tishlari",
+        referred_friends_label: "Taklif qilingan do'stlar",
+        your_referral_link: "Referal havolangiz",
+        sell_title: "Aksiyalarni sotuvga qo'yish",
+        qty_placeholder: "miqdori",
+        price_placeholder: "aksiya narxi",
+        sell_button: "Qo'yish",
+        orderbook_title: "Buyurtmalar daftari",
+        orderbook_selling: "Sotilmoqda",
+        orderbook_buying: "Sotib olinmoqda",
+        messages_title: "Administratordan xabarlar",
+        no_messages: "hozircha xabarlar yo'q",
+
+        admin_title: "robutpit.shares · admin",
+        access_denied: "Ushbu akkauntda administrator huquqlari yo'q.",
+        users_title: "Aksiyadorlar",
+        col_name: "Ism",
+        col_email: "Email",
+        col_shares: "Aksiyalar",
+        col_date: "Ro'yxatdan o'tgan",
+        history_title: "Operatsiyalar tarixi",
+        no_operations: "operatsiyalar yo'q",
+        message_title: "Xabar yozish",
+        message_placeholder: "Xabar matni",
+        send_button: "Yuborish",
+        sent_messages_title: "Yuborilgan xabarlar",
+        no_sent_messages: "hozircha xabarlar yuborilmagan",
+
+        error_email_password_required: "email va parol (kamida 8 belgi) talab qilinadi",
+        error_generic: "So'rov xatosi",
+    },
+    ar: {
+        nav_home: "الرئيسية",
+        nav_cabinet: "لوحة التحكم",
+        nav_login: "تسجيل الدخول",
+        nav_register: "إنشاء حساب",
+        nav_logout: "تسجيل الخروج",
+
+        price_label: "سعر السهم",
+        sold_label: "المُباع / الإجمالي",
+        views_label: "زيارات الموقع",
+        buy_button: "شراء سهم",
+        referral_title: "ادعُ أصدقاءك",
+        referral_placeholder: "سجّل الدخول للحصول على رابطك",
+        copy_button: "نسخ",
+        referral_stats: "تم فتح رابطك {views} مرة · الأصدقاء المدعوون: {friends}",
+        disclaimer: "شهادة رقمية رمزية للمشاركة في المشروع. لا تُعد أداة مالية، ولا تمنح حقوقًا في أرباح الشركة، ولا تضمن إعادة الشراء من قبل المشروع. البيع بين المستخدمين ممكن فقط عبر أوامر متطابقة في السوق الثانوي (راجع لوحة التحكم).",
+
+        register_title: "إنشاء حساب",
+        name_label: "الاسم",
+        email_label: "البريد الإلكتروني",
+        password_label: "كلمة المرور (٨ أحرف على الأقل)",
+        register_submit: "إنشاء حساب",
+        already_have_account: "لديك حساب بالفعل؟",
+        login_link: "تسجيل الدخول",
+
+        login_title: "تسجيل الدخول",
+        password_label_simple: "كلمة المرور",
+        login_submit: "تسجيل الدخول",
+        no_account: "ليس لديك حساب؟",
+        register_link: "إنشاء حساب",
+
+        rank_label: "الترتيب: #{rank}",
+        shares_held_label: "أسهمك",
+        referral_views_label: "زيارات الرابط",
+        referred_friends_label: "الأصدقاء المدعوون",
+        your_referral_link: "رابط الإحالة الخاص بك",
+        sell_title: "عرض أسهم للبيع",
+        qty_placeholder: "الكمية",
+        price_placeholder: "سعر السهم الواحد",
+        sell_button: "عرض",
+        orderbook_title: "دفتر الأوامر",
+        orderbook_selling: "بيع",
+        orderbook_buying: "شراء",
+        messages_title: "رسائل من المسؤول",
+        no_messages: "لا توجد رسائل بعد",
+
+        admin_title: "robutpit.shares · admin",
+        access_denied: "هذا الحساب لا يملك صلاحيات المسؤول.",
+        users_title: "حاملو الأسهم",
+        col_name: "الاسم",
+        col_email: "البريد الإلكتروني",
+        col_shares: "الأسهم",
+        col_date: "تاريخ التسجيل",
+        history_title: "سجل العمليات",
+        no_operations: "لا توجد عمليات",
+        message_title: "كتابة رسالة",
+        message_placeholder: "نص الرسالة",
+        send_button: "إرسال",
+        sent_messages_title: "الرسائل المُرسلة",
+        no_sent_messages: "لم تُرسل أي رسائل بعد",
+
+        error_email_password_required: "البريد الإلكتروني وكلمة المرور (٨ أحرف على الأقل) مطلوبان",
+        error_generic: "خطأ في الطلب",
+    },
+};
+
+const RTL_LANGS = ["ar"];
+
+function currentLang() {
+    return localStorage.getItem("shares_lang") || "ru";
+}
+
+function t(key, params) {
+    const lang = currentLang();
+    let str = (I18N[lang] && I18N[lang][key]) || I18N.ru[key] || key;
+    if (params) {
+        Object.keys(params).forEach(function (k) {
+            str = str.replace("{" + k + "}", params[k]);
+        });
+    }
+    return str;
+}
+
+function applyI18n() {
+    const lang = currentLang();
+    document.documentElement.lang = lang;
+    document.documentElement.dir = RTL_LANGS.indexOf(lang) !== -1 ? "rtl" : "ltr";
+
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+        el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+        el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+
+    const select = document.getElementById("lang-select");
+    if (select) select.value = lang;
+}
+
+function initLangSelect() {
+    const select = document.getElementById("lang-select");
+    if (!select) return;
+    select.value = currentLang();
+    select.addEventListener("change", function () {
+        localStorage.setItem("shares_lang", select.value);
+        location.reload();
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    applyI18n();
+    initLangSelect();
+});

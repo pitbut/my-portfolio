@@ -9,22 +9,36 @@
 </head>
 <body>
     <div class="container" style="max-width:420px;">
-        <div class="topbar"><div class="logo">robutpit.shares</div></div>
+        <div class="topbar">
+            <div class="logo">robutpit.shares</div>
+            <select id="lang-select">
+                <option value="ru">RU</option>
+                <option value="en">EN</option>
+                <option value="es">ES</option>
+                <option value="pt">PT</option>
+                <option value="uz">UZ</option>
+                <option value="ar">AR</option>
+            </select>
+        </div>
         <div class="card">
-            <h2 style="margin-bottom:16px; font-size:18px;">Вход</h2>
+            <h2 style="margin-bottom:16px; font-size:18px;" data-i18n="login_title">Вход</h2>
             <div class="form-field">
-                <label>Email</label>
+                <label data-i18n="email_label">Email</label>
                 <input type="email" id="login-email">
             </div>
             <div class="form-field">
-                <label>Пароль</label>
+                <label data-i18n="password_label_simple">Пароль</label>
                 <input type="password" id="login-password">
             </div>
-            <button id="login-btn" style="width:100%;">Войти</button>
+            <button id="login-btn" style="width:100%;" data-i18n="login_submit">Войти</button>
             <div class="error-msg" id="login-error"></div>
-            <p style="margin-top:14px; font-size:13px;">Нет аккаунта? <a class="link-inline" href="register.html">Зарегистрироваться</a></p>
+            <p style="margin-top:14px; font-size:13px;">
+                <span data-i18n="no_account">Нет аккаунта?</span>
+                <a class="link-inline" href="register.html" data-i18n="register_link">Зарегистрироваться</a>
+            </p>
         </div>
     </div>
+    <script src="js/i18n.js"></script>
     <script src="js/api.js"></script>
     <script>
         document.getElementById("login-btn").addEventListener("click", async function () {
