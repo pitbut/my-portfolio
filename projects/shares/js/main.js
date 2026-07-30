@@ -65,7 +65,18 @@ async function loadReferral() {
     }
 }
 
+// Не считаем повторным просмотром каждое сворачивание/разворачивание вкладки —
+// на мобильных браузер часто перезагружает страницу при возврате из фона,
+// и trackView() запускался бы заново за доли секунды. Поэтому считаем не чаще
+// одного просмотра с одного браузера за VIEW_THROTTLE_MS.
+const VIEW_THROTTLE_MS = 30 * 60 * 1000; // 30 минут
+
 function trackView() {
+    const last = parseInt(localStorage.getItem("shares_last_view") || "0", 10);
+    const now = Date.now();
+    if (now - last < VIEW_THROTTLE_MS) return;
+    localStorage.setItem("shares_last_view", String(now));
+
     const ref = getReferralCodeFromUrl();
     const path = ref ? "/api/view?ref=" + encodeURIComponent(ref) : "/api/view";
     api(path, { method: "POST" }).catch(function () {});
