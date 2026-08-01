@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Библиотека книг о воде — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Библиотека книг о воде</h2>
+  </div>
+
+  {% if genres %}
+  <div class="sort-bar">
+    <a href="{{ url_for('library.index') }}" class="{{ 'is-active' if not active_genre }}">все жанры</a>
+    {% for g in genres %}
+      <a href="{{ url_for('library.index', genre=g) }}" class="{{ 'is-active' if g == active_genre }}">{{ g }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if books %}
+  <div class="grid">
+    {% for b in books %}
+    <article class="card">
+      <span class="meta">{{ b.genre or "книга" }}{% if b.year %} &middot; {{ b.year }}{% endif %}</span>
+      <h3>{{ b.title }}</h3>
+      <p><em>{{ b.author }}</em></p>
+      <p>{{ b.description | truncate(140) }}</p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Книги пока не добавлены.</div>
+  {% endif %}
+</section>
+{% endblock %}

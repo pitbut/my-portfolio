@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Исток — портал о воде{% endblock %}
+
+{% block content %}
+<section class="hero wrap">
+  <span class="hero__eyebrow">портал о воде</span>
+  <h1>Исток</h1>
+  <p class="lead">
+    От священных источников на другом краю света до стакана воды на вашем столе —
+    исследуем воду как культуру, науку и повседневность.
+  </p>
+  <svg class="wave-divider" viewBox="0 0 1200 60" preserveAspectRatio="none">
+    <path d="M0,30 C150,60 350,0 600,30 C850,60 1050,0 1200,30 L1200,60 L0,60 Z" fill="rgba(58,166,168,0.18)"/>
+    <path d="M0,40 C150,20 350,55 600,35 C850,15 1050,50 1200,35 L1200,60 L0,60 Z" fill="rgba(232,183,106,0.10)"/>
+  </svg>
+</section>
+
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Священные источники мира</h2>
+    <a class="see-all" href="{{ url_for('sacred.index') }}">Все источники →</a>
+  </div>
+  <div class="grid">
+    {% for s in sacred_sources %}
+    <article class="card">
+      <span class="meta">{{ s.country }}</span>
+      <h3><a href="{{ url_for('sacred.detail', slug=s.slug) }}">{{ s.name }}</a></h3>
+      <p>{{ s.belief | truncate(120) }}</p>
+    </article>
+    {% else %}
+    <p>Источники пока не добавлены.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Статьи</h2>
+    <a class="see-all" href="{{ url_for('articles.index') }}">Все статьи →</a>
+  </div>
+  <div class="grid">
+    {% for a in articles %}
+    <article class="card">
+      <span class="meta">{{ a.category }}</span>
+      <h3><a href="{{ url_for('articles.detail', slug=a.slug) }}">{{ a.title }}</a></h3>
+      <p>{{ a.summary or (a.body | truncate(120)) }}</p>
+    </article>
+    {% else %}
+    <p>Статьи пока не добавлены.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Каталог питьевой воды</h2>
+    <a class="see-all" href="{{ url_for('catalog.index') }}">Весь каталог →</a>
+  </div>
+  <div class="grid">
+    {% for w in water_brands %}
+    <article class="card">
+      <span class="meta">{{ w.water_type }}</span>
+      <h3>{{ w.name }}</h3>
+      <p>{{ w.volume_l }} л &middot; {{ "%.0f"|format(w.price_rub) }} ₽</p>
+    </article>
+    {% else %}
+    <p>Каталог пока пуст.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Библиотека книг о воде</h2>
+    <a class="see-all" href="{{ url_for('library.index') }}">Вся библиотека →</a>
+  </div>
+  <div class="grid">
+    {% for b in books %}
+    <article class="card">
+      <span class="meta">{{ b.genre or "книга" }}</span>
+      <h3>{{ b.title }}</h3>
+      <p>{{ b.author }}{% if b.year %}, {{ b.year }}{% endif %}</p>
+    </article>
+    {% else %}
+    <p>Книги пока не добавлены.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Оборудование для воды</h2>
+    <a class="see-all" href="{{ url_for('main.equipment_list') }}">Всё оборудование →</a>
+  </div>
+  <div class="grid">
+    {% for e in equipment %}
+    <article class="card">
+      <span class="meta">{{ e.category }}</span>
+      <h3>{{ e.name }}</h3>
+      <p>{{ e.description | truncate(110) }}</p>
+    </article>
+    {% else %}
+    <p>Оборудование пока не добавлено.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Опыты с водой: наука vs мифы</h2>
+    <a class="see-all" href="{{ url_for('main.experiments_list') }}">Все опыты →</a>
+  </div>
+  <div class="grid">
+    {% for exp in experiments %}
+    <article class="card">
+      <span class="badge {{ 'badge--science' if exp.verdict == 'наука' else 'badge--myth' }}">{{ exp.verdict }}</span>
+      <h3>{{ exp.title }}</h3>
+      <p>{{ exp.description | truncate(110) }}</p>
+    </article>
+    {% else %}
+    <p>Опыты пока не добавлены.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Доставка воды</h2>
+    <a class="see-all" href="{{ url_for('main.delivery_list') }}">Все службы →</a>
+  </div>
+  <div class="grid">
+    {% for d in delivery_services %}
+    <article class="card">
+      <span class="meta">{{ d.delivery_time }}</span>
+      <h3>{{ d.name }}</h3>
+      <p>{{ d.coverage or "" }}</p>
+    </article>
+    {% else %}
+    <p>Службы доставки пока не добавлены.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

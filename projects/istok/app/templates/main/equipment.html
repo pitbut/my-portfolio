@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Оборудование для воды — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Оборудование для воды</h2>
+  </div>
+  {% if equipment %}
+  <div class="grid">
+    {% for e in equipment %}
+    <article class="card">
+      <span class="meta">{{ e.category }}</span>
+      <h3>{{ e.name }}</h3>
+      <p>{{ e.description }}</p>
+      <p>
+        {% if e.manufacturer %}{{ e.manufacturer }}{% endif %}
+        {% if e.price_rub %} &middot; от {{ "%.0f"|format(e.price_rub) }} ₽{% endif %}
+      </p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Оборудование пока не добавлено.</div>
+  {% endif %}
+</section>
+{% endblock %}

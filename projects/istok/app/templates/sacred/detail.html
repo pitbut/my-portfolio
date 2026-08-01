@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ source.name }} — священные источники — Исток{% endblock %}
+{% block description %}{{ source.belief | truncate(150) }}{% endblock %}
+
+{% block content %}
+<section class="detail-hero wrap">
+  <div class="breadcrumb"><a href="{{ url_for('sacred.index') }}">Источники</a> / {{ source.name }}</div>
+  <h1>{{ source.name }}</h1>
+  <div class="meta-row">
+    <span>📍 {{ source.country }} — {{ source.location }}</span>
+    {% if source.latitude and source.longitude %}
+      <span>{{ "%.4f"|format(source.latitude) }}, {{ "%.4f"|format(source.longitude) }}</span>
+    {% endif %}
+    {% if source.annual_visitors %}
+      <span>👥 ~{{ "{:,}".format(source.annual_visitors).replace(",", " ") }} посетителей в год</span>
+    {% endif %}
+  </div>
+
+  {% if source.description %}
+  <div class="prose">
+    <p>{{ source.description }}</p>
+  </div>
+  {% endif %}
+
+  <div class="prose">
+    <h3>Во что верят люди</h3>
+    <p>{{ source.belief }}</p>
+  </div>
+
+  <div class="fact-grid">
+    <div class="fact-card">
+      <h4>Что можно</h4>
+      <p>{{ source.allowed }}</p>
+    </div>
+    <div class="fact-card forbidden">
+      <h4>Что нельзя</h4>
+      <p>{{ source.forbidden }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
