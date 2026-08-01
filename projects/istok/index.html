@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Исток — портал о воде</title>
+<meta name="description" content="Исток — Flask-портал о воде: священные источники мира, статьи, каталог цен, библиотека, оборудование, опыты и доставка воды.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --foam: #eef7f8; --shallow: #a9d6d9; --surface: #3aa6a8;
+    --depth-1: #0d5d75; --depth-2: #0a3d5c; --depth-3: #062a44; --abyss: #041c2c;
+    --gold: #e8b76a; --gold-soft: #f3d9a8; --ink: #eaf4f4; --ink-dim: #b9cdd2;
+    --font-display: "Playfair Display", Georgia, serif;
+    --font-body: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: var(--font-body); color: var(--ink); line-height: 1.6;
+    background: linear-gradient(180deg, var(--abyss) 0%, var(--depth-3) 35%, var(--depth-2) 65%, var(--depth-1) 100%);
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-family: var(--font-display); color: var(--foam); font-weight: 600; }
+  a { color: var(--gold-soft); }
+  a:hover { color: var(--gold); }
+  header.hero { text-align: center; padding: 80px 0 40px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .18em; font-size: .75rem; color: var(--gold-soft); }
+  header.hero h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); margin: .3em 0; }
+  header.hero p { color: var(--shallow); font-size: 1.1rem; max-width: 620px; margin: 0 auto; }
+  .back-link { display: inline-block; margin: 30px 0 0; font-size: .9rem; color: var(--shallow); }
+  section { padding: 40px 0; border-top: 1px solid rgba(233,247,248,0.1); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+  .card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(233,247,248,0.1); border-radius: 14px; padding: 18px;
+  }
+  .card h3 { font-size: 1.05rem; margin: 0 0 6px; }
+  .card p { color: var(--ink-dim); font-size: .92rem; margin: 0; }
+  .stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .stack span {
+    font-size: .8rem; font-weight: 700; padding: 4px 12px; border-radius: 100px;
+    background: rgba(58,166,168,0.18); color: var(--shallow);
+  }
+  .note {
+    margin-top: 24px; padding: 18px 20px; border-left: 3px solid var(--gold);
+    background: rgba(255,255,255,0.04); border-radius: 10px; color: var(--ink-dim); font-size: .95rem;
+  }
+  code { background: rgba(0,0,0,0.35); padding: 2px 6px; border-radius: 4px; font-size: .88em; }
+  pre {
+    background: rgba(0,0,0,0.35); padding: 16px 18px; border-radius: 10px; overflow-x: auto;
+    font-size: .85rem; color: var(--ink);
+  }
+  footer { text-align: center; padding: 40px 0 60px; color: var(--ink-dim); font-size: .85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">flask-портал о воде</span>
+    <h1>💧 Исток</h1>
+    <p>
+      Полноценное серверное веб-приложение на Flask: библиотека книг о воде, статьи,
+      каталог цен на питьевую воду, священные источники мира, обзоры оборудования,
+      опыты с водой и службы доставки.
+    </p>
+    <div class="stack">
+      <span>Flask</span><span>SQLAlchemy</span><span>Flask-Migrate</span>
+      <span>Jinja2</span><span>SQLite → PostgreSQL</span><span>pytest</span>
+    </div>
+  </header>
+
+  <div class="note">
+    Это не статичная страница, а полноценное серверное приложение (backend на Flask
+    + база данных), поэтому оно не может работать напрямую на GitHub Pages — здесь
+    хостится только статика. Исходный код проекта целиком лежит в этой папке репозитория:
+    <code>projects/istok/</code>. Чтобы посмотреть портал вживую, запустите его локально:
+    <pre>cd projects/istok
+python -m venv venv &amp;&amp; source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+flask db upgrade
+python seed.py
+python run.py</pre>
+    и откройте <code>http://localhost:5000</code>. Подробности — в <code>README.md</code>
+    этого проекта.
+  </div>
+
+  <section>
+    <h2>Разделы портала</h2>
+    <div class="grid">
+      <div class="card"><h3>Священные источники</h3><p>7 источников мира: Лурд, Ганг в Варанаси, Замзам, Ярденит, Амрит Саровар, Chalice Well, Манасаровар.</p></div>
+      <div class="card"><h3>Статьи</h3><p>Наука, культура, быт и здоровье — с рубриками и человекочитаемыми URL.</p></div>
+      <div class="card"><h3>Каталог цен</h3><p>Марки питьевой воды с сортировкой по цене, минерализации и названию.</p></div>
+      <div class="card"><h3>Библиотека</h3><p>Книги о воде с фильтром по жанру.</p></div>
+      <div class="card"><h3>Оборудование</h3><p>Фильтры, кулеры и счётчики воды.</p></div>
+      <div class="card"><h3>Опыты с водой</h3><p>Наука vs мифы — разбор популярных утверждений о свойствах воды.</p></div>
+      <div class="card"><h3>Доставка воды</h3><p>Службы доставки со сроками и ценами.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Архитектура</h2>
+    <p style="color: var(--ink-dim)">
+      Приложение построено на паттерне application factory (<code>create_app</code>),
+      разбито на блюпринты по разделам (<code>main</code>, <code>sacred</code>,
+      <code>catalog</code>, <code>articles</code>, <code>library</code>), схема БД
+      управляется миграциями Flask-Migrate/Alembic с первого коммита, а модели не
+      используют SQLite-специфичных типов — переключение на PostgreSQL через
+      переменную окружения <code>DATABASE_URL</code> не требует переписывания кода.
+    </p>
+  </section>
+
+  <a class="back-link" href="../../index.html">← Назад в портфолио</a>
+  <footer>Исток · Flask-портал о воде</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} — Исток{% endblock %}
+{% block description %}{{ article.summary or (article.body | truncate(150)) }}{% endblock %}
+
+{% block content %}
+<section class="detail-hero wrap">
+  <div class="breadcrumb"><a href="{{ url_for('articles.index') }}">Статьи</a> / {{ article.category }}</div>
+  <h1>{{ article.title }}</h1>
+  <div class="meta-row">
+    <span>{{ article.category }}</span>
+    <span>{{ article.published_at.strftime("%d.%m.%Y") }}</span>
+  </div>
+  <div class="prose">
+    {% for paragraph in article.body.split("\n\n") %}
+      <p>{{ paragraph }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

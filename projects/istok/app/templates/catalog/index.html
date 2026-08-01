@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Каталог цен на питьевую воду — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Каталог цен на питьевую воду</h2>
+  </div>
+
+  <div class="sort-bar">
+    {% for key, (order_by, label) in sort_options.items() %}
+      <a href="{{ url_for('catalog.index', sort=key) }}" class="{{ 'is-active' if key == sort }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  {% if brands %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Марка</th>
+          <th>Тип</th>
+          <th>Минерализация</th>
+          <th>Объём</th>
+          <th>Цена</th>
+          <th>Происхождение</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in brands %}
+        <tr>
+          <td>{{ w.name }}</td>
+          <td>{{ w.water_type }}</td>
+          <td>{{ w.mineralization_mg_l ~ " мг/л" if w.mineralization_mg_l else "—" }}</td>
+          <td>{{ w.volume_l }} л</td>
+          <td>{{ "%.0f"|format(w.price_rub) }} ₽</td>
+          <td>{{ w.origin or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">Каталог пока пуст.</div>
+  {% endif %}
+</section>
+{% endblock %}

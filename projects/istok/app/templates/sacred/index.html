@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Священные источники мира — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Священные источники мира</h2>
+  </div>
+
+  {% if sources %}
+  <div class="grid">
+    {% for s in sources %}
+    <article class="card">
+      <span class="meta">{{ s.country }}</span>
+      <h3><a href="{{ url_for('sacred.detail', slug=s.slug) }}">{{ s.name }}</a></h3>
+      <p>{{ s.location }}</p>
+      <p>{{ s.belief | truncate(140) }}</p>
+    </article>
+    {% endfor %}
+  </div>
+
+  <nav class="pagination">
+    {% if pagination.has_prev %}
+      <a href="{{ url_for('sacred.index', page=pagination.prev_num) }}">←</a>
+    {% else %}
+      <span class="disabled">←</span>
+    {% endif %}
+
+    {% for p in pagination.iter_pages() %}
+      {% if p %}
+        {% if p == pagination.page %}
+          <span class="current">{{ p }}</span>
+        {% else %}
+          <a href="{{ url_for('sacred.index', page=p) }}">{{ p }}</a>
+        {% endif %}
+      {% else %}
+        <span class="disabled">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+      <a href="{{ url_for('sacred.index', page=pagination.next_num) }}">→</a>
+    {% else %}
+      <span class="disabled">→</span>
+    {% endif %}
+  </nav>
+  {% else %}
+  <div class="empty-state">Источники пока не добавлены.</div>
+  {% endif %}
+</section>
+{% endblock %}

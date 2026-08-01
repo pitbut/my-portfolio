@@ -1,0 +1,43 @@
+"""Фабрика приложения "Исток"."""
+import os
+
+from dotenv import load_dotenv
+from flask import Flask
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+from config import config
+
+load_dotenv()
+
+db = SQLAlchemy()
+migrate = Migrate()
+
+
+def create_app(config_name=None):
+    """Создаёт и настраивает экземпляр Flask-приложения."""
+    config_name = config_name or os.environ.get("FLASK_CONFIG", "default")
+
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_object(config[config_name])
+
+    os.makedirs(app.instance_path, exist_ok=True)
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    from app.routes.main import bp as main_bp
+    from app.routes.sacred import bp as sacred_bp
+    from app.routes.catalog import bp as catalog_bp
+    from app.routes.articles import bp as articles_bp
+    from app.routes.library import bp as library_bp
+
+    app.register_blueprint(main_bp)
+    app.register_blueprint(sacred_bp, url_prefix="/sacred")
+    app.register_blueprint(catalog_bp, url_prefix="/catalog")
+    app.register_blueprint(articles_bp, url_prefix="/articles")
+    app.register_blueprint(library_bp, url_prefix="/library")
+
+    from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
+
+    return app

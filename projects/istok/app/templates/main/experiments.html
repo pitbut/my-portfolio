@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Опыты с водой: наука vs мифы — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Опыты с водой: наука vs мифы</h2>
+  </div>
+  {% if experiments %}
+  <div class="grid">
+    {% for exp in experiments %}
+    <article class="card">
+      <span class="badge {{ 'badge--science' if exp.verdict == 'наука' else 'badge--myth' }}">{{ exp.verdict }}</span>
+      <h3>{{ exp.title }}</h3>
+      <p>{{ exp.description }}</p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Опыты пока не добавлены.</div>
+  {% endif %}
+</section>
+{% endblock %}

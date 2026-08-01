@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Доставка воды — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Службы доставки воды</h2>
+  </div>
+  {% if services %}
+  <div class="grid">
+    {% for d in services %}
+    <article class="card">
+      <span class="meta">{{ d.delivery_time }}</span>
+      <h3>{{ d.name }}</h3>
+      <p>{{ d.coverage or "" }}</p>
+      <p>
+        {% if d.price_rub %}от {{ "%.0f"|format(d.price_rub) }} ₽{% endif %}
+        {% if d.phone %} &middot; {{ d.phone }}{% endif %}
+      </p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Службы доставки пока не добавлены.</div>
+  {% endif %}
+</section>
+{% endblock %}
