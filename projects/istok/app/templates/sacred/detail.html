@@ -2,6 +2,12 @@
 {% block title %}{{ source.name }} — священные источники — Исток{% endblock %}
 {% block description %}{{ source.belief | truncate(150) }}{% endblock %}
 
+{% block extra_head %}
+{% if source.latitude and source.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <section class="detail-hero wrap">
   <div class="breadcrumb"><a href="{{ url_for('sacred.index') }}">Источники</a> / {{ source.name }}</div>
@@ -37,5 +43,35 @@
       <p>{{ source.forbidden }}</p>
     </div>
   </div>
+
+  {% if source.latitude and source.longitude %}
+  <div class="map-block">
+    <div class="map-block__header">
+      <h3>Расположение на карте</h3>
+      <a href="https://www.google.com/maps/search/?api=1&query={{ source.latitude }},{{ source.longitude }}" target="_blank" rel="noopener">Открыть в Google Maps →</a>
+    </div>
+    <div id="source-map" data-lat="{{ source.latitude }}" data-lng="{{ source.longitude }}" data-name="{{ source.name }}"></div>
+  </div>
+  {% endif %}
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if source.latitude and source.longitude %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+  (function () {
+    var el = document.getElementById("source-map");
+    if (!el || typeof L === "undefined") return;
+    var lat = parseFloat(el.dataset.lat);
+    var lng = parseFloat(el.dataset.lng);
+    var map = L.map(el, { scrollWheelZoom: false }).setView([lat, lng], 9);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18
+    }).addTo(map);
+    L.marker([lat, lng]).addTo(map).bindPopup(el.dataset.name);
+  })();
+</script>
+{% endif %}
 {% endblock %}
