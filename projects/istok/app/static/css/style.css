@@ -320,6 +320,40 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
 }
 .prose p { margin: 0 0 1.1em; }
 
+/* ---------- Map ---------- */
+
+.map-block {
+  margin: 34px 0;
+}
+
+.map-block__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.map-block__header h3 { margin: 0; font-size: 1.15rem; }
+.map-block__header a { font-size: .88rem; font-weight: 600; }
+
+#source-map {
+  height: 340px;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid rgba(233, 247, 248, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Leaflet renders its own tiles/controls; keep the popup readable on the dark theme. */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--depth-2);
+  color: var(--foam);
+}
+.leaflet-container a.leaflet-popup-close-button { color: var(--ink-dim); }
+
 /* ---------- Pagination ---------- */
 
 .pagination {
