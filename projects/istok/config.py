@@ -4,6 +4,15 @@ import os
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
+def _normalize_db_url(url):
+    """Render и некоторые другие хостинги отдают DATABASE_URL со схемой
+    postgres://, которую современный SQLAlchemy не принимает — нужен
+    postgresql://."""
+    if url and url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql://", 1)
+    return url
+
+
 class Config:
     """Базовая конфигурация, общая для всех окружений."""
 
@@ -28,7 +37,7 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = _normalize_db_url(os.environ.get("DATABASE_URL"))
 
 
 config = {
