@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-07-30",
+    "date": "2026-08-01",
     "tags": []
   },
   {
@@ -14,7 +14,31 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-07-30",
+    "date": "2026-08-01",
+    "tags": []
+  },
+  {
+    "id": "istok",
+    "title": "💧 Исток — портал о воде",
+    "description": "Flask-портал о воде: священные источники мира, статьи, каталог цен на питьевую воду, библиотека книг, обзоры оборудования, опыты и доставка. Полный стек: Flask + SQLAlchemy + Flask-Migrate.",
+    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=%F0%9F%92%A7%20%D0%98%D1%81%D1%82%D0%BE%D0%BA%20%E2%80%94%20%D0%BF%D0%BE%D1%80%D1%82%D0%B0%D0%BB%20%D0%BE%20%D0%B2%D0%BE%D0%B4%D0%B5",
+    "link": "projects/istok/index.html",
+    "date": "2026-08-01",
+    "tags": [
+      "Flask",
+      "Python",
+      "SQLAlchemy",
+      "Jinja2",
+      "PostgreSQL"
+    ]
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-08-01",
     "tags": []
   },
   {
@@ -30,15 +54,6 @@
       "Реферальная программа",
       "Стакан заявок"
     ]
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-07-30",
-    "tags": []
   },
   {
     "id": "balka",
