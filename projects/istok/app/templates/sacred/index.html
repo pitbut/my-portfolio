@@ -7,6 +7,15 @@
     <h2>Священные источники мира</h2>
   </div>
 
+  {% if country_counts %}
+  <div class="sort-bar">
+    <a href="{{ url_for('sacred.index') }}" class="{{ 'is-active' if not active_country }}">все страны ({{ total_count }})</a>
+    {% for c, count in country_counts %}
+      <a href="{{ url_for('sacred.index', country=c) }}" class="{{ 'is-active' if c == active_country }}">{{ c }} ({{ count }})</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   {% if sources %}
   <div class="grid">
     {% for s in sources %}
@@ -21,7 +30,7 @@
 
   <nav class="pagination">
     {% if pagination.has_prev %}
-      <a href="{{ url_for('sacred.index', page=pagination.prev_num) }}">←</a>
+      <a href="{{ url_for('sacred.index', page=pagination.prev_num, country=active_country) }}">←</a>
     {% else %}
       <span class="disabled">←</span>
     {% endif %}
@@ -31,7 +40,7 @@
         {% if p == pagination.page %}
           <span class="current">{{ p }}</span>
         {% else %}
-          <a href="{{ url_for('sacred.index', page=p) }}">{{ p }}</a>
+          <a href="{{ url_for('sacred.index', page=p, country=active_country) }}">{{ p }}</a>
         {% endif %}
       {% else %}
         <span class="disabled">…</span>
@@ -39,13 +48,13 @@
     {% endfor %}
 
     {% if pagination.has_next %}
-      <a href="{{ url_for('sacred.index', page=pagination.next_num) }}">→</a>
+      <a href="{{ url_for('sacred.index', page=pagination.next_num, country=active_country) }}">→</a>
     {% else %}
       <span class="disabled">→</span>
     {% endif %}
   </nav>
   {% else %}
-  <div class="empty-state">Источники пока не добавлены.</div>
+  <div class="empty-state">Источники в этой стране пока не добавлены.</div>
   {% endif %}
 </section>
 {% endblock %}
