@@ -2,5 +2,6 @@
   "title": "💧 Исток — портал о воде",
   "description": "Flask-портал о воде: священные источники мира, статьи, каталог цен на питьевую воду, библиотека книг, обзоры оборудования, опыты и доставка. Полный стек: Flask + SQLAlchemy + Flask-Migrate.",
   "date": "2026-08-01",
-  "tags": ["Flask", "Python", "SQLAlchemy", "Jinja2", "PostgreSQL"]
+  "tags": ["Flask", "Python", "SQLAlchemy", "Jinja2", "PostgreSQL"],
+  "link": "https://istok.onrender.com"
 }
