@@ -93,6 +93,7 @@ class SacredSource(TimestampMixin, SlugMixin, db.Model):
     annual_visitors = db.Column(db.Integer, nullable=True)  # посещаемость в год
     image_url = db.Column(db.String(500), nullable=True)
     description = db.Column(db.Text, nullable=True)
+    comment = db.Column(db.Text, nullable=True)  # произвольный комментарий редактора
 
     def __repr__(self):
         return f"<SacredSource {self.name!r} ({self.country})>"

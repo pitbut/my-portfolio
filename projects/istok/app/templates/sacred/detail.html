@@ -22,6 +22,10 @@
     {% endif %}
   </div>
 
+  {% if image_url(source.image_url) %}
+  <img class="detail-photo" src="{{ image_url(source.image_url) }}" alt="{{ source.name }}" loading="lazy">
+  {% endif %}
+
   {% if source.description %}
   <div class="prose">
     <p>{{ source.description }}</p>
@@ -43,6 +47,13 @@
       <p>{{ source.forbidden }}</p>
     </div>
   </div>
+
+  {% if source.comment %}
+  <div class="prose comment-block">
+    <h3>Комментарий редакции</h3>
+    <p>{{ source.comment }}</p>
+  </div>
+  {% endif %}
 
   {% if source.latitude and source.longitude %}
   <div class="map-block">

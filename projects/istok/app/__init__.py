@@ -40,4 +40,20 @@ def create_app(config_name=None):
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 
+    @app.template_global()
+    def image_url(value):
+        """Разрешает значение поля image_url/cover_url в готовую ссылку.
+
+        Если это внешняя ссылка (http/https) — используется как есть.
+        Иначе считается путём внутри app/static/img/ (например,
+        "sacred/lourdes.jpg" -> /static/img/sacred/lourdes.jpg) — так
+        картинки можно просто класть файлом в репозиторий."""
+        if not value:
+            return None
+        if value.startswith("http://") or value.startswith("https://"):
+            return value
+        from flask import url_for
+
+        return url_for("static", filename=f"img/{value}")
+
     return app
