@@ -20,6 +20,9 @@
   <div class="grid">
     {% for s in sources %}
     <article class="card">
+      {% if image_url(s.image_url) %}
+      <img class="card-photo" src="{{ image_url(s.image_url) }}" alt="{{ s.name }}" loading="lazy">
+      {% endif %}
       <span class="meta">{{ s.country }}</span>
       <h3><a href="{{ url_for('sacred.detail', slug=s.slug) }}">{{ s.name }}</a></h3>
       <p>{{ s.location }}</p>

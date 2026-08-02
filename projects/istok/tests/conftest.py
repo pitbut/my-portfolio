@@ -34,6 +34,8 @@ def app():
                 allowed="Набирать воду в бутылки.",
                 forbidden="Купаться с мылом.",
                 annual_visitors=1000,
+                image_url="sacred/test-source.jpg",
+                comment="Тестовый комментарий редакции.",
             )
         )
         db.session.add(

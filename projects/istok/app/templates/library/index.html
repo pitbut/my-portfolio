@@ -20,6 +20,9 @@
   <div class="grid">
     {% for b in books %}
     <article class="card">
+      {% if image_url(b.cover_url) %}
+      <img class="card-photo" src="{{ image_url(b.cover_url) }}" alt="{{ b.title }}" loading="lazy">
+      {% endif %}
       <span class="meta">{{ b.genre or "книга" }}{% if b.year %} &middot; {{ b.year }}{% endif %}</span>
       <h3>{{ b.title }}</h3>
       <p><em>{{ b.author }}</em></p>

@@ -11,6 +11,9 @@
   <div class="grid">
     {% for a in articles %}
     <article class="card">
+      {% if image_url(a.cover_url) %}
+      <img class="card-photo" src="{{ image_url(a.cover_url) }}" alt="{{ a.title }}" loading="lazy">
+      {% endif %}
       <span class="meta">{{ a.category }} &middot; {{ a.published_at.strftime("%d.%m.%Y") }}</span>
       <h3><a href="{{ url_for('articles.detail', slug=a.slug) }}">{{ a.title }}</a></h3>
       <p>{{ a.summary or (a.body | truncate(140)) }}</p>

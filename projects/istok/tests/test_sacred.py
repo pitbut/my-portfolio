@@ -10,6 +10,13 @@ def test_sacred_detail(client):
     assert "Люди верят, что вода исполняет желания.".encode() in resp.data
 
 
+def test_sacred_detail_shows_comment_and_image(client):
+    resp = client.get("/sacred/test-source")
+    assert resp.status_code == 200
+    assert "Тестовый комментарий редакции.".encode() in resp.data
+    assert b"/static/img/sacred/test-source.jpg" in resp.data
+
+
 def test_sacred_detail_404(client):
     resp = client.get("/sacred/does-not-exist")
     assert resp.status_code == 404

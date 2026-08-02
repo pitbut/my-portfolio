@@ -10,6 +10,9 @@
     <span>{{ article.category }}</span>
     <span>{{ article.published_at.strftime("%d.%m.%Y") }}</span>
   </div>
+  {% if image_url(article.cover_url) %}
+  <img class="detail-photo" src="{{ image_url(article.cover_url) }}" alt="{{ article.title }}" loading="lazy">
+  {% endif %}
   <div class="prose">
     {% for paragraph in article.body.split("\n\n") %}
       <p>{{ paragraph }}</p>
