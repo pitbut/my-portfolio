@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-08-01",
+    "date": "2026-08-02",
     "tags": []
   },
   {
@@ -14,7 +14,16 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-08-01",
+    "date": "2026-08-02",
+    "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-08-02",
     "tags": []
   },
   {
@@ -31,15 +40,6 @@
       "Jinja2",
       "PostgreSQL"
     ]
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-08-01",
-    "tags": []
   },
   {
     "id": "shares",
