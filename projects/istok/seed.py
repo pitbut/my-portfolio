@@ -30,7 +30,10 @@ DATA_DIR = Path(__file__).resolve().parent / "data"
 
 def read_csv(filename):
     path = DATA_DIR / filename
-    with open(path, newline="", encoding="utf-8") as f:
+    # utf-8-sig корректно читает файл и с BOM (его добавляет Excel при
+    # сохранении), и без — оба варианта нужны, т.к. CSV правят и в Excel,
+    # и через редактор GitHub.
+    with open(path, newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
 
 
