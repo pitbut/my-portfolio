@@ -432,6 +432,106 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
   color: var(--ink-dim);
 }
 
+.flash-messages {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flash {
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: .92rem;
+  border: 1px solid transparent;
+}
+.flash--success { background: rgba(58, 166, 168, 0.16); border-color: rgba(58, 166, 168, 0.4); color: var(--foam); }
+.flash--error { background: rgba(217, 120, 120, 0.16); border-color: rgba(217, 120, 120, 0.4); color: #f0a5a5; }
+.flash--info { background: rgba(232, 183, 106, 0.12); border-color: rgba(232, 183, 106, 0.35); color: var(--gold-soft); }
+
+/* ---------- Forms (предложить правку / админка) ---------- */
+
+.form-block {
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(233, 247, 248, 0.12);
+}
+
+.form-block summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--gold-soft);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.field label { font-size: .85rem; color: var(--shallow); }
+
+.field input[type="text"],
+.field select,
+.field textarea,
+.field input[type="password"] {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(233, 247, 248, 0.18);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: .95rem;
+  resize: vertical;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.honeypot-field { position: absolute; left: -9999px; top: -9999px; }
+
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 100px;
+  border: none;
+  font-weight: 700;
+  font-size: .9rem;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.btn--primary { background: var(--gold); color: var(--abyss); }
+.btn--approve { background: #3aa6a8; color: var(--abyss); }
+.btn--reject { background: rgba(217, 120, 120, 0.85); color: var(--abyss); }
+.btn:hover { filter: brightness(1.08); }
+
+.admin-list { display: flex; flex-direction: column; gap: 18px; }
+
+.admin-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(233, 247, 248, 0.12);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.admin-item__meta { font-size: .85rem; color: var(--shallow); margin-bottom: 10px; }
+
+.admin-item__diff {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+.admin-item__old { color: var(--ink-dim); font-size: .9rem; }
+.admin-item__old del { color: #d97878; text-decoration: line-through; }
+.admin-item__new { color: var(--foam); font-size: .95rem; }
+
+.admin-item__actions { display: flex; gap: 10px; margin-top: 14px; }
+
 .breadcrumb {
   font-size: .85rem;
   color: var(--shallow);

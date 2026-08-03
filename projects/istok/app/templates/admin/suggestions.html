@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Модерация правок — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Предложенные правки</h2>
+    <a class="see-all" href="{{ url_for('admin.logout') }}">Выйти</a>
+  </div>
+
+  <div class="sort-bar">
+    <a href="{{ url_for('admin.suggestions', status='pending') }}" class="{{ 'is-active' if active_status == 'pending' }}">На модерации ({{ pending_count }})</a>
+    <a href="{{ url_for('admin.suggestions', status='approved') }}" class="{{ 'is-active' if active_status == 'approved' }}">Принятые</a>
+    <a href="{{ url_for('admin.suggestions', status='rejected') }}" class="{{ 'is-active' if active_status == 'rejected' }}">Отклонённые</a>
+    <a href="{{ url_for('admin.suggestions', status='all') }}" class="{{ 'is-active' if active_status == 'all' }}">Все</a>
+  </div>
+
+  {% if items %}
+  <div class="admin-list">
+    {% for s in items %}
+    <article class="admin-item">
+      <div class="admin-item__meta">
+        <a href="{{ url_for('sacred.detail', slug=s.source.slug) }}" target="_blank">{{ s.source.name }}</a>
+        &middot; поле «{{ s.field_label() }}»
+        &middot; {{ s.created_at.strftime("%d.%m.%Y %H:%M") }}
+        {% if s.submitter_name %} &middot; от {{ s.submitter_name }}{% endif %}
+        &middot; статус: {{ s.status }}
+      </div>
+
+      <div class="admin-item__diff">
+        <div class="admin-item__old"><del>{{ s.source|attr(s.field_name) or "—" }}</del></div>
+        <div class="admin-item__new">{{ s.proposed_value }}</div>
+      </div>
+
+      {% if s.message %}
+      <p class="admin-item__message"><em>Комментарий отправителя: {{ s.message }}</em></p>
+      {% endif %}
+
+      {% if s.status == "pending" %}
+      <div class="admin-item__actions">
+        <form method="post" action="{{ url_for('admin.approve', suggestion_id=s.id) }}">
+          <button type="submit" class="btn btn--approve">Принять</button>
+        </form>
+        <form method="post" action="{{ url_for('admin.reject', suggestion_id=s.id) }}">
+          <button type="submit" class="btn btn--reject">Отклонить</button>
+        </form>
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Здесь пока пусто.</div>
+  {% endif %}
+</section>
+{% endblock %}

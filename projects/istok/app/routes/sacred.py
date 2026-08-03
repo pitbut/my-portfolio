@@ -1,11 +1,13 @@
 """Раздел «Священные источники мира»."""
-from flask import Blueprint, abort, current_app, render_template, request
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 from sqlalchemy import func
 
 from app import db
-from app.models import SacredSource
+from app.models import EditSuggestion, SacredSource
 
 bp = Blueprint("sacred", __name__, template_folder="../templates/sacred")
+
+MAX_SUGGESTION_LENGTH = 4000
 
 
 @bp.route("/")
@@ -46,3 +48,46 @@ def detail(slug):
     if source is None:
         abort(404)
     return render_template("sacred/detail.html", source=source)
+
+
+@bp.route("/<slug>/suggest", methods=["POST"])
+def suggest(slug):
+    source = SacredSource.query.filter_by(slug=slug).first()
+    if source is None:
+        abort(404)
+
+    # honeypot: скрытое от людей поле формы — если его заполнил бот,
+    # тихо делаем вид, что всё отправилось, но ничего не сохраняем.
+    if request.form.get("website"):
+        flash("Спасибо! Предложение отправлено на модерацию.", "success")
+        return redirect(url_for("sacred.detail", slug=slug))
+
+    field_name = request.form.get("field_name", "")
+    proposed_value = (request.form.get("proposed_value") or "").strip()
+    message = (request.form.get("message") or "").strip()
+    submitter_name = (request.form.get("submitter_name") or "").strip()
+
+    if field_name not in EditSuggestion.FIELD_LABELS:
+        flash("Не удалось определить поле для правки.", "error")
+        return redirect(url_for("sacred.detail", slug=slug))
+
+    if not proposed_value:
+        flash("Опишите, что предлагаете изменить.", "error")
+        return redirect(url_for("sacred.detail", slug=slug))
+
+    if len(proposed_value) > MAX_SUGGESTION_LENGTH or len(message) > MAX_SUGGESTION_LENGTH:
+        flash("Текст слишком длинный.", "error")
+        return redirect(url_for("sacred.detail", slug=slug))
+
+    suggestion = EditSuggestion(
+        source_id=source.id,
+        field_name=field_name,
+        proposed_value=proposed_value,
+        message=message or None,
+        submitter_name=submitter_name or None,
+    )
+    db.session.add(suggestion)
+    db.session.commit()
+
+    flash("Спасибо! Предложение отправлено на модерацию.", "success")
+    return redirect(url_for("sacred.detail", slug=slug))

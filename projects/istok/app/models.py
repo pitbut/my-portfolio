@@ -129,6 +129,41 @@ class Experiment(TimestampMixin, db.Model):
         return f"<Experiment {self.title!r}: {self.verdict}>"
 
 
+class EditSuggestion(TimestampMixin, db.Model):
+    """Правка источника, предложенная посетителем сайта и ждущая модерации."""
+
+    __tablename__ = "edit_suggestions"
+
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+
+    FIELD_LABELS = {
+        "belief": "Во что верят",
+        "allowed": "Что можно",
+        "forbidden": "Что нельзя",
+        "description": "Описание",
+        "comment": "Комментарий редакции",
+    }
+
+    id = db.Column(db.Integer, primary_key=True)
+    source_id = db.Column(db.Integer, db.ForeignKey("sacred_sources.id"), nullable=False)
+    field_name = db.Column(db.String(50), nullable=False)  # ключ из FIELD_LABELS
+    proposed_value = db.Column(db.Text, nullable=False)
+    message = db.Column(db.Text, nullable=True)  # необязательная пояснительная записка
+    submitter_name = db.Column(db.String(120), nullable=True)
+    status = db.Column(db.String(20), nullable=False, default=STATUS_PENDING)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    source = db.relationship("SacredSource", backref="suggestions")
+
+    def field_label(self):
+        return self.FIELD_LABELS.get(self.field_name, self.field_name)
+
+    def __repr__(self):
+        return f"<EditSuggestion #{self.id} {self.field_name} for source_id={self.source_id} ({self.status})>"
+
+
 class DeliveryService(TimestampMixin, db.Model):
     """Служба доставки воды."""
 

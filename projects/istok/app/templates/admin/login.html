@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Вход в модерацию — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 420px;">
+  <div class="section__header">
+    <h2>Панель модерации</h2>
+  </div>
+  <form method="post">
+    <div class="field">
+      <label for="password">Пароль</label>
+      <input type="password" id="password" name="password" required autofocus>
+    </div>
+    <button type="submit" class="btn btn--primary">Войти</button>
+  </form>
+</section>
+{% endblock %}
