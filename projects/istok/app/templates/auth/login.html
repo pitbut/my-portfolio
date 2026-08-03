@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Вход — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 420px;">
+  <div class="section__header">
+    <h2>Вход</h2>
+  </div>
+  <form method="post">
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="text" id="email" name="email" value="{{ email }}" required autofocus>
+    </div>
+    <div class="field">
+      <label for="password">Пароль</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn--primary">Войти</button>
+  </form>
+  <p class="prose" style="margin-top:16px;">Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></p>
+</section>
+{% endblock %}

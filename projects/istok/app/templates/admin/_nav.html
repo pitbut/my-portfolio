@@ -1,0 +1,9 @@
+<div class="section__header">
+  <h2>{{ admin_title }}</h2>
+  <a class="see-all" href="{{ url_for('admin.logout') }}">Выйти</a>
+</div>
+<div class="sort-bar">
+  <a href="{{ url_for('admin.suggestions') }}" class="{{ 'is-active' if request.endpoint == 'admin.suggestions' }}">Правки источников</a>
+  <a href="{{ url_for('admin.suppliers') }}" class="{{ 'is-active' if request.endpoint == 'admin.suppliers' }}">Точки продажи</a>
+  <a href="{{ url_for('admin.messages') }}" class="{{ 'is-active' if request.endpoint == 'admin.messages' }}">Сообщения</a>
+</div>

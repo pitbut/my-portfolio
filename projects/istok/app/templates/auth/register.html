@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Регистрация — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 420px;">
+  <div class="section__header">
+    <h2>Регистрация</h2>
+  </div>
+  <p class="prose">Аккаунт нужен, чтобы добавлять точки продажи воды в каталоге.</p>
+  <form method="post">
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="text" id="email" name="email" value="{{ email }}" required autofocus>
+    </div>
+    <div class="field">
+      <label for="password">Пароль (не короче 8 символов)</label>
+      <input type="password" id="password" name="password" required minlength="8">
+    </div>
+    <div class="field">
+      <label for="password2">Повторите пароль</label>
+      <input type="password" id="password2" name="password2" required minlength="8">
+    </div>
+    <button type="submit" class="btn btn--primary">Зарегистрироваться</button>
+  </form>
+  <p class="prose" style="margin-top:16px;">Уже есть аккаунт? <a href="{{ url_for('auth.login') }}">Войти</a></p>
+</section>
+{% endblock %}

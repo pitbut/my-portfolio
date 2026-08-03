@@ -29,6 +29,20 @@ class Config:
     # правки). По умолчанию выключено, чтобы не терять такие правки.
     FORCE_RESEED = os.environ.get("FORCE_RESEED", "false").lower() == "true"
 
+    # SMTP для писем подтверждения регистрации. Если MAIL_USERNAME не
+    # задан, письма реально не отправляются — вместо этого ссылка
+    # подтверждения выводится в лог и на страницу (для локальной
+    # разработки и как аварийный запасной вариант).
+    MAIL_SERVER = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+    MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
+    MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "Исток <noreply@istok.example>")
+
+    # Срок жизни ссылки подтверждения email, в секундах (по умолчанию сутки).
+    CONFIRM_TOKEN_MAX_AGE = int(os.environ.get("CONFIRM_TOKEN_MAX_AGE", 86400))
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

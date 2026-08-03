@@ -29,7 +29,7 @@
       <tbody>
         {% for w in brands %}
         <tr>
-          <td>{{ w.name }}</td>
+          <td><a href="{{ url_for('catalog.detail', slug=w.slug) }}">{{ w.name }}</a></td>
           <td>{{ w.water_type }}</td>
           <td>{{ w.mineralization_mg_l ~ " мг/л" if w.mineralization_mg_l else "—" }}</td>
           <td>{{ w.volume_l }} л</td>

@@ -127,6 +127,18 @@ p { color: var(--ink-dim); }
   border-bottom-color: var(--gold);
 }
 
+.account-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: .85rem;
+}
+
+.account-nav a { color: var(--gold-soft); }
+.account-nav a:hover { color: var(--gold); }
+.account-nav__email { color: var(--ink-dim); }
+.account-nav__unconfirmed { font-size: .78rem; }
+
 /* ---------- Hero ---------- */
 
 .hero {
@@ -364,7 +376,8 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
 .map-block__header h3 { margin: 0; font-size: 1.15rem; }
 .map-block__header a { font-size: .88rem; font-weight: 600; }
 
-#source-map {
+#source-map,
+#suppliers-map {
   height: 340px;
   width: 100%;
   border-radius: var(--radius);
