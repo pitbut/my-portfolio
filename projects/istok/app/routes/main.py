@@ -1,10 +1,12 @@
 """Главная страница и разделы без собственного блюпринта (оборудование,
-опыты, доставка) — по одному-два на раздел, без пагинации."""
-from flask import Blueprint, render_template
+опыты, доставка, контакты) — по одному-два на раздел, без пагинации."""
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
+from app import db
 from app.models import (
     Article,
     Book,
+    ContactMessage,
     DeliveryService,
     Equipment,
     Experiment,
@@ -13,6 +15,8 @@ from app.models import (
 )
 
 bp = Blueprint("main", __name__)
+
+MAX_MESSAGE_LENGTH = 4000
 
 
 @bp.route("/")
@@ -55,3 +59,31 @@ def experiments_list():
 def delivery_list():
     services = DeliveryService.query.order_by(DeliveryService.name).all()
     return render_template("main/delivery.html", services=services)
+
+
+@bp.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        # honeypot: скрытое поле, боты его заполняют, люди — нет
+        if request.form.get("website"):
+            flash("Спасибо! Сообщение отправлено.", "success")
+            return redirect(url_for("main.contact"))
+
+        name = (request.form.get("name") or "").strip()
+        email = (request.form.get("email") or "").strip()
+        message = (request.form.get("message") or "").strip()
+
+        if not message:
+            flash("Напишите текст сообщения.", "error")
+            return redirect(url_for("main.contact"))
+        if len(message) > MAX_MESSAGE_LENGTH:
+            flash("Сообщение слишком длинное.", "error")
+            return redirect(url_for("main.contact"))
+
+        db.session.add(ContactMessage(name=name or None, email=email or None, message=message))
+        db.session.commit()
+
+        flash("Спасибо! Сообщение отправлено.", "success")
+        return redirect(url_for("main.contact"))
+
+    return render_template("main/contact.html")

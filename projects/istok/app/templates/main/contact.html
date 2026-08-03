@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Контакты — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 560px;">
+  <div class="section__header">
+    <h2>Связаться с нами</h2>
+  </div>
+
+  <p class="prose">
+    По вопросам о портале, партнёрствам или с найденными неточностями пишите
+    на <a href="mailto:hello@istok.example">hello@istok.example</a> или через
+    форму ниже.
+  </p>
+
+  <form method="post">
+    <input type="text" name="website" class="honeypot-field" tabindex="-1" autocomplete="off">
+
+    <div class="field">
+      <label for="name">Ваше имя (необязательно)</label>
+      <input type="text" id="name" name="name" maxlength="120">
+    </div>
+
+    <div class="field">
+      <label for="email">Ваш email (необязательно, если хотите ответ)</label>
+      <input type="text" id="email" name="email" maxlength="255">
+    </div>
+
+    <div class="field">
+      <label for="message">Сообщение</label>
+      <textarea id="message" name="message" rows="5" maxlength="4000" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn--primary">Отправить</button>
+  </form>
+</section>
+{% endblock %}

@@ -3,10 +3,7 @@
 
 {% block content %}
 <section class="section wrap">
-  <div class="section__header">
-    <h2>Предложенные правки</h2>
-    <a class="see-all" href="{{ url_for('admin.logout') }}">Выйти</a>
-  </div>
+  {% with admin_title = "Предложенные правки" %}{% include "admin/_nav.html" %}{% endwith %}
 
   <div class="sort-bar">
     <a href="{{ url_for('admin.suggestions', status='pending') }}" class="{{ 'is-active' if active_status == 'pending' }}">На модерации ({{ pending_count }})</a>

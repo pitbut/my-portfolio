@@ -26,6 +26,7 @@ from app.models import (
     Equipment,
     Experiment,
     SacredSource,
+    Supplier,
     WaterBrand,
 )
 
@@ -117,12 +118,38 @@ def load_articles():
 def load_water_brands():
     for row in read_csv("water_brands.csv"):
         yield WaterBrand(
+            slug=row["slug"].strip(),
             name=row["name"].strip(),
             water_type=row["water_type"].strip(),
             mineralization_mg_l=to_int(row.get("mineralization_mg_l")),
             volume_l=to_decimal_str(row["volume_l"]),
             price_rub=to_decimal_str(row["price_rub"]),
             origin=clean(row.get("origin")),
+            description=clean(row.get("description")),
+        )
+
+
+def to_bool(value):
+    return (clean(value) or "").lower() in ("true", "1", "yes", "да")
+
+
+def load_suppliers():
+    for row in read_csv("suppliers.csv"):
+        brand = WaterBrand.query.filter_by(slug=row["water_brand_slug"].strip()).first()
+        if brand is None:
+            # марка не найдена (например, опечатка в CSV) — пропускаем
+            # строку вместо падения всего сида.
+            continue
+        yield Supplier(
+            water_brand_id=brand.id,
+            name=row["name"].strip(),
+            supplier_type=clean(row.get("supplier_type")),
+            address=row["address"].strip(),
+            latitude=to_float(row.get("latitude")),
+            longitude=to_float(row.get("longitude")),
+            phone=clean(row.get("phone")),
+            website=clean(row.get("website")),
+            verified=to_bool(row.get("verified")),
         )
 
 
@@ -163,6 +190,7 @@ MODEL_LOADERS = [
     (Book, load_books, "книг"),
     (Article, load_articles, "статей"),
     (WaterBrand, load_water_brands, "марок воды"),
+    (Supplier, load_suppliers, "точек продажи"),  # после WaterBrand — зависит по slug
     (Equipment, load_equipment, "единиц оборудования"),
     (Experiment, load_experiments, "опытов"),
     (DeliveryService, load_delivery_services, "служб доставки"),
@@ -187,6 +215,7 @@ def seed():
             for obj in loader():
                 db.session.add(obj)
                 n += 1
+            db.session.flush()  # чтобы, например, Supplier видел id только что созданных WaterBrand
             loaded[label] = n
 
         db.session.commit()

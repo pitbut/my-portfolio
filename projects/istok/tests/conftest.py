@@ -13,6 +13,7 @@ from app.models import (
     Equipment,
     Experiment,
     SacredSource,
+    Supplier,
     WaterBrand,
 )
 
@@ -47,13 +48,26 @@ def app():
                 body="Первый абзац.\n\nВторой абзац.",
             )
         )
+        water_brand = WaterBrand(
+            name="Тестовая вода",
+            slug="test-water",
+            water_type="питьевая",
+            mineralization_mg_l=200,
+            volume_l=1.5,
+            price_rub=50,
+            description="Описание тестовой воды.",
+        )
+        db.session.add(water_brand)
+        db.session.flush()
         db.session.add(
-            WaterBrand(
-                name="Тестовая вода",
-                water_type="питьевая",
-                mineralization_mg_l=200,
-                volume_l=1.5,
-                price_rub=50,
+            Supplier(
+                water_brand_id=water_brand.id,
+                name="Тестовый поставщик",
+                supplier_type="опт",
+                address="Тестовая ул., 1",
+                latitude=55.75,
+                longitude=37.61,
+                verified=True,
             )
         )
         db.session.add(

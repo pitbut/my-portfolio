@@ -15,7 +15,7 @@ from flask import (
 )
 
 from app import db
-from app.models import EditSuggestion
+from app.models import ContactMessage, EditSuggestion, Supplier
 
 bp = Blueprint("admin", __name__, template_folder="../templates/admin")
 
@@ -97,3 +97,65 @@ def reject(suggestion_id):
         db.session.commit()
         flash("Предложение отклонено.", "info")
     return redirect(url_for("admin.suggestions"))
+
+
+@bp.route("/suppliers")
+@login_required
+def suppliers():
+    status = request.args.get("status", "unverified")
+    query = Supplier.query
+    if status == "unverified":
+        query = query.filter_by(verified=False)
+    elif status == "verified":
+        query = query.filter_by(verified=True)
+    items = query.order_by(Supplier.created_at.desc()).all()
+    unverified_count = Supplier.query.filter_by(verified=False).count()
+    return render_template(
+        "admin/suppliers.html",
+        items=items,
+        active_status=status,
+        unverified_count=unverified_count,
+    )
+
+
+@bp.route("/suppliers/<int:supplier_id>/verify", methods=["POST"])
+@login_required
+def verify_supplier(supplier_id):
+    supplier = Supplier.query.get_or_404(supplier_id)
+    supplier.verified = True
+    db.session.commit()
+    flash(f"«{supplier.name}» отмечена как проверенная.", "success")
+    return redirect(url_for("admin.suppliers"))
+
+
+@bp.route("/suppliers/<int:supplier_id>/unverify", methods=["POST"])
+@login_required
+def unverify_supplier(supplier_id):
+    supplier = Supplier.query.get_or_404(supplier_id)
+    supplier.verified = False
+    db.session.commit()
+    flash(f"«{supplier.name}» снова помечена как непроверенная.", "info")
+    return redirect(url_for("admin.suppliers"))
+
+
+@bp.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
+@login_required
+def delete_supplier(supplier_id):
+    supplier = Supplier.query.get_or_404(supplier_id)
+    db.session.delete(supplier)
+    db.session.commit()
+    flash("Точка продажи удалена.", "info")
+    return redirect(url_for("admin.suppliers"))
+
+
+@bp.route("/messages")
+@login_required
+def messages():
+    items = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    unread_count = ContactMessage.query.filter_by(is_read=False).count()
+    unread_ids = [m.id for m in items if not m.is_read]
+    for message in items:
+        message.is_read = True
+    if unread_ids:
+        db.session.commit()
+    return render_template("admin/messages.html", items=items, unread_count=unread_count)

@@ -1,0 +1,6 @@
+﻿water_brand_slug,name,supplier_type,address,latitude,longitude,phone,website,verified
+svyatoy-istochnik,Дистрибьютор "АкваЦентр",опт,"Москва, Дмитровское шоссе, 100",55.8720,37.5310,+7 (495) 100-10-01,https://example.com/akvatsentr,true
+bonaqua,Склад Coca-Cola HBC Россия,опт,"Москва, Каширское шоссе, 22",55.6390,37.6420,+7 (495) 100-10-02,https://example.com/chbc,true
+essentuki-4,ФармТорг Кавминвод,опт,"Ессентуки, ул. Розы Люксембург, 4",44.0450,42.8630,+7 (879) 340-00-03,https://example.com/farmtorg,true
+borjomi,Boржоми РУС дистрибуция,опт,"Москва, Варшавское шоссе, 125",55.6180,37.6070,+7 (495) 100-10-04,https://example.com/borjomirus,false
+narzan,Нарзан-Опт Кисловодск,опт,"Кисловодск, Промышленная ул., 7",43.9040,42.7180,+7 (879) 370-00-05,https://example.com/narzanopt,true

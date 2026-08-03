@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Сообщения — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  {% with admin_title = "Сообщения с контактной формы" %}{% include "admin/_nav.html" %}{% endwith %}
+
+  {% if items %}
+  <div class="admin-list">
+    {% for m in items %}
+    <article class="admin-item">
+      <div class="admin-item__meta">
+        {{ m.created_at.strftime("%d.%m.%Y %H:%M") }}
+        {% if m.name %} &middot; {{ m.name }}{% endif %}
+        {% if m.email %} &middot; {{ m.email }}{% endif %}
+      </div>
+      <p>{{ m.message }}</p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Сообщений пока нет.</div>
+  {% endif %}
+</section>
+{% endblock %}
