@@ -138,3 +138,26 @@ def test_add_supplier_after_confirmation(client, app):
         assert supplier is not None
         assert supplier.verified is False
         assert supplier.added_by_user_id is not None
+
+
+def test_pending_confirm_link_shown_when_mail_not_configured(client):
+    client.post(
+        "/auth/register",
+        data={"email": "nomail@user.example", "password": "password123", "password2": "password123"},
+        follow_redirects=True,
+    )
+    resp = client.get("/")
+    assert "/auth/confirm/".encode() in resp.data
+
+
+def test_pending_confirm_link_hidden_after_confirmation(client, app):
+    client.post(
+        "/auth/register",
+        data={"email": "willconfirm@user.example", "password": "password123", "password2": "password123"},
+        follow_redirects=True,  # consumes the one-time registration flash
+    )
+    token = _confirm_token(app, "willconfirm@user.example")
+    client.get(f"/auth/confirm/{token}", follow_redirects=True)  # consumes the confirmation flash
+
+    resp = client.get("/")
+    assert "/auth/confirm/".encode() not in resp.data
