@@ -21,9 +21,14 @@ def _serializer():
     return URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
 
 
-def _send_confirmation_email(user):
+def confirm_url_for(user):
+    """Строит ссылку подтверждения для пользователя (без отправки письма)."""
     token = _serializer().dumps(user.email, salt=CONFIRM_SALT)
-    confirm_url = url_for("auth.confirm_email", token=token, _external=True)
+    return url_for("auth.confirm_email", token=token, _external=True)
+
+
+def _send_confirmation_email(user):
+    confirm_url = confirm_url_for(user)
     body = (
         f"Здравствуйте!\n\n"
         f"Подтвердите регистрацию на портале «Исток», перейдя по ссылке:\n"

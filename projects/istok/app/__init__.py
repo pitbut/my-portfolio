@@ -54,6 +54,23 @@ def create_app(config_name=None):
     def load_user(user_id):
         return db.session.get(models.User, int(user_id))
 
+    @app.context_processor
+    def inject_pending_confirmation():
+        """Пока на сервере не настроена реальная отправка почты (MAIL_USERNAME/
+        MAIL_PASSWORD), показываем ссылку подтверждения прямо на сайте, а не
+        только один раз во flash-сообщении, — иначе её легко потерять."""
+        from flask_login import current_user
+
+        if (
+            current_user.is_authenticated
+            and not current_user.email_confirmed
+            and not app.config.get("MAIL_USERNAME")
+        ):
+            from app.routes.auth import confirm_url_for
+
+            return {"pending_confirm_url": confirm_url_for(current_user)}
+        return {}
+
     @app.template_global()
     def image_url(value):
         """Разрешает значение поля image_url/cover_url в готовую ссылку.

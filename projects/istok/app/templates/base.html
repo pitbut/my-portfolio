@@ -53,6 +53,14 @@
     </div>
     {% endif %}
   {% endwith %}
+  {% if pending_confirm_url %}
+  <div class="wrap flash-messages">
+    <div class="flash flash--info">
+      Почтовый сервер на сайте пока не настроен — письмо не отправляется автоматически.
+      Подтвердите email по ссылке: <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
+    </div>
+  </div>
+  {% endif %}
   {% block content %}{% endblock %}
 </main>
 
