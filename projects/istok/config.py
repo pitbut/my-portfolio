@@ -21,6 +21,14 @@ class Config:
 
     ITEMS_PER_PAGE = int(os.environ.get("ITEMS_PER_PAGE", 9))
 
+    # Пароль для входа в /admin (панель модерации предложенных правок).
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin-change-me")
+
+    # Если true — seed.py всегда стирает и заново заполняет БД из CSV,
+    # даже если в ней уже есть данные (например, одобренные через /admin
+    # правки). По умолчанию выключено, чтобы не терять такие правки.
+    FORCE_RESEED = os.environ.get("FORCE_RESEED", "false").lower() == "true"
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

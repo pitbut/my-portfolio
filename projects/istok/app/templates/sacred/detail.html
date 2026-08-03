@@ -64,6 +64,41 @@
     <div id="source-map" data-lat="{{ source.latitude }}" data-lng="{{ source.longitude }}" data-name="{{ source.name }}"></div>
   </div>
   {% endif %}
+
+  <details class="form-block">
+    <summary>✏️ Предложить правку к этому источнику</summary>
+    <form method="post" action="{{ url_for('sacred.suggest', slug=source.slug) }}">
+      <input type="text" name="website" class="honeypot-field" tabindex="-1" autocomplete="off">
+
+      <div class="field">
+        <label for="field_name">Какое поле поправить</label>
+        <select id="field_name" name="field_name" required>
+          <option value="belief">Во что верят</option>
+          <option value="allowed">Что можно</option>
+          <option value="forbidden">Что нельзя</option>
+          <option value="description">Описание</option>
+          <option value="comment">Комментарий редакции</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="proposed_value">Предлагаемый текст</label>
+        <textarea id="proposed_value" name="proposed_value" rows="4" maxlength="4000" required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="message">Комментарий к правке (необязательно) — например, откуда сведения</label>
+        <textarea id="message" name="message" rows="2" maxlength="4000"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="submitter_name">Ваше имя (необязательно)</label>
+        <input type="text" id="submitter_name" name="submitter_name" maxlength="120">
+      </div>
+
+      <button type="submit" class="btn btn--primary">Отправить на модерацию</button>
+    </form>
+  </details>
 </section>
 {% endblock %}
 

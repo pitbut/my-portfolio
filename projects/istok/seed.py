@@ -2,13 +2,17 @@
 
 Запуск: python seed.py
 
-Скрипт идемпотентен — при повторном запуске данные не дублируются
-(таблицы очищаются и заполняются заново из текущего содержимого CSV).
+По умолчанию скрипт заполняет из CSV только ПУСТЫЕ таблицы — если в
+таблице уже есть данные (например, после первого запуска, или после
+правок, одобренных через /admin), она не трогается. Это специально:
+иначе правки, одобренные модератором в веб-панели, стирались бы при
+каждом деплое/рестарте сервера.
 
-Редактировать данные можно без Python: открой нужный файл в data/ как
-таблицу (Excel, Google Sheets, редактор CSV на GitHub), поменяй/добавь
-строку, сохрани — при следующем деплое база обновится автоматически.
-Подробности — в README.md.
+Если нужно принудительно стереть и перезалить всё заново из CSV
+(например, вы отредактировали много строк в CSV и хотите синхронизировать
+базу) — установите переменную окружения FORCE_RESEED=true. Учтите: это
+сотрёт и все одобренные через /admin правки, сделанные после последней
+синхронизации с CSV.
 """
 import csv
 from datetime import datetime
@@ -154,30 +158,45 @@ def load_delivery_services():
         )
 
 
+MODEL_LOADERS = [
+    (SacredSource, load_sacred_sources, "источников"),
+    (Book, load_books, "книг"),
+    (Article, load_articles, "статей"),
+    (WaterBrand, load_water_brands, "марок воды"),
+    (Equipment, load_equipment, "единиц оборудования"),
+    (Experiment, load_experiments, "опытов"),
+    (DeliveryService, load_delivery_services, "служб доставки"),
+]
+
+
 def seed():
     app = create_app()
     with app.app_context():
-        db.drop_all()
+        force = app.config.get("FORCE_RESEED", False)
+
+        if force:
+            db.drop_all()
         db.create_all()
 
-        counts = {}
-        for loader, label in [
-            (load_sacred_sources, "источников"),
-            (load_books, "книг"),
-            (load_articles, "статей"),
-            (load_water_brands, "марок воды"),
-            (load_equipment, "единиц оборудования"),
-            (load_experiments, "опытов"),
-            (load_delivery_services, "служб доставки"),
-        ]:
+        loaded, skipped = {}, []
+        for model, loader, label in MODEL_LOADERS:
+            if not force and model.query.count() > 0:
+                skipped.append(label)
+                continue
             n = 0
             for obj in loader():
                 db.session.add(obj)
                 n += 1
-            counts[label] = n
+            loaded[label] = n
 
         db.session.commit()
-        print("Готово: " + ", ".join(f"{n} {label}" for label, n in counts.items()))
+
+        if loaded:
+            print("Загружено из CSV: " + ", ".join(f"{n} {label}" for label, n in loaded.items()))
+        if skipped:
+            print("Пропущено (в базе уже есть данные): " + ", ".join(skipped))
+        if not loaded and not skipped:
+            print("Нечего загружать.")
 
 
 if __name__ == "__main__":

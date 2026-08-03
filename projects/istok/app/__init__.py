@@ -31,12 +31,14 @@ def create_app(config_name=None):
     from app.routes.catalog import bp as catalog_bp
     from app.routes.articles import bp as articles_bp
     from app.routes.library import bp as library_bp
+    from app.routes.admin import bp as admin_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(sacred_bp, url_prefix="/sacred")
     app.register_blueprint(catalog_bp, url_prefix="/catalog")
     app.register_blueprint(articles_bp, url_prefix="/articles")
     app.register_blueprint(library_bp, url_prefix="/library")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 
