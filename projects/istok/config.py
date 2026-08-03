@@ -38,7 +38,16 @@ class Config:
     MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
-    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "Исток <noreply@istok.example>")
+    # Хостинг может передать переменную пустой строкой, а не отсутствующей —
+    # тогда os.environ.get(..., default) не подставит значение по умолчанию,
+    # поэтому проверяем и пустую строку. Отправитель по умолчанию — сам
+    # MAIL_USERNAME (Gmail всё равно требует, чтобы From совпадал с адресом,
+    # от имени которого идёт авторизация).
+    MAIL_DEFAULT_SENDER = (
+        os.environ.get("MAIL_DEFAULT_SENDER")
+        or MAIL_USERNAME
+        or "Исток <noreply@istok.example>"
+    )
 
     # Срок жизни ссылки подтверждения email, в секундах (по умолчанию сутки).
     CONFIRM_TOKEN_MAX_AGE = int(os.environ.get("CONFIRM_TOKEN_MAX_AGE", 86400))

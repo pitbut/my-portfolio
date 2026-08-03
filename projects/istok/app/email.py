@@ -39,10 +39,19 @@ def send_email(to, subject, body):
     port = current_app.config["MAIL_PORT"]
     use_tls = current_app.config["MAIL_USE_TLS"]
 
-    with smtplib.SMTP(server, port, timeout=10) as smtp:
-        if use_tls:
-            smtp.starttls()
-        smtp.login(username, password)
-        smtp.send_message(msg)
+    try:
+        with smtplib.SMTP(server, port, timeout=10) as smtp:
+            if use_tls:
+                smtp.starttls()
+            smtp.login(username, password)
+            smtp.send_message(msg)
+    except (smtplib.SMTPException, OSError):
+        # Неверный пароль приложения, заблокированный аккаунт, сетевая
+        # ошибка и т.п. — не должны ронять регистрацию/вход целиком,
+        # поэтому откатываемся на запасной вариант (ссылка на странице).
+        current_app.logger.exception(
+            "Не удалось отправить письмо для %s через SMTP, откат на запасной вариант.", to
+        )
+        return False
 
     return True
