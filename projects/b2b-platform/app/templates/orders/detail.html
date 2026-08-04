@@ -19,6 +19,10 @@
 
   <p class="order-description">{{ order.description }}</p>
 
+  {% if order.status == 'completed' and (is_owner or (current_user.role == 'executor' and order.assignment and order.assignment.bid.executor_id == current_user.executor_profile.id)) %}
+  <a class="btn btn--secondary" href="{{ url_for('reviews.leave_review', order_id=order.id) }}">Оставить отзыв</a>
+  {% endif %}
+
   {% if order.dimensions_length_mm or order.dimensions_diameter_mm or order.weight_kg %}
   <p class="order-dimensions">
     Габариты:

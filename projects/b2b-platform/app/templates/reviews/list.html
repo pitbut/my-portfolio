@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Отзывы{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Отзывы</h1>
+
+  <h2 class="profile-section-title">Полученные</h2>
+  {% if received %}
+  <div class="notif-list">
+    {% for r in received %}
+    <div class="notif-item">
+      <div class="notif-item__title">{{ r.rating }}/5</div>
+      {% if r.comment %}<div class="notif-item__body">{{ r.comment }}</div>{% endif %}
+      <div class="notif-item__meta">{{ r.created_at.strftime('%d.%m.%Y') }} · заказ «{{ r.order.title }}»</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Пока нет опубликованных отзывов о вас.</p>
+  {% endif %}
+
+  <h2 class="profile-section-title">Оставленные вами</h2>
+  {% if given %}
+  <div class="notif-list">
+    {% for r in given %}
+    <div class="notif-item">
+      <div class="notif-item__title">{{ r.rating }}/5 {% if not r.is_published %}<span class="hint">(ожидает публикации)</span>{% endif %}</div>
+      {% if r.comment %}<div class="notif-item__body">{{ r.comment }}</div>{% endif %}
+      <div class="notif-item__meta">{{ r.created_at.strftime('%d.%m.%Y') }} · заказ «{{ r.order.title }}»</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Вы ещё не оставляли отзывов.</p>
+  {% endif %}
+</section>
+{% endblock %}

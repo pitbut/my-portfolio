@@ -60,12 +60,14 @@ def create_app(config_name=None):
     from app.routes.profile import bp as profile_bp
     from app.routes.orders import bp as orders_bp
     from app.routes.map import bp as map_bp
+    from app.routes.reviews import bp as reviews_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(profile_bp, url_prefix="/profile")
     app.register_blueprint(orders_bp)
     app.register_blueprint(map_bp)
+    app.register_blueprint(reviews_bp)
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 

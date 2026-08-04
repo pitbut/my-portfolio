@@ -506,3 +506,31 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f"<Notification user_id={self.user_id} type={self.type!r}>"
+
+
+# --- модуль 5: отзывы и рейтинги ---
+
+class Review(TimestampMixin, db.Model):
+    """Двусторонний отзыв по завершённому заказу — публикуется только после
+    того, как своё мнение оставили обе стороны (защита от «жду его оценку,
+    чтобы ответить тем же», см. ТЗ)."""
+
+    __tablename__ = "reviews"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    target_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    direction = db.Column(db.String(30), nullable=False)  # customer_to_executor | executor_to_customer
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    is_published = db.Column(db.Boolean, nullable=False, default=False)
+
+    order = db.relationship("Order")
+    author = db.relationship("User", foreign_keys=[author_id])
+    target = db.relationship("User", foreign_keys=[target_id])
+
+    __table_args__ = (db.UniqueConstraint("order_id", "author_id", name="uq_review_per_order_author"),)
+
+    def __repr__(self):
+        return f"<Review order_id={self.order_id} author_id={self.author_id} rating={self.rating}>"
