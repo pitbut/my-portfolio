@@ -132,6 +132,9 @@
       <span class="badge">Telegram Bot</span>
       <span class="badge">Подписочная модель</span>
       <span class="badge">Арбитраж споров</span>
+      <span class="badge">Барахолка станков и инструмента</span>
+      <span class="badge">Вакансии и резюме</span>
+      <span class="badge">Самостоятельная регистрация без админа</span>
     </div>
 
     <div class="summary-box">
@@ -140,7 +143,12 @@
       Заказчик публикует заявку в свободной форме (текст/фото/чертежи/видео), система автоматически подбирает
       исполнителей по техническим возможностям и геолокации, оповещает их через Telegram, и исполнители
       конкурируют за заказ в формате аукциона (цена/срок/условия). Доступ к платформе — только после
-      обязательной регистрации («жёсткий paywall» на уровне разделов, а не главной страницы).</p>
+      обязательной регистрации («жёсткий paywall» на уровне разделов, а не главной страницы). Все профили —
+      и заказчика, и исполнителя — заполняются пользователем самостоятельно при регистрации, без ручного
+      участия администратора. Дополнительно платформа включает доску объявлений купли-продажи
+      металлообрабатывающих станков и инструмента, а также раздел вакансий/резюме (найм персонала) —
+      оба раздела построены по единой модели «объявление + отклик» с мгновенным Telegram-уведомлением
+      обеим сторонам.</p>
     </div>
 
     <nav class="toc">
@@ -156,9 +164,11 @@
         <li><a href="#m5">8. Модуль 5 — Отзывы и рейтинги</a></li>
         <li><a href="#m6">9. Модуль 6 — Арбитраж и медиация</a></li>
         <li><a href="#m7">10. Модуль 7 — Telegram-бот, аукцион, монетизация</a></li>
-        <li><a href="#nfr">11. Нефункциональные требования</a></li>
-        <li><a href="#stack">12. Технологический стек</a></li>
-        <li><a href="#roadmap">13. Дорожная карта</a></li>
+        <li><a href="#m8">11. Модуль 8 — Барахолка: купля-продажа станков и инструмента</a></li>
+        <li><a href="#m9">12. Модуль 9 — Вакансии и резюме (найм персонала)</a></li>
+        <li><a href="#nfr">13. Нефункциональные требования</a></li>
+        <li><a href="#stack">14. Технологический стек</a></li>
+        <li><a href="#roadmap">15. Дорожная карта</a></li>
       </ol>
     </nav>
 
@@ -192,6 +202,10 @@
       <div class="callout note">Один аккаунт (<code>users.id</code>) может иметь только одну активную бизнес-роль
       (customer либо executor) для простоты MVP; переключение роли — через создание второго профиля на тот же email,
       по аналогии с «личным» и «рабочим» кабинетом. Роль <code>admin</code> — отдельный флаг, не публичная регистрация.</div>
+      <div class="callout note"><strong>Принцип самообслуживания:</strong> ни один профиль на платформе не
+      создаётся и не заполняется вручную администратором. И заказчик, и исполнитель проходят один и тот же
+      механизм — обязательную регистрацию (модуль 1) и мастер заполнения профиля (модуль 3) сразу после неё.
+      Роль администратора ограничена последующей верификацией/модерацией уже заполненных данных, а не их вводом.</div>
     </section>
 
     <!-- ================= 2. БД ================= -->
@@ -534,7 +548,7 @@
           <table>
             <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
             <tr><td>user_id</td><td class="type">FK → users.id</td><td></td></tr>
-            <tr><td>type</td><td class="type">enum(new_order_match, outbid, bid_accepted, bid_rejected, dispute_update, subscription_expiring, review_received)</td><td></td></tr>
+            <tr><td>type</td><td class="type">enum(new_order_match, outbid, bid_accepted, bid_rejected, dispute_update, subscription_expiring, review_received, listing_response, vacancy_response, resume_invite)</td><td>последние три — отклики по модулям 8 и 9</td></tr>
             <tr><td>channel</td><td class="type">enum(telegram, email, in_app)</td><td></td></tr>
             <tr><td>payload_json</td><td class="type">jsonb</td><td></td></tr>
             <tr><td>sent_at / read_at</td><td class="type">timestamp NULL</td><td></td></tr>
@@ -575,7 +589,112 @@
         </div>
       </details>
 
-      <h3>2.8 Сводка связей (ER, кратко)</h3>
+      <h3>2.8 Барахолка — купля-продажа станков и инструмента</h3>
+      <p>Отдельный от заказов домен: не услуга, а конкретный физический товар (станок, инструмент, запчасть,
+      расходники). Продавцом или покупателем может быть любой зарегистрированный пользователь — и заказчик,
+      и исполнитель (цех нередко одновременно и покупает, и распродаёт оборудование).</p>
+
+      <details class="db-entity">
+        <summary>listings — объявление о продаже/покупке (1:N к users)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>author_id</td><td class="type">FK → users.id</td><td>автор объявления (продавец либо покупатель)</td></tr>
+            <tr><td>listing_intent</td><td class="type">enum(sell, buy)</td><td>«продаю» или «ищу купить»</td></tr>
+            <tr><td>category</td><td class="type">FK → listing_categories</td><td>станки с ЧПУ, ручной инструмент, сварочное оборудование, запчасти, расходники и т.д.</td></tr>
+            <tr><td>title / description</td><td class="type">varchar / text</td><td></td></tr>
+            <tr><td>content_language</td><td class="type">enum(ru, uz_latin, uz_cyrillic)</td><td></td></tr>
+            <tr><td>condition</td><td class="type">enum(new, used, for_parts)</td><td>состояние — не заполняется при <code>listing_intent = buy</code></td></tr>
+            <tr><td>price</td><td class="type">numeric NULL</td><td>NULL / «договорная» допускается</td></tr>
+            <tr><td>currency</td><td class="type">enum(UZS, USD)</td><td></td></tr>
+            <tr><td>region_id / city_id</td><td class="type">FK</td><td></td></tr>
+            <tr><td>location</td><td class="type">geography(Point,4326) NULL</td><td>для показа на карте/поиска рядом, опционально</td></tr>
+            <tr><td>status</td><td class="type">enum(active, reserved, closed, archived)</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>listing_media — фото/видео товара (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>listing_id</td><td class="type">FK → listings.id</td><td></td></tr>
+            <tr><td>media_type</td><td class="type">enum(photo, video)</td><td></td></tr>
+            <tr><td>file_url</td><td class="type">varchar</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>listing_responses — отклики на объявление (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>listing_id</td><td class="type">FK → listings.id</td><td></td></tr>
+            <tr><td>from_user_id</td><td class="type">FK → users.id</td><td>кто откликнулся («интересует», предложение цены)</td></tr>
+            <tr><td>message</td><td class="type">text NULL</td><td></td></tr>
+            <tr><td>offered_price</td><td class="type">numeric NULL</td><td>торг</td></tr>
+          </table>
+          <p>Каждый новый отклик немедленно уведомляет <code>listings.author_id</code> (Telegram + in-app) —
+          та же механика, что и уведомление заказчика о новой ставке в модуле 2 (см. 10.4).</p>
+        </div>
+      </details>
+
+      <h3>2.9 Вакансии и резюме (найм персонала)</h3>
+      <p>Двусторонняя доска: работодатель размещает вакансию, соискатель — резюме («ищу работу»); каждая
+      сторона может откликнуться на объявление другой стороны, инициатором может быть как работодатель, так
+      и работник.</p>
+
+      <details class="db-entity">
+        <summary>vacancies — вакансия от работодателя (1:N к users)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>employer_id</td><td class="type">FK → users.id</td><td>любой пользователь — цех/завод (executor) или предприятие (customer)</td></tr>
+            <tr><td>profession_category</td><td class="type">FK → profession_categories</td><td>токарь, фрезеровщик, сварщик, наладчик ЧПУ, слесарь-ремонтник, инженер-технолог…</td></tr>
+            <tr><td>title / description</td><td class="type">varchar / text</td><td>требования, обязанности, условия</td></tr>
+            <tr><td>employment_type</td><td class="type">enum(full_time, part_time, shift, contract)</td><td></td></tr>
+            <tr><td>salary_min / salary_max</td><td class="type">numeric NULL</td><td>вилка зарплаты</td></tr>
+            <tr><td>region_id / city_id</td><td class="type">FK</td><td></td></tr>
+            <tr><td>status</td><td class="type">enum(active, closed, archived)</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>resumes — резюме соискателя (1:N к users)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>candidate_id</td><td class="type">FK → users.id</td><td>обычный зарегистрированный пользователь (не обязательно customer/executor)</td></tr>
+            <tr><td>profession_category</td><td class="type">FK → profession_categories</td><td></td></tr>
+            <tr><td>experience_years</td><td class="type">int NULL</td><td></td></tr>
+            <tr><td>about</td><td class="type">text</td><td>опыт, навыки, станки, с которыми умеет работать</td></tr>
+            <tr><td>expected_salary</td><td class="type">numeric NULL</td><td></td></tr>
+            <tr><td>region_id / city_id</td><td class="type">FK</td><td></td></tr>
+            <tr><td>status</td><td class="type">enum(active, hidden)</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>job_responses — отклик в любую сторону (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>vacancy_id</td><td class="type">FK → vacancies.id NULL</td><td>заполнено, если отклик на вакансию</td></tr>
+            <tr><td>resume_id</td><td class="type">FK → resumes.id NULL</td><td>заполнено, если приглашение по резюме</td></tr>
+            <tr><td>from_user_id / to_user_id</td><td class="type">FK → users.id</td><td>инициатор и получатель отклика</td></tr>
+            <tr><td>direction</td><td class="type">enum(candidate_to_employer, employer_to_candidate)</td><td>кто начал: соискатель откликнулся на вакансию, либо работодатель пригласил по резюме</td></tr>
+            <tr><td>message</td><td class="type">text NULL</td><td></td></tr>
+          </table>
+          <p>Ровно один из <code>vacancy_id</code>/<code>resume_id</code> заполнен (CHECK-ограничение). Как и в
+          <code>listing_responses</code>, каждая запись немедленно порождает уведомление получателю (см. 10.4).</p>
+        </div>
+      </details>
+
+      <h3>2.10 Сводка связей (ER, кратко)</h3>
       <ul>
         <li><code>users</code> 1—1 <code>customer_profiles</code> либо <code>executor_profiles</code></li>
         <li><code>executor_profiles</code> 1—N <code>executor_equipment</code>, 1—N <code>executor_capabilities</code></li>
@@ -586,6 +705,8 @@
         <li><code>orders</code> 1—1 (опц.) <code>disputes</code> 1—N <code>dispute_evidence</code>, 1—N <code>dispute_messages</code></li>
         <li><code>executor_profiles</code> 1—N <code>subscriptions</code> N—1 <code>subscription_plans</code>; <code>subscriptions</code> 1—N <code>payments</code></li>
         <li><code>users</code> 1—1 <code>telegram_links</code>; <code>users</code> 1—N <code>notifications</code></li>
+        <li><code>users</code> 1—N <code>listings</code> 1—N <code>listing_media</code>, 1—N <code>listing_responses</code></li>
+        <li><code>users</code> 1—N <code>vacancies</code>; <code>users</code> 1—N <code>resumes</code>; оба 1—N <code>job_responses</code></li>
       </ul>
       <div class="callout note">Индексы: <code>GIST</code> по всем полям <code>geography(Point)</code> для радиус-поиска
       (<code>ST_DWithin</code>); составной индекс <code>(service_category, region_id, status)</code> на <code>orders</code>
@@ -621,17 +742,24 @@
         <tr><td>/subscription</td><td>Исполнитель</td><td>тариф, оплата, история платежей (модуль 7)</td></tr>
         <tr><td>/reviews</td><td>Оба</td><td>оставленные/полученные отзывы (модуль 5)</td></tr>
         <tr><td>/disputes/:id</td><td>Оба + админ</td><td>карточка спора с загрузкой доказательств (модуль 6)</td></tr>
+        <tr><td>/marketplace</td><td>Оба</td><td>барахолка: объявления о продаже/покупке станков и инструмента (модуль 8)</td></tr>
+        <tr><td>/marketplace/new, /marketplace/:id</td><td>Оба</td><td>создание объявления, карточка товара с откликами</td></tr>
+        <tr><td>/jobs</td><td>Оба</td><td>лента вакансий (модуль 9)</td></tr>
+        <tr><td>/jobs/new</td><td>Работодатель</td><td>создание вакансии</td></tr>
+        <tr><td>/resumes</td><td>Оба</td><td>лента резюме — работодатель ищет кандидатов</td></tr>
+        <tr><td>/resumes/new</td><td>Соискатель</td><td>создание/редактирование своего резюме</td></tr>
         <tr><td>/settings</td><td>Оба</td><td>язык интерфейса, уведомления, Telegram-привязка, смена пароля</td></tr>
         <tr><td>/admin/*</td><td>Админ</td><td>верификация исполнителей, модерация, разбор споров, тарифы</td></tr>
       </table>
 
       <h3>3.3 Навигация исполнителя (нижнее/верхнее меню)</h3>
       <p><code>Лента заказов</code> · <code>Мои ставки</code> · <code>Профиль и оборудование</code> ·
-      <code>Отзывы</code> · <code>Подписка</code> · <code>Сообщения</code></p>
+      <code>Барахолка</code> · <code>Вакансии</code> · <code>Отзывы</code> · <code>Подписка</code> ·
+      <code>Сообщения</code></p>
 
       <h3>3.4 Навигация заказчика</h3>
       <p><code>Мои заказы</code> · <code>Новый заказ</code> · <code>Каталог</code> · <code>Карта</code> ·
-      <code>Отзывы</code> · <code>Сообщения</code></p>
+      <code>Барахолка</code> · <code>Вакансии</code> · <code>Отзывы</code> · <code>Сообщения</code></p>
     </section>
 
     <!-- ================= 4. МОДУЛЬ 1 ================= -->
@@ -729,11 +857,31 @@
 
     <!-- ================= 6. МОДУЛЬ 3 ================= -->
     <section id="m3">
-      <h2 class="sec-title"><span class="module-tag">6</span> Модуль 3 — Профиль и техвозможности исполнителя</h2>
+      <h2 class="sec-title"><span class="module-tag">6</span> Модуль 3 — Профиль и техвозможности исполнителя и заказчика</h2>
       <p>Профиль исполнителя не считается «опубликованным» (не участвует в матчинге и не виден в каталоге/на
       карте), пока не заполнен обязательный минимум: тип организации, регион/адрес с координатами, хотя бы
       одна позиция станочного парка и хотя бы одна запись в <code>executor_capabilities</code> с указанием
       габаритов и услуг.</p>
+
+      <h4>User Flow: онбординг заказчика (полностью самостоятельный, без участия администратора)</h4>
+      <ol class="flow">
+        <li data-n="1">Сразу после подтверждения email (или первого входа через Google) заказчик попадает на
+        экран «Заполните карточку компании» — минимум полей, чтобы не отпугнуть, но достаточно для будущих
+        заказов.</li>
+        <li data-n="2"><strong>Кто вы:</strong> физ. лицо или компания (юр. лицо), название/ФИО, контактный
+        телефон (совпадает с полем <code>users.phone</code>), опционально ИНН/СТИР.</li>
+        <li data-n="3"><strong>Локация объекта:</strong> адрес текстом + перетаскивание маркера на карте —
+        та же механика геокодирования, что и у исполнителя (модуль 4), нужна для гео-поиска исполнителей
+        «рядом» и для полей объявлений в модулях 8/9.</li>
+        <li data-n="4">Дальше — сразу шаг «Опубликовать первый заказ» (необязательный, можно пропустить и
+        зайти в каталог/на карту). Никаких данных за заказчика никто не вводит — все поля заполняются им
+        самим в личном кабинете, без обращения в поддержку или к администратору.</li>
+        <li data-n="5">Профиль можно донаполнить позже в <code>/settings</code>/<code>/profile</code> в любой
+        момент — обязательные поля блокируют только публикацию заказа, а не доступ в кабинет.</li>
+      </ol>
+      <div class="callout note">Тот же принцип действует и для объявлений барахолки (модуль 8), и для
+      вакансий/резюме (модуль 9): автор объявления заполняет карточку сам через форму — администратор в
+      этот процесс не вовлекается, кроме постмодерации по жалобам.</div>
 
       <h4>User Flow: онбординг исполнителя</h4>
       <ol class="flow">
@@ -893,11 +1041,109 @@
         <li><code>/subscription</code> — статус подписки, ссылка на продление</li>
         <li>Настройка уведомлений (вкл/выкл по категориям) прямо в чате бота</li>
       </ul>
+
+      <h4>10.4 Единый принцип: любой отклик = мгновенное Telegram-уведомление второй стороне</h4>
+      <p>Бот не ограничен только заказами и ставками — правило одинаково применяется ко всем «объявленческим»
+      модулям платформы (2, 8, 9): у каждого объявления есть автор и есть тот, кто на него откликается;
+      как только в БД появляется новая запись отклика, фоновый воркер немедленно (либо с задержкой тарифа,
+      см. 10.2) отправляет уведомление стороне-получателю через все привязанные каналы (Telegram + in-app).</p>
+      <table>
+        <tr><th>Событие (кто откликнулся)</th><th>Кто получает Telegram-уведомление</th><th>Таблица-источник</th></tr>
+        <tr><td>Исполнитель подал ставку на заказ</td><td>Заказчик — автор заказа</td><td><code>bids</code></td></tr>
+        <tr><td>Заказчик выбрал/отклонил ставку</td><td>Исполнитель — автор ставки</td><td><code>order_assignments</code> / <code>bids.status</code></td></tr>
+        <tr><td>Кто-то откликнулся на объявление барахолки</td><td>Автор объявления (продавец или покупатель)</td><td><code>listing_responses</code></td></tr>
+        <tr><td>Соискатель откликнулся на вакансию</td><td>Работодатель — автор вакансии</td><td><code>job_responses</code> (direction = candidate_to_employer)</td></tr>
+        <tr><td>Работодатель пригласил по резюме</td><td>Соискатель — автор резюме</td><td><code>job_responses</code> (direction = employer_to_candidate)</td></tr>
+      </table>
+      <p>Иными словами: сторона, которая <em>разместила</em> заказ, объявление, вакансию или резюме, всегда
+      узнаёт об отклике первой и мгновенно — независимо от того, заказчик она, исполнитель, продавец,
+      покупатель, работодатель или работник. Это одна и та же нотификационная шина
+      (<code>notifications</code> + <code>telegram_links</code>), просто с разными значениями поля
+      <code>type</code> (см. 2.7).</p>
     </section>
 
-    <!-- ================= 11. NFR ================= -->
+    <!-- ================= 11. МОДУЛЬ 8 ================= -->
+    <section id="m8">
+      <h2 class="sec-title"><span class="module-tag">11</span> Модуль 8 — Барахолка: купля-продажа станков и инструмента</h2>
+      <p>Отдельная от заявок на изготовление/ремонт витрина объявлений: продажа и покупка конкретной
+      физической единицы оборудования, инструмента, запчастей или расходников. Доступна и заказчикам, и
+      исполнителям — по сути это классифайд внутри той же аудитории, что снижает трение (не нужно уходить на
+      сторонние площадки, чтобы продать списанный станок или найти б/у пресс).</p>
+
+      <h4>User Flow: разместить объявление «Продаю»</h4>
+      <ol class="flow">
+        <li data-n="1">Раздел «Барахолка» → «Разместить объявление» → тип «Продаю».</li>
+        <li data-n="2">Категория (станки с ЧПУ, ручной инструмент, сварочное оборудование, запчасти,
+        расходники…), название, описание, состояние (новое/б.у./на запчасти).</li>
+        <li data-n="3">Фото/видео товара, цена (или пометка «Договорная»), регион/город, при желании — точка
+        на карте.</li>
+        <li data-n="4">Публикация → <code>listings.status = active</code>, объявление сразу видно в общей
+        ленте и на карте (если указана локация); дополнительная модерация не блокирует публикацию, а
+        работает постфактум по жалобам.</li>
+      </ol>
+
+      <h4>User Flow: разместить объявление «Куплю» и откликнуться на чужое объявление</h4>
+      <ol class="flow">
+        <li data-n="1">Тип «Куплю» — та же форма, но без поля «состояние»: пользователь описывает, какой
+        станок/инструмент ищет, и в каком бюджете.</li>
+        <li data-n="2">Любой пользователь может как откликнуться на «Продаю» (написать продавцу, предложить
+        свою цену), так и на «Куплю» (предложить свой товар тому, кто ищет) — форма отклика одна и та же,
+        различается лишь то, кто выступает инициатором.</li>
+        <li data-n="3">Отклик создаёт запись в <code>listing_responses</code> → автору объявления мгновенно
+        приходит Telegram-уведомление + уведомление в кабинете (см. 10.4), открывается чат по объявлению.</li>
+        <li data-n="4">Автор объявления помечает его «Зарезервировано» либо «Закрыто» (сделка состоялась) —
+        <code>listings.status</code>; объявление уходит из активной ленты, но остаётся в истории пользователя.</li>
+      </ol>
+      <div class="callout note">Модуль намеренно не включает встроенный эскроу/оплату на MVP — платформа
+      сводит стороны и уведомляет, а расчёт происходит вне системы (как в классических классифайдах);
+      это можно пересмотреть на более поздних этапах по аналогии с рекомендацией по эскроу в модуле 6.</div>
+    </section>
+
+    <!-- ================= 12. МОДУЛЬ 9 ================= -->
+    <section id="m9">
+      <h2 class="sec-title"><span class="module-tag">12</span> Модуль 9 — Вакансии и резюме (найм персонала)</h2>
+      <p>Двусторонняя доска объявлений о работе: работодатели (цеха, заводы, предприятия-заказчики) публикуют
+      вакансии, а соискатели — резюме. Отклик возможен инициативой любой стороны, поэтому Telegram-бот должен
+      одинаково уведомлять и работодателя, и соискателя — не только «работодатель ищет», но и «работника
+      заметили».</p>
+
+      <h4>User Flow: работодатель размещает вакансию</h4>
+      <ol class="flow">
+        <li data-n="1">Раздел «Вакансии» → «Разместить вакансию»: профессия (из справочника
+        <code>profession_categories</code> — токарь, фрезеровщик, сварщик, наладчик ЧПУ, слесарь-ремонтник и
+        т.д.), описание обязанностей/требований.</li>
+        <li data-n="2">Тип занятости, вилка зарплаты, регион/город → публикация,
+        <code>vacancies.status = active</code>.</li>
+        <li data-n="3">Вакансия автоматически показывается в ленте всем соискателям региона/профессии (без
+        отдельного алгоритма матчинга — простая фильтрация по <code>profession_category</code> +
+        <code>region_id</code>, в отличие от сложного матчинга заказов в модуле 2).</li>
+        <li data-n="4">Работодатель также может зайти в раздел «Резюме», отфильтровать по профессии/региону и
+        первым пригласить понравившегося кандидата — это создаёт <code>job_responses</code> с
+        <code>direction = employer_to_candidate</code>.</li>
+      </ol>
+
+      <h4>User Flow: соискатель откликается на вакансию</h4>
+      <ol class="flow">
+        <li data-n="1">Любой зарегистрированный пользователь может создать резюме в разделе «Резюме» — это не
+        требует роли customer/executor, достаточно базовой учётной записи (модуль 1).</li>
+        <li data-n="2">Соискатель просматривает ленту вакансий, открывает подходящую, нажимает «Откликнуться»
+        → создаётся <code>job_responses</code> с <code>direction = candidate_to_employer</code>, можно
+        приложить сообщение.</li>
+        <li data-n="3">Работодатель мгновенно получает Telegram-уведомление «Новый отклик на вакансию
+        “…”» (см. 10.4) и переходит либо к резюме кандидата, либо сразу в чат.</li>
+        <li data-n="4">Симметрично: если работодатель первым пригласил кандидата по резюме, уведомление о
+        приглашении мгновенно получает сам соискатель — платформа не делает работника «вторым сортом» по
+        сравнению с работодателем.</li>
+      </ol>
+      <div class="callout note">Справочник <code>profession_categories</code> частично пересекается со
+      справочником услуг заказов (<code>service_categories</code> из модуля 2) — токарь/фрезеровщик/сварщик
+      актуальны и там, и там, поэтому их стоит вести как связанные, но разные таблицы: одна описывает
+      компетенцию организации (что умеет цех), другая — компетенцию человека (кого ищет работодатель).</div>
+    </section>
+
+    <!-- ================= 13. NFR ================= -->
     <section id="nfr">
-      <h2 class="sec-title"><span class="module-tag">11</span> Нефункциональные требования</h2>
+      <h2 class="sec-title"><span class="module-tag">13</span> Нефункциональные требования</h2>
       <div class="grid2">
         <div class="card">
           <h4>🔒 Безопасность</h4>
@@ -938,9 +1184,9 @@
       </div>
     </section>
 
-    <!-- ================= 12. STACK ================= -->
+    <!-- ================= 14. STACK ================= -->
     <section id="stack">
-      <h2 class="sec-title"><span class="module-tag">12</span> Рекомендуемый технологический стек</h2>
+      <h2 class="sec-title"><span class="module-tag">14</span> Рекомендуемый технологический стек</h2>
       <table>
         <tr><th>Слой</th><th>Технология</th><th>Комментарий</th></tr>
         <tr><td>Backend</td><td>Node.js (NestJS) или Python (FastAPI/Django)</td><td>REST/GraphQL API, фоновые задачи через очередь (BullMQ/Celery)</td></tr>
@@ -955,24 +1201,27 @@
       </table>
     </section>
 
-    <!-- ================= 13. ROADMAP ================= -->
+    <!-- ================= 15. ROADMAP ================= -->
     <section id="roadmap">
-      <h2 class="sec-title"><span class="module-tag">13</span> Дорожная карта</h2>
+      <h2 class="sec-title"><span class="module-tag">15</span> Дорожная карта</h2>
       <div class="grid2">
         <div class="card">
           <h4>MVP (этап 1)</h4>
           <ul>
-            <li>Регистрация email/Google + paywall</li>
+            <li>Регистрация email/Google + paywall, полностью самостоятельное заполнение профиля заказчиком
+            и исполнителем (без ручного ввода админом)</li>
             <li>Конструктор заказа (текст+фото), профиль исполнителя (базовые габариты/оборудование)</li>
             <li>Автоподбор + карта + гео-поиск</li>
             <li>Ставки/аукцион без Telegram (только in-app уведомления)</li>
+            <li>Барахолка и вакансии/резюме — упрощённая версия (без Telegram, только in-app отклики)</li>
             <li>Отзывы, простая подписка (ручная активация админом)</li>
           </ul>
         </div>
         <div class="card">
           <h4>Этап 2</h4>
           <ul>
-            <li>Telegram-бот с уведомлениями и deep-links</li>
+            <li>Telegram-бот с уведомлениями и deep-links — распространяется на все виды откликов (заказы,
+            барахолка, вакансии/резюме) по единой шине уведомлений</li>
             <li>Онлайн-оплата подписки (Payme/Click)</li>
             <li>Модуль арбитража с загрузкой доказательств</li>
             <li>Видео в заявках, машинный перевод UGC</li>
@@ -981,7 +1230,7 @@
         <div class="card">
           <h4>Этап 3</h4>
           <ul>
-            <li>Telegram Mini App для подачи ставок прямо в боте</li>
+            <li>Telegram Mini App для подачи ставок и откликов прямо в боте</li>
             <li>Эскроу-платежи по заказам</li>
             <li>Расширенная аналитика/рейтинги для админа, антифрод-скоринг отзывов</li>
           </ul>
