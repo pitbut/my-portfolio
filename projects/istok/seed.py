@@ -2,14 +2,19 @@
 
 Запуск: python seed.py
 
-По умолчанию скрипт заполняет из CSV только ПУСТЫЕ таблицы — если в
-таблице уже есть данные (например, после первого запуска, или после
-правок, одобренных через /admin), она не трогается. Это специально:
-иначе правки, одобренные модератором в веб-панели, стирались бы при
-каждом деплое/рестарте сервера.
+Разделы с человекочитаемым slug (источники, книги, статьи, марки воды,
+оборудование, опыты, службы доставки) синхронизируются построчно по slug
+на КАЖДОМ запуске: строки CSV, которых ещё нет в базе, добавляются, а уже
+существующие строки не трогаются — так можно просто дописывать новые
+строки в CSV и деплоить, они появятся сами, а правки, одобренные через
+/admin, не стираются.
 
-Если нужно принудительно стереть и перезалить всё заново из CSV
-(например, вы отредактировали много строк в CSV и хотите синхронизировать
+Точки продажи (Supplier) не имеют стабильного природного ключа для такой
+сверки, поэтому для них сохранено старое поведение: CSV загружается только
+если таблица совсем пустая.
+
+Если нужно принудительно стереть и перезалить всё заново из CSV (например,
+вы отредактировали текст уже существующих строк и хотите синхронизировать
 базу) — установите переменную окружения FORCE_RESEED=true. Учтите: это
 сотрёт и все одобренные через /admin правки, сделанные после последней
 синхронизации с CSV.
@@ -199,15 +204,23 @@ def load_delivery_services():
         )
 
 
-MODEL_LOADERS = [
+# Модели со slug — синхронизируются построчно на каждом запуске (новые
+# строки CSV добавляются, существующие не трогаются). Порядок важен:
+# WaterBrand должна обрабатываться до Supplier, который ищет её по slug.
+SLUG_MODEL_LOADERS = [
     (SacredSource, load_sacred_sources, "источников"),
     (Book, load_books, "книг"),
     (Article, load_articles, "статей"),
     (WaterBrand, load_water_brands, "марок воды"),
-    (Supplier, load_suppliers, "точек продажи"),  # после WaterBrand — зависит по slug
     (Equipment, load_equipment, "единиц оборудования"),
     (Experiment, load_experiments, "опытов"),
     (DeliveryService, load_delivery_services, "служб доставки"),
+]
+
+# Модели без стабильного природного ключа — загружаются из CSV только
+# если таблица совсем пустая (как раньше).
+EMPTY_ONLY_LOADERS = [
+    (Supplier, load_suppliers, "точек продажи"),
 ]
 
 
@@ -220,8 +233,28 @@ def seed():
             db.drop_all()
         db.create_all()
 
-        loaded, skipped = {}, []
-        for model, loader, label in MODEL_LOADERS:
+        added, skipped = {}, []
+
+        for model, loader, label in SLUG_MODEL_LOADERS:
+            if force:
+                n = 0
+                for obj in loader():
+                    db.session.add(obj)
+                    n += 1
+            else:
+                existing_slugs = {row[0] for row in db.session.query(model.slug).all()}
+                n = 0
+                for obj in loader():
+                    if obj.slug in existing_slugs:
+                        continue
+                    db.session.add(obj)
+                    existing_slugs.add(obj.slug)
+                    n += 1
+            db.session.flush()  # чтобы Supplier видел id марок воды (новых и уже существующих)
+            if n:
+                added[label] = n
+
+        for model, loader, label in EMPTY_ONLY_LOADERS:
             if not force and model.query.count() > 0:
                 skipped.append(label)
                 continue
@@ -229,17 +262,18 @@ def seed():
             for obj in loader():
                 db.session.add(obj)
                 n += 1
-            db.session.flush()  # чтобы, например, Supplier видел id только что созданных WaterBrand
-            loaded[label] = n
+            db.session.flush()
+            if n:
+                added[label] = n
 
         db.session.commit()
 
-        if loaded:
-            print("Загружено из CSV: " + ", ".join(f"{n} {label}" for label, n in loaded.items()))
+        if added:
+            print("Добавлено новых из CSV: " + ", ".join(f"{n} {label}" for label, n in added.items()))
         if skipped:
             print("Пропущено (в базе уже есть данные): " + ", ".join(skipped))
-        if not loaded and not skipped:
-            print("Нечего загружать.")
+        if not added and not skipped:
+            print("Нечего загружать — все данные уже в базе.")
 
 
 if __name__ == "__main__":
