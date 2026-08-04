@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Спор по заказу «{{ dispute.order.title }}»{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>Спор: «{{ dispute.order.title }}»</h1>
+    <span class="status-chip status-chip--disputed">{{ dispute.status }}</span>
+  </div>
+  <p class="order-meta">
+    <span>Причина: {{ dispute.reason_category }}</span>
+    <span>Открыт: {{ dispute.opened_by.email }}, {{ dispute.created_at.strftime('%d.%m.%Y') }}</span>
+  </p>
+  <p class="order-description">{{ dispute.description }}</p>
+
+  {% if dispute.resolution_text %}
+  <div class="callout-resolution">
+    <strong>Решение администратора ({{ dispute.status }}):</strong>
+    <p>{{ dispute.resolution_text }}</p>
+  </div>
+  {% endif %}
+
+  <h2 class="profile-section-title">Доказательства</h2>
+  {% if dispute.evidence %}
+  <div class="order-media">
+    {% for e in dispute.evidence %}
+    <div>
+      <a href="{{ e.file_url }}" target="_blank" rel="noopener"><img src="{{ e.file_url }}" class="order-media__thumb" alt="доказательство"></a>
+      <div class="notif-item__meta">{{ e.uploaded_by.email }}{% if e.comment %} — {{ e.comment }}{% endif %}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Доказательств пока нет.</p>
+  {% endif %}
+
+  {% if not is_admin and dispute.status in ('open', 'evidence_collection') %}
+  <form method="post" action="{{ url_for('disputes.add_evidence', dispute_id=dispute.id) }}" enctype="multipart/form-data" class="profile-form profile-form--inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Фото/видео (изображение) <input type="file" name="file" accept="image/*" required></label>
+    <label>Комментарий <input type="text" name="comment"></label>
+    <button type="submit" class="btn btn--secondary">Добавить доказательство</button>
+  </form>
+  <form method="post" action="{{ url_for('disputes.mark_ready', dispute_id=dispute.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn-link">Готово к рассмотрению →</button>
+  </form>
+  {% endif %}
+
+  <h2 class="profile-section-title">Переписка</h2>
+  <div class="notif-list">
+    {% for m in visible_messages %}
+    <div class="notif-item{% if m.is_internal_admin_note %} notif-item--internal{% endif %}">
+      <div class="notif-item__title">{{ m.sender.email }}{% if m.is_internal_admin_note %} (внутренняя заметка){% endif %}</div>
+      <div class="notif-item__body">{{ m.text }}</div>
+      <div class="notif-item__meta">{{ m.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <form method="post" action="{{ url_for('disputes.add_message', dispute_id=dispute.id) }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Сообщение <textarea name="text" rows="3" required></textarea></label>
+    {% if is_admin %}
+    <label class="checkbox-label"><input type="checkbox" name="internal" value="1"> Внутренняя заметка (не видна сторонам)</label>
+    {% endif %}
+    <button type="submit" class="btn btn--secondary">Отправить</button>
+  </form>
+
+  {% if is_admin and dispute.status in ('open', 'evidence_collection', 'in_review') %}
+  <h2 class="profile-section-title">Решение администратора</h2>
+  <form method="post" action="{{ url_for('admin.resolve_dispute', dispute_id=dispute.id) }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>В чью пользу решение *
+      <select name="resolution" required>
+        <option value="resolved_customer">В пользу заказчика</option>
+        <option value="resolved_executor">В пользу исполнителя</option>
+        <option value="resolved_partial">Частично / компромисс</option>
+      </select>
+    </label>
+    <label>Обоснование *<textarea name="resolution_text" rows="4" required></textarea></label>
+    <label>Итоговый статус заказа *
+      <select name="order_final_status" required>
+        <option value="completed">Завершён</option>
+        <option value="cancelled">Отменён</option>
+      </select>
+    </label>
+    <button type="submit" class="btn btn--primary">Вынести решение</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

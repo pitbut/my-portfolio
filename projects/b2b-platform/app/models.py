@@ -534,3 +534,74 @@ class Review(TimestampMixin, db.Model):
 
     def __repr__(self):
         return f"<Review order_id={self.order_id} author_id={self.author_id} rating={self.rating}>"
+
+
+# --- модуль 6: арбитраж и медиация ---
+
+DISPUTE_STATUSES = (
+    "open", "evidence_collection", "in_review",
+    "resolved_customer", "resolved_executor", "resolved_partial", "closed",
+)
+DISPUTE_REASON_CATEGORIES = ("defect", "delay", "quality", "price_dispute", "other")
+
+
+class Dispute(TimestampMixin, db.Model):
+    """Спор по заказу (1:1) — брак, задержка, претензия по качеству и т.п."""
+
+    __tablename__ = "disputes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), unique=True, nullable=False)
+    opened_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    reason_category = db.Column(db.String(30), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(30), nullable=False, default="open")
+    assigned_admin_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    resolution_text = db.Column(db.Text, nullable=True)
+    resolved_at = db.Column(db.DateTime, nullable=True)
+
+    order = db.relationship("Order", backref=db.backref("dispute", uselist=False))
+    opened_by = db.relationship("User", foreign_keys=[opened_by_user_id])
+    assigned_admin = db.relationship("User", foreign_keys=[assigned_admin_id])
+    evidence = db.relationship("DisputeEvidence", backref="dispute", cascade="all, delete-orphan", order_by="DisputeEvidence.created_at")
+    messages = db.relationship("DisputeMessage", backref="dispute", cascade="all, delete-orphan", order_by="DisputeMessage.created_at")
+
+    def __repr__(self):
+        return f"<Dispute order_id={self.order_id} status={self.status!r}>"
+
+
+class DisputeEvidence(db.Model):
+    """Фото/видео/документ-доказательство от одной из сторон."""
+
+    __tablename__ = "dispute_evidence"
+
+    id = db.Column(db.Integer, primary_key=True)
+    dispute_id = db.Column(db.Integer, db.ForeignKey("disputes.id"), nullable=False)
+    uploaded_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    media_type = db.Column(db.String(20), nullable=False)  # photo | video | document
+    file_url = db.Column(db.String(1000), nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    uploaded_by = db.relationship("User")
+
+    def __repr__(self):
+        return f"<DisputeEvidence dispute_id={self.dispute_id}>"
+
+
+class DisputeMessage(db.Model):
+    """Переписка сторон и администратора внутри спора."""
+
+    __tablename__ = "dispute_messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+    dispute_id = db.Column(db.Integer, db.ForeignKey("disputes.id"), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    is_internal_admin_note = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    sender = db.relationship("User")
+
+    def __repr__(self):
+        return f"<DisputeMessage dispute_id={self.dispute_id}>"

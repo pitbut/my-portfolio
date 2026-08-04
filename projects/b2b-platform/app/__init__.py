@@ -9,6 +9,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 
+from app.cli import register_cli
 from config import config
 
 load_dotenv()
@@ -61,6 +62,8 @@ def create_app(config_name=None):
     from app.routes.orders import bp as orders_bp
     from app.routes.map import bp as map_bp
     from app.routes.reviews import bp as reviews_bp
+    from app.routes.disputes import bp as disputes_bp
+    from app.routes.admin import bp as admin_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -68,6 +71,10 @@ def create_app(config_name=None):
     app.register_blueprint(orders_bp)
     app.register_blueprint(map_bp)
     app.register_blueprint(reviews_bp)
+    app.register_blueprint(disputes_bp)
+    app.register_blueprint(admin_bp, url_prefix="/admin")
+
+    register_cli(app)
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 

@@ -141,5 +141,9 @@ textarea{resize:vertical;}
 .notif-item__meta{color:var(--sub);font-size:.8em;margin-top:6px;}
 .notif-item__tg{color:var(--accent2);}
 
+/* --- disputes --- */
+.callout-resolution{background:#e5f6ec;border-left:4px solid var(--accent);border-radius:10px;padding:14px 18px;margin:14px 0;}
+.notif-item--internal{background:#fff8e6;border-left:4px solid var(--warn);}
+
 /* --- footer --- */
 .site-footer{background:var(--bg1);color:rgba(255,255,255,.6);padding:20px 0;margin-top:40px;font-size:.85em;}

@@ -19,8 +19,16 @@
 
   <p class="order-description">{{ order.description }}</p>
 
-  {% if order.status == 'completed' and (is_owner or (current_user.role == 'executor' and order.assignment and order.assignment.bid.executor_id == current_user.executor_profile.id)) %}
+  {% set is_assigned_executor = current_user.role == 'executor' and order.assignment and order.assignment.bid.executor_id == current_user.executor_profile.id %}
+
+  {% if order.status == 'completed' and (is_owner or is_assigned_executor) %}
   <a class="btn btn--secondary" href="{{ url_for('reviews.leave_review', order_id=order.id) }}">Оставить отзыв</a>
+  {% endif %}
+
+  {% if order.dispute %}
+  <a class="btn btn--secondary" href="{{ url_for('disputes.dispute_detail', dispute_id=order.dispute.id) }}">Спор по заказу ({{ order.dispute.status }})</a>
+  {% elif order.status in ('assigned', 'in_progress', 'completed') and (is_owner or is_assigned_executor) %}
+  <a class="btn-link btn-link--danger" href="{{ url_for('disputes.open_dispute', order_id=order.id) }}">Открыть спор</a>
   {% endif %}
 
   {% if order.dimensions_length_mm or order.dimensions_diameter_mm or order.weight_kg %}

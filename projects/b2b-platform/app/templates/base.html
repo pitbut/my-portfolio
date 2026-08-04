@@ -36,6 +36,8 @@
             <a href="{{ url_for('orders.executor_dashboard') }}">Лента заказов</a>
             <a href="{{ url_for('reviews.my_reviews') }}">Отзывы</a>
             <a href="{{ url_for('profile.executor_edit') }}">{{ t('nav.profile') }}</a>
+          {% elif current_user.role == 'admin' %}
+            <a href="{{ url_for('admin.disputes_list') }}">Споры (админ)</a>
           {% endif %}
           <a href="{{ url_for('main.notifications') }}">🔔{% if unread_notifications %}<span class="notif-badge">{{ unread_notifications }}</span>{% endif %}</a>
           <span class="account-nav__email">{{ current_user.email }}</span>
