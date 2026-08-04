@@ -2,7 +2,7 @@
   "title": "📝 Генератор экзаменационных билетов",
   "description": "Профессиональный генератор билетов с ИИ. Python + Flask + Groq + Gemini. 4 режима работы. Экспорт в Word с шаблонами. Без проблем с CORS!",
   "image": "preview.jpg",
-  "link": "https://bilet.onrender.com",
+  "link": "https://bilet-8f3i.onrender.com",
   "date": "2025-01-10",
   "tags": ["Образование", "ИИ", "Python", "Flask", "Groq", "Gemini"],
   "hashtags": ["#образование", "#экзамены", "#ии", "#python", "#flask", "#автоматизация", "#учителям", "#groq", "#gemini"],
