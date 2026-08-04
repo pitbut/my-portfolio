@@ -1,57 +1,69 @@
-"""Отправка писем через SMTP.
+"""Отправка писем через Resend (HTTP API).
 
-Если MAIL_USERNAME не настроен (нет учётных данных SMTP), письма не
+Render блокирует исходящие SMTP-соединения (порты 25/465/587) на бесплатном
+тарифе, поэтому письма отправляются через HTTPS-API Resend, а не через
+smtplib. Если RESEND_API_KEY не настроен (нет учётных данных), письма не
 отправляются по-настоящему — вместо этого текст письма пишется в лог
-приложения. Это позволяет разрабатывать и тестировать регистрацию
-локально без реального почтового сервера и не роняет прод, если
-администратор ещё не подключил SMTP.
+приложения. Это позволяет разрабатывать и тестировать регистрацию локально
+без реального email-провайдера и не роняет прод, если администратор ещё не
+подключил Resend.
 """
-import smtplib
-from email.message import EmailMessage
+import json
+import urllib.error
+import urllib.request
 
 from flask import current_app
 
+RESEND_API_URL = "https://api.resend.com/emails"
+
 
 def send_email(to, subject, body):
-    """Отправляет письмо или, если SMTP не настроен, пишет его в лог.
+    """Отправляет письмо через Resend или, если API-ключ не настроен, пишет его в лог.
 
-    Возвращает True, если письмо реально отправлено по SMTP, и False,
-    если сработал запасной вариант (лог) — по этому флагу можно решить,
+    Возвращает True, если письмо реально отправлено, и False, если
+    сработал запасной вариант (лог) — по этому флагу можно решить,
     показывать ли пользователю ссылку прямо на странице."""
-    username = current_app.config.get("MAIL_USERNAME")
-    password = current_app.config.get("MAIL_PASSWORD")
+    api_key = current_app.config.get("RESEND_API_KEY")
 
-    if not username or not password:
+    if not api_key:
         current_app.logger.warning(
-            "SMTP не настроен (MAIL_USERNAME/MAIL_PASSWORD пусты). "
+            "Resend не настроен (RESEND_API_KEY пуст). "
             "Письмо для %s не отправлено, содержимое:\n%s\n%s",
             to, subject, body,
         )
         return False
 
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = current_app.config["MAIL_DEFAULT_SENDER"]
-    msg["To"] = to
-    msg.set_content(body)
+    payload = json.dumps({
+        "from": current_app.config["MAIL_DEFAULT_SENDER"],
+        "to": [to],
+        "subject": subject,
+        "text": body,
+    }).encode("utf-8")
 
-    server = current_app.config["MAIL_SERVER"]
-    port = current_app.config["MAIL_PORT"]
-    use_tls = current_app.config["MAIL_USE_TLS"]
+    request = urllib.request.Request(
+        RESEND_API_URL,
+        data=payload,
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+    )
 
     try:
-        with smtplib.SMTP(server, port, timeout=10) as smtp:
-            if use_tls:
-                smtp.starttls()
-            smtp.login(username, password)
-            smtp.send_message(msg)
-    except (smtplib.SMTPException, OSError):
-        # Неверный пароль приложения, заблокированный аккаунт, сетевая
-        # ошибка и т.п. — не должны ронять регистрацию/вход целиком,
-        # поэтому откатываемся на запасной вариант (ссылка на странице).
-        current_app.logger.exception(
-            "Не удалось отправить письмо для %s через SMTP, откат на запасной вариант.", to
+        with urllib.request.urlopen(request, timeout=10) as response:
+            if not (200 <= response.status < 300):
+                current_app.logger.error(
+                    "Resend вернул статус %s при отправке письма для %s.", response.status, to
+                )
+                return False
+    except urllib.error.HTTPError as exc:
+        current_app.logger.error(
+            "Resend отклонил письмо для %s: %s %s", to, exc.code, exc.read().decode(errors="replace")
         )
+        return False
+    except (urllib.error.URLError, OSError):
+        current_app.logger.exception("Не удалось отправить письмо для %s через Resend.", to)
         return False
 
     return True
