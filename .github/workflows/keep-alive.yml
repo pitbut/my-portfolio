@@ -1,0 +1,37 @@
+name: Keep Render Services Awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ping every Render-hosted project from projects.json
+        run: |
+          urls=$(jq -r '.[].link | select(test("onrender\\.com"))' projects.json | sort -u)
+
+          if [ -z "$urls" ]; then
+            echo "No onrender.com links found in projects.json"
+            exit 0
+          fi
+
+          echo "Найдено ссылок на Render:"
+          echo "$urls"
+          echo
+
+          for url in $urls; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -m 90 "$url" || echo "000")
+            if [ "$code" = "000" ]; then
+              echo "⚠️  $url -> нет ответа (таймаут/ошибка)"
+            elif [ "$code" -ge 500 ]; then
+              echo "⚠️  $url -> $code"
+            else
+              echo "✅ $url -> $code"
+            fi
+          done
