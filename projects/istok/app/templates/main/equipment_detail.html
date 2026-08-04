@@ -13,6 +13,10 @@
     <span class="badge {{ 'badge--science' if item.verified else 'badge--myth' }}">{{ 'проверено' if item.verified else 'не проверено' }}</span>
   </div>
 
+  {% if image_url(item.image_url) %}
+  <img class="detail-photo" src="{{ image_url(item.image_url) }}" alt="{{ item.name }}" loading="lazy">
+  {% endif %}
+
   <div class="prose">
     <p>{{ item.description }}</p>
   </div>

@@ -36,6 +36,9 @@
     <div class="grid" id="suppliers-list">
       {% for s in suppliers %}
       <article class="card" data-lat="{{ s.latitude or '' }}" data-lng="{{ s.longitude or '' }}">
+        {% if image_url(s.image_url) %}
+        <img class="card-photo" src="{{ image_url(s.image_url) }}" alt="{{ s.name }}" loading="lazy">
+        {% endif %}
         <span class="badge {{ 'badge--science' if s.verified else 'badge--myth' }}">{{ 'проверено' if s.verified else 'не проверено' }}</span>
         <h3>{{ s.name }}</h3>
         {% if s.supplier_type %}<span class="meta">{{ s.supplier_type }}</span>{% endif %}

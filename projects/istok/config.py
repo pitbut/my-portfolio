@@ -44,6 +44,12 @@ class Config:
     # Срок жизни ссылки подтверждения email, в секундах (по умолчанию сутки).
     CONFIRM_TOKEN_MAX_AGE = int(os.environ.get("CONFIRM_TOKEN_MAX_AGE", 86400))
 
+    # Загруженные пользователями фото уходят на ImgBB (HTTP API) — Render не
+    # хранит файлы между деплоями (диск эфемерный), а свой файл-сервер для
+    # небольшого личного портала избыточен. Если IMGBB_API_KEY не задан,
+    # загрузка фото просто недоступна (поле формы игнорируется).
+    IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY")
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

@@ -4,6 +4,7 @@ from flask_login import current_user, login_required
 
 from app import db
 from app.models import Supplier, WaterBrand
+from app.photos import upload_photo
 from app.routes.reviews import reviews_for
 
 bp = Blueprint("catalog", __name__)
@@ -86,6 +87,10 @@ def add_supplier(slug):
         except ValueError:
             latitude = longitude = None
 
+        image_url, photo_error = upload_photo(request.files.get("photo"))
+        if photo_error:
+            flash(photo_error, "info")
+
         supplier = Supplier(
             water_brand_id=brand.id,
             name=name,
@@ -95,6 +100,7 @@ def add_supplier(slug):
             longitude=longitude,
             phone=phone or None,
             website=website or None,
+            image_url=image_url,
             verified=False,
             added_by_user_id=current_user.id,
         )

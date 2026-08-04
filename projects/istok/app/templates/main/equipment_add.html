@@ -12,7 +12,7 @@
     администрация проверит сведения и подтвердит их.
   </p>
 
-  <form method="post">
+  <form method="post" enctype="multipart/form-data">
     <div class="field">
       <label for="name">Название</label>
       <input type="text" id="name" name="name" maxlength="255" required>
@@ -36,6 +36,11 @@
     <div class="field">
       <label for="price_rub">Цена, ₽ (необязательно)</label>
       <input type="text" id="price_rub" name="price_rub" placeholder="1990">
+    </div>
+
+    <div class="field">
+      <label for="photo">Фото (необязательно)</label>
+      <input type="file" id="photo" name="photo" accept="image/*">
     </div>
 
     <button type="submit" class="btn btn--primary">Добавить</button>
