@@ -49,7 +49,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: b2b-platform-db
+          property: connectionString
       - key: RESEND_API_KEY
         sync: false
       - key: MAIL_DEFAULT_SENDER
@@ -68,3 +70,8 @@ services:
         sync: false
       - key: PUBLIC_BASE_URL
         sync: false
+
+databases:
+  - name: b2b-platform-db
+    plan: free
+    region: frankfurt
