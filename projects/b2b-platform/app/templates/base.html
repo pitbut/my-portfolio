@@ -78,7 +78,7 @@
     </div>
   </div>
   {% endif %}
-  {% if current_user.is_authenticated and current_user.role and not current_user.profile_complete %}
+  {% if current_user.is_authenticated and current_user.role in ('customer', 'executor') and not current_user.profile_complete %}
   <div class="wrap flash-messages">
     <div class="flash flash--warn">{{ t('profile.incomplete_banner') }}</div>
   </div>
