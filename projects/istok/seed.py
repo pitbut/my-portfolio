@@ -29,6 +29,7 @@ from app.models import (
     Supplier,
     WaterBrand,
 )
+from app.slugify import unique_slug
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -91,9 +92,12 @@ def load_sacred_sources():
 
 
 def load_books():
+    used_slugs = set()
     for row in read_csv("books.csv"):
+        title = row["title"].strip()
         yield Book(
-            title=row["title"].strip(),
+            slug=unique_slug(title, used_slugs, "book"),
+            title=title,
             author=row["author"].strip(),
             year=to_int(row.get("year")),
             genre=clean(row.get("genre")),
@@ -154,29 +158,39 @@ def load_suppliers():
 
 
 def load_equipment():
+    used_slugs = set()
     for row in read_csv("equipment.csv"):
+        name = row["name"].strip()
         yield Equipment(
+            slug=unique_slug(name, used_slugs, "equipment"),
             category=row["category"].strip(),
-            name=row["name"].strip(),
+            name=name,
             description=row["description"].strip(),
             price_rub=to_decimal_str(row.get("price_rub")),
             manufacturer=clean(row.get("manufacturer")),
+            verified=True,  # из CSV — куратор сайта, а не пользователь
         )
 
 
 def load_experiments():
+    used_slugs = set()
     for row in read_csv("experiments.csv"):
+        title = row["title"].strip()
         yield Experiment(
-            title=row["title"].strip(),
+            slug=unique_slug(title, used_slugs, "experiment"),
+            title=title,
             description=row["description"].strip(),
             verdict=row["verdict"].strip(),
         )
 
 
 def load_delivery_services():
+    used_slugs = set()
     for row in read_csv("delivery_services.csv"):
+        name = row["name"].strip()
         yield DeliveryService(
-            name=row["name"].strip(),
+            slug=unique_slug(name, used_slugs, "service"),
+            name=name,
             coverage=clean(row.get("coverage")),
             delivery_time=row["delivery_time"].strip(),
             price_rub=to_decimal_str(row.get("price_rub")),

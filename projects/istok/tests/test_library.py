@@ -12,3 +12,14 @@ def test_library_filter_by_genre(client):
     resp_empty = client.get("/library/?genre=несуществующий-жанр")
     assert resp_empty.status_code == 200
     assert "Тестовая книга".encode() not in resp_empty.data
+
+
+def test_library_detail(client):
+    resp = client.get("/library/test-book")
+    assert resp.status_code == 200
+    assert "Тестовая книга".encode() in resp.data
+
+
+def test_library_detail_404(client):
+    resp = client.get("/library/does-not-exist")
+    assert resp.status_code == 404

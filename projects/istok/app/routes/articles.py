@@ -2,6 +2,7 @@
 from flask import Blueprint, abort, current_app, render_template, request
 
 from app.models import Article
+from app.routes.reviews import reviews_for
 
 bp = Blueprint("articles", __name__)
 
@@ -21,4 +22,12 @@ def detail(slug):
     article = Article.query.filter_by(slug=slug).first()
     if article is None:
         abort(404)
-    return render_template("articles/detail.html", article=article)
+    reviews, avg_rating = reviews_for("article", article.id)
+    return render_template(
+        "articles/detail.html",
+        article=article,
+        reviews=reviews,
+        avg_rating=avg_rating,
+        target_type="article",
+        target_id=article.id,
+    )

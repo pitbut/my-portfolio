@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} — библиотека — Исток{% endblock %}
+{% block description %}{{ book.description | truncate(150) }}{% endblock %}
+
+{% block content %}
+<section class="detail-hero wrap">
+  <div class="breadcrumb"><a href="{{ url_for('library.index') }}">Библиотека</a> / {{ book.title }}</div>
+  <h1>{{ book.title }}</h1>
+  <div class="meta-row">
+    <span><em>{{ book.author }}</em></span>
+    {% if book.year %}<span>{{ book.year }}</span>{% endif %}
+    {% if book.genre %}<span>{{ book.genre }}</span>{% endif %}
+  </div>
+
+  {% if image_url(book.cover_url) %}
+  <img class="detail-photo" src="{{ image_url(book.cover_url) }}" alt="{{ book.title }}" loading="lazy">
+  {% endif %}
+
+  <div class="prose">
+    <p>{{ book.description }}</p>
+  </div>
+
+  {% include "_reviews.html" %}
+</section>
+{% endblock %}

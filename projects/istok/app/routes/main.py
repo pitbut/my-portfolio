@@ -1,6 +1,8 @@
 """Главная страница и разделы без собственного блюпринта (оборудование,
-опыты, доставка, контакты) — по одному-два на раздел, без пагинации."""
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+опыты, доставка, контакты)."""
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
+from sqlalchemy import func, or_
 
 from app import db
 from app.models import (
@@ -13,6 +15,8 @@ from app.models import (
     SacredSource,
     WaterBrand,
 )
+from app.routes.reviews import reviews_for
+from app.slugify import unique_slug
 
 bp = Blueprint("main", __name__)
 
@@ -43,10 +47,100 @@ def index():
 
 @bp.route("/equipment")
 def equipment_list():
-    category = None
-    query = Equipment.query.order_by(Equipment.category, Equipment.name)
-    equipment = query.all()
-    return render_template("main/equipment.html", equipment=equipment, category=category)
+    category = request.args.get("category")
+    q = (request.args.get("q") or "").strip()
+
+    query = Equipment.query
+    if category:
+        query = query.filter_by(category=category)
+    if q:
+        like = f"%{q}%"
+        query = query.filter(
+            or_(
+                Equipment.name.ilike(like),
+                Equipment.description.ilike(like),
+                Equipment.manufacturer.ilike(like),
+            )
+        )
+    equipment = query.order_by(Equipment.category, Equipment.name).all()
+
+    category_counts = (
+        db.session.query(Equipment.category, func.count(Equipment.id))
+        .group_by(Equipment.category)
+        .order_by(Equipment.category)
+        .all()
+    )
+
+    return render_template(
+        "main/equipment.html",
+        equipment=equipment,
+        active_category=category,
+        q=q,
+        category_counts=category_counts,
+    )
+
+
+@bp.route("/equipment/add", methods=["GET", "POST"])
+@login_required
+def equipment_add():
+    if not current_user.email_confirmed:
+        flash("Сначала подтвердите email — так мы защищаем каталог от спама.", "error")
+        return redirect(url_for("main.equipment_list"))
+
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        category = (request.form.get("category") or "").strip()
+        description = (request.form.get("description") or "").strip()
+        manufacturer = (request.form.get("manufacturer") or "").strip()
+        price_rub = request.form.get("price_rub") or None
+
+        if not name or not category or not description:
+            flash("Заполните название, категорию и описание.", "error")
+            return render_template("main/equipment_add.html")
+
+        try:
+            price_rub = float(price_rub) if price_rub else None
+        except ValueError:
+            price_rub = None
+
+        used_slugs = {row[0] for row in db.session.query(Equipment.slug).all()}
+        item = Equipment(
+            slug=unique_slug(name, used_slugs, "equipment"),
+            category=category,
+            name=name,
+            description=description,
+            price_rub=price_rub,
+            manufacturer=manufacturer or None,
+            verified=False,
+            added_by_user_id=current_user.id,
+        )
+        db.session.add(item)
+        db.session.commit()
+
+        flash(
+            "Оборудование добавлено и уже видно в каталоге с пометкой «не проверено» "
+            "— администрация проверит и подтвердит.",
+            "success",
+        )
+        return redirect(url_for("main.equipment_detail", slug=item.slug))
+
+    return render_template("main/equipment_add.html")
+
+
+@bp.route("/equipment/<slug>")
+def equipment_detail(slug):
+    item = Equipment.query.filter_by(slug=slug).first()
+    if item is None:
+        abort(404)
+    reviews, avg_rating = reviews_for("equipment", item.id)
+    return render_template(
+        "main/equipment_detail.html",
+        item=item,
+        reviews=reviews,
+        avg_rating=avg_rating,
+        target_type="equipment",
+        target_id=item.id,
+    )
 
 
 @bp.route("/experiments")
@@ -55,10 +149,42 @@ def experiments_list():
     return render_template("main/experiments.html", experiments=experiments)
 
 
+@bp.route("/experiments/<slug>")
+def experiment_detail(slug):
+    experiment = Experiment.query.filter_by(slug=slug).first()
+    if experiment is None:
+        abort(404)
+    reviews, avg_rating = reviews_for("experiment", experiment.id)
+    return render_template(
+        "main/experiment_detail.html",
+        experiment=experiment,
+        reviews=reviews,
+        avg_rating=avg_rating,
+        target_type="experiment",
+        target_id=experiment.id,
+    )
+
+
 @bp.route("/delivery")
 def delivery_list():
     services = DeliveryService.query.order_by(DeliveryService.name).all()
     return render_template("main/delivery.html", services=services)
+
+
+@bp.route("/delivery/<slug>")
+def delivery_detail(slug):
+    service = DeliveryService.query.filter_by(slug=slug).first()
+    if service is None:
+        abort(404)
+    reviews, avg_rating = reviews_for("delivery_service", service.id)
+    return render_template(
+        "main/delivery_detail.html",
+        service=service,
+        reviews=reviews,
+        avg_rating=avg_rating,
+        target_type="delivery_service",
+        target_id=service.id,
+    )
 
 
 @bp.route("/contact", methods=["GET", "POST"])

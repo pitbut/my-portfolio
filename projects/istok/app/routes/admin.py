@@ -15,7 +15,8 @@ from flask import (
 )
 
 from app import db
-from app.models import ContactMessage, EditSuggestion, Supplier
+from app.models import ContactMessage, EditSuggestion, Equipment, Review, Supplier
+from app.routes.reviews import REVIEW_TARGETS
 
 bp = Blueprint("admin", __name__, template_folder="../templates/admin")
 
@@ -146,6 +147,81 @@ def delete_supplier(supplier_id):
     db.session.commit()
     flash("Точка продажи удалена.", "info")
     return redirect(url_for("admin.suppliers"))
+
+
+@bp.route("/equipment")
+@login_required
+def equipment():
+    status = request.args.get("status", "unverified")
+    query = Equipment.query
+    if status == "unverified":
+        query = query.filter_by(verified=False)
+    elif status == "verified":
+        query = query.filter_by(verified=True)
+    items = query.order_by(Equipment.created_at.desc()).all()
+    unverified_count = Equipment.query.filter_by(verified=False).count()
+    return render_template(
+        "admin/equipment.html",
+        items=items,
+        active_status=status,
+        unverified_count=unverified_count,
+    )
+
+
+@bp.route("/equipment/<int:equipment_id>/verify", methods=["POST"])
+@login_required
+def verify_equipment(equipment_id):
+    item = Equipment.query.get_or_404(equipment_id)
+    item.verified = True
+    db.session.commit()
+    flash(f"«{item.name}» отмечено как проверенное.", "success")
+    return redirect(url_for("admin.equipment"))
+
+
+@bp.route("/equipment/<int:equipment_id>/unverify", methods=["POST"])
+@login_required
+def unverify_equipment(equipment_id):
+    item = Equipment.query.get_or_404(equipment_id)
+    item.verified = False
+    db.session.commit()
+    flash(f"«{item.name}» снова помечено как непроверенное.", "info")
+    return redirect(url_for("admin.equipment"))
+
+
+@bp.route("/equipment/<int:equipment_id>/delete", methods=["POST"])
+@login_required
+def delete_equipment(equipment_id):
+    item = Equipment.query.get_or_404(equipment_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash("Оборудование удалено.", "info")
+    return redirect(url_for("admin.equipment"))
+
+
+@bp.route("/reviews")
+@login_required
+def reviews():
+    items = Review.query.order_by(Review.created_at.desc()).all()
+    enriched = []
+    for r in items:
+        target_info = REVIEW_TARGETS.get(r.target_type)
+        target = db.session.get(target_info["model"], r.target_id) if target_info else None
+        target_url = url_for(target_info["endpoint"], slug=target.slug) if target_info and target else None
+        target_label = getattr(target, "name", None) or getattr(target, "title", None) or r.target_type
+        enriched.append(
+            {"review": r, "target": target, "target_url": target_url, "target_label": target_label}
+        )
+    return render_template("admin/reviews.html", items=enriched, total_count=len(items))
+
+
+@bp.route("/reviews/<int:review_id>/delete", methods=["POST"])
+@login_required
+def delete_review(review_id):
+    review = Review.query.get_or_404(review_id)
+    db.session.delete(review)
+    db.session.commit()
+    flash("Отзыв удалён.", "info")
+    return redirect(url_for("admin.reviews"))
 
 
 @bp.route("/messages")

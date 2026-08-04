@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Добавить оборудование — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 520px;">
+  <div class="breadcrumb"><a href="{{ url_for('main.equipment_list') }}">Оборудование</a> / Добавить</div>
+  <div class="section__header">
+    <h2>Добавить оборудование</h2>
+  </div>
+  <p class="prose">
+    Оборудование появится в каталоге сразу с пометкой «не проверено» —
+    администрация проверит сведения и подтвердит их.
+  </p>
+
+  <form method="post">
+    <div class="field">
+      <label for="name">Название</label>
+      <input type="text" id="name" name="name" maxlength="255" required>
+    </div>
+
+    <div class="field">
+      <label for="category">Категория</label>
+      <input type="text" id="category" name="category" maxlength="120" placeholder="фильтр / кулер / счётчик" required>
+    </div>
+
+    <div class="field">
+      <label for="description">Описание</label>
+      <textarea id="description" name="description" rows="5" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="manufacturer">Производитель (необязательно)</label>
+      <input type="text" id="manufacturer" name="manufacturer" maxlength="255">
+    </div>
+
+    <div class="field">
+      <label for="price_rub">Цена, ₽ (необязательно)</label>
+      <input type="text" id="price_rub" name="price_rub" placeholder="1990">
+    </div>
+
+    <button type="submit" class="btn btn--primary">Добавить</button>
+  </form>
+</section>
+{% endblock %}

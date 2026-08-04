@@ -25,7 +25,7 @@ class SlugMixin:
     slug = db.Column(db.String(220), unique=True, nullable=False, index=True)
 
 
-class Book(TimestampMixin, db.Model):
+class Book(TimestampMixin, SlugMixin, db.Model):
     """Книга о воде — раздел «Библиотека»."""
 
     __tablename__ = "books"
@@ -170,7 +170,7 @@ class SacredSource(TimestampMixin, SlugMixin, db.Model):
         return f"<SacredSource {self.name!r} ({self.country})>"
 
 
-class Equipment(TimestampMixin, db.Model):
+class Equipment(TimestampMixin, SlugMixin, db.Model):
     """Оборудование для воды — фильтры/кулеры/счётчики."""
 
     __tablename__ = "equipment"
@@ -181,12 +181,16 @@ class Equipment(TimestampMixin, db.Model):
     description = db.Column(db.Text, nullable=False)
     price_rub = db.Column(db.Numeric(10, 2), nullable=True)
     manufacturer = db.Column(db.String(255), nullable=True)
+    verified = db.Column(db.Boolean, nullable=False, default=False)
+    added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    added_by = db.relationship("User")
 
     def __repr__(self):
         return f"<Equipment {self.name!r}>"
 
 
-class Experiment(TimestampMixin, db.Model):
+class Experiment(TimestampMixin, SlugMixin, db.Model):
     """Опыт с водой — наука vs мифы."""
 
     __tablename__ = "experiments"
@@ -235,7 +239,7 @@ class EditSuggestion(TimestampMixin, db.Model):
         return f"<EditSuggestion #{self.id} {self.field_name} for source_id={self.source_id} ({self.status})>"
 
 
-class DeliveryService(TimestampMixin, db.Model):
+class DeliveryService(TimestampMixin, SlugMixin, db.Model):
     """Служба доставки воды."""
 
     __tablename__ = "delivery_services"
@@ -250,3 +254,33 @@ class DeliveryService(TimestampMixin, db.Model):
 
     def __repr__(self):
         return f"<DeliveryService {self.name!r}>"
+
+
+class Review(TimestampMixin, db.Model):
+    """Отзыв с оценкой на любой раздел сайта (источник, марка воды,
+    оборудование, книга, статья, опыт, служба доставки).
+
+    target_type/target_id вместо отдельной таблицы на каждый раздел — чтобы
+    добавлять отзывы к новым разделам без новых таблиц и роутов."""
+
+    __tablename__ = "reviews"
+
+    TARGET_TYPES = (
+        "sacred_source",
+        "water_brand",
+        "equipment",
+        "book",
+        "article",
+        "experiment",
+        "delivery_service",
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    target_type = db.Column(db.String(50), nullable=False, index=True)
+    target_id = db.Column(db.Integer, nullable=False, index=True)
+    author_name = db.Column(db.String(120), nullable=True)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5
+    body = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f"<Review #{self.id} {self.target_type}:{self.target_id} rating={self.rating}>"

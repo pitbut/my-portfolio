@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Оборудование — модерация — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  {% with admin_title = "Оборудование" %}{% include "admin/_nav.html" %}{% endwith %}
+
+  <div class="sort-bar">
+    <a href="{{ url_for('admin.equipment', status='unverified') }}" class="{{ 'is-active' if active_status == 'unverified' }}">Не проверенное ({{ unverified_count }})</a>
+    <a href="{{ url_for('admin.equipment', status='verified') }}" class="{{ 'is-active' if active_status == 'verified' }}">Проверенное</a>
+    <a href="{{ url_for('admin.equipment', status='all') }}" class="{{ 'is-active' if active_status == 'all' }}">Всё</a>
+  </div>
+
+  {% if items %}
+  <div class="admin-list">
+    {% for item in items %}
+    <article class="admin-item">
+      <div class="admin-item__meta">
+        <a href="{{ url_for('main.equipment_detail', slug=item.slug) }}" target="_blank">{{ item.category }}</a>
+        &middot; {{ item.created_at.strftime("%d.%m.%Y %H:%M") }}
+        {% if item.added_by %} &middot; добавил(а) {{ item.added_by.email }}{% endif %}
+        &middot; <span class="badge {{ 'badge--science' if item.verified else 'badge--myth' }}">{{ 'проверено' if item.verified else 'не проверено' }}</span>
+      </div>
+      <h3 style="margin: 6px 0;">{{ item.name }}</h3>
+      <p>{{ item.description | truncate(200) }}</p>
+      {% if item.manufacturer %}<p class="admin-item__meta">{{ item.manufacturer }}</p>{% endif %}
+
+      <div class="admin-item__actions">
+        {% if item.verified %}
+        <form method="post" action="{{ url_for('admin.unverify_equipment', equipment_id=item.id) }}">
+          <button type="submit" class="btn btn--reject">Снять отметку «проверено»</button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('admin.verify_equipment', equipment_id=item.id) }}">
+          <button type="submit" class="btn btn--approve">Отметить проверенным</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{{ url_for('admin.delete_equipment', equipment_id=item.id) }}" onsubmit="return confirm('Удалить это оборудование?');">
+          <button type="submit" class="btn btn--reject">Удалить</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Здесь пока пусто.</div>
+  {% endif %}
+</section>
+{% endblock %}

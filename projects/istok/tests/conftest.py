@@ -73,6 +73,7 @@ def app():
         db.session.add(
             Book(
                 title="Тестовая книга",
+                slug="test-book",
                 author="Автор Тестов",
                 year=2020,
                 genre="наука",
@@ -83,12 +84,15 @@ def app():
             Equipment(
                 category="Фильтр",
                 name="Тестовый фильтр",
+                slug="test-filter",
                 description="Описание тестового фильтра.",
+                verified=True,
             )
         )
         db.session.add(
             Experiment(
                 title="Тестовый опыт",
+                slug="test-experiment",
                 description="Описание тестового опыта.",
                 verdict="наука",
             )
@@ -96,6 +100,7 @@ def app():
         db.session.add(
             DeliveryService(
                 name="Тестовая доставка",
+                slug="test-delivery",
                 delivery_time="1 день",
             )
         )

@@ -140,6 +140,56 @@ def test_add_supplier_after_confirmation(client, app):
         assert supplier.added_by_user_id is not None
 
 
+def test_add_equipment_blocked_until_confirmed(client, app):
+    client.post(
+        "/auth/register",
+        data={"email": "unconfirmedeq@user.example", "password": "password123", "password2": "password123"},
+    )
+    resp = client.post(
+        "/equipment/add",
+        data={"name": "Спам-фильтр", "category": "Фильтр", "description": "Спам."},
+        follow_redirects=True,
+    )
+    assert "подтвердите email".encode() in resp.data
+
+    with app.app_context():
+        from app.models import Equipment
+
+        assert Equipment.query.filter_by(name="Спам-фильтр").first() is None
+
+
+def test_add_equipment_after_confirmation(client, app):
+    client.post(
+        "/auth/register",
+        data={"email": "confirmedeq@user.example", "password": "password123", "password2": "password123"},
+    )
+    token = _confirm_token(app, "confirmedeq@user.example")
+    client.get(f"/auth/confirm/{token}")
+
+    resp = client.post(
+        "/equipment/add",
+        data={
+            "name": "Новый фильтр",
+            "category": "Фильтр",
+            "description": "Описание нового фильтра.",
+            "manufacturer": "Акварус",
+            "price_rub": "2500",
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    assert "не проверено".encode() in resp.data
+
+    with app.app_context():
+        from app.models import Equipment
+
+        item = Equipment.query.filter_by(name="Новый фильтр").first()
+        assert item is not None
+        assert item.verified is False
+        assert item.added_by_user_id is not None
+        assert item.slug
+
+
 def test_pending_confirm_link_shown_when_mail_not_configured(client):
     client.post(
         "/auth/register",
