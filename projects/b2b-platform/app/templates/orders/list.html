@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Мои заказы{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>Мои заказы</h1>
+    <a class="btn btn--primary" href="{{ url_for('orders.new_order') }}">+ Новая заявка</a>
+  </div>
+
+  {% if orders %}
+  <table class="data-table">
+    <thead><tr><th>Заявка</th><th>Категория</th><th>Статус</th><th>Ставок</th><th>Создан</th><th></th></tr></thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>{{ order.title }}</td>
+        <td>{{ order.service_category.name_ru }}</td>
+        <td><span class="status-chip status-chip--{{ order.status }}">{{ order.status }}</span></td>
+        <td>{{ order.bids|length }}</td>
+        <td>{{ order.created_at.strftime('%d.%m.%Y') }}</td>
+        <td><a href="{{ url_for('orders.order_detail', order_id=order.id) }}">Открыть</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Заявок пока нет. <a href="{{ url_for('orders.new_order') }}">Разместить первую</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}

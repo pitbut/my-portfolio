@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Оставить отзыв{% endblock %}
+
+{% block content %}
+<section class="wrap auth-page">
+  <div class="auth-card">
+    <h1>Отзыв о заказе «{{ order.title }}»</h1>
+    <form method="post" action="{{ url_for('reviews.leave_review', order_id=order.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Оценка (1–5) *
+        <select name="rating" required>
+          <option value="">— выберите —</option>
+          {% for i in range(5, 0, -1) %}
+            <option value="{{ i }}" {{ 'selected' if existing and existing.rating == i }}>{{ i }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Комментарий
+        <textarea name="comment" rows="4">{{ existing.comment or '' if existing }}</textarea>
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">{{ 'Обновить отзыв' if existing else 'Отправить отзыв' }}</button>
+    </form>
+    {% if existing and not existing.is_published %}
+    <p class="empty-hint">Ваш отзыв сохранён и будет опубликован, как только своё мнение оставит другая сторона.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

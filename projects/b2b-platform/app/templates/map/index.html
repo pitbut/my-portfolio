@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Карта исполнителей{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Карта изготовителей и ремонтников</h1>
+
+  <form id="mapFilters" class="map-filters">
+    <label>Категория услуг
+      <select id="f_service">
+        <option value="">Все</option>
+        {% for sc in service_categories %}<option value="{{ sc.id }}">{{ sc.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Тип организации
+      <select id="f_org_type">
+        <option value="">Все</option>
+        <option value="master">Мастер</option>
+        <option value="tsekh">Цех</option>
+        <option value="zavod">Завод</option>
+      </select>
+    </label>
+    <label>Регион
+      <select id="f_region">
+        <option value="">Все</option>
+        {% for r in regions %}<option value="{{ r.id }}">{{ r.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+    <button type="button" id="btnNearby" class="btn btn--secondary">📍 Показать рядом со мной</button>
+  </form>
+
+  <div id="executorsMap" class="location-map location-map--big"></div>
+
+  <div id="nearbyResults" class="nearby-results" hidden>
+    <h2 class="profile-section-title">Ближайшие исполнители</h2>
+    <div id="nearbyList"></div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

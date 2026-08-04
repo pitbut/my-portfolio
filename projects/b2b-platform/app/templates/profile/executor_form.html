@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Профиль исполнителя{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Профиль исполнителя</h1>
+  <p class="profile-page__hint">
+    {% if profile.is_complete %}
+      <span class="badge badge--ok">Профиль заполнен — участвует в подборе заказов</span>
+    {% else %}
+      <span class="badge badge--warn">Профиль не заполнен — пока не участвует в подборе заказов</span>
+    {% endif %}
+  </p>
+
+  <h2 class="profile-section-title">1. Основная информация</h2>
+  <form method="post" action="{{ url_for('profile.executor_edit') }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="role-fieldset">
+      <legend>Тип организации *</legend>
+      <label><input type="radio" name="org_type" value="master" {{ 'checked' if profile.org_type == 'master' }} required> Мастер (частное лицо/ИП)</label>
+      <label><input type="radio" name="org_type" value="tsekh" {{ 'checked' if profile.org_type == 'tsekh' }}> Цех</label>
+      <label><input type="radio" name="org_type" value="zavod" {{ 'checked' if profile.org_type == 'zavod' }}> Завод</label>
+    </fieldset>
+
+    <label>Название цеха/завода или ФИО мастера *
+      <input type="text" name="display_name" value="{{ profile.display_name or '' }}" required>
+    </label>
+
+    <label>Описание
+      <textarea name="description" rows="4" placeholder="Чем занимаетесь, какой опыт, какие работы выполняете">{{ profile.description or '' }}</textarea>
+    </label>
+
+    <label>Контактный телефон
+      <input type="tel" name="phone" value="{{ current_user.phone or '' }}" placeholder="+998 90 123 45 67">
+    </label>
+
+    <label>ИНН / СТИР
+      <input type="text" name="stir_inn" value="{{ profile.stir_inn or '' }}">
+    </label>
+
+    <div class="form-row">
+      <label>Регион *
+        <select name="region_id" id="region_id" required>
+          <option value="">— выберите —</option>
+          {% for region in regions %}
+            <option value="{{ region.id }}" {{ 'selected' if profile.region_id == region.id }}>{{ region.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Город
+        <select name="city_id" id="city_id" data-selected="{{ profile.city_id or '' }}">
+          <option value="">— сначала выберите регион —</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Адрес цеха/завода *
+      <input type="text" name="address_text" value="{{ profile.address_text or '' }}" required>
+    </label>
+
+    <label>Уточните точку на карте</label>
+    <div id="locationMap" class="location-map"
+         data-lat="{{ profile.latitude or '' }}" data-lng="{{ profile.longitude or '' }}"></div>
+    <input type="hidden" name="latitude" id="latitude" value="{{ profile.latitude or '' }}">
+    <input type="hidden" name="longitude" id="longitude" value="{{ profile.longitude or '' }}">
+
+    <label>Готовность выезжать на ремонт в радиусе, км
+      <input type="number" name="service_radius_km" min="0" max="1000" value="{{ profile.service_radius_km or 50 }}">
+    </label>
+
+    <button type="submit" class="btn btn--primary">Сохранить основную информацию</button>
+  </form>
+
+  <h2 class="profile-section-title">2. Станочный парк {% if not profile.id %}<span class="hint">(сначала сохраните основную информацию)</span>{% endif %}</h2>
+
+  {% if profile.equipment %}
+  <table class="data-table">
+    <thead><tr><th>Оборудование</th><th>Модель</th><th>Кол-во</th><th>Примечания</th><th></th></tr></thead>
+    <tbody>
+      {% for item in profile.equipment %}
+      <tr>
+        <td>{{ item.equipment_type.name_ru }}</td>
+        <td>{{ item.model_name or '—' }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.notes or '—' }}</td>
+        <td>
+          <form method="post" action="{{ url_for('profile.executor_equipment_delete', item_id=item.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Станочный парк ещё не заполнен — без него профиль не будет участвовать в подборе заказов.</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('profile.executor_equipment_add') }}" class="profile-form profile-form--inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Тип оборудования
+      <select name="equipment_type_id" required>
+        <option value="">— выберите —</option>
+        {% for eq in equipment_types %}
+          <option value="{{ eq.id }}">{{ eq.name_ru }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Модель <input type="text" name="model_name" placeholder="напр. DMG MORI NLX 2500"></label>
+    <label>Кол-во <input type="number" name="quantity" min="1" value="1"></label>
+    <label>Примечания <input type="text" name="notes"></label>
+    <button type="submit" class="btn btn--secondary">Добавить оборудование</button>
+  </form>
+
+  <h2 class="profile-section-title">3. Допустимые габариты, материалы и услуги</h2>
+  <form method="post" action="{{ url_for('profile.executor_capabilities_save') }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-row form-row--4">
+      <label>Макс. длина, мм <input type="number" name="max_length_mm" min="0" value="{{ profile.capability.max_length_mm if profile.capability else '' }}"></label>
+      <label>Макс. диаметр, мм <input type="number" name="max_diameter_mm" min="0" value="{{ profile.capability.max_diameter_mm if profile.capability else '' }}"></label>
+      <label>Макс. ширина, мм <input type="number" name="max_width_mm" min="0" value="{{ profile.capability.max_width_mm if profile.capability else '' }}"></label>
+      <label>Макс. высота, мм <input type="number" name="max_height_mm" min="0" value="{{ profile.capability.max_height_mm if profile.capability else '' }}"></label>
+    </div>
+    <label>Макс. вес заготовки, кг
+      <input type="number" name="max_weight_kg" min="0" step="0.1" value="{{ profile.capability.max_weight_kg if profile.capability else '' }}">
+    </label>
+
+    <fieldset class="checkbox-fieldset">
+      <legend>Категории услуг (по ним идёт подбор заказов)</legend>
+      {% set selected_services = profile.capability.service_categories|map(attribute='id')|list if profile.capability else [] %}
+      {% for sc in service_categories %}
+        <label class="checkbox-label">
+          <input type="checkbox" name="service_category_ids" value="{{ sc.id }}" {{ 'checked' if sc.id in selected_services }}>
+          {{ sc.name_ru }}
+        </label>
+      {% endfor %}
+    </fieldset>
+
+    <fieldset class="checkbox-fieldset">
+      <legend>Материалы, с которыми работаете</legend>
+      {% set selected_materials = profile.capability.materials|map(attribute='id')|list if profile.capability else [] %}
+      {% for m in materials %}
+        <label class="checkbox-label">
+          <input type="checkbox" name="material_ids" value="{{ m.id }}" {{ 'checked' if m.id in selected_materials }}>
+          {{ m.name_ru }}
+        </label>
+      {% endfor %}
+    </fieldset>
+
+    <button type="submit" class="btn btn--primary">Сохранить техвозможности</button>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  initRegionCityCascade('region_id', 'city_id');
+  initLocationMap('locationMap', 'latitude', 'longitude');
+});
+</script>
+{% endblock %}

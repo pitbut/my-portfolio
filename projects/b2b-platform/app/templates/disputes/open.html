@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Открыть спор{% endblock %}
+
+{% block content %}
+<section class="wrap auth-page">
+  <div class="auth-card">
+    <h1>Спор по заказу «{{ order.title }}»</h1>
+    <p class="profile-page__hint">Опишите проблему и после отправки приложите фото/видео-доказательства — это поможет администратору объективно разобраться.</p>
+    <form method="post" action="{{ url_for('disputes.open_dispute', order_id=order.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Причина *
+        <select name="reason_category" required>
+          <option value="">— выберите —</option>
+          <option value="defect">Брак</option>
+          <option value="delay">Задержка сроков</option>
+          <option value="quality">Претензия по качеству</option>
+          <option value="price_dispute">Расхождение по цене</option>
+          <option value="other">Другое</option>
+        </select>
+      </label>
+      <label>Опишите ситуацию *
+        <textarea name="description" rows="5" required></textarea>
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">Открыть спор</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

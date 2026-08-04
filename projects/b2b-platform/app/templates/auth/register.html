@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.register') }}{% endblock %}
+
+{% block content %}
+<section class="wrap auth-page">
+  <div class="auth-card">
+    <h1>{{ t('nav.register') }}</h1>
+    <form method="post" action="{{ url_for('auth.register') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <label>{{ t('auth.email') }}
+        <input type="email" name="email" value="{{ email }}" required>
+      </label>
+      <label>{{ t('auth.password') }}
+        <input type="password" name="password" required minlength="8">
+      </label>
+      <label>Повторите пароль
+        <input type="password" name="password2" required minlength="8">
+      </label>
+      <fieldset class="role-fieldset">
+        <legend>Кто вы?</legend>
+        <label><input type="radio" name="role" value="customer" {{ 'checked' if role == 'customer' }} required> {{ t('auth.role_customer') }}</label>
+        <label><input type="radio" name="role" value="executor" {{ 'checked' if role == 'executor' }}> {{ t('auth.role_executor') }}</label>
+      </fieldset>
+      <label>Язык интерфейса
+        <select name="language">
+          {% for code in supported_languages %}
+            <option value="{{ code }}" {{ 'selected' if code == language }}>{{ language_labels[code] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">{{ t('nav.register') }}</button>
+    </form>
+    {% if google_login_available %}
+    <a class="btn btn--google btn--block" href="{{ url_for('auth.google_login', next=next_url) }}">{{ t('auth.google') }}</a>
+    {% endif %}
+    <p class="auth-card__switch">Уже есть аккаунт? <a href="{{ url_for('auth.login', next=next_url) }}">{{ t('nav.login') }}</a></p>
+  </div>
+</section>
+{% endblock %}

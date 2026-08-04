@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="{{ 'uz' if current_lang != 'ru' else 'ru' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}B2B-платформа изготовителей и ремонтников оборудования{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏭</text></svg>">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="{{ url_for('main.index') }}">
+      <span class="brand__icon">🏭</span>
+      <span class="brand__name">B2B Platform UZ</span>
+    </a>
+
+    <div class="header-right">
+      <div class="lang-switch">
+        {% for code in supported_languages %}
+          <a href="{{ url_for('main.set_language', lang=code) }}"
+             class="lang-switch__item {{ 'is-active' if code == current_lang }}">{{ language_labels[code] }}</a>
+        {% endfor %}
+      </div>
+
+      <nav class="account-nav">
+        {% if current_user.is_authenticated %}
+          {% if current_user.role == 'customer' %}
+            <a href="{{ url_for('orders.my_orders') }}">Мои заказы</a>
+            <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
+            <a href="{{ url_for('map.index') }}">Карта</a>
+            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
+            <a href="{{ url_for('reviews.my_reviews') }}">Отзывы</a>
+            <a href="{{ url_for('profile.customer_edit') }}">{{ t('nav.profile') }}</a>
+          {% elif current_user.role == 'executor' %}
+            <a href="{{ url_for('orders.executor_dashboard') }}">Лента заказов</a>
+            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
+            <a href="{{ url_for('reviews.my_reviews') }}">Отзывы</a>
+            <a href="{{ url_for('settings.subscription_page') }}">Подписка</a>
+            <a href="{{ url_for('profile.executor_edit') }}">{{ t('nav.profile') }}</a>
+          {% elif current_user.role == 'admin' %}
+            <a href="{{ url_for('admin.disputes_list') }}">Споры (админ)</a>
+            <a href="{{ url_for('admin.subscriptions_list') }}">Подписки (админ)</a>
+          {% endif %}
+          {% if current_user.role in ('customer', 'executor') %}
+            <a href="{{ url_for('settings.index') }}">⚙️</a>
+          {% endif %}
+          <a href="{{ url_for('main.notifications') }}">🔔{% if unread_notifications %}<span class="notif-badge">{{ unread_notifications }}</span>{% endif %}</a>
+          <span class="account-nav__email">{{ current_user.email }}</span>
+          <a href="{{ url_for('auth.logout') }}">{{ t('nav.logout') }}</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">{{ t('nav.login') }}</a>
+          <a href="{{ url_for('auth.register') }}" class="btn-nav">{{ t('nav.register') }}</a>
+        {% endif %}
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="wrap flash-messages">
+      {% for category, message in messages %}
+        <div class="flash flash--{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+  {% if pending_confirm_url %}
+  <div class="wrap flash-messages">
+    <div class="flash flash--info">
+      Почтовый сервер на сайте пока не настроен — письмо не отправляется автоматически.
+      Подтвердите email по ссылке: <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
+    </div>
+  </div>
+  {% endif %}
+  {% if current_user.is_authenticated and current_user.role and not current_user.profile_complete %}
+  <div class="wrap flash-messages">
+    <div class="flash flash--warn">{{ t('profile.incomplete_banner') }}</div>
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <span>🏭 B2B Platform UZ — изготовители и ремонтники оборудования Узбекистана</span>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

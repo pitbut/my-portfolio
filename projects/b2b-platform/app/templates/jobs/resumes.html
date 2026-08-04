@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Резюме{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>Резюме соискателей</h1>
+    <a class="btn btn--primary" href="{{ url_for('jobs.resume_edit') }}">Моё резюме</a>
+  </div>
+
+  <form method="get" class="map-filters">
+    <label>Профессия
+      <select name="profession_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for p in professions %}<option value="{{ p.id }}" {{ 'selected' if request.args.get('profession_id')|string == p.id|string }}>{{ p.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Регион
+      <select name="region_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for r in regions %}<option value="{{ r.id }}" {{ 'selected' if request.args.get('region_id')|string == r.id|string }}>{{ r.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+  </form>
+
+  {% if resumes %}
+  <table class="data-table">
+    <thead><tr><th>Профессия</th><th>Опыт</th><th>Регион</th><th>Ожидания по зарплате</th><th></th></tr></thead>
+    <tbody>
+      {% for r in resumes %}
+      <tr>
+        <td>{{ r.profession_category.name_ru }}</td>
+        <td>{{ r.experience_years or '—' }} лет</td>
+        <td>{{ r.region.name_ru }}</td>
+        <td>{{ r.expected_salary or '—' }}</td>
+        <td><a href="{{ url_for('jobs.resume_detail', resume_id=r.id) }}">Открыть</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Пока нет резюме по этим фильтрам.</p>
+  {% endif %}
+</section>
+{% endblock %}

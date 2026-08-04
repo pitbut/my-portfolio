@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ t('home.title') }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <h1>{{ t('home.title') }}</h1>
+    <p class="hero__subtitle">{{ t('home.subtitle') }}</p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="{{ url_for('orders.new_order') }}">{{ t('home.cta_order') }}</a>
+      <a class="btn btn--secondary" href="{{ url_for('profile.executor_edit') }}">{{ t('home.cta_executor') }}</a>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works wrap">
+  <div class="how-card">
+    <span class="how-card__num">1</span>
+    <h3>Регистрация</h3>
+    <p>Заказчик и исполнитель регистрируются сами — по email или через Google — и сами заполняют свой профиль.</p>
+  </div>
+  <div class="how-card">
+    <span class="how-card__num">2</span>
+    <h3>Профиль</h3>
+    <p>Исполнитель указывает станочный парк, допустимые габариты и материалы — это основа будущего автоподбора заказов.</p>
+  </div>
+  <div class="how-card">
+    <span class="how-card__num">3</span>
+    <h3>Заказы и аукцион</h3>
+    <p>Следующий этап разработки — публикация заявок, автоподбор исполнителей и аукцион ставок (см. техническое задание).</p>
+  </div>
+</section>
+
+<section class="wrap status-note">
+  <p>Сейчас на платформе реализованы: регистрация (email + Google), «жёсткий» paywall и самостоятельное заполнение
+  профилей заказчика и исполнителя со станочным парком и техвозможностями. Остальные модули из
+  <a href="../b2b-equipment-platform-uz/index.html">технического задания</a> — в разработке.</p>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if not current_user.is_authenticated %}
+<div id="authModal" class="modal {{ 'is-open' if auth_required }}" aria-hidden="{{ 'false' if auth_required else 'true' }}">
+  <div class="modal__backdrop" data-close-modal></div>
+  <div class="modal__dialog">
+    <button type="button" class="modal__close" data-close-modal aria-label="Закрыть">×</button>
+    <h2>{{ t('paywall.title') }}</h2>
+    <p class="modal__body-text">{{ t('paywall.body') }}</p>
+
+    <div class="modal__tabs">
+      <button type="button" class="modal__tab is-active" data-tab="login">{{ t('nav.login') }}</button>
+      <button type="button" class="modal__tab" data-tab="register">{{ t('nav.register') }}</button>
+    </div>
+
+    <div class="modal__panel" data-panel="login">
+      <form method="post" action="{{ url_for('auth.login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <label>{{ t('auth.email') }}<input type="email" name="email" required></label>
+        <label>{{ t('auth.password') }}<input type="password" name="password" required></label>
+        <button type="submit" class="btn btn--primary btn--block">{{ t('nav.login') }}</button>
+      </form>
+      {% if google_login_available %}
+      <a class="btn btn--google btn--block" href="{{ url_for('auth.google_login', next=next_url) }}">{{ t('auth.google') }}</a>
+      {% endif %}
+    </div>
+
+    <div class="modal__panel" data-panel="register" hidden>
+      <form method="post" action="{{ url_for('auth.register') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <label>{{ t('auth.email') }}<input type="email" name="email" required></label>
+        <label>{{ t('auth.password') }}<input type="password" name="password" required minlength="8"></label>
+        <label>Повторите пароль<input type="password" name="password2" required minlength="8"></label>
+        <fieldset class="role-fieldset">
+          <label><input type="radio" name="role" value="customer" required> {{ t('auth.role_customer') }}</label>
+          <label><input type="radio" name="role" value="executor"> {{ t('auth.role_executor') }}</label>
+        </fieldset>
+        <label>Язык интерфейса
+          <select name="language">
+            {% for code in supported_languages %}
+              <option value="{{ code }}" {{ 'selected' if code == current_lang }}>{{ language_labels[code] }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button type="submit" class="btn btn--primary btn--block">{{ t('nav.register') }}</button>
+      </form>
+      {% if google_login_available %}
+      <a class="btn btn--google btn--block" href="{{ url_for('auth.google_login', next=next_url) }}">{{ t('auth.google') }}</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
