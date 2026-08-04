@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — {{ heading }}{% endblock %}
+
+{% block content %}
+<section class="wrap auth-page">
+  <div class="auth-card" style="text-align:center;">
+    <h1 style="font-size:3em;margin-bottom:4px;">{{ code }}</h1>
+    <p style="font-size:1.15em;font-weight:700;color:var(--bg2);margin-bottom:10px;">{{ heading }}</p>
+    <p class="profile-page__hint">{{ message }}</p>
+    <a class="btn btn--primary" href="{{ url_for('main.index') }}">На главную</a>
+  </div>
+</section>
+{% endblock %}
