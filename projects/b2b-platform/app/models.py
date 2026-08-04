@@ -605,3 +605,86 @@ class DisputeMessage(db.Model):
 
     def __repr__(self):
         return f"<DisputeMessage dispute_id={self.dispute_id}>"
+
+
+# --- модуль 8: барахолка станков и инструмента ---
+
+class ListingCategory(db.Model):
+    """Справочник категорий объявлений (станки, инструмент, запчасти...)."""
+
+    __tablename__ = "listing_categories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name_ru = db.Column(db.String(160), nullable=False)
+    name_uz_latin = db.Column(db.String(160), nullable=False)
+    name_uz_cyrillic = db.Column(db.String(160), nullable=False)
+
+    def name(self, lang):
+        return getattr(self, f"name_{lang}", self.name_ru)
+
+    def __repr__(self):
+        return f"<ListingCategory {self.name_ru!r}>"
+
+
+class Listing(TimestampMixin, db.Model):
+    """Объявление о продаже/покупке станка, инструмента, запчастей."""
+
+    __tablename__ = "listings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    listing_intent = db.Column(db.String(10), nullable=False)  # sell | buy
+    category_id = db.Column(db.Integer, db.ForeignKey("listing_categories.id"), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    content_language = db.Column(db.String(20), nullable=False, default="ru")
+    condition = db.Column(db.String(20), nullable=True)  # new | used | for_parts (только для sell)
+    price = db.Column(db.Numeric(12, 2), nullable=True)
+    currency = db.Column(db.String(10), nullable=False, default="UZS")
+    price_negotiable = db.Column(db.Boolean, nullable=False, default=False)
+    region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=False)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="active")  # active | reserved | closed | archived
+
+    author = db.relationship("User")
+    category = db.relationship("ListingCategory")
+    region = db.relationship("Region")
+    city = db.relationship("City")
+    media = db.relationship("ListingMedia", backref="listing", cascade="all, delete-orphan", order_by="ListingMedia.sort_order")
+    responses = db.relationship("ListingResponse", backref="listing", cascade="all, delete-orphan", order_by="ListingResponse.created_at")
+
+    def __repr__(self):
+        return f"<Listing {self.id} {self.title!r} {self.listing_intent}>"
+
+
+class ListingMedia(db.Model):
+    __tablename__ = "listing_media"
+
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey("listings.id"), nullable=False)
+    media_type = db.Column(db.String(20), nullable=False)  # photo | video
+    file_url = db.Column(db.String(1000), nullable=False)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<ListingMedia listing_id={self.listing_id}>"
+
+
+class ListingResponse(db.Model):
+    """Отклик на объявление — уведомляет автора через общую шину (модуль 7)."""
+
+    __tablename__ = "listing_responses"
+
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey("listings.id"), nullable=False)
+    from_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    message = db.Column(db.Text, nullable=True)
+    offered_price = db.Column(db.Numeric(12, 2), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    from_user = db.relationship("User")
+
+    def __repr__(self):
+        return f"<ListingResponse listing_id={self.listing_id} from={self.from_user_id}>"

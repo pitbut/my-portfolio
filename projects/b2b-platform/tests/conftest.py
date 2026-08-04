@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pytest
 
 from app import create_app, db
-from app.models import EquipmentType, Material, Region, ServiceCategory
+from app.models import EquipmentType, ListingCategory, Material, Region, ServiceCategory
 
 
 @pytest.fixture()
@@ -30,6 +30,9 @@ def app():
         ))
         db.session.add(Material(
             name_ru="Сталь конструкционная", name_uz_latin="Konstruksion po'lat", name_uz_cyrillic="Конструкцион пўлат",
+        ))
+        db.session.add(ListingCategory(
+            name_ru="Станки с ЧПУ", name_uz_latin="CPU stanoklar", name_uz_cyrillic="ЧПУ станоклар",
         ))
         db.session.commit()
 

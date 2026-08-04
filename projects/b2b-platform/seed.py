@@ -8,7 +8,7 @@ import csv
 from pathlib import Path
 
 from app import create_app, db
-from app.models import City, EquipmentType, Material, Region, ServiceCategory
+from app.models import City, EquipmentType, ListingCategory, Material, Region, ServiceCategory
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -79,6 +79,7 @@ def main():
         seed_simple_dictionary(EquipmentType, "equipment_types.csv")
         seed_simple_dictionary(ServiceCategory, "service_categories.csv")
         seed_simple_dictionary(Material, "materials.csv")
+        seed_simple_dictionary(ListingCategory, "listing_categories.csv")
         print("Готово.")
 
 

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Новое объявление{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Новое объявление</h1>
+  <form method="post" action="{{ url_for('marketplace.new_listing') }}" enctype="multipart/form-data" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="role-fieldset">
+      <legend>Тип объявления *</legend>
+      <label><input type="radio" name="listing_intent" value="sell" required> Продаю</label>
+      <label><input type="radio" name="listing_intent" value="buy"> Ищу купить</label>
+    </fieldset>
+
+    <label>Категория *
+      <select name="category_id" required>
+        <option value="">— выберите —</option>
+        {% for c in categories %}<option value="{{ c.id }}">{{ c.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+
+    <label>Название *
+      <input type="text" name="title" placeholder="напр. Токарный станок 1К62, б/у" required>
+    </label>
+    <label>Описание *
+      <textarea name="description" rows="4" required></textarea>
+    </label>
+
+    <fieldset class="role-fieldset">
+      <legend>Состояние (для «Продаю»)</legend>
+      <label><input type="radio" name="condition" value="new"> Новое</label>
+      <label><input type="radio" name="condition" value="used"> Б/у</label>
+      <label><input type="radio" name="condition" value="for_parts"> На запчасти</label>
+    </fieldset>
+
+    <div class="form-row">
+      <label>Цена <input type="number" name="price" min="0"></label>
+      <label>Валюта
+        <select name="currency"><option value="UZS">UZS</option><option value="USD">USD</option></select>
+      </label>
+    </div>
+    <label class="checkbox-label"><input type="checkbox" name="price_negotiable" value="1"> Торг уместен</label>
+
+    <label>Регион *
+      <select name="region_id" required>
+        <option value="">— выберите —</option>
+        {% for r in regions %}<option value="{{ r.id }}">{{ r.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+
+    <label>Фото (можно несколько) <input type="file" name="photos" accept="image/*" multiple></label>
+
+    <button type="submit" class="btn btn--primary">Опубликовать</button>
+  </form>
+</section>
+{% endblock %}

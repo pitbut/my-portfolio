@@ -64,6 +64,7 @@ def create_app(config_name=None):
     from app.routes.reviews import bp as reviews_bp
     from app.routes.disputes import bp as disputes_bp
     from app.routes.admin import bp as admin_bp
+    from app.routes.marketplace import bp as marketplace_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -73,6 +74,7 @@ def create_app(config_name=None):
     app.register_blueprint(reviews_bp)
     app.register_blueprint(disputes_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(marketplace_bp)
 
     register_cli(app)
 
