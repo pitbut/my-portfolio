@@ -56,15 +56,15 @@ def create_app(config_name=None):
 
     @app.context_processor
     def inject_pending_confirmation():
-        """Пока на сервере не настроена реальная отправка почты (MAIL_USERNAME/
-        MAIL_PASSWORD), показываем ссылку подтверждения прямо на сайте, а не
-        только один раз во flash-сообщении, — иначе её легко потерять."""
+        """Пока на сервере не настроена реальная отправка почты (RESEND_API_KEY),
+        показываем ссылку подтверждения прямо на сайте, а не только один раз
+        во flash-сообщении, — иначе её легко потерять."""
         from flask_login import current_user
 
         if (
             current_user.is_authenticated
             and not current_user.email_confirmed
-            and not app.config.get("MAIL_USERNAME")
+            and not app.config.get("RESEND_API_KEY")
         ):
             from app.routes.auth import confirm_url_for
 
