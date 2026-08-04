@@ -48,7 +48,7 @@
     "id": "istok",
     "title": "💧 Исток — портал о воде",
     "description": "Flask-портал о воде: священные источники мира, статьи, каталог цен на питьевую воду, библиотека книг, обзоры оборудования, опыты и доставка. Полный стек: Flask + SQLAlchemy + Flask-Migrate.",
-    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=%F0%9F%92%A7%20%D0%98%D1%81%D1%82%D0%BE%D0%BA%20%E2%80%94%20%D0%BF%D0%BE%D1%80%D1%82%D0%B0%D0%BB%20%D0%BE%20%D0%B2%D0%BE%D0%B4%D0%B5",
+    "image": "projects/istok/preview.jpg",
     "link": "https://istok.onrender.com",
     "date": "2026-08-01",
     "tags": [
