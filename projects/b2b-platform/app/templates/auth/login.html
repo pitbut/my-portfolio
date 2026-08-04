@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.login') }}{% endblock %}
+
+{% block content %}
+<section class="wrap auth-page">
+  <div class="auth-card">
+    <h1>{{ t('nav.login') }}</h1>
+    <form method="post" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <label>{{ t('auth.email') }}
+        <input type="email" name="email" value="{{ email }}" required>
+      </label>
+      <label>{{ t('auth.password') }}
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">{{ t('nav.login') }}</button>
+    </form>
+    {% if google_login_available %}
+    <a class="btn btn--google btn--block" href="{{ url_for('auth.google_login', next=next_url) }}">{{ t('auth.google') }}</a>
+    {% endif %}
+    <p class="auth-card__switch">Нет аккаунта? <a href="{{ url_for('auth.register', next=next_url) }}">{{ t('nav.register') }}</a></p>
+  </div>
+</section>
+{% endblock %}

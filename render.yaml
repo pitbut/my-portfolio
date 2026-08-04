@@ -30,3 +30,31 @@ services:
         sync: false
       - key: IMGBB_API_KEY
         sync: false
+
+  - type: web
+    name: b2b-platform-uz
+    env: python
+    rootDir: projects/b2b-platform
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask db upgrade && python seed.py && gunicorn run:app --bind 0.0.0.0:$PORT --timeout 120
+    envVars:
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_CONFIG
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
