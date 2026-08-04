@@ -5,15 +5,50 @@
 1. Зайди на [render.com](https://render.com) → New → **Blueprint**.
 2. Подключи GitHub-репозиторий `pitbut/my-portfolio` (если ещё не подключён —
    Render попросит авторизовать доступ через GitHub).
-3. Render найдёт `render.yaml` в корне репозитория и покажет список
-   сервисов для создания: `istok`, **`b2b-platform-uz`** и базу
-   `b2b-platform-db`.
-4. Отметь `b2b-platform-uz` (и `b2b-platform-db` — она отметится
-   автоматически, так как на неё ссылается сервис) и нажми **Apply**.
+3. Render найдёт `render.yaml` и предложит создать веб-сервисы `istok` и
+   **`b2b-platform-uz`**. Отметь `b2b-platform-uz` → **Apply**.
 
-Render сам создаст бесплатный Postgres и подставит `DATABASE_URL` в сервис
-— вручную копировать строку подключения не нужно (см. `fromDatabase` в
-`render.yaml`).
+`render.yaml` **не** создаёт отдельную базу данных для `b2b-platform-uz` —
+на бесплатном тарифе Render разрешена только одна бесплатная Postgres-база
+на аккаунт, и если она уже занята другим проектом, вторую создать не
+получится (Render honestly откажет: «cannot have more than one active free
+tier database»). Поэтому `DATABASE_URL` для `b2b-platform-uz` задаётся
+вручную — двумя способами на выбор:
+
+### Способ А — своя отдельная БД внутри уже существующего Postgres-сервера
+
+Если у тебя уже есть бесплатная Postgres-база под другой проект (например
+`vr-shop-db`), можно завести для `b2b-platform-uz` **отдельную логическую
+базу на том же сервере** — это не общая БД с общими таблицами, полная
+изоляция данных, просто второй самостоятельный namespace на том же
+бесплатном ресурсе (в лимит Render эта база не считается — лимит именно на
+количество Postgres-*сервисов*, а не баз внутри одного сервиса).
+
+1. В Render Dashboard открой существующую БД (например `vr-shop-db`) →
+   вкладка **Connect** → скопируй **PSQL Command** (или Internal/External
+   Database URL).
+2. Подключись `psql`-ом (из терминала на своём компьютере, либо через Shell
+   любого уже работающего сервиса на Render) и создай новую базу:
+   ```sql
+   CREATE DATABASE b2b_platform;
+   ```
+3. Собери новую строку подключения — та же, что и у исходной БД, но с
+   именем базы в конце заменённым на `b2b_platform`:
+   ```
+   postgresql://<user>:<password>@<host>/b2b_platform
+   ```
+4. В Render Dashboard → сервис `b2b-platform-uz` → **Environment** →
+   добавь `DATABASE_URL` = эта строка. Сохрани — сервис перезапустится и
+   при рестарте сам применит миграции (`flask db upgrade` уже прописан в
+   `startCommand`).
+
+### Способ Б — отдельная БД на внешнем бесплатном сервисе (проще, без psql)
+
+1. Зарегистрируйся на [neon.tech](https://neon.tech) (щедрый бесплатный
+   тариф Postgres, не пересекается с лимитом Render).
+2. Создай проект → скопируй **Connection string**.
+3. В Render Dashboard → сервис `b2b-platform-uz` → **Environment** →
+   `DATABASE_URL` = эта строка.
 
 ## 2. Первый деплой
 
