@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Новая вакансия{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Новая вакансия</h1>
+  <form method="post" action="{{ url_for('jobs.vacancy_new') }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Название *<input type="text" name="title" placeholder="напр. Токарь 5 разряда" required></label>
+    <label>Профессия *
+      <select name="profession_category_id" required>
+        <option value="">— выберите —</option>
+        {% for p in professions %}<option value="{{ p.id }}">{{ p.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Описание, требования, условия *<textarea name="description" rows="4" required></textarea></label>
+    <fieldset class="role-fieldset">
+      <legend>Тип занятости *</legend>
+      <label><input type="radio" name="employment_type" value="full_time" required> Полная занятость</label>
+      <label><input type="radio" name="employment_type" value="part_time"> Частичная занятость</label>
+      <label><input type="radio" name="employment_type" value="shift"> Вахта/смена</label>
+      <label><input type="radio" name="employment_type" value="contract"> Контракт/подряд</label>
+    </fieldset>
+    <div class="form-row">
+      <label>Зарплата от <input type="number" name="salary_min" min="0"></label>
+      <label>Зарплата до <input type="number" name="salary_max" min="0"></label>
+    </div>
+    <label>Регион *
+      <select name="region_id" required>
+        <option value="">— выберите —</option>
+        {% for r in regions %}<option value="{{ r.id }}">{{ r.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="btn btn--primary">Опубликовать вакансию</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Резюме — {{ resume.profession_category.name_ru }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>{{ resume.profession_category.name_ru }}</h1>
+  <p class="order-meta">
+    <span>Опыт: {{ resume.experience_years or '—' }} лет</span>
+    <span>{{ resume.region.name_ru }}</span>
+    {% if resume.expected_salary %}<span>Ожидания: {{ resume.expected_salary }}</span>{% endif %}
+  </p>
+  <p class="order-description">{{ resume.about }}</p>
+
+  {% if is_owner %}
+    <h2 class="profile-section-title">Приглашения от работодателей ({{ invites|length }})</h2>
+    {% if invites %}
+    <div class="notif-list">
+      {% for i in invites %}
+      <div class="notif-item">
+        <div class="notif-item__title">{{ i.from_user.email }}</div>
+        {% if i.message %}<div class="notif-item__body">{{ i.message }}</div>{% endif %}
+        <div class="notif-item__meta">{{ i.created_at.strftime('%d.%m.%Y') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-hint">Приглашений пока нет.</p>
+    {% endif %}
+  {% elif my_invite %}
+    <p class="empty-hint">Вы уже приглашали этого кандидата.</p>
+  {% else %}
+    <h2 class="profile-section-title">Пригласить</h2>
+    <form method="post" action="{{ url_for('jobs.resume_invite', resume_id=resume.id) }}" class="profile-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Сообщение <textarea name="message" rows="3" placeholder="Расскажите о вакансии"></textarea></label>
+      <button type="submit" class="btn btn--primary">Пригласить</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

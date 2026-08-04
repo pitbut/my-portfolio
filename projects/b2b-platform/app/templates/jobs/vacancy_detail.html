@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ vacancy.title }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>{{ vacancy.title }}</h1>
+  <p class="order-meta">
+    <span>{{ vacancy.profession_category.name_ru }}</span>
+    <span>{{ vacancy.region.name_ru }}</span>
+    <span>{% if vacancy.salary_min or vacancy.salary_max %}{{ vacancy.salary_min or '?' }}–{{ vacancy.salary_max or '?' }} {{ vacancy.currency }}{% endif %}</span>
+  </p>
+  <p class="order-description">{{ vacancy.description }}</p>
+
+  {% if is_owner %}
+    <h2 class="profile-section-title">Отклики ({{ responses|length }})</h2>
+    {% if responses %}
+    <div class="notif-list">
+      {% for r in responses %}
+      <div class="notif-item">
+        <div class="notif-item__title">{{ r.from_user.email }}</div>
+        {% if r.message %}<div class="notif-item__body">{{ r.message }}</div>{% endif %}
+        <div class="notif-item__meta">{{ r.created_at.strftime('%d.%m.%Y') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-hint">Откликов пока нет.</p>
+    {% endif %}
+  {% elif my_response %}
+    <p class="empty-hint">Вы уже откликнулись на эту вакансию.</p>
+  {% else %}
+    <h2 class="profile-section-title">Откликнуться</h2>
+    <form method="post" action="{{ url_for('jobs.vacancy_apply', vacancy_id=vacancy.id) }}" class="profile-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Сопроводительное сообщение <textarea name="message" rows="3"></textarea></label>
+      <button type="submit" class="btn btn--primary">Откликнуться</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

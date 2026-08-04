@@ -688,3 +688,108 @@ class ListingResponse(db.Model):
 
     def __repr__(self):
         return f"<ListingResponse listing_id={self.listing_id} from={self.from_user_id}>"
+
+
+# --- модуль 9: вакансии и резюме (найм персонала) ---
+
+class ProfessionCategory(db.Model):
+    """Справочник профессий (токарь, фрезеровщик, сварщик...). Отдельно от
+    service_categories (модуль 2): там — умение организации, здесь — умение
+    человека, хотя списки местами пересекаются."""
+
+    __tablename__ = "profession_categories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name_ru = db.Column(db.String(160), nullable=False)
+    name_uz_latin = db.Column(db.String(160), nullable=False)
+    name_uz_cyrillic = db.Column(db.String(160), nullable=False)
+
+    def name(self, lang):
+        return getattr(self, f"name_{lang}", self.name_ru)
+
+    def __repr__(self):
+        return f"<ProfessionCategory {self.name_ru!r}>"
+
+
+class Vacancy(TimestampMixin, db.Model):
+    """Вакансия от работодателя — любой зарегистрированный пользователь
+    (не обязательно executor: заказчик тоже может нанимать персонал)."""
+
+    __tablename__ = "vacancies"
+
+    id = db.Column(db.Integer, primary_key=True)
+    employer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    profession_category_id = db.Column(db.Integer, db.ForeignKey("profession_categories.id"), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    employment_type = db.Column(db.String(20), nullable=False)  # full_time | part_time | shift | contract
+    salary_min = db.Column(db.Numeric(12, 2), nullable=True)
+    salary_max = db.Column(db.Numeric(12, 2), nullable=True)
+    currency = db.Column(db.String(10), nullable=False, default="UZS")
+    region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=False)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="active")  # active | closed | archived
+
+    employer = db.relationship("User")
+    profession_category = db.relationship("ProfessionCategory")
+    region = db.relationship("Region")
+    city = db.relationship("City")
+
+    def __repr__(self):
+        return f"<Vacancy {self.id} {self.title!r}>"
+
+
+class Resume(TimestampMixin, db.Model):
+    """Резюме соискателя («ищу работу») — тоже доступно любому пользователю."""
+
+    __tablename__ = "resumes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    candidate_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+    profession_category_id = db.Column(db.Integer, db.ForeignKey("profession_categories.id"), nullable=False)
+    experience_years = db.Column(db.Integer, nullable=True)
+    about = db.Column(db.Text, nullable=False)
+    expected_salary = db.Column(db.Numeric(12, 2), nullable=True)
+    region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=False)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="active")  # active | hidden
+
+    candidate = db.relationship("User")
+    profession_category = db.relationship("ProfessionCategory")
+    region = db.relationship("Region")
+    city = db.relationship("City")
+
+    def __repr__(self):
+        return f"<Resume {self.id} candidate_id={self.candidate_id}>"
+
+
+class JobResponse(db.Model):
+    """Отклик в любую сторону: соискатель откликается на вакансию
+    (candidate_to_employer) либо работодатель приглашает по резюме
+    (employer_to_candidate). Ровно одно из vacancy_id/resume_id заполнено."""
+
+    __tablename__ = "job_responses"
+
+    id = db.Column(db.Integer, primary_key=True)
+    vacancy_id = db.Column(db.Integer, db.ForeignKey("vacancies.id"), nullable=True)
+    resume_id = db.Column(db.Integer, db.ForeignKey("resumes.id"), nullable=True)
+    from_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    to_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    direction = db.Column(db.String(30), nullable=False)  # candidate_to_employer | employer_to_candidate
+    message = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    vacancy = db.relationship("Vacancy")
+    resume = db.relationship("Resume")
+    from_user = db.relationship("User", foreign_keys=[from_user_id])
+    to_user = db.relationship("User", foreign_keys=[to_user_id])
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "(vacancy_id IS NOT NULL AND resume_id IS NULL) OR (vacancy_id IS NULL AND resume_id IS NOT NULL)",
+            name="ck_job_response_target",
+        ),
+    )
+
+    def __repr__(self):
+        return f"<JobResponse {self.direction} from={self.from_user_id} to={self.to_user_id}>"

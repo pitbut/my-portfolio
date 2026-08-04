@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Вакансии{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>Вакансии</h1>
+    <a class="btn btn--primary" href="{{ url_for('jobs.vacancy_new') }}">+ Разместить вакансию</a>
+  </div>
+
+  <form method="get" class="map-filters">
+    <label>Профессия
+      <select name="profession_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for p in professions %}<option value="{{ p.id }}" {{ 'selected' if request.args.get('profession_id')|string == p.id|string }}>{{ p.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Регион
+      <select name="region_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for r in regions %}<option value="{{ r.id }}" {{ 'selected' if request.args.get('region_id')|string == r.id|string }}>{{ r.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+  </form>
+
+  {% if vacancies %}
+  <table class="data-table">
+    <thead><tr><th>Вакансия</th><th>Профессия</th><th>Зарплата</th><th>Регион</th><th></th></tr></thead>
+    <tbody>
+      {% for v in vacancies %}
+      <tr>
+        <td>{{ v.title }}</td>
+        <td>{{ v.profession_category.name_ru }}</td>
+        <td>{% if v.salary_min or v.salary_max %}{{ v.salary_min or '?' }}–{{ v.salary_max or '?' }} {{ v.currency }}{% else %}—{% endif %}</td>
+        <td>{{ v.region.name_ru }}</td>
+        <td><a href="{{ url_for('jobs.vacancy_detail', vacancy_id=v.id) }}">Открыть</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Пока нет вакансий по этим фильтрам.</p>
+  {% endif %}
+</section>
+{% endblock %}
