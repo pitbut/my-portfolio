@@ -3,7 +3,7 @@ import os
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -108,6 +108,27 @@ def create_app(config_name=None):
     @app.context_processor
     def inject_google_available():
         return {"google_login_available": google_oauth is not None}
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        return render_template(
+            "errors/error.html", code=403, heading="Доступ запрещён",
+            message="У вас нет прав на просмотр этой страницы — возможно, она относится к другой роли или другому пользователю.",
+        ), 403
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template(
+            "errors/error.html", code=404, heading="Страница не найдена",
+            message="Такой страницы не существует, либо она была удалена.",
+        ), 404
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return render_template(
+            "errors/error.html", code=500, heading="Ошибка сервера",
+            message="Что-то пошло не так на нашей стороне. Мы уже знаем об этом — попробуйте обновить страницу чуть позже.",
+        ), 500
 
     @app.context_processor
     def inject_unread_notifications():
