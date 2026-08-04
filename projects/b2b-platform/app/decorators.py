@@ -29,12 +29,19 @@ def paywall_required(view):
 def role_required(role):
     """Требует конкретную бизнес-роль (customer/executor). Применяется поверх
     paywall_required. Если роль ещё не выбрана (первый вход через Google) —
-    отправляет на выбор роли."""
+    отправляет на выбор роли.
+
+    Роль admin проходит через любую проверку — администратор должен иметь
+    возможность открыть и протестировать любой раздел сайта (модуль 6 ТЗ
+    прямо предполагает, что администратор разбирается в происходящем на
+    платформе, а не только в очереди споров)."""
 
     def decorator(view):
         @wraps(view)
         @paywall_required
         def wrapped(*args, **kwargs):
+            if current_user.role == "admin":
+                return view(*args, **kwargs)
             if current_user.role is None:
                 return redirect(url_for("auth.choose_role"))
             if current_user.role != role:

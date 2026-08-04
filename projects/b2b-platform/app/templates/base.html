@@ -42,6 +42,11 @@
             <a href="{{ url_for('settings.subscription_page') }}">Подписка</a>
             <a href="{{ url_for('profile.executor_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'admin' %}
+            <a href="{{ url_for('orders.my_orders') }}">Заказы</a>
+            <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
+            <a href="{{ url_for('map.index') }}">Карта</a>
+            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('admin.disputes_list') }}">Споры (админ)</a>
             <a href="{{ url_for('admin.subscriptions_list') }}">Подписки (админ)</a>
           {% endif %}
