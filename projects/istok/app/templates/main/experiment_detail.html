@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ experiment.title }} — опыты с водой — Исток{% endblock %}
+{% block description %}{{ experiment.description | truncate(150) }}{% endblock %}
+
+{% block content %}
+<section class="detail-hero wrap">
+  <div class="breadcrumb"><a href="{{ url_for('main.experiments_list') }}">Опыты</a> / {{ experiment.title }}</div>
+  <h1>{{ experiment.title }}</h1>
+  <div class="meta-row">
+    <span class="badge {{ 'badge--science' if experiment.verdict == 'наука' else 'badge--myth' }}">{{ experiment.verdict }}</span>
+  </div>
+
+  <div class="prose">
+    <p>{{ experiment.description }}</p>
+  </div>
+
+  {% include "_reviews.html" %}
+</section>
+{% endblock %}

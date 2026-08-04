@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Отзывы — модерация — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  {% with admin_title = "Отзывы (" ~ total_count ~ ")" %}{% include "admin/_nav.html" %}{% endwith %}
+
+  {% if items %}
+  <div class="admin-list">
+    {% for entry in items %}
+    <article class="admin-item">
+      <div class="admin-item__meta">
+        {% if entry.target_url %}
+          <a href="{{ entry.target_url }}" target="_blank">{{ entry.target_label }}</a>
+        {% else %}
+          {{ entry.target_label }} (объект удалён)
+        {% endif %}
+        &middot; {{ entry.review.created_at.strftime("%d.%m.%Y %H:%M") }}
+        &middot; <span class="stars">{{ "★" * entry.review.rating }}{{ "☆" * (5 - entry.review.rating) }}</span>
+      </div>
+      <p class="admin-item__meta">{{ entry.review.author_name or "Аноним" }}</p>
+      <p>{{ entry.review.body }}</p>
+
+      <div class="admin-item__actions">
+        <form method="post" action="{{ url_for('admin.delete_review', review_id=entry.review.id) }}" onsubmit="return confirm('Удалить этот отзыв?');">
+          <button type="submit" class="btn btn--reject">Удалить</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Отзывов пока нет.</div>
+  {% endif %}
+</section>
+{% endblock %}

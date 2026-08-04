@@ -4,6 +4,7 @@ from flask_login import current_user, login_required
 
 from app import db
 from app.models import Supplier, WaterBrand
+from app.routes.reviews import reviews_for
 
 bp = Blueprint("catalog", __name__)
 
@@ -43,7 +44,16 @@ def detail(slug):
         .order_by(Supplier.verified.desc(), Supplier.name)
         .all()
     )
-    return render_template("catalog/detail.html", brand=brand, suppliers=suppliers)
+    reviews, avg_rating = reviews_for("water_brand", brand.id)
+    return render_template(
+        "catalog/detail.html",
+        brand=brand,
+        suppliers=suppliers,
+        reviews=reviews,
+        avg_rating=avg_rating,
+        target_type="water_brand",
+        target_id=brand.id,
+    )
 
 
 @bp.route("/<slug>/add-supplier", methods=["GET", "POST"])

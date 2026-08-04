@@ -4,6 +4,7 @@ from sqlalchemy import func
 
 from app import db
 from app.models import EditSuggestion, SacredSource
+from app.routes.reviews import reviews_for
 
 bp = Blueprint("sacred", __name__, template_folder="../templates/sacred")
 
@@ -47,7 +48,15 @@ def detail(slug):
     source = SacredSource.query.filter_by(slug=slug).first()
     if source is None:
         abort(404)
-    return render_template("sacred/detail.html", source=source)
+    reviews, avg_rating = reviews_for("sacred_source", source.id)
+    return render_template(
+        "sacred/detail.html",
+        source=source,
+        reviews=reviews,
+        avg_rating=avg_rating,
+        target_type="sacred_source",
+        target_id=source.id,
+    )
 
 
 @bp.route("/<slug>/suggest", methods=["POST"])

@@ -1,0 +1,61 @@
+{# Переиспользуемый блок отзывов — подключается на детальных страницах через
+   {% include "_reviews.html" %}, ожидает в контексте: reviews, avg_rating,
+   target_type, target_id. #}
+<div class="reviews-block">
+  <div class="section__header" style="border-bottom-color: rgba(233,247,248,0.12);">
+    <h3 style="margin:0;">Отзывы{% if reviews %} ({{ reviews | length }}){% endif %}</h3>
+    {% if avg_rating %}
+    <span class="stars stars--summary" aria-label="Средняя оценка {{ avg_rating }} из 5">
+      {{ "★" * (avg_rating | round(0, "floor") | int) }}{{ "☆" * (5 - (avg_rating | round(0, "floor") | int)) }}
+      <span class="stars__value">{{ avg_rating }}</span>
+    </span>
+    {% endif %}
+  </div>
+
+  {% if reviews %}
+  <div class="review-list">
+    {% for r in reviews %}
+    <article class="review">
+      <div class="review__head">
+        <span class="stars" aria-label="Оценка {{ r.rating }} из 5">{{ "★" * r.rating }}{{ "☆" * (5 - r.rating) }}</span>
+        <span class="review__author">{{ r.author_name or "Аноним" }}</span>
+        <span class="review__date">{{ r.created_at.strftime("%d.%m.%Y") }}</span>
+      </div>
+      <p class="review__body">{{ r.body }}</p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Отзывов пока нет — будьте первым.</div>
+  {% endif %}
+
+  <details class="form-block">
+    <summary>✏️ Оставить отзыв</summary>
+    <form method="post" action="{{ url_for('reviews.add', target_type=target_type, target_id=target_id) }}">
+      <input type="text" name="website" class="honeypot-field" tabindex="-1" autocomplete="off">
+
+      <div class="field">
+        <label for="rating-{{ target_type }}-{{ target_id }}">Оценка</label>
+        <select id="rating-{{ target_type }}-{{ target_id }}" name="rating" required>
+          <option value="5">★★★★★ — отлично</option>
+          <option value="4">★★★★☆ — хорошо</option>
+          <option value="3">★★★☆☆ — нормально</option>
+          <option value="2">★★☆☆☆ — так себе</option>
+          <option value="1">★☆☆☆☆ — плохо</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="body-{{ target_type }}-{{ target_id }}">Отзыв</label>
+        <textarea id="body-{{ target_type }}-{{ target_id }}" name="body" rows="4" maxlength="4000" required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="author-{{ target_type }}-{{ target_id }}">Ваше имя (необязательно)</label>
+        <input type="text" id="author-{{ target_type }}-{{ target_id }}" name="author_name" maxlength="120">
+      </div>
+
+      <button type="submit" class="btn btn--primary">Отправить отзыв</button>
+    </form>
+  </details>
+</div>

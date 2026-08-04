@@ -11,8 +11,8 @@
     {% for exp in experiments %}
     <article class="card">
       <span class="badge {{ 'badge--science' if exp.verdict == 'наука' else 'badge--myth' }}">{{ exp.verdict }}</span>
-      <h3>{{ exp.title }}</h3>
-      <p>{{ exp.description }}</p>
+      <h3><a href="{{ url_for('main.experiment_detail', slug=exp.slug) }}">{{ exp.title }}</a></h3>
+      <p>{{ exp.description | truncate(140) }}</p>
     </article>
     {% endfor %}
   </div>

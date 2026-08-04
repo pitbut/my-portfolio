@@ -39,6 +39,7 @@ def create_app(config_name=None):
     from app.routes.library import bp as library_bp
     from app.routes.admin import bp as admin_bp
     from app.routes.auth import bp as auth_bp
+    from app.routes.reviews import bp as reviews_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(sacred_bp, url_prefix="/sacred")
@@ -47,6 +48,7 @@ def create_app(config_name=None):
     app.register_blueprint(library_bp, url_prefix="/library")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(reviews_bp, url_prefix="/reviews")
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 

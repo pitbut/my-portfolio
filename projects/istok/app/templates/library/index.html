@@ -24,7 +24,7 @@
       <img class="card-photo" src="{{ image_url(b.cover_url) }}" alt="{{ b.title }}" loading="lazy">
       {% endif %}
       <span class="meta">{{ b.genre or "книга" }}{% if b.year %} &middot; {{ b.year }}{% endif %}</span>
-      <h3>{{ b.title }}</h3>
+      <h3><a href="{{ url_for('library.detail', slug=b.slug) }}">{{ b.title }}</a></h3>
       <p><em>{{ b.author }}</em></p>
       <p>{{ b.description | truncate(140) }}</p>
     </article>

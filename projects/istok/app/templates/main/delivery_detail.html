@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ service.name }} — доставка воды — Исток{% endblock %}
+
+{% block content %}
+<section class="detail-hero wrap">
+  <div class="breadcrumb"><a href="{{ url_for('main.delivery_list') }}">Доставка</a> / {{ service.name }}</div>
+  <h1>{{ service.name }}</h1>
+  <div class="meta-row">
+    <span>{{ service.delivery_time }}</span>
+    {% if service.coverage %}<span>📍 {{ service.coverage }}</span>{% endif %}
+    {% if service.price_rub %}<span>от {{ "%.0f"|format(service.price_rub) }} ₽</span>{% endif %}
+  </div>
+
+  {% if service.phone or service.website %}
+  <div class="prose">
+    {% if service.phone %}<p>Телефон: {{ service.phone }}</p>{% endif %}
+    {% if service.website %}<p><a href="{{ service.website }}" target="_blank" rel="noopener">{{ service.website }}</a></p>{% endif %}
+  </div>
+  {% endif %}
+
+  {% include "_reviews.html" %}
+</section>
+{% endblock %}

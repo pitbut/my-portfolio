@@ -5,14 +5,36 @@
 <section class="section wrap">
   <div class="section__header">
     <h2>Оборудование для воды</h2>
+    {% if current_user.is_authenticated %}
+      <a class="see-all" href="{{ url_for('main.equipment_add') }}">+ Добавить оборудование</a>
+    {% else %}
+      <a class="see-all" href="{{ url_for('auth.register') }}">Зарегистрируйтесь, чтобы добавить</a>
+    {% endif %}
   </div>
+
+  <form method="get" class="search-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию, описанию, производителю…">
+    {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+    <button type="submit" class="btn btn--primary">Найти</button>
+  </form>
+
+  {% if category_counts %}
+  <div class="sort-bar">
+    <a href="{{ url_for('main.equipment_list', q=q) }}" class="{{ 'is-active' if not active_category }}">все категории</a>
+    {% for cat, count in category_counts %}
+      <a href="{{ url_for('main.equipment_list', category=cat, q=q) }}" class="{{ 'is-active' if cat == active_category }}">{{ cat }} ({{ count }})</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   {% if equipment %}
   <div class="grid">
     {% for e in equipment %}
     <article class="card">
       <span class="meta">{{ e.category }}</span>
-      <h3>{{ e.name }}</h3>
-      <p>{{ e.description }}</p>
+      {% if not e.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+      <h3><a href="{{ url_for('main.equipment_detail', slug=e.slug) }}">{{ e.name }}</a></h3>
+      <p>{{ e.description | truncate(140) }}</p>
       <p>
         {% if e.manufacturer %}{{ e.manufacturer }}{% endif %}
         {% if e.price_rub %} &middot; от {{ "%.0f"|format(e.price_rub) }} ₽{% endif %}
@@ -21,7 +43,9 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state">Оборудование пока не добавлено.</div>
+  <div class="empty-state">
+    {% if q or active_category %}Ничего не найдено.{% else %}Оборудование пока не добавлено.{% endif %}
+  </div>
   {% endif %}
 </section>
 {% endblock %}

@@ -11,7 +11,7 @@
     {% for d in services %}
     <article class="card">
       <span class="meta">{{ d.delivery_time }}</span>
-      <h3>{{ d.name }}</h3>
+      <h3><a href="{{ url_for('main.delivery_detail', slug=d.slug) }}">{{ d.name }}</a></h3>
       <p>{{ d.coverage or "" }}</p>
       <p>
         {% if d.price_rub %}от {{ "%.0f"|format(d.price_rub) }} ₽{% endif %}
