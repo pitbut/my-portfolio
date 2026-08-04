@@ -11,6 +11,7 @@ from app import db
 from app.geo import haversine_km
 from app.models import ExecutorCapability, ExecutorProfile, OrderMatch
 from app.notify import notify
+from app.subscriptions import has_active_subscription
 
 TOP_N_CANDIDATES = 20
 
@@ -61,6 +62,8 @@ def find_candidates(order):
     for capability in capabilities:
         executor = capability.executor
         if not executor.equipment:  # не считается «опубликованным» без станочного парка
+            continue
+        if not has_active_subscription(executor):  # см. ТЗ, модуль 2: без подписки в матчинг не попадает
             continue
         if not _fits_dimensions(order, capability):
             continue

@@ -479,7 +479,8 @@ def record_status_change(order, to_status, user=None):
 
 NOTIFICATION_TYPES = (
     "new_order_match", "outbid", "bid_accepted", "bid_rejected", "order_completed", "dispute_update",
-    "subscription_expiring", "review_received", "listing_response", "vacancy_response", "resume_invite",
+    "subscription_expiring", "subscription_activated", "review_received",
+    "listing_response", "vacancy_response", "resume_invite",
 )
 
 
@@ -793,3 +794,88 @@ class JobResponse(db.Model):
 
     def __repr__(self):
         return f"<JobResponse {self.direction} from={self.from_user_id} to={self.to_user_id}>"
+
+
+# --- модуль 7: Telegram-бот и монетизация ---
+
+class TelegramLink(db.Model):
+    """Привязка Telegram-аккаунта исполнителя/заказчика (1:1 к users)."""
+
+    __tablename__ = "telegram_links"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+    telegram_chat_id = db.Column(db.BigInteger, unique=True, nullable=False)
+    telegram_username = db.Column(db.String(120), nullable=True)
+    linked_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    notifications_enabled = db.Column(db.Boolean, nullable=False, default=True)
+
+    user = db.relationship("User", backref=db.backref("telegram_link", uselist=False))
+
+    def __repr__(self):
+        return f"<TelegramLink user_id={self.user_id} chat_id={self.telegram_chat_id}>"
+
+
+class SubscriptionPlan(db.Model):
+    """Тариф подписки исполнителя (справочник)."""
+
+    __tablename__ = "subscription_plans"
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), unique=True, nullable=False)  # trial | basic | standard | pro
+    title = db.Column(db.String(120), nullable=False)
+    price_monthly_uzs = db.Column(db.Numeric(12, 2), nullable=False, default=0)
+    max_bids_per_month = db.Column(db.Integer, nullable=True)  # NULL = без лимита
+    telegram_alert_delay_minutes = db.Column(db.Integer, nullable=False, default=0)
+    catalog_priority = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<SubscriptionPlan {self.code!r}>"
+
+
+class Subscription(db.Model):
+    """Активная/пробная подписка исполнителя. История хранится — новых
+    записей может быть много, действующая определяется по expires_at."""
+
+    __tablename__ = "subscriptions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    executor_id = db.Column(db.Integer, db.ForeignKey("executor_profiles.id"), nullable=False)
+    plan_id = db.Column(db.Integer, db.ForeignKey("subscription_plans.id"), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default="trialing")  # trialing|pending_payment|active|expired|cancelled
+    started_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    auto_renew = db.Column(db.Boolean, nullable=False, default=False)
+
+    executor = db.relationship("ExecutorProfile", backref="subscriptions")
+    plan = db.relationship("SubscriptionPlan")
+    payments = db.relationship("Payment", backref="subscription", cascade="all, delete-orphan")
+
+    @property
+    def is_active_now(self):
+        if self.status not in ("trialing", "active"):
+            return False
+        return self.expires_at is None or self.expires_at > datetime.utcnow()
+
+    def __repr__(self):
+        return f"<Subscription executor_id={self.executor_id} status={self.status!r}>"
+
+
+class Payment(db.Model):
+    """Платёж по подписке. provider/provider_transaction_id заполняются,
+    когда подключён реальный эквайринг (Payme/Click/Uzcard) — до этого
+    момента заявки обрабатываются администратором вручную (см. /admin)."""
+
+    __tablename__ = "payments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    subscription_id = db.Column(db.Integer, db.ForeignKey("subscriptions.id"), nullable=False)
+    amount = db.Column(db.Numeric(12, 2), nullable=False)
+    currency = db.Column(db.String(10), nullable=False, default="UZS")
+    provider = db.Column(db.String(20), nullable=True)  # payme | click | uzcard | manual
+    provider_transaction_id = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="pending")  # pending|succeeded|failed|refunded
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<Payment subscription_id={self.subscription_id} status={self.status!r}>"

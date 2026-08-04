@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Заявки на подписку — админ-панель{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Заявки на подписку</h1>
+  {% if pending %}
+  <table class="data-table">
+    <thead><tr><th>Исполнитель</th><th>Тариф</th><th>Оплата</th><th>Дата заявки</th><th></th></tr></thead>
+    <tbody>
+      {% for s in pending %}
+      <tr>
+        <td>{{ s.executor.display_name }} ({{ s.executor.user.email }})</td>
+        <td>{{ s.plan.title }} — {{ s.plan.price_monthly_uzs }} UZS</td>
+        <td>{{ s.payments[-1].provider if s.payments else '—' }}</td>
+        <td>{{ s.started_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.approve_subscription', subscription_id=s.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="reference" placeholder="№ операции" style="width:110px">
+            <button type="submit" class="btn btn--secondary">Активировать</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.reject_subscription', subscription_id=s.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-link btn-link--danger">Отклонить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Заявок на подписку нет.</p>
+  {% endif %}
+</section>
+{% endblock %}

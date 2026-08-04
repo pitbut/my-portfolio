@@ -45,6 +45,14 @@ class Config:
     # Telegram-бот (модуль 7). Без токена уведомления идут только in-app.
     TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
     TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME")
+    # Секретный сегмент пути вебхука — заменяет отсутствующую у Telegram
+    # подпись запроса: /telegram/webhook/<этот_секрет>. Обязателен для
+    # включения приёма вебхуков в проде.
+    TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET")
+    # Нужен только когда send_telegram_notification вызывается вне HTTP-
+    # запроса (например, из будущей фоновой задачи) — для формирования
+    # абсолютных ссылок в тексте сообщения.
+    PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL")
 
     WTF_CSRF_TIME_LIMIT = None  # токен не должен протухать раньше сессии
 

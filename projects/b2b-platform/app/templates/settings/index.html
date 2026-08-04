@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Настройки{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Настройки</h1>
+
+  <h2 class="profile-section-title">Telegram</h2>
+  {% if telegram_link %}
+  <p>Привязан аккаунт {{ '@' + telegram_link.telegram_username if telegram_link.telegram_username else telegram_link.telegram_chat_id }}.
+     Уведомления: {{ 'включены' if telegram_link.notifications_enabled else 'выключены' }}.</p>
+  <form method="post" action="{{ url_for('settings.toggle_telegram') }}" style="display:inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn--secondary">{{ 'Выключить' if telegram_link.notifications_enabled else 'Включить' }} уведомления</button>
+  </form>
+  <form method="post" action="{{ url_for('settings.unlink_telegram') }}" style="display:inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn-link btn-link--danger">Отвязать</button>
+  </form>
+  {% elif deep_link %}
+  <p class="empty-hint">Telegram не привязан. Нажмите кнопку и в открывшемся боте нажмите Start — уведомления о заказах, откликах и спорах начнут приходить туда же.</p>
+  <a class="btn btn--primary" href="{{ deep_link }}" target="_blank" rel="noopener">Подключить Telegram</a>
+  {% if not bot_configured %}
+  <p class="hint">Бот ещё не отправляет сообщения — администратор платформы не задал TELEGRAM_BOT_TOKEN. Привязка аккаунта уже работает и сохранится, отправка уведомлений включится автоматически, как только токен будет добавлен.</p>
+  {% endif %}
+  {% else %}
+  <p class="empty-hint">Telegram-бот пока не подключён администратором платформы (не задан TELEGRAM_BOT_USERNAME) — уведомления приходят только в личном кабинете, в разделе «Уведомления».</p>
+  {% endif %}
+</section>
+{% endblock %}

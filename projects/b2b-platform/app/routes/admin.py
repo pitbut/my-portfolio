@@ -2,14 +2,14 @@
 
 Роль admin не выдаётся через самостоятельную регистрацию — только через
 CLI-команду `flask create-admin <email> <password>` (см. README)."""
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
 from app import db
 from app.decorators import role_required
-from app.models import Dispute, record_status_change
+from app.models import Dispute, Subscription, record_status_change
 from app.notify import notify
 from app.routes.disputes import _order_parties
 
@@ -17,6 +17,7 @@ bp = Blueprint("admin", __name__)
 
 OPEN_STATUSES = ("open", "evidence_collection", "in_review")
 RESOLUTION_STATUSES = ("resolved_customer", "resolved_executor", "resolved_partial")
+SUBSCRIPTION_PERIOD_DAYS = 30
 
 
 @bp.route("/disputes")
@@ -61,3 +62,49 @@ def resolve_dispute(dispute_id):
 
     flash("Решение вынесено, стороны уведомлены.", "success")
     return redirect(url_for("admin.disputes_list"))
+
+
+@bp.route("/subscriptions")
+@role_required("admin")
+def subscriptions_list():
+    pending = Subscription.query.filter_by(status="pending_payment").order_by(Subscription.started_at).all()
+    return render_template("admin/subscriptions.html", pending=pending)
+
+
+@bp.route("/subscriptions/<int:subscription_id>/approve", methods=["POST"])
+@role_required("admin")
+def approve_subscription(subscription_id):
+    subscription = db.session.get(Subscription, subscription_id)
+    if subscription is None:
+        abort(404)
+
+    subscription.status = "active"
+    subscription.expires_at = datetime.utcnow() + timedelta(days=SUBSCRIPTION_PERIOD_DAYS)
+    for payment in subscription.payments:
+        if payment.status == "pending":
+            payment.status = "succeeded"
+            payment.provider_transaction_id = (request.form.get("reference") or "").strip() or None
+    db.session.commit()
+
+    notify(
+        subscription.executor.user, "subscription_activated",
+        title="Подписка активирована", body=f"Тариф «{subscription.plan.title}» действует до {subscription.expires_at.strftime('%d.%m.%Y')}.",
+        url=url_for("settings.subscription_page"),
+    )
+    flash("Подписка активирована.", "success")
+    return redirect(url_for("admin.subscriptions_list"))
+
+
+@bp.route("/subscriptions/<int:subscription_id>/reject", methods=["POST"])
+@role_required("admin")
+def reject_subscription(subscription_id):
+    subscription = db.session.get(Subscription, subscription_id)
+    if subscription is None:
+        abort(404)
+    subscription.status = "cancelled"
+    for payment in subscription.payments:
+        if payment.status == "pending":
+            payment.status = "failed"
+    db.session.commit()
+    flash("Заявка на подписку отклонена.", "info")
+    return redirect(url_for("admin.subscriptions_list"))

@@ -8,7 +8,16 @@ import csv
 from pathlib import Path
 
 from app import create_app, db
-from app.models import City, EquipmentType, ListingCategory, Material, ProfessionCategory, Region, ServiceCategory
+from app.models import (
+    City,
+    EquipmentType,
+    ListingCategory,
+    Material,
+    ProfessionCategory,
+    Region,
+    ServiceCategory,
+    SubscriptionPlan,
+)
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -70,6 +79,24 @@ def seed_simple_dictionary(model, filename):
     print(f"{model.__tablename__}: добавлено {model.query.count()}")
 
 
+def seed_subscription_plans():
+    if SubscriptionPlan.query.filter(SubscriptionPlan.code != "trial").first() is not None:
+        print("subscription_plans (платные) уже заполнены — пропускаю")
+        return
+    plans = [
+        dict(code="basic", title="Basic", price_monthly_uzs=150000, max_bids_per_month=10,
+             telegram_alert_delay_minutes=120, catalog_priority=1),
+        dict(code="standard", title="Standard", price_monthly_uzs=350000, max_bids_per_month=40,
+             telegram_alert_delay_minutes=0, catalog_priority=5),
+        dict(code="pro", title="Pro", price_monthly_uzs=700000, max_bids_per_month=None,
+             telegram_alert_delay_minutes=0, catalog_priority=10),
+    ]
+    for data in plans:
+        db.session.add(SubscriptionPlan(**data))
+    db.session.commit()
+    print(f"subscription_plans: добавлено {len(plans)}")
+
+
 def main():
     app = create_app()
     with app.app_context():
@@ -81,6 +108,7 @@ def main():
         seed_simple_dictionary(Material, "materials.csv")
         seed_simple_dictionary(ListingCategory, "listing_categories.csv")
         seed_simple_dictionary(ProfessionCategory, "profession_categories.csv")
+        seed_subscription_plans()
         print("Готово.")
 
 

@@ -39,9 +39,14 @@
             <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
             <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('reviews.my_reviews') }}">Отзывы</a>
+            <a href="{{ url_for('settings.subscription_page') }}">Подписка</a>
             <a href="{{ url_for('profile.executor_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'admin' %}
             <a href="{{ url_for('admin.disputes_list') }}">Споры (админ)</a>
+            <a href="{{ url_for('admin.subscriptions_list') }}">Подписки (админ)</a>
+          {% endif %}
+          {% if current_user.role in ('customer', 'executor') %}
+            <a href="{{ url_for('settings.index') }}">⚙️</a>
           {% endif %}
           <a href="{{ url_for('main.notifications') }}">🔔{% if unread_notifications %}<span class="notif-badge">{{ unread_notifications }}</span>{% endif %}</a>
           <span class="account-nav__email">{{ current_user.email }}</span>

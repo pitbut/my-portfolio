@@ -203,7 +203,17 @@ def executor_capabilities_save():
     db.session.commit()
 
     if profile.is_complete:
-        flash("Техвозможности сохранены. Профиль полностью заполнен и участвует в подборе заказов.", "success")
+        from app.subscriptions import TRIAL_DAYS, start_trial_if_needed
+
+        started = start_trial_if_needed(profile)
+        if started:
+            flash(
+                f"Техвозможности сохранены. Профиль полностью заполнен — включён бесплатный пробный период "
+                f"на {TRIAL_DAYS} дней, заказы начнут подбираться автоматически.",
+                "success",
+            )
+        else:
+            flash("Техвозможности сохранены. Профиль полностью заполнен и участвует в подборе заказов.", "success")
     else:
         flash("Техвозможности сохранены.", "success")
     return redirect(url_for("profile.executor_edit"))

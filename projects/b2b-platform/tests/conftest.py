@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pytest
 
 from app import create_app, db
-from app.models import EquipmentType, ListingCategory, Material, ProfessionCategory, Region, ServiceCategory
+from app.models import EquipmentType, ListingCategory, Material, ProfessionCategory, Region, ServiceCategory, SubscriptionPlan
 
 
 @pytest.fixture()
@@ -37,6 +37,9 @@ def app():
         db.session.add(ProfessionCategory(
             name_ru="Токарь", name_uz_latin="Tokar", name_uz_cyrillic="Токар",
         ))
+        db.session.add(SubscriptionPlan(code="basic", title="Basic", price_monthly_uzs=150000, max_bids_per_month=10, telegram_alert_delay_minutes=120, catalog_priority=1))
+        db.session.add(SubscriptionPlan(code="standard", title="Standard", price_monthly_uzs=350000, max_bids_per_month=40, telegram_alert_delay_minutes=0, catalog_priority=5))
+        db.session.add(SubscriptionPlan(code="pro", title="Pro", price_monthly_uzs=700000, max_bids_per_month=None, telegram_alert_delay_minutes=0, catalog_priority=10))
         db.session.commit()
 
         yield app

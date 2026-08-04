@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Подписка{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Подписка</h1>
+
+  {% if subscription %}
+  <div class="callout-resolution">
+    <strong>Текущий тариф: {{ subscription.plan.title }}</strong>
+    <p>Статус: {{ subscription.status }}. Действует до: {{ subscription.expires_at.strftime('%d.%m.%Y') if subscription.expires_at else 'бессрочно' }}.</p>
+  </div>
+  {% else %}
+  <p class="empty-hint">Подписка не активна — заказы не подбираются. Оформите тариф ниже (или заполните профиль полностью, если ещё не получили бесплатный пробный период).</p>
+  {% endif %}
+
+  {% if pending_payment %}
+  <p class="empty-hint">Заявка на тариф отправлена и ожидает подтверждения администратором ({{ pending_payment.provider }}, {{ pending_payment.amount }} UZS).</p>
+  {% else %}
+  <h2 class="profile-section-title">Тарифы</h2>
+  <table class="data-table">
+    <thead><tr><th>Тариф</th><th>Цена/мес</th><th>Ставок в месяц</th><th>Скорость Telegram-алертов</th><th>Приоритет</th></tr></thead>
+    <tbody>
+      {% for p in plans %}
+      <tr>
+        <td>{{ p.title }}</td>
+        <td>{{ p.price_monthly_uzs }} UZS</td>
+        <td>{{ p.max_bids_per_month or 'без лимита' }}</td>
+        <td>{% if p.telegram_alert_delay_minutes %}с задержкой ~{{ p.telegram_alert_delay_minutes // 60 }} ч{% else %}мгновенно{% endif %}</td>
+        <td>{{ p.catalog_priority }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form method="post" action="{{ url_for('settings.subscription_request') }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Тариф
+      <select name="plan_code" required>
+        {% for p in plans %}<option value="{{ p.code }}">{{ p.title }} — {{ p.price_monthly_uzs }} UZS/мес</option>{% endfor %}
+      </select>
+    </label>
+    <label>Способ оплаты
+      <select name="provider" required>
+        <option value="payme">Payme</option>
+        <option value="click">Click</option>
+        <option value="uzcard">Uzcard</option>
+      </select>
+    </label>
+    <button type="submit" class="btn btn--primary">Оформить</button>
+    <p class="hint">Онлайн-оплата подключается по мере получения мерчант-аккаунта — сейчас заявка обрабатывается администратором вручную.</p>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}
