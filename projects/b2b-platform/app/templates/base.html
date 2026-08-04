@@ -29,6 +29,7 @@
           {% if current_user.role == 'customer' %}
             <a href="{{ url_for('orders.my_orders') }}">Мои заказы</a>
             <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
+            <a href="{{ url_for('map.index') }}">Карта</a>
             <a href="{{ url_for('profile.customer_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'executor' %}
             <a href="{{ url_for('orders.executor_dashboard') }}">Лента заказов</a>
