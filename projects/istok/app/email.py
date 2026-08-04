@@ -47,6 +47,11 @@ def send_email(to, subject, body):
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            "Accept": "application/json",
+            # Без нормального User-Agent запрос уходит как "Python-urllib/x.y",
+            # который Cloudflare (через него идёт api.resend.com) блокирует как
+            # похожий на бота — 403 "error code: 1010".
+            "User-Agent": "istok-app/1.0 (+https://istok.onrender.com)",
         },
     )
 
