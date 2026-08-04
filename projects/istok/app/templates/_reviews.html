@@ -22,6 +22,9 @@
         <span class="review__date">{{ r.created_at.strftime("%d.%m.%Y") }}</span>
       </div>
       <p class="review__body">{{ r.body }}</p>
+      {% if image_url(r.image_url) %}
+      <img class="review__photo" src="{{ image_url(r.image_url) }}" alt="Фото к отзыву" loading="lazy">
+      {% endif %}
     </article>
     {% endfor %}
   </div>
@@ -31,7 +34,7 @@
 
   <details class="form-block">
     <summary>✏️ Оставить отзыв</summary>
-    <form method="post" action="{{ url_for('reviews.add', target_type=target_type, target_id=target_id) }}">
+    <form method="post" action="{{ url_for('reviews.add', target_type=target_type, target_id=target_id) }}" enctype="multipart/form-data">
       <input type="text" name="website" class="honeypot-field" tabindex="-1" autocomplete="off">
 
       <div class="field">
@@ -53,6 +56,11 @@
       <div class="field">
         <label for="author-{{ target_type }}-{{ target_id }}">Ваше имя (необязательно)</label>
         <input type="text" id="author-{{ target_type }}-{{ target_id }}" name="author_name" maxlength="120">
+      </div>
+
+      <div class="field">
+        <label for="photo-{{ target_type }}-{{ target_id }}">Фото (необязательно)</label>
+        <input type="file" id="photo-{{ target_type }}-{{ target_id }}" name="photo" accept="image/*">
       </div>
 
       <button type="submit" class="btn btn--primary">Отправить отзыв</button>

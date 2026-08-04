@@ -594,6 +594,14 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
 .review__author { color: var(--foam); font-weight: 600; }
 .review__date { color: var(--shallow); }
 .review__body { margin: 0; font-size: .95rem; }
+.review__photo {
+  display: block;
+  max-width: 220px;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 10px;
+}
 
 @media (max-width: 640px) {
   .site-header__inner { flex-direction: column; align-items: flex-start; gap: 12px; }

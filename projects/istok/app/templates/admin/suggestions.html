@@ -24,10 +24,21 @@
         &middot; статус: {{ s.status }}
       </div>
 
+      {% if s.field_name == "image_url" %}
+      <div class="admin-item__diff">
+        <div class="admin-item__old">
+          {% if image_url(s.source.image_url) %}<img class="card-photo" style="width:160px; height:110px;" src="{{ image_url(s.source.image_url) }}" alt="текущее фото">{% else %}—{% endif %}
+        </div>
+        <div class="admin-item__new">
+          {% if image_url(s.proposed_value) %}<img class="card-photo" style="width:160px; height:110px;" src="{{ image_url(s.proposed_value) }}" alt="предложенное фото">{% endif %}
+        </div>
+      </div>
+      {% else %}
       <div class="admin-item__diff">
         <div class="admin-item__old"><del>{{ s.source|attr(s.field_name) or "—" }}</del></div>
         <div class="admin-item__new">{{ s.proposed_value }}</div>
       </div>
+      {% endif %}
 
       {% if s.message %}
       <p class="admin-item__message"><em>Комментарий отправителя: {{ s.message }}</em></p>

@@ -4,6 +4,7 @@ from sqlalchemy import func
 
 from app import db
 from app.models import EditSuggestion, SacredSource
+from app.photos import upload_photo
 from app.routes.reviews import reviews_for
 
 bp = Blueprint("sacred", __name__, template_folder="../templates/sacred")
@@ -79,6 +80,18 @@ def suggest(slug):
     if field_name not in EditSuggestion.FIELD_LABELS:
         flash("Не удалось определить поле для правки.", "error")
         return redirect(url_for("sacred.detail", slug=slug))
+
+    if field_name == "image_url":
+        # для фото — либо загруженный файл (приоритет), либо вручную
+        # вставленная ссылка в том же текстовом поле.
+        uploaded_url, photo_error = upload_photo(request.files.get("photo"))
+        if uploaded_url:
+            proposed_value = uploaded_url
+        elif photo_error and not proposed_value:
+            flash(photo_error, "error")
+            return redirect(url_for("sacred.detail", slug=slug))
+        elif photo_error:
+            flash(photo_error, "info")
 
     if not proposed_value:
         flash("Опишите, что предлагаете изменить.", "error")

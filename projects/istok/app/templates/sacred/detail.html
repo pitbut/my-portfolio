@@ -69,7 +69,7 @@
 
   <details class="form-block">
     <summary>✏️ Предложить правку к этому источнику</summary>
-    <form method="post" action="{{ url_for('sacred.suggest', slug=source.slug) }}">
+    <form method="post" action="{{ url_for('sacred.suggest', slug=source.slug) }}" enctype="multipart/form-data">
       <input type="text" name="website" class="honeypot-field" tabindex="-1" autocomplete="off">
 
       <div class="field">
@@ -80,12 +80,18 @@
           <option value="forbidden">Что нельзя</option>
           <option value="description">Описание</option>
           <option value="comment">Комментарий редакции</option>
+          <option value="image_url">Фото</option>
         </select>
       </div>
 
       <div class="field">
-        <label for="proposed_value">Предлагаемый текст</label>
-        <textarea id="proposed_value" name="proposed_value" rows="4" maxlength="4000" required></textarea>
+        <label for="proposed_value">Предлагаемый текст (для «Фото» — можно оставить пустым, если прикладываете файл ниже)</label>
+        <textarea id="proposed_value" name="proposed_value" rows="4" maxlength="4000"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="suggest_photo">Фото — только если поправка «Фото» (необязательно)</label>
+        <input type="file" id="suggest_photo" name="photo" accept="image/*">
       </div>
 
       <div class="field">

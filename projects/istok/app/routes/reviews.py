@@ -16,6 +16,7 @@ from app.models import (
     SacredSource,
     WaterBrand,
 )
+from app.photos import upload_photo
 
 bp = Blueprint("reviews", __name__)
 
@@ -78,12 +79,17 @@ def add(target_type, target_id):
         flash("Выберите оценку от 1 до 5.", "error")
         return redirect(redirect_url)
 
+    image_url, photo_error = upload_photo(request.files.get("photo"))
+    if photo_error:
+        flash(photo_error, "info")
+
     review = Review(
         target_type=target_type,
         target_id=target_id,
         author_name=author_name or None,
         rating=rating,
         body=body,
+        image_url=image_url,
     )
     db.session.add(review)
     db.session.commit()

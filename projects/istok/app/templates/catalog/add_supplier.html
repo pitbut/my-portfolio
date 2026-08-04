@@ -12,7 +12,7 @@
     проверит адрес и подтвердит его.
   </p>
 
-  <form method="post">
+  <form method="post" enctype="multipart/form-data">
     <div class="field">
       <label for="name">Название</label>
       <input type="text" id="name" name="name" maxlength="255" required>
@@ -45,6 +45,11 @@
     <div class="field">
       <label for="website_url">Сайт (необязательно)</label>
       <input type="text" id="website_url" name="website_url" maxlength="255" placeholder="https://...">
+    </div>
+
+    <div class="field">
+      <label for="photo">Фото (необязательно)</label>
+      <input type="file" id="photo" name="photo" accept="image/*">
     </div>
 
     <button type="submit" class="btn btn--primary">Добавить</button>

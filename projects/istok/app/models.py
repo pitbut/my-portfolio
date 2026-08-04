@@ -122,6 +122,7 @@ class Supplier(TimestampMixin, db.Model):
     longitude = db.Column(db.Float, nullable=True)
     phone = db.Column(db.String(50), nullable=True)
     website = db.Column(db.String(255), nullable=True)
+    image_url = db.Column(db.String(500), nullable=True)
     verified = db.Column(db.Boolean, nullable=False, default=False)
     added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
@@ -181,6 +182,7 @@ class Equipment(TimestampMixin, SlugMixin, db.Model):
     description = db.Column(db.Text, nullable=False)
     price_rub = db.Column(db.Numeric(10, 2), nullable=True)
     manufacturer = db.Column(db.String(255), nullable=True)
+    image_url = db.Column(db.String(500), nullable=True)
     verified = db.Column(db.Boolean, nullable=False, default=False)
     added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
@@ -219,6 +221,7 @@ class EditSuggestion(TimestampMixin, db.Model):
         "forbidden": "Что нельзя",
         "description": "Описание",
         "comment": "Комментарий редакции",
+        "image_url": "Фото",
     }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -281,6 +284,7 @@ class Review(TimestampMixin, db.Model):
     author_name = db.Column(db.String(120), nullable=True)
     rating = db.Column(db.Integer, nullable=False)  # 1-5
     body = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(500), nullable=True)
 
     def __repr__(self):
         return f"<Review #{self.id} {self.target_type}:{self.target_id} rating={self.rating}>"

@@ -15,6 +15,7 @@ from app.models import (
     SacredSource,
     WaterBrand,
 )
+from app.photos import upload_photo
 from app.routes.reviews import reviews_for
 from app.slugify import unique_slug
 
@@ -103,6 +104,10 @@ def equipment_add():
         except ValueError:
             price_rub = None
 
+        image_url, photo_error = upload_photo(request.files.get("photo"))
+        if photo_error:
+            flash(photo_error, "info")
+
         used_slugs = {row[0] for row in db.session.query(Equipment.slug).all()}
         item = Equipment(
             slug=unique_slug(name, used_slugs, "equipment"),
@@ -111,6 +116,7 @@ def equipment_add():
             description=description,
             price_rub=price_rub,
             manufacturer=manufacturer or None,
+            image_url=image_url,
             verified=False,
             added_by_user_id=current_user.id,
         )

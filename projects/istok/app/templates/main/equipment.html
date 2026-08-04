@@ -31,6 +31,9 @@
   <div class="grid">
     {% for e in equipment %}
     <article class="card">
+      {% if image_url(e.image_url) %}
+      <img class="card-photo" src="{{ image_url(e.image_url) }}" alt="{{ e.name }}" loading="lazy">
+      {% endif %}
       <span class="meta">{{ e.category }}</span>
       {% if not e.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
       <h3><a href="{{ url_for('main.equipment_detail', slug=e.slug) }}">{{ e.name }}</a></h3>
