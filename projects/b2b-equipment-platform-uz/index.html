@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ТЗ: B2B-платформа изготовителей и ремонтников оборудования (Узбекистан)</title>
+<style>
+  :root{
+    --gold:#FFD700; --orange:#FFA500; --ink:#1f2430; --sub:#5a6270;
+    --line:#e7e7ee; --bg1:#1a1a2e; --bg2:#16213e; --bg3:#0f3460;
+    --accent:#0f6e5c; --accent2:#1f6feb; --danger:#c0392b; --warn:#b8860b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg3) 100%);
+    background-attachment:fixed;
+    color:var(--ink); line-height:1.65; scroll-behavior:smooth;
+  }
+  .container{max-width:1180px;margin:0 auto;padding:36px 18px 70px;}
+  .back-link{
+    display:inline-block;margin-bottom:24px;padding:11px 24px;
+    background:linear-gradient(135deg,var(--gold),var(--orange));
+    color:#000;text-decoration:none;border-radius:25px;font-weight:700;
+    box-shadow:0 4px 15px rgba(255,215,0,.3); transition:transform .25s;
+  }
+  .back-link:hover{transform:translateY(-2px);}
+  .content{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:44px 48px;}
+  @media (max-width:768px){ .content{padding:26px 18px;} .container{padding:20px 12px 50px;} }
+
+  h1.title{
+    font-size:2.1em;font-weight:900;margin-bottom:6px;
+    background:linear-gradient(135deg,var(--orange),var(--gold));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .lede{color:var(--sub);font-size:1.05em;margin-bottom:22px;}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+  .badge{background:#f2f2fa;border:1px solid var(--line);color:var(--bg2);font-size:.78em;font-weight:700;padding:5px 12px;border-radius:20px;}
+
+  .summary-box{
+    background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,165,0,.10));
+    border-left:4px solid var(--gold); border-radius:10px; padding:20px 22px;margin:20px 0 30px;
+  }
+  .summary-box p{margin:0;color:#4a4030;}
+
+  nav.toc{background:#f7f7fb;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:36px;}
+  nav.toc h2{font-size:1em;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin-bottom:10px;}
+  nav.toc ol{columns:2;column-gap:30px;padding-left:20px;}
+  nav.toc li{margin-bottom:6px;font-size:.94em;}
+  nav.toc a{color:var(--bg3);text-decoration:none;font-weight:600;}
+  nav.toc a:hover{text-decoration:underline;}
+  @media (max-width:640px){ nav.toc ol{columns:1;} }
+
+  section{margin:44px 0;}
+  h2.sec-title{
+    font-size:1.55em;color:var(--bg3);border-bottom:3px solid var(--gold);
+    padding-bottom:10px;margin-bottom:18px;display:flex;align-items:center;gap:10px;
+  }
+  h3{font-size:1.18em;color:var(--bg2);margin:22px 0 10px;}
+  h4{font-size:1em;color:var(--accent2);margin:16px 0 8px;}
+  p{margin-bottom:12px;color:#333;}
+  ul,ol{margin:0 0 14px 22px;color:#333;}
+  li{margin-bottom:6px;}
+  strong{color:var(--bg2);}
+  code{background:#f2f2f7;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:.88em;color:#a2270f;font-family:Consolas,Menlo,monospace;}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:.9em;}
+  caption{caption-side:top;text-align:left;font-weight:700;color:var(--bg2);margin-bottom:6px;font-size:1em;}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;}
+  th{background:var(--bg2);color:#fff;font-weight:600;}
+  tr:nth-child(even) td{background:#fafafe;}
+  .type{font-family:Consolas,Menlo,monospace;font-size:.85em;color:#8a3d00;white-space:nowrap;}
+
+  details.db-entity{border:1px solid var(--line);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+  details.db-entity summary{
+    cursor:pointer;padding:12px 16px;background:#f7f7fb;font-weight:700;color:var(--bg2);
+    list-style:none;display:flex;justify-content:space-between;align-items:center;
+  }
+  details.db-entity summary::-webkit-details-marker{display:none;}
+  details.db-entity summary::after{content:"▾";transition:transform .2s;color:var(--gold);}
+  details.db-entity[open] summary::after{transform:rotate(180deg);}
+  details.db-entity .body{padding:6px 16px 14px;}
+
+  .flow{border-left:3px solid var(--accent2);margin:18px 0;padding-left:0;list-style:none;}
+  .flow li{
+    position:relative;margin-bottom:14px;padding:12px 16px;background:#f5f8ff;border-radius:0 10px 10px 0;margin-left:0;
+  }
+  .flow li::before{
+    content:attr(data-n);position:absolute;left:-15px;top:12px;width:26px;height:26px;
+    background:var(--accent2);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:.78em;font-weight:700;
+  }
+  .flow{margin-left:18px;padding-left:14px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+  @media (max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .card{background:#f7f7fb;border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .card h4{margin-top:0;}
+
+  .module-tag{
+    display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#000;border-radius:8px;font-weight:800;font-size:.95em;
+  }
+
+  .status-chip{display:inline-block;font-size:.78em;font-weight:700;padding:2px 10px;border-radius:12px;margin:2px 4px 2px 0;}
+  .st-open{background:#e8f0fe;color:var(--accent2);}
+  .st-progress{background:#fff4d6;color:var(--warn);}
+  .st-done{background:#e5f6ec;color:var(--accent);}
+  .st-dispute{background:#fdeaea;color:var(--danger);}
+
+  .callout{border-radius:10px;padding:14px 18px;margin:14px 0;font-size:.94em;}
+  .callout.note{background:#eef3ff;border-left:4px solid var(--accent2);}
+  .callout.warn{background:#fff8e6;border-left:4px solid var(--warn);}
+  .callout.risk{background:#fdeeee;border-left:4px solid var(--danger);}
+
+  footer.page-footer{text-align:center;color:rgba(255,255,255,.55);font-size:.85em;margin-top:30px;}
+  a.anchor-back{font-size:.8em;color:var(--accent2);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="../../index.html" class="back-link">← К портфолио</a>
+
+  <div class="content">
+    <h1 class="title">🏭 B2B-платформа изготовителей и ремонтников оборудования Узбекистана</h1>
+    <p class="lede">Техническое задание, архитектура данных, структура интерфейса и пользовательские сценарии (User Flow)</p>
+    <div class="badges">
+      <span class="badge">B2B Marketplace</span>
+      <span class="badge">Мультиязычность RU / UZ Latin / UZ Cyrillic</span>
+      <span class="badge">Гео-поиск</span>
+      <span class="badge">Аукцион заказов</span>
+      <span class="badge">Telegram Bot</span>
+      <span class="badge">Подписочная модель</span>
+      <span class="badge">Арбитраж споров</span>
+    </div>
+
+    <div class="summary-box">
+      <p><strong>Суть проекта:</strong> сервис, который соединяет заказчиков (предприятия, нуждающиеся в изготовлении
+      деталей, узлов или в ремонте оборудования) с исполнителями (частные мастера, цеха, заводы Узбекистана).
+      Заказчик публикует заявку в свободной форме (текст/фото/чертежи/видео), система автоматически подбирает
+      исполнителей по техническим возможностям и геолокации, оповещает их через Telegram, и исполнители
+      конкурируют за заказ в формате аукциона (цена/срок/условия). Доступ к платформе — только после
+      обязательной регистрации («жёсткий paywall» на уровне разделов, а не главной страницы).</p>
+    </div>
+
+    <nav class="toc">
+      <h2>Содержание</h2>
+      <ol>
+        <li><a href="#roles">1. Роли пользователей и права доступа</a></li>
+        <li><a href="#db">2. Архитектура базы данных</a></li>
+        <li><a href="#ia">3. Структура интерфейса (IA / карта разделов)</a></li>
+        <li><a href="#m1">4. Модуль 1 — Авторизация и Paywall</a></li>
+        <li><a href="#m2">5. Модуль 2 — Публикация заказа и автоподбор</a></li>
+        <li><a href="#m3">6. Модуль 3 — Профиль и техвозможности исполнителя</a></li>
+        <li><a href="#m4">7. Модуль 4 — Карта и гео-поиск</a></li>
+        <li><a href="#m5">8. Модуль 5 — Отзывы и рейтинги</a></li>
+        <li><a href="#m6">9. Модуль 6 — Арбитраж и медиация</a></li>
+        <li><a href="#m7">10. Модуль 7 — Telegram-бот, аукцион, монетизация</a></li>
+        <li><a href="#nfr">11. Нефункциональные требования</a></li>
+        <li><a href="#stack">12. Технологический стек</a></li>
+        <li><a href="#roadmap">13. Дорожная карта</a></li>
+      </ol>
+    </nav>
+
+    <!-- ================= 1. РОЛИ ================= -->
+    <section id="roles">
+      <h2 class="sec-title"><span class="module-tag">1</span> Роли пользователей и права доступа</h2>
+      <div class="grid2">
+        <div class="card">
+          <h4>👤 Заказчик (Customer)</h4>
+          <p>Юр. или физ. лицо, которому требуется изготовление детали/узла или ремонт оборудования.
+          Публикует заказы, просматривает каталог и карту исполнителей, выбирает победителя аукциона,
+          оставляет отзывы, инициирует споры.</p>
+        </div>
+        <div class="card">
+          <h4>🔧 Исполнитель (Executor)</h4>
+          <p>Подтипы: <strong>Мастер</strong> (частное лицо/ИП), <strong>Цех</strong> (малое производство),
+          <strong>Завод</strong> (крупное производство). Заполняет карточку станочного парка и допустимых
+          габаритов, получает уведомления о заказах, участвует в аукционах, оплачивает подписку.</p>
+        </div>
+        <div class="card">
+          <h4>🛡️ Администратор / Модератор</h4>
+          <p>Проверяет исполнителей (верификация), модерирует контент, разбирает споры (арбитраж),
+          управляет тарифами подписки, видит агрегированную аналитику.</p>
+        </div>
+        <div class="card">
+          <h4>🤖 Система (Matching Engine / Bot)</h4>
+          <p>Не пользователь, а служебная роль: движок автоподбора исполнителей и Telegram-бот,
+          действующие по правилам модулей 2 и 7.</p>
+        </div>
+      </div>
+      <div class="callout note">Один аккаунт (<code>users.id</code>) может иметь только одну активную бизнес-роль
+      (customer либо executor) для простоты MVP; переключение роли — через создание второго профиля на тот же email,
+      по аналогии с «личным» и «рабочим» кабинетом. Роль <code>admin</code> — отдельный флаг, не публичная регистрация.</div>
+    </section>
+
+    <!-- ================= 2. БД ================= -->
+    <section id="db">
+      <h2 class="sec-title"><span class="module-tag">2</span> Архитектура базы данных</h2>
+      <p>Реляционная модель (PostgreSQL + расширение <code>PostGIS</code> для гео-запросов). Ниже — таблицы,
+      сгруппированные по доменам. Все таблицы имеют <code>id UUID PK</code>, <code>created_at</code>, <code>updated_at</code> —
+      опущены в схемах для краткости.</p>
+
+      <h3>2.1 Пользователи и авторизация</h3>
+
+      <details class="db-entity" open>
+        <summary>users — базовая учётная запись</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>email</td><td class="type">varchar UNIQUE</td><td>основной email, обязателен даже при входе через Google</td></tr>
+            <tr><td>password_hash</td><td class="type">varchar NULL</td><td>NULL, если вход только через Google</td></tr>
+            <tr><td>google_id</td><td class="type">varchar NULL UNIQUE</td><td>sub из Google OAuth</td></tr>
+            <tr><td>phone</td><td class="type">varchar NULL</td><td>для Telegram-верификации и связи</td></tr>
+            <tr><td>role</td><td class="type">enum(customer, executor, admin)</td><td>основная роль аккаунта</td></tr>
+            <tr><td>preferred_language</td><td class="type">enum(ru, uz_latin, uz_cyrillic)</td><td>язык интерфейса</td></tr>
+            <tr><td>status</td><td class="type">enum(active, blocked, pending_verification)</td><td>статус аккаунта</td></tr>
+            <tr><td>is_email_verified</td><td class="type">boolean</td><td></td></tr>
+            <tr><td>last_login_at</td><td class="type">timestamp</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>customer_profiles — карточка заказчика (1:1 к users)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>user_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>company_name</td><td class="type">varchar NULL</td><td>если юр. лицо</td></tr>
+            <tr><td>stir_inn</td><td class="type">varchar NULL</td><td>ИНН/СТИР для верификации бизнеса</td></tr>
+            <tr><td>region_id / city_id</td><td class="type">FK → regions / cities</td><td>основной регион</td></tr>
+            <tr><td>address_text</td><td class="type">varchar</td><td></td></tr>
+            <tr><td>location</td><td class="type">geography(Point,4326)</td><td>координаты объекта заказчика (для радиуса поиска)</td></tr>
+            <tr><td>rating_avg</td><td class="type">numeric(3,2)</td><td>кэш среднего рейтинга от исполнителей</td></tr>
+            <tr><td>reviews_count</td><td class="type">int</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>executor_profiles — карточка исполнителя (1:1 к users)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>user_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>org_type</td><td class="type">enum(master, tsekh, zavod)</td><td>масштаб производства</td></tr>
+            <tr><td>display_name</td><td class="type">varchar</td><td>название цеха/завода или ФИО мастера</td></tr>
+            <tr><td>description</td><td class="type">text</td><td>описание, хранится по языку публикации + опц. переводы</td></tr>
+            <tr><td>stir_inn</td><td class="type">varchar NULL</td><td></td></tr>
+            <tr><td>region_id / city_id</td><td class="type">FK → regions / cities</td><td></td></tr>
+            <tr><td>address_text</td><td class="type">varchar</td><td></td></tr>
+            <tr><td>location</td><td class="type">geography(Point,4326)</td><td>координаты цеха/завода — основа гео-поиска</td></tr>
+            <tr><td>service_radius_km</td><td class="type">int</td><td>готовность выезжать/принимать заказы в радиусе (для ремонта на месте)</td></tr>
+            <tr><td>is_verified</td><td class="type">boolean</td><td>прошёл проверку админом</td></tr>
+            <tr><td>rating_avg</td><td class="type">numeric(3,2)</td><td>кэш рейтинга от заказчиков</td></tr>
+            <tr><td>reviews_count</td><td class="type">int</td><td></td></tr>
+            <tr><td>subscription_status</td><td class="type">enum(trial, active, expired, none)</td><td>кэш из subscriptions для быстрой проверки доступа</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>executor_equipment — станочный парк исполнителя (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>executor_id</td><td class="type">FK → executor_profiles.id</td><td></td></tr>
+            <tr><td>equipment_type</td><td class="type">enum / FK → equipment_types</td><td>напр. «токарный ЧПУ», «лазерная резка», «сварка аргон», «фрезерный», «пресс», «зубофрезерный»</td></tr>
+            <tr><td>model_name</td><td class="type">varchar NULL</td><td>марка/модель станка</td></tr>
+            <tr><td>quantity</td><td class="type">int</td><td>количество единиц</td></tr>
+            <tr><td>notes</td><td class="type">text NULL</td><td></td></tr>
+          </table>
+          <p><em>equipment_types</em> — справочник (токарный ЧПУ, фрезерный ЧПУ, лазерная резка, плазменная резка,
+          сварка (аргон/полуавтомат/дуговая), гибка листа, литьё, шлифовка, зубофрезерование, электроэрозия, и т.д.),
+          управляется админом, мультиязычные названия.</p>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>executor_capabilities — допустимые габариты и материалы (1:1 или 1:N по категориям)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>executor_id</td><td class="type">FK → executor_profiles.id</td><td></td></tr>
+            <tr><td>max_length_mm</td><td class="type">int NULL</td><td>макс. длина детали</td></tr>
+            <tr><td>max_diameter_mm</td><td class="type">int NULL</td><td>макс. диаметр (для токарных работ)</td></tr>
+            <tr><td>max_width_mm / max_height_mm</td><td class="type">int NULL</td><td>для листовых/фрезерных работ</td></tr>
+            <tr><td>max_weight_kg</td><td class="type">numeric NULL</td><td>макс. вес заготовки, которую поднимает оборудование (кран-балка и т.п.)</td></tr>
+            <tr><td>materials</td><td class="type">varchar[] / FK-таблица</td><td>сталь, чугун, алюминий, нержавейка, пластик, латунь и т.д.</td></tr>
+            <tr><td>service_categories</td><td class="type">varchar[] / FK-таблица</td><td>теги услуг: токарные работы, фрезеровка, лазерная резка, сварочные работы, ремонт редукторов, ремонт насосов…</td></tr>
+          </table>
+          <p>Поля <code>service_categories</code> и <code>materials</code> — управляемые справочники
+          (many-to-many через связочные таблицы <code>executor_capability_services</code> /
+          <code>executor_capability_materials</code>), что необходимо для точного алгоритма автоподбора (модуль 2).</p>
+        </div>
+      </details>
+
+      <h3>2.2 География</h3>
+      <details class="db-entity">
+        <summary>regions / cities — справочник регионов Узбекистана</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>name_ru / name_uz_latin / name_uz_cyrillic</td><td class="type">varchar</td><td>14 областей + Каракалпакстан + Ташкент, привязанные города</td></tr>
+            <tr><td>location</td><td class="type">geography(Point,4326)</td><td>центр региона/города — для дефолтного центрирования карты</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <h3>2.3 Заказы, медиа и матчинг</h3>
+      <details class="db-entity" open>
+        <summary>orders — заявка заказчика</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>customer_id</td><td class="type">FK → customer_profiles.id</td><td></td></tr>
+            <tr><td>title</td><td class="type">varchar</td><td></td></tr>
+            <tr><td>description</td><td class="type">text</td><td></td></tr>
+            <tr><td>content_language</td><td class="type">enum(ru, uz_latin, uz_cyrillic)</td><td>язык, на котором заказчик реально ввёл текст</td></tr>
+            <tr><td>order_type</td><td class="type">enum(manufacturing, repair)</td><td>изготовление или ремонт</td></tr>
+            <tr><td>service_category</td><td class="type">FK → service_categories</td><td>тип работ, по которому идёт матчинг</td></tr>
+            <tr><td>material</td><td class="type">FK → materials NULL</td><td></td></tr>
+            <tr><td>dimensions_length_mm / diameter_mm / weight_kg</td><td class="type">numeric NULL</td><td>параметры детали — сверяются с executor_capabilities</td></tr>
+            <tr><td>budget_min / budget_max</td><td class="type">numeric NULL</td><td>вилка бюджета (опционально, влияет на аукцион)</td></tr>
+            <tr><td>deadline_date</td><td class="type">date NULL</td><td>желаемый срок</td></tr>
+            <tr><td>region_id / city_id</td><td class="type">FK</td><td></td></tr>
+            <tr><td>location</td><td class="type">geography(Point,4326)</td><td>точка объекта — для ремонта на месте и радиуса поиска</td></tr>
+            <tr><td>auction_deadline_at</td><td class="type">timestamp</td><td>время закрытия приёма ставок</td></tr>
+            <tr><td>status</td><td class="type">enum(draft, published, matching, auction_open, awaiting_choice, assigned, in_progress, completed, disputed, cancelled)</td><td>см. модуль 2 и 6</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>order_media — вложения заявки (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id</td><td></td></tr>
+            <tr><td>media_type</td><td class="type">enum(photo, drawing, video, document)</td><td>чертежи хранятся как photo/document с флагом drawing</td></tr>
+            <tr><td>file_url</td><td class="type">varchar</td><td>объектное хранилище (S3-совместимое)</td></tr>
+            <tr><td>thumbnail_url</td><td class="type">varchar NULL</td><td></td></tr>
+            <tr><td>sort_order</td><td class="type">int</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>order_matches — результат автоподбора (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id</td><td></td></tr>
+            <tr><td>executor_id</td><td class="type">FK → executor_profiles.id</td><td></td></tr>
+            <tr><td>match_score</td><td class="type">numeric(5,2)</td><td>вес совпадения — см. модуль 2</td></tr>
+            <tr><td>distance_km</td><td class="type">numeric NULL</td><td></td></tr>
+            <tr><td>notified_via</td><td class="type">enum(telegram, email, in_app, none)</td><td></td></tr>
+            <tr><td>notified_at</td><td class="type">timestamp NULL</td><td></td></tr>
+            <tr><td>viewed_at</td><td class="type">timestamp NULL</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>bids — ставки исполнителей в аукционе (1:N к order)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id</td><td></td></tr>
+            <tr><td>executor_id</td><td class="type">FK → executor_profiles.id</td><td></td></tr>
+            <tr><td>price</td><td class="type">numeric</td><td>предложенная цена</td></tr>
+            <tr><td>currency</td><td class="type">enum(UZS, USD)</td><td></td></tr>
+            <tr><td>lead_time_days</td><td class="type">int</td><td>срок исполнения</td></tr>
+            <tr><td>comment</td><td class="type">text NULL</td><td>условия, гарантия и т.п.</td></tr>
+            <tr><td>status</td><td class="type">enum(active, withdrawn, accepted, rejected)</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>order_assignments — назначение победителя аукциона (1:1 к order)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id UNIQUE</td><td></td></tr>
+            <tr><td>bid_id</td><td class="type">FK → bids.id</td><td>выигравшая ставка</td></tr>
+            <tr><td>agreed_price / agreed_deadline</td><td class="type">numeric / date</td><td>зафиксированные условия</td></tr>
+            <tr><td>assigned_at</td><td class="type">timestamp</td><td></td></tr>
+            <tr><td>completed_at</td><td class="type">timestamp NULL</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>order_status_history — журнал статусов (аудит)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id</td><td></td></tr>
+            <tr><td>from_status / to_status</td><td class="type">enum</td><td></td></tr>
+            <tr><td>changed_by_user_id</td><td class="type">FK → users.id NULL</td><td>NULL — системное изменение</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <h3>2.4 Отзывы и рейтинги</h3>
+      <details class="db-entity">
+        <summary>reviews — двусторонние отзывы (1:N к order)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id</td><td>отзыв возможен только по завершённому заказу</td></tr>
+            <tr><td>author_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>target_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>direction</td><td class="type">enum(customer_to_executor, executor_to_customer)</td><td></td></tr>
+            <tr><td>rating</td><td class="type">int (1..5)</td><td></td></tr>
+            <tr><td>rating_breakdown</td><td class="type">jsonb NULL</td><td>для исполнителя: качество/сроки/коммуникация; для заказчика: адекватность ТЗ/оплата вовремя/коммуникация</td></tr>
+            <tr><td>comment</td><td class="type">text NULL</td><td></td></tr>
+            <tr><td>is_published</td><td class="type">boolean</td><td>публикуется одновременно с обеих сторон либо через N дней — против «эффекта заложника»</td></tr>
+          </table>
+          <p>Уникальность: один <code>(order_id, author_id)</code> — один отзыв. Триггер пересчитывает
+          <code>rating_avg</code>/<code>reviews_count</code> в профиле цели.</p>
+        </div>
+      </details>
+
+      <h3>2.5 Арбитраж</h3>
+      <details class="db-entity">
+        <summary>disputes — спор по заказу (1:1 к order)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id</td><td></td></tr>
+            <tr><td>opened_by_user_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>reason_category</td><td class="type">enum(defect, delay, quality, price_dispute, other)</td><td></td></tr>
+            <tr><td>description</td><td class="type">text</td><td></td></tr>
+            <tr><td>status</td><td class="type">enum(open, evidence_collection, in_review, resolved_customer, resolved_executor, resolved_partial, closed)</td><td></td></tr>
+            <tr><td>assigned_admin_id</td><td class="type">FK → users.id NULL</td><td></td></tr>
+            <tr><td>resolution_text</td><td class="type">text NULL</td><td></td></tr>
+            <tr><td>resolved_at</td><td class="type">timestamp NULL</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>dispute_evidence — доказательства сторон (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>dispute_id</td><td class="type">FK → disputes.id</td><td></td></tr>
+            <tr><td>uploaded_by_user_id</td><td class="type">FK → users.id</td><td>заказчик или исполнитель</td></tr>
+            <tr><td>media_type</td><td class="type">enum(photo, video, document)</td><td></td></tr>
+            <tr><td>file_url</td><td class="type">varchar</td><td></td></tr>
+            <tr><td>comment</td><td class="type">text NULL</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>dispute_messages — переписка сторон + админа внутри спора (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>dispute_id</td><td class="type">FK → disputes.id</td><td></td></tr>
+            <tr><td>sender_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>text</td><td class="type">text</td><td></td></tr>
+            <tr><td>is_internal_admin_note</td><td class="type">boolean</td><td>заметки админа, невидимые сторонам</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <h3>2.6 Монетизация и подписки</h3>
+      <details class="db-entity">
+        <summary>subscription_plans — тарифы (справочник)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>code</td><td class="type">enum(basic, standard, pro)</td><td></td></tr>
+            <tr><td>price_monthly_uzs</td><td class="type">numeric</td><td></td></tr>
+            <tr><td>max_bids_per_month</td><td class="type">int NULL</td><td>NULL = без лимита (pro)</td></tr>
+            <tr><td>telegram_alert_delay_sec</td><td class="type">int</td><td>0 — мгновенно (pro), задержка для дешёвых тарифов</td></tr>
+            <tr><td>catalog_priority</td><td class="type">int</td><td>вес поднятия в каталоге/матчинге</td></tr>
+            <tr><td>features_json</td><td class="type">jsonb</td><td>прочие фичи тарифа</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>subscriptions — активная подписка исполнителя (1:N история, 1 активная)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>executor_id</td><td class="type">FK → executor_profiles.id</td><td></td></tr>
+            <tr><td>plan_id</td><td class="type">FK → subscription_plans.id</td><td></td></tr>
+            <tr><td>status</td><td class="type">enum(trialing, active, past_due, expired, cancelled)</td><td></td></tr>
+            <tr><td>started_at / expires_at</td><td class="type">timestamp</td><td></td></tr>
+            <tr><td>auto_renew</td><td class="type">boolean</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>payments — платежи по подписке (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>subscription_id</td><td class="type">FK → subscriptions.id</td><td></td></tr>
+            <tr><td>amount / currency</td><td class="type">numeric / enum</td><td></td></tr>
+            <tr><td>provider</td><td class="type">enum(payme, click, uzcard)</td><td>локальные платёжные провайдеры РУз</td></tr>
+            <tr><td>provider_transaction_id</td><td class="type">varchar</td><td></td></tr>
+            <tr><td>status</td><td class="type">enum(pending, succeeded, failed, refunded)</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <h3>2.7 Уведомления, Telegram, чат</h3>
+      <details class="db-entity">
+        <summary>telegram_links — привязка Telegram-аккаунта (1:1 к users)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>user_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>telegram_chat_id</td><td class="type">bigint UNIQUE</td><td></td></tr>
+            <tr><td>telegram_username</td><td class="type">varchar NULL</td><td></td></tr>
+            <tr><td>linked_at</td><td class="type">timestamp</td><td></td></tr>
+            <tr><td>notifications_enabled</td><td class="type">boolean</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>notifications — журнал уведомлений (1:N к users)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>user_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>type</td><td class="type">enum(new_order_match, outbid, bid_accepted, bid_rejected, dispute_update, subscription_expiring, review_received)</td><td></td></tr>
+            <tr><td>channel</td><td class="type">enum(telegram, email, in_app)</td><td></td></tr>
+            <tr><td>payload_json</td><td class="type">jsonb</td><td></td></tr>
+            <tr><td>sent_at / read_at</td><td class="type">timestamp NULL</td><td></td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>order_messages — чат заказчик ↔ исполнитель по заказу (1:N)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>order_id</td><td class="type">FK → orders.id</td><td></td></tr>
+            <tr><td>sender_id / receiver_id</td><td class="type">FK → users.id</td><td></td></tr>
+            <tr><td>text</td><td class="type">text NULL</td><td></td></tr>
+            <tr><td>attachment_url</td><td class="type">varchar NULL</td><td></td></tr>
+          </table>
+          <p>Чат открывается только после того, как заказчик проявил интерес к ставке исполнителя —
+          защита от спама на этапе аукциона.</p>
+        </div>
+      </details>
+
+      <details class="db-entity">
+        <summary>content_translations — кэш авто-перевода UGC (опционально)</summary>
+        <div class="body">
+          <table>
+            <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+            <tr><td>entity_type</td><td class="type">enum(order, executor_profile)</td><td></td></tr>
+            <tr><td>entity_id</td><td class="type">uuid</td><td></td></tr>
+            <tr><td>target_language</td><td class="type">enum(ru, uz_latin, uz_cyrillic)</td><td></td></tr>
+            <tr><td>translated_title / translated_text</td><td class="type">text</td><td></td></tr>
+            <tr><td>provider</td><td class="type">varchar</td><td>сервис машинного перевода</td></tr>
+          </table>
+          <p>UI-строки (кнопки, лейблы, статусы) переводятся статически (i18n JSON-файлы <code>ru.json</code>,
+          <code>uz_latin.json</code>, <code>uz_cyrillic.json</code>), а не через БД. Данная таблица покрывает только
+          пользовательский контент (заявки, описания цехов), чтобы заказчик и исполнитель с разным родным языком
+          понимали друг друга.</p>
+        </div>
+      </details>
+
+      <h3>2.8 Сводка связей (ER, кратко)</h3>
+      <ul>
+        <li><code>users</code> 1—1 <code>customer_profiles</code> либо <code>executor_profiles</code></li>
+        <li><code>executor_profiles</code> 1—N <code>executor_equipment</code>, 1—N <code>executor_capabilities</code></li>
+        <li><code>customer_profiles</code> 1—N <code>orders</code> 1—N <code>order_media</code></li>
+        <li><code>orders</code> 1—N <code>order_matches</code> N—1 <code>executor_profiles</code></li>
+        <li><code>orders</code> 1—N <code>bids</code> N—1 <code>executor_profiles</code>; <code>orders</code> 1—1 <code>order_assignments</code> → <code>bids</code></li>
+        <li><code>orders</code> 1—N <code>reviews</code> (по одной с каждой стороны)</li>
+        <li><code>orders</code> 1—1 (опц.) <code>disputes</code> 1—N <code>dispute_evidence</code>, 1—N <code>dispute_messages</code></li>
+        <li><code>executor_profiles</code> 1—N <code>subscriptions</code> N—1 <code>subscription_plans</code>; <code>subscriptions</code> 1—N <code>payments</code></li>
+        <li><code>users</code> 1—1 <code>telegram_links</code>; <code>users</code> 1—N <code>notifications</code></li>
+      </ul>
+      <div class="callout note">Индексы: <code>GIST</code> по всем полям <code>geography(Point)</code> для радиус-поиска
+      (<code>ST_DWithin</code>); составной индекс <code>(service_category, region_id, status)</code> на <code>orders</code>
+      для быстрого матчинга; полнотекстовый индекс (<code>pg_trgm</code>/<code>tsvector</code>) на
+      <code>executor_profiles.description</code> и <code>orders.title/description</code> для поиска по каталогу.</div>
+    </section>
+
+    <!-- ================= 3. IA ================= -->
+    <section id="ia">
+      <h2 class="sec-title"><span class="module-tag">3</span> Структура интерфейса (карта разделов)</h2>
+
+      <h3>3.1 Открытая зона (без авторизации)</h3>
+      <ul>
+        <li><strong>Главная (/)</strong> — оффер, «как это работает» в 3 шага, преимущества, витрина из 4–6
+        обезличенных карточек исполнителей/выполненных проектов (без клика), кнопки «Разместить заказ» и
+        «Стать исполнителем» — обе ведут к paywall-модалке.</li>
+        <li><strong>О платформе</strong>, <strong>Тарифы для исполнителей</strong> (маркетинговое описание,
+        без входа в личный кабинет), <strong>Контакты/Поддержка</strong>.</li>
+        <li><strong>/auth/login</strong>, <strong>/auth/register</strong> — форма email + кнопка «Войти через Google».</li>
+      </ul>
+
+      <h3>3.2 Закрытая зона (после регистрации)</h3>
+      <table>
+        <tr><th>Раздел</th><th>Для кого</th><th>Назначение</th></tr>
+        <tr><td>/orders/new — Конструктор заказа</td><td>Заказчик</td><td>мультимедийная форма создания заявки (модуль 2)</td></tr>
+        <tr><td>/orders/:id</td><td>Заказчик, приглашённые исполнители</td><td>карточка заказа, статус, ставки аукциона, чат</td></tr>
+        <tr><td>/orders (мои заказы)</td><td>Заказчик</td><td>список со статусами (open/в аукционе/в работе/завершён/спор)</td></tr>
+        <tr><td>/catalog</td><td>Заказчик</td><td>каталог исполнителей с фильтрами по услуге, региону, рейтингу</td></tr>
+        <tr><td>/map</td><td>Заказчик</td><td>интерактивная карта Узбекистана с исполнителями (модуль 4)</td></tr>
+        <tr><td>/executor/:id</td><td>Заказчик</td><td>публичная карточка исполнителя: станочный парк, габариты, отзывы, портфолио</td></tr>
+        <tr><td>/dashboard (лента заказов)</td><td>Исполнитель</td><td>лента подобранных заказов + активные аукционы, где он участвует</td></tr>
+        <tr><td>/profile/equipment</td><td>Исполнитель</td><td>редактирование станочного парка и габаритов (модуль 3)</td></tr>
+        <tr><td>/subscription</td><td>Исполнитель</td><td>тариф, оплата, история платежей (модуль 7)</td></tr>
+        <tr><td>/reviews</td><td>Оба</td><td>оставленные/полученные отзывы (модуль 5)</td></tr>
+        <tr><td>/disputes/:id</td><td>Оба + админ</td><td>карточка спора с загрузкой доказательств (модуль 6)</td></tr>
+        <tr><td>/settings</td><td>Оба</td><td>язык интерфейса, уведомления, Telegram-привязка, смена пароля</td></tr>
+        <tr><td>/admin/*</td><td>Админ</td><td>верификация исполнителей, модерация, разбор споров, тарифы</td></tr>
+      </table>
+
+      <h3>3.3 Навигация исполнителя (нижнее/верхнее меню)</h3>
+      <p><code>Лента заказов</code> · <code>Мои ставки</code> · <code>Профиль и оборудование</code> ·
+      <code>Отзывы</code> · <code>Подписка</code> · <code>Сообщения</code></p>
+
+      <h3>3.4 Навигация заказчика</h3>
+      <p><code>Мои заказы</code> · <code>Новый заказ</code> · <code>Каталог</code> · <code>Карта</code> ·
+      <code>Отзывы</code> · <code>Сообщения</code></p>
+    </section>
+
+    <!-- ================= 4. МОДУЛЬ 1 ================= -->
+    <section id="m1">
+      <h2 class="sec-title"><span class="module-tag">4</span> Модуль 1 — Авторизация и «жёсткий» Paywall</h2>
+      <p><strong>Логика доступа:</strong> публичны только маркетинговые страницы (главная, о платформе, тарифы,
+      auth). Любой переход на защищённый роут при отсутствии активной сессии перехватывается
+      route-guard'ом (middleware), который вместо загрузки страницы показывает модальное окно
+      и <em>не</em> выполняет навигацию (в адресной строке остаётся исходный URL или редирект на
+      <code>/?authRequired=1&next=/orders/new</code>).</p>
+
+      <h4>User Flow: попытка неавторизованного доступа</h4>
+      <ol class="flow">
+        <li data-n="1">Гость открывает главную страницу — доступна полностью, без ограничений.</li>
+        <li data-n="2">Гость кликает «Разместить заказ» / «Каталог» / «Личный кабинет».</li>
+        <li data-n="3">Фронтенд проверяет наличие валидного JWT/сессии → сессии нет.</li>
+        <li data-n="4">Показывается модальное окно: «Для продолжения работы необходима регистрация» с двумя
+        вкладками — «Войти» / «Зарегистрироваться», и кнопкой «Войти через Google».</li>
+        <li data-n="5">Целевой URL сохраняется как <code>next</code> — после успешной авторизации пользователь
+        автоматически попадает туда, куда изначально пытался перейти.</li>
+      </ol>
+
+      <h4>User Flow: регистрация через Email</h4>
+      <ol class="flow">
+        <li data-n="1">Пользователь выбирает роль: «Я заказчик» / «Я исполнитель».</li>
+        <li data-n="2">Вводит email, пароль, подтверждение пароля, выбирает язык интерфейса (RU / Oʻzbekcha (lotin) / Ўзбекча (кирилл)).</li>
+        <li data-n="3">Система создаёт <code>users</code> со статусом <code>pending_verification</code>, отправляет письмо со ссылкой подтверждения.</li>
+        <li data-n="4">Пользователь переходит по ссылке → <code>is_email_verified = true</code>, <code>status = active</code>.</li>
+        <li data-n="5">Онбординг: заказчика ведут в конструктор заказа; исполнителя — на обязательное заполнение
+        профиля (модуль 3), без которого он не появляется в матчинге.</li>
+      </ol>
+
+      <h4>User Flow: вход через Google</h4>
+      <ol class="flow">
+        <li data-n="1">Клик «Войти через Google» → OAuth-редирект → согласие пользователя.</li>
+        <li data-n="2">Бэкенд получает <code>email</code> и <code>google_id</code>. Если email уже существует —
+        аккаунты связываются (google_id прикрепляется к существующему <code>users</code>); если нет — создаётся
+        новый аккаунт, <code>is_email_verified = true</code> сразу (email подтверждён Google).</li>
+        <li data-n="3">Если это первый вход — короткий шаг выбора роли (заказчик/исполнитель), т.к. Google не
+        сообщает эту информацию.</li>
+      </ol>
+
+      <div class="callout warn">Восстановление пароля — стандартный email-flow. Для пользователей, вошедших
+      только через Google (<code>password_hash IS NULL</code>), кнопка «Забыли пароль» скрыта — предлагается
+      «Войти через Google».</div>
+    </section>
+
+    <!-- ================= 5. МОДУЛЬ 2 ================= -->
+    <section id="m2">
+      <h2 class="sec-title"><span class="module-tag">5</span> Модуль 2 — Конструктор заказа и автоподбор исполнителей</h2>
+
+      <h4>Мультимедийный конструктор — шаги формы</h4>
+      <ol class="flow">
+        <li data-n="1"><strong>Тип и категория:</strong> «Изготовление» или «Ремонт» → выбор категории работ
+        (токарные, фрезерные, лазерная резка, сварка, ремонт редуктора и т.д. — из справочника <code>service_categories</code>).</li>
+        <li data-n="2"><strong>Описание:</strong> текстовое поле (в родном языке пользователя,
+        <code>content_language</code> проставляется автоматически по <code>preferred_language</code> с
+        возможностью переключить).</li>
+        <li data-n="3"><strong>Медиа:</strong> drag-and-drop загрузка фото, чертежей (PDF/JPG/DWG-превью), видео
+        (до N МБ, с клиентским сжатием изображений перед отправкой).</li>
+        <li data-n="4"><strong>Параметры детали:</strong> материал, габариты (длина/диаметр/вес) — опционально,
+        но повышают точность матчинга и обязательны, если заявка ищет исполнителя по станочным ограничениям.</li>
+        <li data-n="5"><strong>Локация и бюджет:</strong> адрес объекта (для ремонта) или регион доставки
+        заготовки (для изготовления), опциональная вилка бюджета, желаемый срок и длительность аукциона
+        (24 / 48 / 72 часа).</li>
+        <li data-n="6"><strong>Публикация</strong> → <code>orders.status = published</code>, запускается матчинг.</li>
+      </ol>
+
+      <h4>Логика автоматического подбора исполнителей</h4>
+      <p>Сразу после публикации фоновая задача формирует ранжированный список кандидатов
+      (<code>order_matches</code>) по формуле взвешенной суммы:</p>
+      <table>
+        <tr><th>Критерий</th><th>Вес</th><th>Условие</th></tr>
+        <tr><td>Совпадение категории услуг</td><td>обязательное</td><td><code>service_category</code> входит в <code>executor_capabilities.service_categories</code> — исполнители без совпадения исключаются</td></tr>
+        <tr><td>Габариты/вес детали</td><td>обязательное (если указано)</td><td><code>order.dimensions ≤ executor_capabilities.max_*</code></td></tr>
+        <tr><td>Материал</td><td>высокий</td><td>совпадение с <code>materials</code></td></tr>
+        <tr><td>Гео-близость</td><td>высокий</td><td>обратно пропорционален <code>distance_km</code> (ST_Distance), приоритет своему региону/городу</td></tr>
+        <tr><td>Рейтинг исполнителя</td><td>средний</td><td><code>rating_avg</code>, при отсутствии отзывов — нейтральный вес</td></tr>
+        <tr><td>Активная подписка</td><td>обязательное</td><td>исполнитель без активной подписки в матчинг не попадает (модуль 7)</td></tr>
+        <tr><td>Приоритет тарифа</td><td>бонус</td><td><code>subscription_plans.catalog_priority</code> поднимает исполнителя в списке</td></tr>
+      </table>
+      <ol class="flow">
+        <li data-n="1">Отбираются все исполнители, прошедшие обязательные фильтры.</li>
+        <li data-n="2">Оставшиеся ранжируются по сумме взвешенных критериев → топ-N (например, 15–20) получают
+        уведомление.</li>
+        <li data-n="3">Уведомления рассылаются одновременно: Telegram-бот (модуль 7) + push в личном кабинете
+        («Лента заказов»).</li>
+        <li data-n="4">Если через 25% времени аукциона ставок меньше 3 — система автоматически расширяет
+        радиус поиска и/или ослабляет негеографические веса, дозаявляя дополнительных исполнителей.</li>
+        <li data-n="5">Если кандидатов не найдено вовсе — заказчику показывается уведомление
+        «Пока нет подходящих исполнителей, мы оповестим вас, как только появится совпадение» и заказ остаётся
+        в статусе <code>matching</code> с фоновым пересчётом при регистрации новых исполнителей.</li>
+      </ol>
+    </section>
+
+    <!-- ================= 6. МОДУЛЬ 3 ================= -->
+    <section id="m3">
+      <h2 class="sec-title"><span class="module-tag">6</span> Модуль 3 — Профиль и техвозможности исполнителя</h2>
+      <p>Профиль исполнителя не считается «опубликованным» (не участвует в матчинге и не виден в каталоге/на
+      карте), пока не заполнен обязательный минимум: тип организации, регион/адрес с координатами, хотя бы
+      одна позиция станочного парка и хотя бы одна запись в <code>executor_capabilities</code> с указанием
+      габаритов и услуг.</p>
+
+      <h4>User Flow: онбординг исполнителя</h4>
+      <ol class="flow">
+        <li data-n="1">После регистрации — экран «Заполните профиль, чтобы начать получать заказы» с прогресс-баром
+        (Основная информация → Локация → Станочный парк → Габариты и материалы → Подписка).</li>
+        <li data-n="2"><strong>Основная информация:</strong> тип (мастер/цех/завод), название, описание,
+        контакты, ИНН/СТИР (для верификации).</li>
+        <li data-n="3"><strong>Локация:</strong> адрес вводится текстом + подтверждается перетаскиванием
+        маркера на карте (геокодирование с ручной корректировкой), регион/город определяются автоматически по
+        координатам.</li>
+        <li data-n="4"><strong>Станочный парк:</strong> мультивыбор из справочника оборудования +
+        возможность добавить произвольную позицию с модерацией админом.</li>
+        <li data-n="5"><strong>Габариты и допуски:</strong> форма макс. длины, диаметра, ширины/высоты, веса;
+        мультивыбор материалов и категорий услуг (то, что реально сверяется алгоритмом матчинга).</li>
+        <li data-n="6"><strong>Портфолио (опц.):</strong> фото выполненных работ — повышает конверсию в
+        каталоге, не обязателен для матчинга.</li>
+        <li data-n="7">Заявка на верификацию уходит админу (бейдж «Проверено» после ручной/полуавтоматической
+        проверки ИНН); профиль уже участвует в матчинге и до верификации, но с меньшим весом ранжирования.</li>
+        <li data-n="8">Выбор тарифа подписки → оплата (модуль 7) → профиль полностью активен.</li>
+      </ol>
+      <div class="callout note">Редактирование станочного парка и габаритов доступно в любой момент из
+      <code>/profile/equipment</code>; изменения пересчитывают матчинг для новых заказов немедленно, но не
+      затрагивают уже отправленные <code>order_matches</code>.</div>
+    </section>
+
+    <!-- ================= 7. МОДУЛЬ 4 ================= -->
+    <section id="m4">
+      <h2 class="sec-title"><span class="module-tag">7</span> Модуль 4 — Карта и гео-поиск</h2>
+      <ol class="flow">
+        <li data-n="1">Заказчик открывает раздел «Карта» — интерактивная карта Узбекистана (Leaflet/MapLibre +
+        тайлы, напр. 2GIS/OSM) со всеми верифицированными и активными (подписка не истекла) исполнителями в
+        виде кластеризованных маркеров.</li>
+        <li data-n="2">Фильтры на карте: категория услуг, тип организации (мастер/цех/завод), минимальный
+        рейтинг, только с активной подпиской.</li>
+        <li data-n="3">Клик по маркеру → всплывающая карточка с кратким описанием, рейтингом, ключевым
+        оборудованием и ссылкой на полный профиль <code>/executor/:id</code>.</li>
+        <li data-n="4"><strong>Геопоиск «рядом»:</strong> кнопка «Показать рядом со мной» — браузерная
+        геолокация или ручной ввод адреса объекта → SQL-запрос
+        <code>ST_DWithin(executor.location, point, radius)</code> с выбором радиуса (5/10/25/50/100 км) —
+        список сортируется по расстоянию.</li>
+        <li data-n="5">Из карты можно сразу перейти в конструктор заказа с предзаполненной локацией объекта
+        или отправить точечный запрос конкретному исполнителю в обход общего аукциона («прямой заказ»).</li>
+      </ol>
+      <div class="callout note">Та же гео-логика используется в модуле 2 (автоподбор): координаты заказа
+      сравниваются с координатами исполнителей через тот же индекс <code>GIST</code>, поэтому «Карта» и
+      «Автоподбор» дают согласованные результаты.</div>
+    </section>
+
+    <!-- ================= 8. МОДУЛЬ 5 ================= -->
+    <section id="m5">
+      <h2 class="sec-title"><span class="module-tag">8</span> Модуль 5 — Отзывы и рейтинги</h2>
+      <ol class="flow">
+        <li data-n="1">Отзыв становится доступен только когда <code>orders.status = completed</code>
+        (заказчик подтвердил приёмку работы либо истёк срок автоматического подтверждения — 7 дней без
+        возражений).</li>
+        <li data-n="2">Обеим сторонам приходит уведомление «Оцените сотрудничество» со ссылкой на форму
+        отзыва по шкале 1–5 + детализация (для исполнителя: качество, соблюдение сроков, коммуникация;
+        для заказчика: чёткость ТЗ, своевременность оплаты, коммуникация) + текстовый комментарий.</li>
+        <li data-n="3">Отзывы скрыты друг от друга до момента, пока не оставлены обе стороны, либо не истекло
+        14 дней с завершения заказа — после чего публикуются одновременно (защита от предвзятости «жду его
+        оценку, чтобы ответить тем же»).</li>
+        <li data-n="4">Опубликованный отзыв пересчитывает <code>rating_avg</code>/<code>reviews_count</code> в
+        профиле, влияет на позицию в каталоге, на карте и в весах матчинга (модуль 2).</li>
+        <li data-n="5">Жалоба на недостоверный отзыв → эскалация админу (не путать с арбитражем по заказу,
+        модуль 6) с возможностью скрыть отзыв до проверки.</li>
+      </ol>
+    </section>
+
+    <!-- ================= 9. МОДУЛЬ 6 ================= -->
+    <section id="m6">
+      <h2 class="sec-title"><span class="module-tag">9</span> Модуль 6 — Арбитраж и медиация споров</h2>
+      <p>Статусы спора:
+        <span class="status-chip st-open">open</span>
+        <span class="status-chip st-progress">evidence_collection</span>
+        <span class="status-chip st-progress">in_review</span>
+        <span class="status-chip st-done">resolved_customer / resolved_executor / resolved_partial</span>
+        <span class="status-chip st-dispute">closed</span>
+      </p>
+      <ol class="flow">
+        <li data-n="1">Любая сторона на заказе в статусе <code>in_progress</code> или <code>completed</code>
+        (в течение 14 дней после завершения) нажимает «Открыть спор», указывает причину
+        (брак / задержка / претензия по качеству / расхождение по цене / другое) и текстовое описание.</li>
+        <li data-n="2"><code>orders.status → disputed</code>; вторая сторона получает уведомление и обязана
+        ответить в течение 48 часов.</li>
+        <li data-n="3"><strong>Сбор доказательств:</strong> обе стороны загружают фото/видео в
+        <code>dispute_evidence</code> — заказчик подтверждает брак/несоответствие, исполнитель — процесс
+        и результат работы, соответствие ТЗ. Возможна переписка в <code>dispute_messages</code>.</li>
+        <li data-n="4">Спор автоматически или вручную (по кнопке «Готово к рассмотрению» от обеих сторон, либо
+        по истечении 5 дней сбора доказательств) переходит в <code>in_review</code> и назначается
+        администратору из очереди (round-robin / по загрузке).</li>
+        <li data-n="5">Администратор изучает доказательства, при необходимости запрашивает дополнительные
+        материалы (внутренние заметки/сообщения сторонам), выносит решение с обоснованием.</li>
+        <li data-n="6">Решение фиксируется (<code>resolution_text</code>, итоговый статус), обе стороны
+        уведомляются, заказ переводится в финальный статус (<code>completed</code> с пометкой о споре или
+        <code>cancelled</code>).</li>
+        <li data-n="7">Решение влияет на рейтинг: спор, решённый в пользу заказчика, может блокировать
+        публикацию заведомо положительного отзыва исполнителя по этому заказу (анти-накрутка).</li>
+      </ol>
+      <div class="callout risk"><strong>Рекомендация на будущее (вне текущего ТЗ, но важно для зрелости
+      платформы):</strong> ввести эскроу — оплата исполнителю удерживается платформой до подтверждения
+      приёмки заказчиком, а при открытии спора автоматически замораживается до решения администратора. Это
+      резко повышает эффективность арбитража, так как решение админа получает реальный денежный вес, а не
+      только репутационный.</div>
+    </section>
+
+    <!-- ================= 10. МОДУЛЬ 7 ================= -->
+    <section id="m7">
+      <h2 class="sec-title"><span class="module-tag">10</span> Модуль 7 — Telegram-бот, аукцион и монетизация</h2>
+
+      <h4>Привязка Telegram</h4>
+      <ol class="flow">
+        <li data-n="1">В разделе «Настройки» исполнитель нажимает «Подключить Telegram» → бот генерирует
+        одноразовый deep-link (<code>t.me/PlatformBot?start=&lt;token&gt;</code>).</li>
+        <li data-n="2">Исполнитель открывает бота, нажимает Start → бэкенд по токену связывает
+        <code>telegram_chat_id</code> с <code>users.id</code> в таблице <code>telegram_links</code>.</li>
+      </ol>
+
+      <h4>Тарифные планы (пример)</h4>
+      <table>
+        <tr><th>Тариф</th><th>Ставок в мес.</th><th>Скорость Telegram-алертов</th><th>Приоритет в матчинге</th></tr>
+        <tr><td>Basic</td><td>до 10</td><td>с задержкой ~2 часа</td><td>базовый</td></tr>
+        <tr><td>Standard</td><td>до 40</td><td>мгновенно</td><td>средний</td></tr>
+        <tr><td>Pro</td><td>без лимита</td><td>мгновенно + первым в очереди</td><td>максимальный</td></tr>
+      </table>
+      <p>Оплата — Payme / Click / Uzcard (локальные для Узбекистана), автопродление ежемесячно; при
+      <code>subscription.status = expired</code> исполнитель исключается из автоподбора (модуль 2) и скрывается
+      из каталога/карты, но сохраняет доступ к своему кабинету и истории заказов для продления.</p>
+
+      <h4>User Flow: аукцион заказа целиком</h4>
+      <ol class="flow">
+        <li data-n="1">Заказ опубликован → топ-N исполнителей получают Telegram-сообщение: краткое описание,
+        категория, регион, фото (первое из вложений), кнопка «Открыть заказ на платформе».</li>
+        <li data-n="2">Исполнитель переходит по ссылке (deep-link открывает конкретный <code>/orders/:id</code>
+        в мини-приложении/браузере), изучает полное описание, чертежи, видео.</li>
+        <li data-n="3">Исполнитель подаёт ставку: цена, срок выполнения, комментарий/условия →
+        <code>bids</code>, статус <code>active</code>. Проверяется лимит <code>max_bids_per_month</code> тарифа.</li>
+        <li data-n="4">Заказчик в реальном времени видит список ставок (сортировка по цене/сроку/рейтингу),
+        может открыть чат с конкретным исполнителем для уточнений — чат разблокируется при первом сообщении
+        заказчика.</li>
+        <li data-n="5">Исполнители, чью ставку «обошли» более выгодным предложением, получают Telegram-уведомление
+        «Вас обошли по цене» с возможностью подать новую ставку (пока аукцион открыт) — механика реального
+        тендера.</li>
+        <li data-n="6">По истечении <code>auction_deadline_at</code> либо по ручному выбору заказчика раньше
+        срока — заказчик нажимает «Выбрать исполнителя» на понравившейся ставке →
+        <code>order_assignments</code> создаётся, <code>orders.status → assigned</code>, остальные ставки
+        помечаются <code>rejected</code>, все участники получают итоговое уведомление (Telegram + in-app).</li>
+        <li data-n="7">Исполнитель отмечает начало работ (<code>in_progress</code>) и завершение
+        (<code>completed</code>, с подтверждением заказчика) → запускаются модуль 5 (отзывы) и, при
+        необходимости, модуль 6 (спор).</li>
+      </ol>
+
+      <h4>Команды Telegram-бота (минимальный набор)</h4>
+      <ul>
+        <li><code>/start</code> — привязка аккаунта</li>
+        <li><code>/orders</code> — список актуальных заказов, подобранных под профиль</li>
+        <li><code>/mybids</code> — статус поданных ставок</li>
+        <li><code>/subscription</code> — статус подписки, ссылка на продление</li>
+        <li>Настройка уведомлений (вкл/выкл по категориям) прямо в чате бота</li>
+      </ul>
+    </section>
+
+    <!-- ================= 11. NFR ================= -->
+    <section id="nfr">
+      <h2 class="sec-title"><span class="module-tag">11</span> Нефункциональные требования</h2>
+      <div class="grid2">
+        <div class="card">
+          <h4>🔒 Безопасность</h4>
+          <ul>
+            <li>Хеширование паролей (bcrypt/argon2), OAuth 2.0 для Google, JWT + refresh-токены.</li>
+            <li>Права доступа проверяются и на фронтенде (route-guard/paywall), и обязательно на бэкенде
+            (RLS/сервисный слой) — фронтовая блокировка не является security-контролем.</li>
+            <li>Подписанные временные URL для загруженных медиа (не публичные пути к бакету).</li>
+            <li>Rate-limiting на подачу ставок и создание заказов — анти-спам/анти-накрутка.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>🌍 Мультиязычность</h4>
+          <ul>
+            <li>UI-строки — статические словари <code>ru / uz_latin / uz_cyrillic</code>, переключатель языка
+            в шапке, сохраняется в <code>users.preferred_language</code>.</li>
+            <li>Латиница и кириллица узбекского — не автоматическая транслитерация «на лету» для UGC
+            (риск ошибок), а выбор языка ввода самим пользователем + опциональный машинный перевод
+            (<code>content_translations</code>) для контента другого языка.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>📈 Масштабируемость</h4>
+          <ul>
+            <li>Матчинг и рассылка уведомлений — асинхронные фоновые задачи (очередь), не блокируют публикацию
+            заказа.</li>
+            <li>Геозапросы — индексы PostGIS, кэш каталога/карты (Redis) с инвалидацией по изменению профиля.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>⚖️ Соответствие законодательству РУз</h4>
+          <ul>
+            <li>Закон «О персональных данных» РУз — согласие на обработку данных при регистрации, хранение
+            данных с учётом требований локализации.</li>
+            <li>Интеграция локальных платёжных систем (Payme, Click, Uzcard/Humo) для подписки исполнителей.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 12. STACK ================= -->
+    <section id="stack">
+      <h2 class="sec-title"><span class="module-tag">12</span> Рекомендуемый технологический стек</h2>
+      <table>
+        <tr><th>Слой</th><th>Технология</th><th>Комментарий</th></tr>
+        <tr><td>Backend</td><td>Node.js (NestJS) или Python (FastAPI/Django)</td><td>REST/GraphQL API, фоновые задачи через очередь (BullMQ/Celery)</td></tr>
+        <tr><td>БД</td><td>PostgreSQL + PostGIS</td><td>гео-запросы, полнотекстовый поиск</td></tr>
+        <tr><td>Кэш/очереди</td><td>Redis</td><td>кэш каталога/карты, очередь уведомлений</td></tr>
+        <tr><td>Хранилище файлов</td><td>S3-совместимое (MinIO / облако)</td><td>фото, чертежи, видео, доказательства споров</td></tr>
+        <tr><td>Frontend Web</td><td>React/Next.js или Vue/Nuxt</td><td>SSR для главной (SEO), SPA для закрытой зоны</td></tr>
+        <tr><td>Карта</td><td>MapLibre GL / Leaflet + тайлы 2ГИС или OSM</td><td>2ГИС даёт лучшее покрытие адресов Узбекистана</td></tr>
+        <tr><td>Telegram</td><td>Telegram Bot API (webhook)</td><td>уведомления, deep-links, мини-приложение (Telegram Web App) — опционально для подачи ставки прямо в боте</td></tr>
+        <tr><td>Платежи</td><td>Payme Business API, Click Merchant API, Uzcard</td><td>подписочные платежи</td></tr>
+        <tr><td>Auth</td><td>Email/пароль + Google OAuth 2.0</td><td>как указано в ТЗ</td></tr>
+      </table>
+    </section>
+
+    <!-- ================= 13. ROADMAP ================= -->
+    <section id="roadmap">
+      <h2 class="sec-title"><span class="module-tag">13</span> Дорожная карта</h2>
+      <div class="grid2">
+        <div class="card">
+          <h4>MVP (этап 1)</h4>
+          <ul>
+            <li>Регистрация email/Google + paywall</li>
+            <li>Конструктор заказа (текст+фото), профиль исполнителя (базовые габариты/оборудование)</li>
+            <li>Автоподбор + карта + гео-поиск</li>
+            <li>Ставки/аукцион без Telegram (только in-app уведомления)</li>
+            <li>Отзывы, простая подписка (ручная активация админом)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Этап 2</h4>
+          <ul>
+            <li>Telegram-бот с уведомлениями и deep-links</li>
+            <li>Онлайн-оплата подписки (Payme/Click)</li>
+            <li>Модуль арбитража с загрузкой доказательств</li>
+            <li>Видео в заявках, машинный перевод UGC</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Этап 3</h4>
+          <ul>
+            <li>Telegram Mini App для подачи ставок прямо в боте</li>
+            <li>Эскроу-платежи по заказам</li>
+            <li>Расширенная аналитика/рейтинги для админа, антифрод-скоринг отзывов</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <p style="text-align:center;"><a href="#" class="anchor-back" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Наверх</a></p>
+  </div>
+
+  <footer class="page-footer">Технический документ подготовлен как проектный кейс портфолио</footer>
+</div>
+</body>
+</html>
