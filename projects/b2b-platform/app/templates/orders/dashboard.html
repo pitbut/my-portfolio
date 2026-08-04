@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Лента заказов{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Лента заказов</h1>
+  <p class="profile-page__hint">Заказы, подобранные под ваш станочный парк, габариты и регион.</p>
+
+  {% if matches %}
+  <table class="data-table">
+    <thead><tr><th>Заявка</th><th>Категория</th><th>Расстояние</th><th>Статус</th><th>Моя ставка</th><th></th></tr></thead>
+    <tbody>
+      {% for m in matches %}
+      {% set order = m.order %}
+      {% set bid = my_bid_by_order.get(order.id) %}
+      <tr>
+        <td>{{ order.title }}</td>
+        <td>{{ order.service_category.name_ru }}</td>
+        <td>{{ '%.0f км'|format(m.distance_km) if m.distance_km is not none else '—' }}</td>
+        <td><span class="status-chip status-chip--{{ order.status }}">{{ order.status }}</span></td>
+        <td>{% if bid %}{{ bid.price }} {{ bid.currency }} / {{ bid.lead_time_days }} дн. ({{ bid.status }}){% else %}—{% endif %}</td>
+        <td><a href="{{ url_for('orders.order_detail', order_id=order.id) }}">Открыть</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Пока нет подобранных заказов — как только появится подходящая заявка, вы увидите её здесь и получите уведомление.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -2,6 +2,7 @@
 from flask import Blueprint, redirect, render_template, request, session, url_for
 from flask_login import current_user
 
+from app.decorators import paywall_required
 from app.i18n import SUPPORTED_LANGUAGES
 
 bp = Blueprint("main", __name__)
@@ -28,3 +29,21 @@ def set_language(lang):
         current_user.preferred_language = lang
         db.session.commit()
     return redirect(request.referrer or url_for("main.index"))
+
+
+@bp.route("/notifications")
+@paywall_required
+def notifications():
+    from datetime import datetime
+
+    from app import db
+    from app.models import Notification
+
+    items = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(100).all()
+    unread_ids = [n.id for n in items if n.read_at is None]
+    if unread_ids:
+        Notification.query.filter(Notification.id.in_(unread_ids)).update(
+            {"read_at": datetime.utcnow()}, synchronize_session=False
+        )
+        db.session.commit()
+    return render_template("main/notifications.html", items=items)

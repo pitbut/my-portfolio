@@ -36,6 +36,16 @@ class Config:
     GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
     GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 
+    # Загруженные пользователями фото (заказы, объявления барахолки,
+    # доказательства в спорах) уходят на ImgBB — Render не хранит файлы на
+    # диске между деплоями. Без ключа загрузка фото просто недоступна, форма
+    # сохраняется без фото.
+    IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY")
+
+    # Telegram-бот (модуль 7). Без токена уведомления идут только in-app.
+    TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME")
+
     WTF_CSRF_TIME_LIMIT = None  # токен не должен протухать раньше сессии
 
 

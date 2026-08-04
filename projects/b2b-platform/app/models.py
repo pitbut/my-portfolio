@@ -307,3 +307,202 @@ class ExecutorCapability(db.Model):
 
     def __repr__(self):
         return f"<ExecutorCapability executor_id={self.executor_id}>"
+
+
+# --- модуль 2: заказы, медиа, автоподбор, аукцион ---
+
+ORDER_OPEN_STATUSES = ("published",)
+ORDER_STATUSES = (
+    "draft", "published", "assigned", "in_progress", "completed", "disputed", "cancelled",
+)
+
+
+class Order(TimestampMixin, db.Model):
+    """Заявка заказчика на изготовление или ремонт."""
+
+    __tablename__ = "orders"
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey("customer_profiles.id"), nullable=False)
+
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    content_language = db.Column(db.String(20), nullable=False, default="ru")
+    order_type = db.Column(db.String(20), nullable=False)  # manufacturing | repair
+    service_category_id = db.Column(db.Integer, db.ForeignKey("service_categories.id"), nullable=False)
+    material_id = db.Column(db.Integer, db.ForeignKey("materials.id"), nullable=True)
+
+    dimensions_length_mm = db.Column(db.Integer, nullable=True)
+    dimensions_diameter_mm = db.Column(db.Integer, nullable=True)
+    dimensions_width_mm = db.Column(db.Integer, nullable=True)
+    dimensions_height_mm = db.Column(db.Integer, nullable=True)
+    weight_kg = db.Column(db.Numeric(10, 2), nullable=True)
+
+    budget_min = db.Column(db.Numeric(12, 2), nullable=True)
+    budget_max = db.Column(db.Numeric(12, 2), nullable=True)
+    deadline_date = db.Column(db.Date, nullable=True)
+
+    region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=False)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    address_text = db.Column(db.String(500), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+
+    auction_deadline_at = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="published")
+
+    customer = db.relationship("CustomerProfile", backref="orders")
+    service_category = db.relationship("ServiceCategory")
+    material = db.relationship("Material")
+    region = db.relationship("Region")
+    city = db.relationship("City")
+    media = db.relationship("OrderMedia", backref="order", cascade="all, delete-orphan", order_by="OrderMedia.sort_order")
+    matches = db.relationship("OrderMatch", backref="order", cascade="all, delete-orphan")
+    bids = db.relationship("Bid", backref="order", cascade="all, delete-orphan", order_by="Bid.price")
+    assignment = db.relationship("OrderAssignment", backref="order", uselist=False, cascade="all, delete-orphan")
+
+    @property
+    def is_open_for_bids(self):
+        if self.status != "published":
+            return False
+        if self.auction_deadline_at and self.auction_deadline_at < datetime.utcnow():
+            return False
+        return True
+
+    def __repr__(self):
+        return f"<Order {self.id} {self.title!r} status={self.status!r}>"
+
+
+class OrderMedia(db.Model):
+    """Фото/чертежи/видео/документы, приложенные к заявке."""
+
+    __tablename__ = "order_media"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    media_type = db.Column(db.String(20), nullable=False)  # photo | drawing | video | document
+    file_url = db.Column(db.String(1000), nullable=False)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<OrderMedia order_id={self.order_id} type={self.media_type!r}>"
+
+
+class OrderMatch(db.Model):
+    """Результат автоподбора: кандидат-исполнитель под конкретный заказ."""
+
+    __tablename__ = "order_matches"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    executor_id = db.Column(db.Integer, db.ForeignKey("executor_profiles.id"), nullable=False)
+    match_score = db.Column(db.Numeric(6, 2), nullable=False, default=0)
+    distance_km = db.Column(db.Numeric(8, 2), nullable=True)
+    notified_at = db.Column(db.DateTime, nullable=True)
+    viewed_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    executor = db.relationship("ExecutorProfile")
+
+    __table_args__ = (db.UniqueConstraint("order_id", "executor_id", name="uq_order_match"),)
+
+    def __repr__(self):
+        return f"<OrderMatch order_id={self.order_id} executor_id={self.executor_id} score={self.match_score}>"
+
+
+class Bid(TimestampMixin, db.Model):
+    """Ставка исполнителя в аукционе по заказу."""
+
+    __tablename__ = "bids"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    executor_id = db.Column(db.Integer, db.ForeignKey("executor_profiles.id"), nullable=False)
+    price = db.Column(db.Numeric(12, 2), nullable=False)
+    currency = db.Column(db.String(10), nullable=False, default="UZS")
+    lead_time_days = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="active")  # active | withdrawn | accepted | rejected
+
+    executor = db.relationship("ExecutorProfile")
+
+    __table_args__ = (db.UniqueConstraint("order_id", "executor_id", name="uq_order_bid_per_executor"),)
+
+    def __repr__(self):
+        return f"<Bid order_id={self.order_id} executor_id={self.executor_id} price={self.price}>"
+
+
+class OrderAssignment(db.Model):
+    """Назначение победителя аукциона по заказу (1:1)."""
+
+    __tablename__ = "order_assignments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), unique=True, nullable=False)
+    bid_id = db.Column(db.Integer, db.ForeignKey("bids.id"), nullable=False)
+    agreed_price = db.Column(db.Numeric(12, 2), nullable=False)
+    agreed_deadline = db.Column(db.Date, nullable=True)
+    assigned_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
+
+    bid = db.relationship("Bid")
+
+    def __repr__(self):
+        return f"<OrderAssignment order_id={self.order_id} bid_id={self.bid_id}>"
+
+
+class OrderStatusHistory(db.Model):
+    """Журнал смены статусов заказа (аудит)."""
+
+    __tablename__ = "order_status_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    from_status = db.Column(db.String(20), nullable=True)
+    to_status = db.Column(db.String(20), nullable=False)
+    changed_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<OrderStatusHistory order_id={self.order_id} -> {self.to_status!r}>"
+
+
+def record_status_change(order, to_status, user=None):
+    """Общий помощник: меняет статус заказа и пишет запись в журнал."""
+    from_status = order.status
+    order.status = to_status
+    db.session.add(OrderStatusHistory(order_id=order.id, from_status=from_status, to_status=to_status,
+                                       changed_by_user_id=user.id if user else None))
+
+
+# --- единая нотификационная шина (используется модулями 2, 7, 8, 9) ---
+
+NOTIFICATION_TYPES = (
+    "new_order_match", "outbid", "bid_accepted", "bid_rejected", "order_completed", "dispute_update",
+    "subscription_expiring", "review_received", "listing_response", "vacancy_response", "resume_invite",
+)
+
+
+class Notification(db.Model):
+    """Запись о событии, о котором пользователь должен быть уведомлён.
+
+    Общая точка входа для всех модулей (заказы/барахолка/вакансии) — модуль 7
+    (Telegram-бот) просто добавляет ещё один канал доставки поверх той же
+    таблицы, ничего не меняя в остальных модулях."""
+
+    __tablename__ = "notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    type = db.Column(db.String(30), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    body = db.Column(db.Text, nullable=True)
+    url = db.Column(db.String(500), nullable=True)
+    telegram_sent = db.Column(db.Boolean, nullable=False, default=False)
+    read_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    user = db.relationship("User")
+
+    def __repr__(self):
+        return f"<Notification user_id={self.user_id} type={self.type!r}>"

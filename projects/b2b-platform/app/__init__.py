@@ -58,10 +58,12 @@ def create_app(config_name=None):
     from app.routes.main import bp as main_bp
     from app.routes.auth import bp as auth_bp
     from app.routes.profile import bp as profile_bp
+    from app.routes.orders import bp as orders_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(profile_bp, url_prefix="/profile")
+    app.register_blueprint(orders_bp)
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 
@@ -86,6 +88,16 @@ def create_app(config_name=None):
     @app.context_processor
     def inject_google_available():
         return {"google_login_available": google_oauth is not None}
+
+    @app.context_processor
+    def inject_unread_notifications():
+        from flask_login import current_user
+
+        if current_user.is_authenticated:
+            from app.notify import unread_count
+
+            return {"unread_notifications": unread_count(current_user)}
+        return {"unread_notifications": 0}
 
     return app
 

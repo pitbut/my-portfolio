@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Новый заказ{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Новая заявка на изготовление или ремонт</h1>
+  <p class="profile-page__hint">Опишите задачу в любом удобном формате — текстом, фото, чертежами, видео. Сразу после публикации мы подберём подходящих исполнителей.</p>
+
+  <form method="post" action="{{ url_for('orders.new_order') }}" enctype="multipart/form-data" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="role-fieldset">
+      <legend>Тип заявки *</legend>
+      <label><input type="radio" name="order_type" value="manufacturing" {{ 'checked' if form.get('order_type') == 'manufacturing' }} required> Изготовление</label>
+      <label><input type="radio" name="order_type" value="repair" {{ 'checked' if form.get('order_type') == 'repair' }}> Ремонт</label>
+    </fieldset>
+
+    <label>Название заявки *
+      <input type="text" name="title" value="{{ form.get('title', '') }}" placeholder="напр. Токарная обточка вала, 5 шт." required>
+    </label>
+
+    <label>Описание *
+      <textarea name="description" rows="5" required placeholder="Что нужно сделать, какие требования, есть ли чертёж">{{ form.get('description', '') }}</textarea>
+    </label>
+
+    <div class="form-row">
+      <label>Категория работ *
+        <select name="service_category_id" required>
+          <option value="">— выберите —</option>
+          {% for sc in service_categories %}
+            <option value="{{ sc.id }}" {{ 'selected' if form.get('service_category_id')|string == sc.id|string }}>{{ sc.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Материал
+        <select name="material_id">
+          <option value="">— не важно / не знаю —</option>
+          {% for m in materials %}
+            <option value="{{ m.id }}">{{ m.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <h2 class="profile-section-title">Параметры детали (необязательно, но повышают точность подбора)</h2>
+    <div class="form-row form-row--4">
+      <label>Длина, мм <input type="number" name="dimensions_length_mm" min="0"></label>
+      <label>Диаметр, мм <input type="number" name="dimensions_diameter_mm" min="0"></label>
+      <label>Ширина, мм <input type="number" name="dimensions_width_mm" min="0"></label>
+      <label>Высота, мм <input type="number" name="dimensions_height_mm" min="0"></label>
+    </div>
+    <label>Вес заготовки, кг <input type="number" name="weight_kg" min="0" step="0.1"></label>
+
+    <h2 class="profile-section-title">Медиа</h2>
+    <label>Фото (можно несколько) <input type="file" name="photos" accept="image/*" multiple></label>
+    <label>Чертёж (изображение) <input type="file" name="drawing" accept="image/*"></label>
+    <label>Ссылка на видео (YouTube, Google Диск и т.п.) <input type="url" name="video_url" placeholder="https://"></label>
+    <label>Ссылка на документ (PDF-чертёж и т.п.) <input type="url" name="document_url" placeholder="https://"></label>
+
+    <h2 class="profile-section-title">Локация и условия</h2>
+    <div class="form-row">
+      <label>Регион *
+        <select name="region_id" id="region_id" required>
+          <option value="">— выберите —</option>
+          {% for region in regions %}
+            <option value="{{ region.id }}">{{ region.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Город
+        <select name="city_id" id="city_id">
+          <option value="">— сначала выберите регион —</option>
+        </select>
+      </label>
+    </div>
+    <label>Адрес объекта <input type="text" name="address_text" placeholder="для ремонта на месте"></label>
+    <label>Уточните точку на карте</label>
+    <div id="locationMap" class="location-map"></div>
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
+
+    <div class="form-row">
+      <label>Бюджет от, UZS <input type="number" name="budget_min" min="0"></label>
+      <label>Бюджет до, UZS <input type="number" name="budget_max" min="0"></label>
+    </div>
+    <div class="form-row">
+      <label>Желаемый срок <input type="date" name="deadline_date"></label>
+      <label>Длительность аукциона
+        <select name="auction_hours">
+          <option value="24">24 часа</option>
+          <option value="48" selected>48 часов</option>
+          <option value="72">72 часа</option>
+        </select>
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn--primary">Опубликовать заявку</button>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  initRegionCityCascade('region_id', 'city_id');
+  initLocationMap('locationMap', 'latitude', 'longitude');
+});
+</script>
+{% endblock %}

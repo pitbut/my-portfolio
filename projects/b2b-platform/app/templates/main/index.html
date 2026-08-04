@@ -7,7 +7,7 @@
     <h1>{{ t('home.title') }}</h1>
     <p class="hero__subtitle">{{ t('home.subtitle') }}</p>
     <div class="hero__actions">
-      <a class="btn btn--primary" href="{{ url_for('profile.customer_edit') }}">{{ t('home.cta_order') }}</a>
+      <a class="btn btn--primary" href="{{ url_for('orders.new_order') }}">{{ t('home.cta_order') }}</a>
       <a class="btn btn--secondary" href="{{ url_for('profile.executor_edit') }}">{{ t('home.cta_executor') }}</a>
     </div>
   </div>

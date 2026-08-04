@@ -100,6 +100,22 @@ textarea{resize:vertical;}
 .empty-hint{color:var(--sub);font-style:italic;}
 .hint{color:var(--sub);font-weight:400;font-size:.8em;}
 
+/* --- orders --- */
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
+.status-chip{display:inline-block;padding:3px 12px;border-radius:14px;font-size:.78em;font-weight:700;background:#eef1f6;color:var(--bg2);}
+.status-chip--published{background:#eef3ff;color:var(--accent2);}
+.status-chip--assigned{background:#fff4d6;color:var(--warn);}
+.status-chip--in_progress{background:#fff4d6;color:var(--warn);}
+.status-chip--completed{background:#e5f6ec;color:var(--accent);}
+.status-chip--disputed{background:#fdeaea;color:var(--danger);}
+.status-chip--cancelled{background:#eee;color:var(--sub);}
+.order-meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--sub);font-size:.9em;margin:10px 0 18px;}
+.order-description{white-space:pre-wrap;background:#fff;border-radius:10px;padding:16px 18px;box-shadow:0 4px 14px rgba(0,0,0,.05);}
+.order-dimensions{color:var(--sub);font-size:.9em;}
+.order-media{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0;}
+.order-media__thumb{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+.order-media__link{align-self:center;}
+
 /* --- modal (paywall) --- */
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100;}
 .modal.is-open{display:flex;}
@@ -111,6 +127,15 @@ textarea{resize:vertical;}
 .modal__tab{flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;font-weight:700;color:var(--sub);cursor:pointer;}
 .modal__tab.is-active{color:var(--bg2);border-bottom-color:var(--gold);}
 .modal__panel form{display:flex;flex-direction:column;gap:12px;}
+
+/* --- notifications --- */
+.notif-badge{background:var(--danger);color:#fff;border-radius:10px;font-size:.7em;padding:1px 6px;margin-left:2px;}
+.notif-list{display:flex;flex-direction:column;gap:10px;}
+.notif-item{background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 4px 14px rgba(0,0,0,.05);}
+.notif-item__title{font-weight:700;color:var(--bg2);}
+.notif-item__body{color:var(--sub);font-size:.92em;margin-top:4px;}
+.notif-item__meta{color:var(--sub);font-size:.8em;margin-top:6px;}
+.notif-item__tg{color:var(--accent2);}
 
 /* --- footer --- */
 .site-footer{background:var(--bg1);color:rgba(255,255,255,.6);padding:20px 0;margin-top:40px;font-size:.85em;}

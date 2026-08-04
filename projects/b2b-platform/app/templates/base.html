@@ -27,10 +27,14 @@
       <nav class="account-nav">
         {% if current_user.is_authenticated %}
           {% if current_user.role == 'customer' %}
+            <a href="{{ url_for('orders.my_orders') }}">Мои заказы</a>
+            <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
             <a href="{{ url_for('profile.customer_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'executor' %}
+            <a href="{{ url_for('orders.executor_dashboard') }}">Лента заказов</a>
             <a href="{{ url_for('profile.executor_edit') }}">{{ t('nav.profile') }}</a>
           {% endif %}
+          <a href="{{ url_for('main.notifications') }}">🔔{% if unread_notifications %}<span class="notif-badge">{{ unread_notifications }}</span>{% endif %}</a>
           <span class="account-nav__email">{{ current_user.email }}</span>
           <a href="{{ url_for('auth.logout') }}">{{ t('nav.logout') }}</a>
         {% else %}

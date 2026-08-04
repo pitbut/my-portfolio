@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Уведомления{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Уведомления</h1>
+  {% if items %}
+  <div class="notif-list">
+    {% for n in items %}
+    <div class="notif-item">
+      <div class="notif-item__title">{{ n.title }}</div>
+      {% if n.body %}<div class="notif-item__body">{{ n.body }}</div>{% endif %}
+      <div class="notif-item__meta">
+        {{ n.created_at.strftime('%d.%m.%Y %H:%M') }}
+        {% if n.url %}· <a href="{{ n.url }}">Открыть</a>{% endif %}
+        {% if n.telegram_sent %}· <span class="notif-item__tg">отправлено в Telegram</span>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Пока нет уведомлений.</p>
+  {% endif %}
+</section>
+{% endblock %}
