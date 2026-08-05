@@ -13,9 +13,19 @@ def index():
     """Главная — единственная полностью открытая страница (модуль 1: «жёсткий»
     paywall). Если сюда пришёл редирект от paywall_required, показываем
     модальное окно регистрации/входа поверх главной."""
+    from app.models import User
+
     auth_required = request.args.get("auth_required") == "1"
     next_url = request.args.get("next") or ""
-    return render_template("main/index.html", auth_required=auth_required, next_url=next_url)
+
+    stats = {
+        "customer": User.query.filter_by(role="customer").count(),
+        "executor": User.query.filter_by(role="executor").count(),
+        "constructor": User.query.filter_by(role="constructor").count(),
+    }
+    stats["total"] = stats["customer"] + stats["executor"] + stats["constructor"]
+
+    return render_template("main/index.html", auth_required=auth_required, next_url=next_url, stats=stats)
 
 
 @bp.route("/lang/<lang>")

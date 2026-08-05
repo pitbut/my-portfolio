@@ -9,6 +9,14 @@
     <div class="hero__actions">
       <a class="btn btn--primary" href="{{ url_for('orders.new_order') }}">{{ t('home.cta_order') }}</a>
       <a class="btn btn--secondary" href="{{ url_for('profile.executor_edit') }}">{{ t('home.cta_executor') }}</a>
+      <a class="btn btn--secondary" href="{{ url_for('profile.constructor_edit') }}">{{ t('auth.role_constructor') }}</a>
+    </div>
+
+    <div class="hero__stats">
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.total }}</span><span class="hero__stat-label">зарегистрировано всего</span></div>
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.customer }}</span><span class="hero__stat-label">заказчиков</span></div>
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.executor }}</span><span class="hero__stat-label">исполнителей</span></div>
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.constructor }}</span><span class="hero__stat-label">конструкторов</span></div>
     </div>
   </div>
 </section>
@@ -17,24 +25,24 @@
   <div class="how-card">
     <span class="how-card__num">1</span>
     <h3>Регистрация</h3>
-    <p>Заказчик и исполнитель регистрируются сами — по email или через Google — и сами заполняют свой профиль.</p>
+    <p>Заказчик, исполнитель или конструктор регистрируются сами — по email или через Google — и сами заполняют свой профиль.</p>
   </div>
   <div class="how-card">
     <span class="how-card__num">2</span>
     <h3>Профиль</h3>
-    <p>Исполнитель указывает станочный парк, допустимые габариты и материалы — это основа будущего автоподбора заказов.</p>
+    <p>Исполнитель указывает станочный парк, допустимые габариты и материалы — это основа автоподбора заказов.</p>
   </div>
   <div class="how-card">
     <span class="how-card__num">3</span>
     <h3>Заказы и аукцион</h3>
-    <p>Следующий этап разработки — публикация заявок, автоподбор исполнителей и аукцион ставок (см. техническое задание).</p>
+    <p>Публикация заявок, автоподбор исполнителей поблизости и аукцион ставок — заказчик сам выбирает победителя.</p>
   </div>
 </section>
 
 <section class="wrap status-note">
-  <p>Сейчас на платформе реализованы: регистрация (email + Google), «жёсткий» paywall и самостоятельное заполнение
-  профилей заказчика и исполнителя со станочным парком и техвозможностями. Остальные модули из
-  <a href="../b2b-equipment-platform-uz/index.html">технического задания</a> — в разработке.</p>
+  <p>На платформе работают: заказы и автоподбор, карта и геопоиск, отзывы, арбитраж, Telegram-бот и подписки,
+  барахолка станков и инструмента, вакансии и резюме, рынок сырья и материалов, роль «Конструктор», прямые
+  сообщения между пользователями. Подробнее — в <a href="../b2b-equipment-platform-uz/index.html">техническом задании</a>.</p>
 </section>
 {% endblock %}
 
