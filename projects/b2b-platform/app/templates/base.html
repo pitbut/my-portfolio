@@ -30,6 +30,7 @@
             <a href="{{ url_for('orders.my_orders') }}">Мои заказы</a>
             <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
             <a href="{{ url_for('map.index') }}">Карта</a>
+            <a href="{{ url_for('map.index', constructors=1) }}">Конструкторы</a>
             <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
             <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('materials_market.index') }}">Материалы</a>
@@ -37,6 +38,8 @@
             <a href="{{ url_for('profile.customer_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'executor' %}
             <a href="{{ url_for('orders.executor_dashboard') }}">Лента заказов</a>
+            <a href="{{ url_for('map.index') }}">Карта</a>
+            <a href="{{ url_for('map.index', constructors=1) }}">Конструкторы</a>
             <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
             <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('materials_market.index') }}">Материалы</a>
@@ -47,6 +50,7 @@
             <a href="{{ url_for('orders.my_orders') }}">Заказы</a>
             <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
             <a href="{{ url_for('map.index') }}">Карта</a>
+            <a href="{{ url_for('map.index', constructors=1) }}">Конструкторы</a>
             <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
             <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('materials_market.index') }}">Материалы</a>

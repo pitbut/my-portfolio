@@ -16,6 +16,11 @@
     var markersLayer = L.layerGroup().addTo(map);
     var userMarker = null;
 
+    var filtersForm = document.getElementById("mapFilters");
+    if (filtersForm && filtersForm.dataset.constructorsView === "1") {
+      document.getElementById("f_design_engineer").checked = true;
+    }
+
     function popupHtml(item) {
       var typeLabels = { master: "Мастер", tsekh: "Цех", zavod: "Завод" };
       var html = "<strong>" + item.name + "</strong><br>" + (typeLabels[item.org_type] || item.org_type);
