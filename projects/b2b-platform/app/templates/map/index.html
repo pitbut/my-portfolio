@@ -7,9 +7,12 @@
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Карта изготовителей и ремонтников</h1>
+  <h1>{{ 'Конструкторы' if constructors_view else 'Карта изготовителей и ремонтников' }}</h1>
+  {% if constructors_view %}
+  <p class="empty-hint">Показаны только те, у кого отмечено «есть конструктор в штате», либо кто оказывает услугу «Проектирование и конструирование». Фильтры ниже можно менять.</p>
+  {% endif %}
 
-  <form id="mapFilters" class="map-filters">
+  <form id="mapFilters" class="map-filters" data-constructors-view="{{ '1' if constructors_view else '' }}">
     <label>Категория услуг
       <select id="f_service">
         <option value="">Все</option>

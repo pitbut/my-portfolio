@@ -10,6 +10,19 @@ def test_map_requires_auth(client):
     assert "auth_required=1" in resp.headers["Location"]
 
 
+def test_map_page_constructors_view_pre_filters(client):
+    _setup_customer(client, "cust5@example.com")
+    _login(client, "cust5@example.com")
+
+    resp = client.get("/map?constructors=1")
+    assert resp.status_code == 200
+    assert "Конструкторы".encode() in resp.data
+    assert b'data-constructors-view="1"' in resp.data
+
+    resp = client.get("/map")
+    assert b'data-constructors-view="1"' not in resp.data
+
+
 def test_executors_json_excludes_incomplete_profiles(client):
     region_id = _setup_customer(client, "cust@example.com")
     _login(client, "cust@example.com")

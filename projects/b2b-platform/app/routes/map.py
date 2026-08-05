@@ -44,6 +44,7 @@ def index():
         "map/index.html",
         regions=Region.query.order_by(Region.name_ru).all(),
         service_categories=ServiceCategory.query.order_by(ServiceCategory.name_ru).all(),
+        constructors_view=request.args.get("constructors") == "1",
     )
 
 
