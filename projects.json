@@ -1,5 +1,32 @@
 [
   {
+    "id": "chat",
+    "title": "Chat",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/chat/preview.jpg",
+    "link": "projects/chat/index.html",
+    "date": "2026-08-05",
+    "tags": []
+  },
+  {
+    "id": "checker",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/checker/preview.jpg",
+    "link": "projects/checker/index.html",
+    "date": "2026-08-05",
+    "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-08-05",
+    "tags": []
+  },
+  {
     "id": "b2b-equipment-platform-uz",
     "title": "🏭 B2B-платформа изготовителей и ремонтников оборудования (Узбекистан)",
     "description": "Рабочая B2B-платформа (не макет): регистрация заказчиков и исполнителей без участия администратора, оплата подписки, мультимедийный конструктор заказов, автоподбор исполнителей по станочному парку и габаритам, карта и гео-поиск, аукцион ставок, двусторонние отзывы с рейтингом, арбитраж споров, Telegram-бот с уведомлениями по всем событиям, барахолка станков и инструмента, вакансии и резюме с двусторонними откликами. Реальная БД, миграции, 48 автотестов.",
@@ -16,33 +43,6 @@
       "Вакансии и резюме",
       "Узбекистан"
     ]
-  },
-  {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-08-04",
-    "tags": []
-  },
-  {
-    "id": "checker",
-    "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/checker/preview.jpg",
-    "link": "projects/checker/index.html",
-    "date": "2026-08-04",
-    "tags": []
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-08-04",
-    "tags": []
   },
   {
     "id": "istok",
