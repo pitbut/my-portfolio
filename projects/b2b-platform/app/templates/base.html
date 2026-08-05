@@ -102,6 +102,15 @@
     <div class="flash flash--warn">{{ t('profile.incomplete_banner') }}</div>
   </div>
   {% endif %}
+  {% if current_user.is_authenticated and current_user.role in ('customer', 'executor', 'constructor') and current_user.google_sub and telegram_bot_available and not current_user.telegram_link %}
+  <div class="wrap flash-messages">
+    <div class="flash flash--warn">
+      Вы вошли через Google — телефон и Telegram у нас ещё не привязаны. Обязательно привяжите Telegram
+      в <a href="{{ url_for('settings.index') }}">настройках</a>, иначе не будете получать уведомления
+      о заказах, откликах и сообщениях.
+    </div>
+  </div>
+  {% endif %}
 
   {% block content %}{% endblock %}
 </main>

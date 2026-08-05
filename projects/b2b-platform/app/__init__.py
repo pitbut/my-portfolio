@@ -115,6 +115,14 @@ def create_app(config_name=None):
     def inject_google_available():
         return {"google_login_available": google_oauth is not None}
 
+    @app.context_processor
+    def inject_telegram_bot_available():
+        return {
+            "telegram_bot_available": bool(
+                app.config.get("TELEGRAM_BOT_TOKEN") and app.config.get("TELEGRAM_BOT_USERNAME")
+            )
+        }
+
     @app.errorhandler(403)
     def forbidden(error):
         return render_template(
