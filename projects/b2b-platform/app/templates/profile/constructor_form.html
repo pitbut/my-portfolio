@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Анкета конструктора{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Анкета конструктора</h1>
+  <p class="profile-page__hint">
+    Заполните анкету — по ней вас будут находить заказчики и исполнители, у которых нет своего конструктора в штате. Обязательные поля отмечены *.
+    {% if profile.is_complete %}<span class="badge badge--ok">Анкета заполнена — видна в каталоге</span>{% else %}<span class="badge badge--warn">Анкета не заполнена</span>{% endif %}
+  </p>
+
+  <form method="post" action="{{ url_for('profile.constructor_edit') }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label>Имя / название студии *
+      <input type="text" name="display_name" value="{{ profile.display_name or '' }}" required>
+    </label>
+
+    <label>О себе, специализация *
+      <textarea name="description" rows="4" placeholder="Какие чертежи делаете, в каких программах (КОМПАС, AutoCAD, SolidWorks...), опыт">{{ profile.description or '' }}</textarea>
+    </label>
+
+    <label>Опыт работы, лет
+      <input type="number" name="experience_years" min="0" max="60" value="{{ profile.experience_years or '' }}">
+    </label>
+
+    <label>Ссылка на портфолио
+      <input type="url" name="portfolio_url" value="{{ profile.portfolio_url or '' }}" placeholder="https://...">
+    </label>
+
+    <label>Стоимость работ
+      <input type="text" name="price_note" value="{{ profile.price_note or '' }}" placeholder="Например: от 200 000 сум за чертёж">
+    </label>
+
+    <label>Контактный телефон
+      <input type="tel" name="phone" value="{{ current_user.phone or '' }}" placeholder="+998 90 123 45 67">
+    </label>
+
+    <div class="form-row">
+      <label>Регион *
+        <select name="region_id" id="region_id" required>
+          <option value="">— выберите —</option>
+          {% for region in regions %}
+            <option value="{{ region.id }}" {{ 'selected' if profile.region_id == region.id }}>{{ region.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Город
+        <select name="city_id" id="city_id" data-selected="{{ profile.city_id or '' }}">
+          <option value="">— сначала выберите регион —</option>
+        </select>
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn--primary">Сохранить анкету</button>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  initRegionCityCascade('region_id', 'city_id');
+});
+</script>
+{% endblock %}

@@ -51,6 +51,8 @@ def _post_login_redirect():
         return redirect(url_for("profile.customer_edit"))
     if current_user.role == "executor":
         return redirect(url_for("profile.executor_edit"))
+    if current_user.role == "constructor":
+        return redirect(url_for("profile.constructor_edit"))
     return redirect(url_for("main.index"))
 
 
@@ -78,8 +80,8 @@ def register():
         if password != password2:
             flash("Пароли не совпадают.", "error")
             return render_template("auth/register.html", **form_ctx)
-        if role not in ("customer", "executor"):
-            flash("Выберите, вы заказчик или исполнитель.", "error")
+        if role not in ("customer", "executor", "constructor"):
+            flash("Выберите роль.", "error")
             return render_template("auth/register.html", **form_ctx)
         if language not in SUPPORTED_LANGUAGES:
             language = "ru"
@@ -111,6 +113,8 @@ def register():
 
         if role == "customer":
             return redirect(url_for("profile.customer_edit", next=next_url) if next_url else url_for("profile.customer_edit"))
+        if role == "constructor":
+            return redirect(url_for("profile.constructor_edit", next=next_url) if next_url else url_for("profile.constructor_edit"))
         return redirect(url_for("profile.executor_edit", next=next_url) if next_url else url_for("profile.executor_edit"))
 
     return render_template(
@@ -210,8 +214,8 @@ def choose_role():
 
     if request.method == "POST":
         role = request.form.get("role")
-        if role not in ("customer", "executor"):
-            flash("Выберите, вы заказчик или исполнитель.", "error")
+        if role not in ("customer", "executor", "constructor"):
+            flash("Выберите роль.", "error")
             return render_template("auth/choose_role.html", next_url=next_url)
         current_user.role = role
         db.session.commit()

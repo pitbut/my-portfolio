@@ -30,7 +30,7 @@
             <a href="{{ url_for('orders.my_orders') }}">Мои заказы</a>
             <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
             <a href="{{ url_for('map.index') }}">Карта</a>
-            <a href="{{ url_for('map.index', constructors=1) }}">Конструкторы</a>
+            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
             <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
             <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('materials_market.index') }}">Материалы</a>
@@ -39,25 +39,31 @@
           {% elif current_user.role == 'executor' %}
             <a href="{{ url_for('orders.executor_dashboard') }}">Лента заказов</a>
             <a href="{{ url_for('map.index') }}">Карта</a>
-            <a href="{{ url_for('map.index', constructors=1) }}">Конструкторы</a>
+            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
             <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
             <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('materials_market.index') }}">Материалы</a>
             <a href="{{ url_for('reviews.my_reviews') }}">Отзывы</a>
             <a href="{{ url_for('settings.subscription_page') }}">Подписка</a>
             <a href="{{ url_for('profile.executor_edit') }}">{{ t('nav.profile') }}</a>
+          {% elif current_user.role == 'constructor' %}
+            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
+            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
+            <a href="{{ url_for('materials_market.index') }}">Материалы</a>
+            <a href="{{ url_for('profile.constructor_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'admin' %}
             <a href="{{ url_for('orders.my_orders') }}">Заказы</a>
             <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
             <a href="{{ url_for('map.index') }}">Карта</a>
-            <a href="{{ url_for('map.index', constructors=1) }}">Конструкторы</a>
+            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
             <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
             <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
             <a href="{{ url_for('materials_market.index') }}">Материалы</a>
             <a href="{{ url_for('admin.disputes_list') }}">Споры (админ)</a>
             <a href="{{ url_for('admin.subscriptions_list') }}">Подписки (админ)</a>
           {% endif %}
-          {% if current_user.role in ('customer', 'executor') %}
+          {% if current_user.role in ('customer', 'executor', 'constructor') %}
             <a href="{{ url_for('settings.index') }}">⚙️</a>
           {% endif %}
           <a href="{{ url_for('chat.inbox') }}">💬{% if unread_messages %}<span class="notif-badge">{{ unread_messages }}</span>{% endif %}</a>
@@ -91,7 +97,7 @@
     </div>
   </div>
   {% endif %}
-  {% if current_user.is_authenticated and current_user.role in ('customer', 'executor') and not current_user.profile_complete %}
+  {% if current_user.is_authenticated and current_user.role in ('customer', 'executor', 'constructor') and not current_user.profile_complete %}
   <div class="wrap flash-messages">
     <div class="flash flash--warn">{{ t('profile.incomplete_banner') }}</div>
   </div>

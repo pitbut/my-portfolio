@@ -68,6 +68,7 @@ def create_app(config_name=None):
     from app.routes.jobs import bp as jobs_bp
     from app.routes.materials_market import bp as materials_market_bp
     from app.routes.chat import bp as chat_bp
+    from app.routes.constructors import bp as constructors_bp
     from app.routes.settings import bp as settings_bp
     from app.routes.telegram import bp as telegram_bp
 
@@ -83,6 +84,7 @@ def create_app(config_name=None):
     app.register_blueprint(jobs_bp)
     app.register_blueprint(materials_market_bp)
     app.register_blueprint(chat_bp)
+    app.register_blueprint(constructors_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(telegram_bp)
     csrf.exempt(telegram_bp)  # вебхук Telegram не может передать наш CSRF-токен
