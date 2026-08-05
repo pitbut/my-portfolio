@@ -46,6 +46,28 @@ def test_executors_json_includes_complete_profile_and_filters(client):
     assert resp.get_json() == []
 
 
+def test_executors_json_filters_by_design_engineer(client):
+    region_id = _setup_customer(client, "cust4@example.com")
+    _setup_executor(client, "designer@example.com", region_id)
+
+    _login(client, "cust4@example.com")
+    resp = client.get("/map/executors.json?has_design_engineer=1")
+    assert resp.get_json() == []
+
+    from app.models import ExecutorProfile
+    from app import db
+
+    with client.application.app_context():
+        exec_profile = ExecutorProfile.query.join(ExecutorProfile.user).filter_by(email="designer@example.com").first()
+        exec_profile.has_design_engineer = True
+        db.session.commit()
+
+    resp = client.get("/map/executors.json?has_design_engineer=1")
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]["has_design_engineer"] is True
+
+
 def test_nearby_json_sorts_by_distance(client):
     region_id = _setup_customer(client, "cust3@example.com")
     _setup_executor(client, "near@example.com", region_id)  # lat 41.31, lng 69.26 в helper'е

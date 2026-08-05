@@ -66,17 +66,23 @@ def seed_cities():
 
 
 def seed_simple_dictionary(model, filename):
-    if model.query.first() is not None:
-        print(f"{model.__tablename__} уже заполнены — пропускаю")
-        return
+    """Добавляет в справочник строки из CSV, которых там ещё нет (по
+    name_ru) — не просто «пусто -> заполнить один раз», а безопасный
+    повторный запуск: новые строки, дописанные в CSV позже, подтянутся при
+    следующем деплое сами, а уже существующие не дублируются."""
+    existing_names = {row.name_ru for row in model.query.all()}
+    added = 0
     for row in read_csv(filename):
+        if row["name_ru"] in existing_names:
+            continue
         db.session.add(model(
             name_ru=row["name_ru"],
             name_uz_latin=row["name_uz_latin"],
             name_uz_cyrillic=row["name_uz_cyrillic"],
         ))
+        added += 1
     db.session.commit()
-    print(f"{model.__tablename__}: добавлено {model.query.count()}")
+    print(f"{model.__tablename__}: добавлено новых {added}, всего {model.query.count()}")
 
 
 def seed_subscription_plans():

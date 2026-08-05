@@ -236,6 +236,7 @@ class ExecutorProfile(TimestampMixin, db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     service_radius_km = db.Column(db.Integer, nullable=True, default=50)
+    has_design_engineer = db.Column(db.Boolean, nullable=False, default=False)  # есть конструктор в штате
 
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
     rating_avg = db.Column(db.Numeric(3, 2), nullable=True)

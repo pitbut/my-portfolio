@@ -110,6 +110,7 @@ def executor_edit():
         profile.latitude = _to_float(request.form.get("latitude"))
         profile.longitude = _to_float(request.form.get("longitude"))
         profile.service_radius_km = _to_int(request.form.get("service_radius_km")) or 50
+        profile.has_design_engineer = request.form.get("has_design_engineer") == "1"
 
         phone = (request.form.get("phone") or "").strip()
         if phone:
