@@ -26,5 +26,25 @@
   {% else %}
   <p class="empty-hint">Telegram-бот пока не подключён администратором платформы (не задан TELEGRAM_BOT_USERNAME) — уведомления приходят только в личном кабинете, в разделе «Уведомления».</p>
   {% endif %}
+
+  {% if switchable_roles %}
+  <h2 class="profile-section-title">Роль на платформе</h2>
+  <p class="empty-hint">
+    Сейчас вы — {{ {'customer': 'заказчик', 'executor': 'исполнитель', 'constructor': 'конструктор'}[current_user.role] }}.
+    Можно переключиться на другую роль в любой момент — старая анкета и данные не удаляются,
+    просто становятся неактивны, пока вы не вернётесь обратно.
+  </p>
+  <form method="post" action="{{ url_for('settings.switch_role') }}" class="profile-form profile-form--inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Стать
+      <select name="role">
+        {% for r in switchable_roles %}
+        <option value="{{ r }}">{{ {'customer': 'заказчиком', 'executor': 'исполнителем', 'constructor': 'конструктором'}[r] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="btn btn--secondary">Сменить роль</button>
+  </form>
+  {% endif %}
 </section>
 {% endblock %}

@@ -4,7 +4,7 @@ from flask_login import login_required
 
 from app.decorators import paywall_required
 from app.geo import haversine_km
-from app.models import ExecutorProfile, Region, ServiceCategory
+from app.models import ExecutorProfile, Region, ServiceCategory, User
 
 bp = Blueprint("map", __name__)
 
@@ -12,8 +12,11 @@ bp = Blueprint("map", __name__)
 def _visible_executors_query():
     """Профиль виден на карте/в геопоиске только когда действительно
     заполнен (есть координаты, оборудование, техвозможности) — иначе
-    показывать нечего и незачем."""
-    return ExecutorProfile.query.filter(
+    показывать нечего и незачем. Плюс User.role == 'executor': если
+    пользователь переключился на другую роль в настройках, его старая
+    анкета исполнителя остаётся в базе, но с карты пропадает."""
+    return ExecutorProfile.query.join(User, ExecutorProfile.user_id == User.id).filter(
+        User.role == "executor",
         ExecutorProfile.latitude.isnot(None),
         ExecutorProfile.longitude.isnot(None),
         ExecutorProfile.display_name.isnot(None),

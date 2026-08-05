@@ -61,6 +61,8 @@ def find_candidates(order):
     results = []
     for capability in capabilities:
         executor = capability.executor
+        if executor.user.role != "executor":  # переключился на другую роль в настройках — из матчинга выбывает
+            continue
         if not executor.equipment:  # не считается «опубликованным» без станочного парка
             continue
         if not has_active_subscription(executor):  # см. ТЗ, модуль 2: без подписки в матчинг не попадает
