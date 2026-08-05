@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Конструкторы{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>Конструкторы</h1>
+  </div>
+  <p class="empty-hint">
+    Специалисты, разрабатывающие чертежи на заказ — обратиться может и заказчик, и исполнитель,
+    у которого нет своего конструктора в штате.
+  </p>
+
+  <form method="get" class="map-filters">
+    <label>Регион
+      <select name="region_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for r in regions %}
+          <option value="{{ r.id }}" {{ 'selected' if request.args.get('region_id')|string == r.id|string }}>{{ r.name_ru }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+
+  {% if constructors %}
+  <div class="listing-grid">
+    {% for c in constructors %}
+    <a class="listing-card" href="{{ url_for('constructors.detail', constructor_id=c.id) }}">
+      <h3>{{ c.display_name }}</h3>
+      <p class="listing-card__meta">
+        {{ c.region.name_ru }}{% if c.city %} · {{ c.city.name_ru }}{% endif %}
+        {% if c.experience_years %} · опыт {{ c.experience_years }} лет{% endif %}
+      </p>
+      <p class="listing-card__meta">{{ c.description[:140] }}</p>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Пока нет заполненных анкет конструкторов по этим фильтрам.</p>
+  {% endif %}
+</section>
+{% endblock %}

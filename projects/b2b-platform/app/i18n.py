@@ -77,6 +77,11 @@ STRINGS = {
         "uz_latin": "Men ijrochiman — sex/zavod/usta",
         "uz_cyrillic": "Мен ижрочиман — сех/завод/уста",
     },
+    "auth.role_constructor": {
+        "ru": "Я конструктор — разрабатываю чертежи на заказ",
+        "uz_latin": "Men konstruktorman — buyurtma bilan chizma tayyorlayman",
+        "uz_cyrillic": "Мен конструкторман — буюртма билан чизма тайёрлайман",
+    },
     "auth.google": {
         "ru": "Войти через Google", "uz_latin": "Google orqali kirish", "uz_cyrillic": "Google орқали кириш",
     },

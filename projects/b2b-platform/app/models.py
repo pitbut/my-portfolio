@@ -58,6 +58,9 @@ class User(TimestampMixin, db.Model):
     executor_profile = db.relationship(
         "ExecutorProfile", backref="user", uselist=False, cascade="all, delete-orphan"
     )
+    constructor_profile = db.relationship(
+        "ConstructorProfile", backref="user", uselist=False, cascade="all, delete-orphan"
+    )
 
     # --- интерфейс, ожидаемый Flask-Login ---
     @property
@@ -81,6 +84,8 @@ class User(TimestampMixin, db.Model):
             return self.customer_profile
         if self.role == "executor":
             return self.executor_profile
+        if self.role == "constructor":
+            return self.constructor_profile
         return None
 
     @property
@@ -308,6 +313,37 @@ class ExecutorCapability(db.Model):
 
     def __repr__(self):
         return f"<ExecutorCapability executor_id={self.executor_id}>"
+
+
+class ConstructorProfile(TimestampMixin, db.Model):
+    """Карточка конструктора-фрилансера — отдельная роль, не «исполнитель»
+    со станками, а специалист, разрабатывающий чертежи на заказ. К нему
+    может обратиться как заказчик, так и исполнитель (у которого нет
+    своего конструктора в штате)."""
+
+    __tablename__ = "constructor_profiles"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+
+    display_name = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    experience_years = db.Column(db.Integer, nullable=True)
+    portfolio_url = db.Column(db.String(500), nullable=True)
+    price_note = db.Column(db.String(500), nullable=True)
+
+    region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=True)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+
+    region = db.relationship("Region")
+    city = db.relationship("City")
+
+    @property
+    def is_complete(self):
+        return bool(self.display_name and self.description and self.region_id)
+
+    def __repr__(self):
+        return f"<ConstructorProfile user_id={self.user_id}>"
 
 
 # --- модуль 2: заказы, медиа, автоподбор, аукцион ---

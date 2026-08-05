@@ -11,6 +11,7 @@ from app import db
 from app.decorators import role_required
 from app.models import (
     City,
+    ConstructorProfile,
     EquipmentType,
     ExecutorCapability,
     ExecutorEquipment,
@@ -84,6 +85,45 @@ def customer_edit():
         return redirect(next_url or url_for("profile.customer_edit"))
 
     return render_template("profile/customer_form.html", profile=profile, regions=_regions())
+
+
+@bp.route("/constructor", methods=["GET", "POST"])
+@role_required("constructor")
+def constructor_edit():
+    profile = current_user.constructor_profile
+    if profile is None:
+        profile = ConstructorProfile(user_id=current_user.id)
+
+    if request.method == "POST":
+        if profile.id is None:
+            db.session.add(profile)
+        profile.display_name = (request.form.get("display_name") or "").strip() or None
+        profile.description = (request.form.get("description") or "").strip() or None
+        profile.experience_years = _to_int(request.form.get("experience_years"))
+        profile.portfolio_url = (request.form.get("portfolio_url") or "").strip() or None
+        profile.price_note = (request.form.get("price_note") or "").strip() or None
+        profile.region_id = _to_int(request.form.get("region_id"))
+        profile.city_id = _to_int(request.form.get("city_id"))
+
+        phone = (request.form.get("phone") or "").strip()
+        if phone:
+            current_user.phone = phone
+
+        if profile.city_id and profile.region_id:
+            city = db.session.get(City, profile.city_id)
+            if city is None or city.region_id != profile.region_id:
+                profile.city_id = None
+
+        db.session.commit()
+
+        if profile.is_complete:
+            flash("Анкета конструктора сохранена и полностью заполнена — вы видны в каталоге «Конструкторы».", "success")
+        else:
+            flash("Данные сохранены. Заполните обязательные поля (отмечены *), чтобы анкета стала видна в каталоге.", "info")
+
+        return redirect(url_for("profile.constructor_edit"))
+
+    return render_template("profile/constructor_form.html", profile=profile, regions=_regions())
 
 
 def _get_or_build_executor_profile():
