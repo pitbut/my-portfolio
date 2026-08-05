@@ -4,6 +4,9 @@
 {% block content %}
 <section class="wrap profile-page">
   <h1>{{ vacancy.title }}</h1>
+  {% if not is_owner %}
+  <p><a href="{{ url_for('chat.thread', user_id=vacancy.employer_id) }}" class="btn-link">✉ Написать работодателю</a></p>
+  {% endif %}
   <p class="order-meta">
     <span>{{ vacancy.profession_category.name_ru }}</span>
     <span>{{ vacancy.region.name_ru }}</span>

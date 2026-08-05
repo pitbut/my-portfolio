@@ -4,6 +4,9 @@
 {% block content %}
 <section class="wrap profile-page">
   <h1>{{ resume.profession_category.name_ru }}</h1>
+  {% if not is_owner %}
+  <p><a href="{{ url_for('chat.thread', user_id=resume.candidate_id) }}" class="btn-link">✉ Написать кандидату</a></p>
+  {% endif %}
   <p class="order-meta">
     <span>Опыт: {{ resume.experience_years or '—' }} лет</span>
     <span>{{ resume.region.name_ru }}</span>
