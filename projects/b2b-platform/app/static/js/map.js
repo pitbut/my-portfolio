@@ -23,6 +23,7 @@
       if (item.rating_avg) html += "<br>Рейтинг: " + item.rating_avg.toFixed(1);
       if (item.distance_km !== undefined) html += "<br>Расстояние: " + item.distance_km + " км";
       if (item.services && item.services.length) html += "<br>" + item.services.join(", ");
+      if (item.has_design_engineer) html += "<br>✏️ Есть конструктор в штате";
       return html;
     }
 
@@ -31,9 +32,11 @@
       var service = document.getElementById("f_service").value;
       var orgType = document.getElementById("f_org_type").value;
       var region = document.getElementById("f_region").value;
+      var designEngineer = document.getElementById("f_design_engineer").checked;
       if (service) params.set("service_category_id", service);
       if (orgType) params.set("org_type", orgType);
       if (region) params.set("region_id", region);
+      if (designEngineer) params.set("has_design_engineer", "1");
 
       fetch("/map/executors.json?" + params.toString())
         .then(function (r) { return r.json(); })
@@ -45,7 +48,7 @@
         });
     }
 
-    ["f_service", "f_org_type", "f_region"].forEach(function (id) {
+    ["f_service", "f_org_type", "f_region", "f_design_engineer"].forEach(function (id) {
       document.getElementById(id).addEventListener("change", loadExecutors);
     });
     loadExecutors();

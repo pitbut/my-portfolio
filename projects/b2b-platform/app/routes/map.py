@@ -32,6 +32,7 @@ def _executor_payload(executor):
         "rating_avg": float(executor.rating_avg) if executor.rating_avg is not None else None,
         "services": [s.name_ru for s in services],
         "is_complete": executor.is_complete,
+        "has_design_engineer": executor.has_design_engineer,
     }
 
 
@@ -61,6 +62,9 @@ def executors_json():
     min_rating = request.args.get("min_rating", type=float)
     if min_rating:
         query = query.filter(ExecutorProfile.rating_avg >= min_rating)
+
+    if request.args.get("has_design_engineer") == "1":
+        query = query.filter(ExecutorProfile.has_design_engineer.is_(True))
 
     service_category_id = request.args.get("service_category_id", type=int)
     executors = query.all()

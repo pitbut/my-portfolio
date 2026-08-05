@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>{{ listing.title }}</h1>
+    <span class="listing-card__intent listing-card__intent--{{ listing.listing_intent }}">{{ 'Продаю' if listing.listing_intent == 'sell' else 'Куплю' }}</span>
+  </div>
+  <p class="order-meta">
+    <span>{{ listing.material.name_ru }}</span>
+    {% if listing.form %}<span>{{ listing.form.name_ru }}</span>{% endif %}
+    {% if listing.quantity %}<span>{{ listing.quantity }} {{ listing.unit }}</span>{% endif %}
+    <span>{{ listing.region.name_ru }}</span>
+    <span>{% if listing.price %}{{ listing.price }} {{ listing.currency }}{% if listing.price_negotiable %} (торг){% endif %}{% else %}Цена не указана{% endif %}</span>
+    <span class="status-chip">{{ listing.status }}</span>
+  </p>
+  <p class="order-description">{{ listing.description }}</p>
+
+  {% if listing.media %}
+  <div class="order-media">
+    {% for m in listing.media %}
+    <a href="{{ m.file_url }}" target="_blank" rel="noopener"><img src="{{ m.file_url }}" class="order-media__thumb" alt="фото"></a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if is_owner %}
+    <h2 class="profile-section-title">Отклики ({{ listing.responses|length }})</h2>
+    {% if listing.responses %}
+    <div class="notif-list">
+      {% for r in listing.responses %}
+      <div class="notif-item">
+        <div class="notif-item__title">{{ r.from_user.email }}{% if r.offered_price %} — предложено {{ r.offered_price }}{% endif %}</div>
+        {% if r.message %}<div class="notif-item__body">{{ r.message }}</div>{% endif %}
+        <div class="notif-item__meta">{{ r.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-hint">Откликов пока нет.</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('materials_market.set_status', listing_id=listing.id) }}" class="profile-form profile-form--inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Статус
+        <select name="status">
+          <option value="active" {{ 'selected' if listing.status == 'active' }}>Активно</option>
+          <option value="reserved" {{ 'selected' if listing.status == 'reserved' }}>Зарезервировано</option>
+          <option value="closed" {{ 'selected' if listing.status == 'closed' }}>Сделка состоялась</option>
+        </select>
+      </label>
+      <button type="submit" class="btn btn--secondary">Обновить</button>
+    </form>
+  {% elif listing.status == 'active' %}
+    <h2 class="profile-section-title">Откликнуться</h2>
+    <form method="post" action="{{ url_for('materials_market.respond', listing_id=listing.id) }}" class="profile-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Сообщение <textarea name="message" rows="3" placeholder="Интересует, уточните..."></textarea></label>
+      <label>Ваша цена (если торг) <input type="number" name="offered_price" min="0"></label>
+      <button type="submit" class="btn btn--primary">Отправить отклик</button>
+    </form>
+  {% else %}
+    <p class="empty-hint">Объявление больше не активно.</p>
+  {% endif %}
+</section>
+{% endblock %}

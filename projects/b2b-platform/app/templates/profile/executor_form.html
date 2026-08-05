@@ -73,6 +73,8 @@
       <input type="number" name="service_radius_km" min="0" max="1000" value="{{ profile.service_radius_km or 50 }}">
     </label>
 
+    <label class="checkbox-label"><input type="checkbox" name="has_design_engineer" value="1" {{ 'checked' if profile.has_design_engineer }}> Есть конструктор в штате (можем сами разработать чертёж)</label>
+
     <button type="submit" class="btn btn--primary">Сохранить основную информацию</button>
   </form>
 
