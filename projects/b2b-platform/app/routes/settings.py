@@ -12,6 +12,8 @@ from app.telegram_bot import bot_deep_link
 
 bp = Blueprint("settings", __name__)
 
+SWITCHABLE_ROLES = ("customer", "executor", "constructor")
+
 
 @bp.route("/settings")
 @paywall_required
@@ -20,7 +22,37 @@ def index():
     return render_template(
         "settings/index.html", telegram_link=current_user.telegram_link,
         deep_link=deep_link, bot_configured=bool(current_app.config.get("TELEGRAM_BOT_TOKEN")),
+        switchable_roles=[r for r in SWITCHABLE_ROLES if r != current_user.role],
     )
+
+
+@bp.route("/settings/switch-role", methods=["POST"])
+@paywall_required
+def switch_role():
+    """Позволяет сменить бизнес-роль после регистрации (исполнитель стал
+    заказчиком и наоборот). Роль admin сюда не входит намеренно — её меняет
+    только администратор напрямую в БД, самостоятельная смена на/с admin
+    через эту форму была бы дырой в правах.
+
+    Старый профиль (CustomerProfile/ExecutorProfile/ConstructorProfile) не
+    удаляется — просто перестаёт быть «активным» (route_required больше не
+    пускает его редактировать, а карта/каталог/автоподбор перестают его
+    показывать, см. фильтр по User.role в map.py/matching.py/constructors.py).
+    Если пользователь вернётся к этой роли, все данные будут на месте."""
+    new_role = request.form.get("role")
+    if current_user.role == "admin" or new_role not in SWITCHABLE_ROLES or new_role == current_user.role:
+        flash("Недопустимая смена роли.", "error")
+        return redirect(url_for("settings.index"))
+
+    current_user.role = new_role
+    db.session.commit()
+    flash("Роль изменена. Старые данные сохранены — при необходимости сможете переключиться обратно.", "success")
+
+    if new_role == "customer":
+        return redirect(url_for("profile.customer_edit"))
+    if new_role == "executor":
+        return redirect(url_for("profile.executor_edit"))
+    return redirect(url_for("profile.constructor_edit"))
 
 
 @bp.route("/settings/telegram/toggle", methods=["POST"])

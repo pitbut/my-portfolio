@@ -5,13 +5,16 @@ from flask import Blueprint, abort, render_template, request
 
 from app import db
 from app.decorators import paywall_required
-from app.models import ConstructorProfile, Region
+from app.models import ConstructorProfile, Region, User
 
 bp = Blueprint("constructors", __name__, url_prefix="/constructors")
 
 
 def _visible_query():
-    return ConstructorProfile.query.filter(
+    """User.role == 'constructor': если пользователь переключился на другую
+    роль в настройках, его анкета остаётся в базе, но пропадает из каталога."""
+    return ConstructorProfile.query.join(User, ConstructorProfile.user_id == User.id).filter(
+        User.role == "constructor",
         ConstructorProfile.display_name.isnot(None),
         ConstructorProfile.description.isnot(None),
         ConstructorProfile.region_id.isnot(None),
@@ -38,6 +41,6 @@ def index():
 @paywall_required
 def detail(constructor_id):
     profile = db.session.get(ConstructorProfile, constructor_id)
-    if profile is None or not profile.is_complete:
+    if profile is None or not profile.is_complete or profile.user.role != "constructor":
         abort(404)
     return render_template("constructors/detail.html", profile=profile)
