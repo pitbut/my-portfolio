@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Диалог с {{ other.email }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>{{ other.email }}</h1>
+    <a href="{{ url_for('chat.inbox') }}" class="btn-link">← Все сообщения</a>
+  </div>
+
+  <div class="chat-thread">
+    {% if conversation and conversation.messages %}
+      {% for m in conversation.messages %}
+      <div class="chat-bubble {{ 'chat-bubble--own' if m.sender_id == current_user.id else 'chat-bubble--other' }}">
+        <div class="chat-bubble__body">{{ m.body }}</div>
+        <div class="notif-item__meta">{{ m.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty-hint">Сообщений пока нет — напишите первым.</p>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{{ url_for('chat.thread', user_id=other.id) }}" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Сообщение <textarea name="body" rows="3" required></textarea></label>
+    <button type="submit" class="btn btn--primary">Отправить</button>
+  </form>
+</section>
+{% endblock %}

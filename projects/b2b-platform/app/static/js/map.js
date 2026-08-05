@@ -24,6 +24,7 @@
       if (item.distance_km !== undefined) html += "<br>Расстояние: " + item.distance_km + " км";
       if (item.services && item.services.length) html += "<br>" + item.services.join(", ");
       if (item.has_design_engineer) html += "<br>✏️ Есть конструктор в штате";
+      if (item.user_id) html += '<br><a href="/messages/u/' + item.user_id + '">✉ Написать</a>';
       return html;
     }
 

@@ -481,7 +481,7 @@ def record_status_change(order, to_status, user=None):
 NOTIFICATION_TYPES = (
     "new_order_match", "outbid", "bid_accepted", "bid_rejected", "order_completed", "dispute_update",
     "subscription_expiring", "subscription_activated", "review_received",
-    "listing_response", "vacancy_response", "resume_invite", "material_response",
+    "listing_response", "vacancy_response", "resume_invite", "material_response", "direct_message",
 )
 
 
@@ -966,3 +966,49 @@ class MaterialListingResponse(db.Model):
 
     def __repr__(self):
         return f"<MaterialListingResponse listing_id={self.listing_id} from={self.from_user_id}>"
+
+
+# --- модуль 11: сообщения между любыми пользователями ---
+
+class Conversation(TimestampMixin, db.Model):
+    """Диалог между двумя пользователями платформы — открыт для любой пары
+    ролей (не только «заказчик-исполнитель»): кооперация производителей,
+    обращение к конструктору-фрилансеру, вопрос по объявлению и т.п.
+    user_a_id всегда меньше user_b_id, чтобы пара была уникальна независимо
+    от того, кто написал первым."""
+
+    __tablename__ = "conversations"
+    __table_args__ = (db.UniqueConstraint("user_a_id", "user_b_id", name="uq_conversation_pair"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_a_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    user_b_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    last_message_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    user_a = db.relationship("User", foreign_keys=[user_a_id])
+    user_b = db.relationship("User", foreign_keys=[user_b_id])
+    messages = db.relationship(
+        "Message", backref="conversation", cascade="all, delete-orphan", order_by="Message.created_at"
+    )
+
+    def other_user(self, user):
+        return self.user_b if user.id == self.user_a_id else self.user_a
+
+    def __repr__(self):
+        return f"<Conversation {self.user_a_id}<->{self.user_b_id}>"
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey("conversations.id"), nullable=False, index=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    read_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    sender = db.relationship("User")
+
+    def __repr__(self):
+        return f"<Message conversation_id={self.conversation_id} sender_id={self.sender_id}>"

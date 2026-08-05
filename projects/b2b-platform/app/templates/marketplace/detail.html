@@ -7,6 +7,9 @@
     <h1>{{ listing.title }}</h1>
     <span class="listing-card__intent listing-card__intent--{{ listing.listing_intent }}">{{ 'Продаю' if listing.listing_intent == 'sell' else 'Куплю' }}</span>
   </div>
+  {% if not is_owner %}
+  <p><a href="{{ url_for('chat.thread', user_id=listing.author_id) }}" class="btn-link">✉ Написать автору</a></p>
+  {% endif %}
   <p class="order-meta">
     <span>{{ listing.category.name_ru }}</span>
     <span>{{ listing.region.name_ru }}</span>

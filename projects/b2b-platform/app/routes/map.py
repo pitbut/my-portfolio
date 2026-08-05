@@ -24,6 +24,7 @@ def _executor_payload(executor):
     services = executor.capability.service_categories if executor.capability else []
     return {
         "id": executor.id,
+        "user_id": executor.user_id,
         "name": executor.display_name,
         "org_type": executor.org_type,
         "lat": executor.latitude,

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Сообщения{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Сообщения</h1>
+  {% if items %}
+  <div class="notif-list">
+    {% for item in items %}
+    <a class="notif-item chat-inbox-item{% if item.unread %} chat-inbox-item--unread{% endif %}" href="{{ url_for('chat.thread', user_id=item.other.id) }}">
+      <div class="notif-item__title">
+        {{ item.other.email }}
+        {% if item.unread %}<span class="notif-badge">{{ item.unread }}</span>{% endif %}
+      </div>
+      {% if item.last_message %}
+      <div class="notif-item__body">
+        {% if item.last_message.sender_id == current_user.id %}Вы: {% endif %}{{ item.last_message.body[:140] }}
+      </div>
+      {% endif %}
+      <div class="notif-item__meta">{{ item.conversation.last_message_at.strftime('%d.%m.%Y %H:%M') }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Пока нет ни одного диалога. Написать можно любому пользователю — например, автору объявления или исполнителю с карты.</p>
+  {% endif %}
+</section>
+{% endblock %}

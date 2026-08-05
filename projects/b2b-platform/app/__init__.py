@@ -67,6 +67,7 @@ def create_app(config_name=None):
     from app.routes.marketplace import bp as marketplace_bp
     from app.routes.jobs import bp as jobs_bp
     from app.routes.materials_market import bp as materials_market_bp
+    from app.routes.chat import bp as chat_bp
     from app.routes.settings import bp as settings_bp
     from app.routes.telegram import bp as telegram_bp
 
@@ -81,6 +82,7 @@ def create_app(config_name=None):
     app.register_blueprint(marketplace_bp)
     app.register_blueprint(jobs_bp)
     app.register_blueprint(materials_market_bp)
+    app.register_blueprint(chat_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(telegram_bp)
     csrf.exempt(telegram_bp)  # вебхук Telegram не может передать наш CSRF-токен
@@ -141,6 +143,25 @@ def create_app(config_name=None):
 
             return {"unread_notifications": unread_count(current_user)}
         return {"unread_notifications": 0}
+
+    @app.context_processor
+    def inject_unread_messages():
+        from flask_login import current_user
+
+        if current_user.is_authenticated:
+            from app.models import Conversation, Message
+
+            count = (
+                Message.query.join(Conversation, Message.conversation_id == Conversation.id)
+                .filter(
+                    db.or_(Conversation.user_a_id == current_user.id, Conversation.user_b_id == current_user.id),
+                    Message.sender_id != current_user.id,
+                    Message.read_at.is_(None),
+                )
+                .count()
+            )
+            return {"unread_messages": count}
+        return {"unread_messages": 0}
 
     return app
 

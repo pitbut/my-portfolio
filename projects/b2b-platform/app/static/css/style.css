@@ -151,6 +151,15 @@ textarea{resize:vertical;}
 .listing-card__price{font-weight:700;color:var(--bg2);margin:4px 0;}
 .listing-card__meta{color:var(--sub);font-size:.85em;}
 
+/* --- чат --- */
+.chat-inbox-item{text-decoration:none;color:inherit;display:block;}
+.chat-inbox-item--unread{border-left:4px solid var(--accent2);}
+.chat-thread{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.chat-bubble{max-width:70%;border-radius:12px;padding:10px 14px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.05);}
+.chat-bubble--own{align-self:flex-end;background:#eef3ff;}
+.chat-bubble--other{align-self:flex-start;}
+.chat-bubble__body{white-space:pre-wrap;word-break:break-word;}
+
 /* --- disputes --- */
 .callout-resolution{background:#e5f6ec;border-left:4px solid var(--accent);border-radius:10px;padding:14px 18px;margin:14px 0;}
 .notif-item--internal{background:#fff8e6;border-left:4px solid var(--warn);}

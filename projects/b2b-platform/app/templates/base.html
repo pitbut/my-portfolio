@@ -56,6 +56,7 @@
           {% if current_user.role in ('customer', 'executor') %}
             <a href="{{ url_for('settings.index') }}">⚙️</a>
           {% endif %}
+          <a href="{{ url_for('chat.inbox') }}">💬{% if unread_messages %}<span class="notif-badge">{{ unread_messages }}</span>{% endif %}</a>
           <a href="{{ url_for('main.notifications') }}">🔔{% if unread_notifications %}<span class="notif-badge">{{ unread_notifications }}</span>{% endif %}</a>
           <span class="account-nav__email">{{ current_user.email }}</span>
           <a href="{{ url_for('auth.logout') }}">{{ t('nav.logout') }}</a>
