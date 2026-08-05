@@ -481,7 +481,7 @@ def record_status_change(order, to_status, user=None):
 NOTIFICATION_TYPES = (
     "new_order_match", "outbid", "bid_accepted", "bid_rejected", "order_completed", "dispute_update",
     "subscription_expiring", "subscription_activated", "review_received",
-    "listing_response", "vacancy_response", "resume_invite",
+    "listing_response", "vacancy_response", "resume_invite", "material_response",
 )
 
 
@@ -880,3 +880,89 @@ class Payment(db.Model):
 
     def __repr__(self):
         return f"<Payment subscription_id={self.subscription_id} status={self.status!r}>"
+
+
+# --- модуль 10: материалы и сырьё ---
+
+class MaterialForm(db.Model):
+    """Справочник вида/формы материала (лист, круг, труба...) — отдельно от
+    Material (справочник марки/типа: сталь, алюминий...), чтобы фильтровать
+    объявления и по тому, и по другому одновременно."""
+
+    __tablename__ = "material_forms"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name_ru = db.Column(db.String(160), nullable=False)
+    name_uz_latin = db.Column(db.String(160), nullable=False)
+    name_uz_cyrillic = db.Column(db.String(160), nullable=False)
+
+    def name(self, lang):
+        return getattr(self, f"name_{lang}", self.name_ru)
+
+    def __repr__(self):
+        return f"<MaterialForm {self.name_ru!r}>"
+
+
+class MaterialListing(TimestampMixin, db.Model):
+    """Объявление о продаже/покупке сырья (лист, прокат, труба, лом...).
+    Доступно любому зарегистрированному пользователю — завод-изготовитель,
+    отдельный поставщик сырья или заказчик с остатками металла."""
+
+    __tablename__ = "material_listings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    listing_intent = db.Column(db.String(10), nullable=False)  # sell | buy
+    material_id = db.Column(db.Integer, db.ForeignKey("materials.id"), nullable=False)
+    form_id = db.Column(db.Integer, db.ForeignKey("material_forms.id"), nullable=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    content_language = db.Column(db.String(20), nullable=False, default="ru")
+    quantity = db.Column(db.Numeric(12, 2), nullable=True)
+    unit = db.Column(db.String(10), nullable=True)  # kg | t | m | m2 | pcs
+    price = db.Column(db.Numeric(14, 2), nullable=True)
+    currency = db.Column(db.String(10), nullable=False, default="UZS")
+    price_negotiable = db.Column(db.Boolean, nullable=False, default=False)
+    region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=False)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="active")  # active | reserved | closed | archived
+
+    author = db.relationship("User")
+    material = db.relationship("Material")
+    form = db.relationship("MaterialForm")
+    region = db.relationship("Region")
+    city = db.relationship("City")
+    media = db.relationship("MaterialListingMedia", backref="listing", cascade="all, delete-orphan", order_by="MaterialListingMedia.sort_order")
+    responses = db.relationship("MaterialListingResponse", backref="listing", cascade="all, delete-orphan", order_by="MaterialListingResponse.created_at")
+
+    def __repr__(self):
+        return f"<MaterialListing {self.id} {self.title!r} {self.listing_intent}>"
+
+
+class MaterialListingMedia(db.Model):
+    __tablename__ = "material_listing_media"
+
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey("material_listings.id"), nullable=False)
+    media_type = db.Column(db.String(20), nullable=False)  # photo
+    file_url = db.Column(db.String(1000), nullable=False)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<MaterialListingMedia listing_id={self.listing_id}>"
+
+
+class MaterialListingResponse(db.Model):
+    __tablename__ = "material_listing_responses"
+
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey("material_listings.id"), nullable=False)
+    from_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    message = db.Column(db.Text, nullable=True)
+    offered_price = db.Column(db.Numeric(14, 2), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    from_user = db.relationship("User")
+
+    def __repr__(self):
+        return f"<MaterialListingResponse listing_id={self.listing_id} from={self.from_user_id}>"

@@ -13,6 +13,7 @@ from app.models import (
     EquipmentType,
     ListingCategory,
     Material,
+    MaterialForm,
     ProfessionCategory,
     Region,
     ServiceCategory,
@@ -114,6 +115,7 @@ def main():
         seed_simple_dictionary(Material, "materials.csv")
         seed_simple_dictionary(ListingCategory, "listing_categories.csv")
         seed_simple_dictionary(ProfessionCategory, "profession_categories.csv")
+        seed_simple_dictionary(MaterialForm, "material_forms.csv")
         seed_subscription_plans()
         print("Готово.")
 

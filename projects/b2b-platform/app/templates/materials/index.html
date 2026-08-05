@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Материалы и сырьё{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>Материалы и сырьё</h1>
+    <a class="btn btn--primary" href="{{ url_for('materials_market.new_listing') }}">+ Разместить объявление</a>
+  </div>
+
+  <form method="get" class="map-filters">
+    <label>Тип
+      <select name="intent" onchange="this.form.submit()">
+        <option value="">Все</option>
+        <option value="sell" {{ 'selected' if request.args.get('intent') == 'sell' }}>Продаю</option>
+        <option value="buy" {{ 'selected' if request.args.get('intent') == 'buy' }}>Куплю</option>
+      </select>
+    </label>
+    <label>Материал
+      <select name="material_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for m in materials %}
+          <option value="{{ m.id }}" {{ 'selected' if request.args.get('material_id')|string == m.id|string }}>{{ m.name_ru }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Вид/форма
+      <select name="form_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for f in forms %}
+          <option value="{{ f.id }}" {{ 'selected' if request.args.get('form_id')|string == f.id|string }}>{{ f.name_ru }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Регион
+      <select name="region_id" onchange="this.form.submit()">
+        <option value="">Все</option>
+        {% for r in regions %}
+          <option value="{{ r.id }}" {{ 'selected' if request.args.get('region_id')|string == r.id|string }}>{{ r.name_ru }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+
+  {% if listings %}
+  <div class="listing-grid">
+    {% for l in listings %}
+    <a class="listing-card" href="{{ url_for('materials_market.detail', listing_id=l.id) }}">
+      <span class="listing-card__intent listing-card__intent--{{ l.listing_intent }}">{{ 'Продаю' if l.listing_intent == 'sell' else 'Куплю' }}</span>
+      <h3>{{ l.title }}</h3>
+      <p class="listing-card__price">{% if l.price %}{{ l.price }} {{ l.currency }}{% if l.price_negotiable %} (торг){% endif %}{% else %}Цена не указана{% endif %}</p>
+      <p class="listing-card__meta">{{ l.material.name_ru }}{% if l.form %} · {{ l.form.name_ru }}{% endif %}{% if l.quantity %} · {{ l.quantity }} {{ l.unit }}{% endif %} · {{ l.region.name_ru }}</p>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Пока нет объявлений по этим фильтрам.</p>
+  {% endif %}
+</section>
+{% endblock %}
