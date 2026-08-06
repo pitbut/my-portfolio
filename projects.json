@@ -5,7 +5,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/chat/preview.jpg",
     "link": "projects/chat/index.html",
-    "date": "2026-08-05",
+    "date": "2026-08-06",
     "tags": []
   },
   {
@@ -14,7 +14,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/checker/preview.jpg",
     "link": "projects/checker/index.html",
-    "date": "2026-08-05",
+    "date": "2026-08-06",
     "tags": []
   },
   {
@@ -23,7 +23,7 @@
     "description": "Описание проекта скоро появится",
     "image": "projects/videokonferenciya/preview.jpg",
     "link": "projects/videokonferenciya/index.html",
-    "date": "2026-08-05",
+    "date": "2026-08-06",
     "tags": []
   },
   {
@@ -31,7 +31,7 @@
     "title": "🏭 B2B-платформа изготовителей и ремонтников оборудования (Узбекистан)",
     "description": "Рабочая B2B-платформа (не макет): регистрация заказчиков и исполнителей без участия администратора, оплата подписки, мультимедийный конструктор заказов, автоподбор исполнителей по станочному парку и габаритам, карта и гео-поиск, аукцион ставок, двусторонние отзывы с рейтингом, арбитраж споров, Telegram-бот с уведомлениями по всем событиям, барахолка станков и инструмента, вакансии и резюме с двусторонними откликами. Реальная БД, миграции, 48 автотестов.",
     "image": "projects/b2b-equipment-platform-uz/preview.jpg",
-    "link": "https://b2b-platform-uz.onrender.com",
+    "link": "https://b2b.robutpit.com",
     "date": "2026-08-04",
     "tags": [
       "Flask",
@@ -49,7 +49,7 @@
     "title": "💧 Исток — портал о воде",
     "description": "Flask-портал о воде: священные источники мира, статьи, каталог цен на питьевую воду, библиотека книг, обзоры оборудования, опыты и доставка. Полный стек: Flask + SQLAlchemy + Flask-Migrate.",
     "image": "projects/istok/preview.jpg",
-    "link": "https://istok.onrender.com",
+    "link": "https://istok.robutpit.com",
     "date": "2026-08-01",
     "tags": [
       "Flask",
