@@ -38,18 +38,14 @@ def _to_decimal(value):
 
 
 def _can_view_order(order):
+    """Заявки — открытая лента: любой исполнитель может открыть и оценить
+    любую заявку, не только «рекомендованные» подбором (см. executor_dashboard)."""
     if current_user.role == "admin":
         return True
     if current_user.role == "customer" and order.customer.user_id == current_user.id:
         return True
     if current_user.role == "executor":
-        executor = current_user.executor_profile
-        if executor is None:
-            return False
-        if any(m.executor_id == executor.id for m in order.matches):
-            return True
-        if order.assignment and order.assignment.bid.executor_id == executor.id:
-            return True
+        return True
     return False
 
 
@@ -178,17 +174,33 @@ def my_orders():
 @bp.route("/dashboard")
 @role_required("executor")
 def executor_dashboard():
+    """Открытая лента: видно все опубликованные заявки (плюс свои
+    заявки в работе/завершённые — если по ним была ставка), а не только те,
+    что подобраны автоматически. Подобранные (совпадают станочный парк,
+    габариты, регион, подписка) помечаются как «Рекомендуем» и идут первыми —
+    так исполнитель без заполненного профиля тоже видит рынок, но подсказка,
+    что стоит выгоднее откликнуться, остаётся."""
     profile = current_user.executor_profile
-    matches = []
+
+    query = Order.query
     if profile and profile.id:
-        matches = (
-            OrderMatch.query.filter_by(executor_id=profile.id)
-            .join(Order).filter(Order.status.in_(("published", "assigned", "in_progress", "completed")))
-            .order_by(OrderMatch.created_at.desc()).all()
-        )
-    my_bids = Bid.query.filter_by(executor_id=profile.id).all() if profile and profile.id else []
-    my_bid_by_order = {b.order_id: b for b in my_bids}
-    return render_template("orders/dashboard.html", matches=matches, my_bid_by_order=my_bid_by_order)
+        my_bid_order_ids = db.session.query(Bid.order_id).filter(Bid.executor_id == profile.id)
+        orders = query.filter(db.or_(Order.status == "published", Order.id.in_(my_bid_order_ids))).order_by(Order.created_at.desc()).all()
+    else:
+        orders = query.filter(Order.status == "published").order_by(Order.created_at.desc()).all()
+
+    matches_by_order = {}
+    my_bid_by_order = {}
+    if profile and profile.id:
+        matches_by_order = {m.order_id: m for m in OrderMatch.query.filter_by(executor_id=profile.id).all()}
+        my_bid_by_order = {b.order_id: b for b in Bid.query.filter_by(executor_id=profile.id).all()}
+
+    orders.sort(key=lambda o: o.id not in matches_by_order)
+
+    return render_template(
+        "orders/dashboard.html", orders=orders,
+        matches_by_order=matches_by_order, my_bid_by_order=my_bid_by_order,
+    )
 
 
 @bp.route("/orders/<int:order_id>")
@@ -215,8 +227,9 @@ def submit_bid(order_id):
     if order is None:
         abort(404)
     executor = current_user.executor_profile
-    if executor is None or not any(m.executor_id == executor.id for m in order.matches):
-        abort(403)
+    if executor is None or not executor.is_complete:
+        flash("Чтобы делать ставки, сначала полностью заполните профиль исполнителя.", "error")
+        return redirect(url_for("profile.executor_edit"))
     if not order.is_open_for_bids:
         flash("Приём ставок по этому заказу уже закрыт.", "error")
         return redirect(url_for("orders.order_detail", order_id=order.id))
