@@ -118,6 +118,53 @@
     map.on("click", function (e) {
       setPoint(e.latlng.lat, e.latlng.lng);
     });
+
+    return { setPoint: setPoint, map: map };
+  };
+
+  // Кнопка «Найти на карте» рядом с текстовым полем адреса: подтягивает
+  // точку через бесплатный геокодер Nominatim (OpenStreetMap, без ключа —
+  // как и сама карта). Адрес — обычный текст «на глаз», может быть неточным
+  // или неполным (без номера дома), поэтому маркер после этого остаётся
+  // перетаскиваемым, а не выставляется намертво — геокодирование лишь
+  // подсказка, а не источник истины. У Nominatim есть лимит по частоте
+  // запросов — годится для формы профиля (клик по кнопке вручную), но не для
+  // массовых/фоновых вызовов.
+  window.initAddressGeocode = function (buttonId, addressFieldId, mapController) {
+    var btn = document.getElementById(buttonId);
+    var addressField = document.getElementById(addressFieldId);
+    if (!btn || !addressField || !mapController) return;
+
+    btn.addEventListener("click", function () {
+      var query = addressField.value.trim();
+      if (!query) {
+        alert("Сначала введите адрес.");
+        return;
+      }
+      var originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Ищу…";
+
+      fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=uz&q=" + encodeURIComponent(query))
+        .then(function (res) { return res.json(); })
+        .then(function (results) {
+          if (!results.length) {
+            alert("Не удалось найти это место на карте. Уточните адрес или отметьте точку вручную кликом.");
+            return;
+          }
+          var lat = parseFloat(results[0].lat);
+          var lon = parseFloat(results[0].lon);
+          mapController.setPoint(lat, lon);
+          mapController.map.setView([lat, lon], 15);
+        })
+        .catch(function () {
+          alert("Не удалось связаться с картографическим сервисом. Отметьте точку на карте вручную.");
+        })
+        .finally(function () {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        });
+    });
   };
 
   document.addEventListener("DOMContentLoaded", initAuthModal);

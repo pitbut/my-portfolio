@@ -72,6 +72,11 @@ a{color:var(--accent2);}
 .badge--ok{background:#e5f6ec;color:var(--accent);}
 .badge--warn{background:#fff4d6;color:var(--warn);}
 
+.profile-checklist{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:6px;font-size:.92em;}
+.profile-checklist li{padding:6px 12px;border-radius:8px;}
+.profile-checklist li.is-done{color:var(--accent);background:#e5f6ec;}
+.profile-checklist li.is-missing{color:var(--warn);background:#fff4d6;}
+
 form.profile-form{background:#fff;border-radius:14px;padding:26px;box-shadow:0 6px 20px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:16px;max-width:640px;}
 form.profile-form.profile-form--inline{flex-direction:row;flex-wrap:wrap;align-items:end;max-width:none;}
 form.profile-form.profile-form--inline label{flex:1 1 160px;}

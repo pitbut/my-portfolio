@@ -112,6 +112,52 @@ def test_order_excludes_executor_without_service_match(client):
     assert "Подходящих исполнителей пока не нашлось".encode() in resp.data
 
 
+def test_new_executor_profile_matches_already_open_orders(client):
+    """run_matching() при публикации заказа матчит только уже существующих
+    подходящих исполнителей. Если исполнитель заполнил профиль ПОЗЖЕ, чем
+    заказ уже опубликован, он не должен остаться незамеченным навсегда —
+    завершение профиля должно подобрать ему уже открытые заказы задним числом."""
+    region_id = _setup_customer(client, "cust3@example.com")
+    with client.application.app_context():
+        service_id = ServiceCategory.query.first().id
+        material_id = Material.query.first().id
+
+    _login(client, "cust3@example.com")
+    resp = _create_order(client, region_id, service_id, material_id=str(material_id))
+    assert "Подходящих исполнителей пока не нашлось".encode() in resp.data
+    client.get("/auth/logout")
+
+    register(client, email="exec3@example.com", role="executor")
+    with client.application.app_context():
+        equipment_type_id = EquipmentType.query.first().id
+    client.post(
+        "/profile/executor",
+        data={
+            "org_type": "tsekh", "display_name": "Цех exec3@example.com", "region_id": str(region_id),
+            "address_text": "рядом", "latitude": "41.31", "longitude": "69.26", "service_radius_km": "200",
+        },
+        follow_redirects=True,
+    )
+    client.post(
+        "/profile/executor/equipment/add",
+        data={"equipment_type_id": str(equipment_type_id), "quantity": "1"},
+        follow_redirects=True,
+    )
+    resp = client.post(
+        "/profile/executor/capabilities",
+        data={
+            "max_length_mm": "5000", "max_diameter_mm": "1000", "max_weight_kg": "2000",
+            "service_category_ids": [str(service_id)], "material_ids": [str(material_id)],
+        },
+        follow_redirects=True,
+    )
+    assert "Подобрано уже открытых заказов: 1".encode() in resp.data
+
+    with client.application.app_context():
+        order = Order.query.first()
+        assert len(order.matches) == 1
+
+
 def test_order_excludes_executor_outside_service_radius(client):
     region_id = _setup_customer(client, "cust3@example.com")
     service_id, _ = _setup_executor(client, "exec3@example.com", region_id, radius_km=1)

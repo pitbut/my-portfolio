@@ -9,7 +9,7 @@ from datetime import datetime
 
 from app import db
 from app.geo import haversine_km
-from app.models import ExecutorCapability, ExecutorProfile, OrderMatch
+from app.models import ExecutorCapability, ExecutorProfile, Order, OrderMatch
 from app.notify import notify
 from app.subscriptions import has_active_subscription
 
@@ -93,6 +93,58 @@ def run_matching(order):
     for executor, score, distance_km in candidates:
         if executor.id in already_matched_ids:
             continue
+        match = OrderMatch(
+            order_id=order.id, executor_id=executor.id, match_score=score,
+            distance_km=distance_km, notified_at=datetime.utcnow(),
+        )
+        db.session.add(match)
+        created += 1
+
+        notify(
+            executor.user, "new_order_match",
+            title=f"Новый заказ: {order.title}",
+            body=order.description[:200],
+            url=f"/orders/{order.id}",
+        )
+
+    db.session.commit()
+    return created
+
+
+def match_new_executor_to_open_orders(executor):
+    """run_matching() запускается один раз, в момент публикации заказа — если
+    исполнитель заполнил профиль позже, он не попадёт в уже опубликованные
+    заказы задним числом. Эта функция закрывает разрыв: вызывается сразу
+    после того, как профиль исполнителя впервые стал полным (модуль 3), и
+    подбирает ему все ещё открытые для ставок заказы, под которые он
+    подходит — по тем же правилам, что и find_candidates()."""
+    capability = executor.capability
+    if capability is None or not capability.service_categories or not executor.equipment:
+        return 0
+    if not has_active_subscription(executor):
+        return 0
+
+    service_ids = [sc.id for sc in capability.service_categories]
+    already_matched_order_ids = {m.order_id for m in OrderMatch.query.filter_by(executor_id=executor.id).all()}
+
+    open_orders = Order.query.filter(
+        Order.status == "published", Order.service_category_id.in_(service_ids),
+    ).all()
+
+    created = 0
+    for order in open_orders:
+        if order.id in already_matched_order_ids or not order.is_open_for_bids:
+            continue
+        if not _fits_dimensions(order, capability):
+            continue
+
+        distance_km = None
+        if order.latitude is not None and order.longitude is not None and executor.latitude is not None and executor.longitude is not None:
+            distance_km = haversine_km(order.latitude, order.longitude, executor.latitude, executor.longitude)
+            if executor.service_radius_km and distance_km > executor.service_radius_km:
+                continue
+
+        score = _score(order, executor, capability, distance_km)
         match = OrderMatch(
             order_id=order.id, executor_id=executor.id, match_score=score,
             distance_km=distance_km, notified_at=datetime.utcnow(),
