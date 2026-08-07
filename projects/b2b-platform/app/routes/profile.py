@@ -244,17 +244,20 @@ def executor_capabilities_save():
     db.session.commit()
 
     if profile.is_complete:
+        from app.matching import match_new_executor_to_open_orders
         from app.subscriptions import TRIAL_DAYS, start_trial_if_needed
 
         started = start_trial_if_needed(profile)
+        matched = match_new_executor_to_open_orders(profile)
+        extra = f" Подобрано уже открытых заказов: {matched}." if matched else ""
         if started:
             flash(
                 f"Техвозможности сохранены. Профиль полностью заполнен — включён бесплатный пробный период "
-                f"на {TRIAL_DAYS} дней, заказы начнут подбираться автоматически.",
+                f"на {TRIAL_DAYS} дней, заказы начнут подбираться автоматически.{extra}",
                 "success",
             )
         else:
-            flash("Техвозможности сохранены. Профиль полностью заполнен и участвует в подборе заказов.", "success")
+            flash(f"Техвозможности сохранены. Профиль полностью заполнен и участвует в подборе заказов.{extra}", "success")
     else:
         flash("Техвозможности сохранены.", "success")
     return redirect(url_for("profile.executor_edit"))

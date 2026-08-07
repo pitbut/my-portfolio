@@ -16,6 +16,17 @@
     {% endif %}
   </p>
 
+  {% if not profile.is_complete %}
+  {% set has_basic = profile.org_type and profile.display_name and profile.region_id and profile.address_text %}
+  {% set has_equipment = profile.equipment %}
+  {% set has_services = profile.capability and profile.capability.service_categories %}
+  <ul class="profile-checklist">
+    <li class="{{ 'is-done' if has_basic else 'is-missing' }}">{{ '✓' if has_basic else '—' }} 1. Основная информация (тип, название, регион, адрес)</li>
+    <li class="{{ 'is-done' if has_equipment else 'is-missing' }}">{{ '✓' if has_equipment else '—' }} 2. Станочный парк — добавлена хотя бы одна единица оборудования</li>
+    <li class="{{ 'is-done' if has_services else 'is-missing' }}">{{ '✓' if has_services else '—' }} 3. Выбрана хотя бы одна категория услуг ниже</li>
+  </ul>
+  {% endif %}
+
   <h2 class="profile-section-title">1. Основная информация</h2>
   <form method="post" action="{{ url_for('profile.executor_edit') }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -60,10 +71,11 @@
     </div>
 
     <label>Адрес цеха/завода *
-      <input type="text" name="address_text" value="{{ profile.address_text or '' }}" required>
+      <input type="text" name="address_text" id="address_text" value="{{ profile.address_text or '' }}" required>
     </label>
+    <button type="button" id="geocodeAddressBtn" class="btn btn--secondary">Найти на карте по адресу</button>
 
-    <label>Уточните точку на карте</label>
+    <label>Уточните точку на карте (или поправьте маркер вручную — геокодер по адресу иногда ошибается)</label>
     <div id="locationMap" class="location-map"
          data-lat="{{ profile.latitude or '' }}" data-lng="{{ profile.longitude or '' }}"></div>
     <input type="hidden" name="latitude" id="latitude" value="{{ profile.latitude or '' }}">
@@ -166,7 +178,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   initRegionCityCascade('region_id', 'city_id');
-  initLocationMap('locationMap', 'latitude', 'longitude');
+  var mapController = initLocationMap('locationMap', 'latitude', 'longitude');
+  initAddressGeocode('geocodeAddressBtn', 'address_text', mapController);
 });
 </script>
 {% endblock %}
