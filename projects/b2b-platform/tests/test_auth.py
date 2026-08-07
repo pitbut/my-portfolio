@@ -1,3 +1,5 @@
+from werkzeug.security import check_password_hash
+
 from app.models import User
 
 from tests.conftest import register
@@ -68,3 +70,62 @@ def test_email_confirmation_flow(client):
     with client.application.app_context():
         user = User.query.filter_by(email="confirm@example.com").first()
         assert user.email_confirmed is True
+
+
+def _reset_path_for(client, email):
+    from app.routes.auth import reset_url_for
+
+    with client.application.test_request_context():
+        with client.application.app_context():
+            user = User.query.filter_by(email=email).first()
+            url = reset_url_for(user)
+    return url.split("localhost", 1)[-1] if "localhost" in url else url
+
+
+def test_forgot_password_shows_reset_link_when_resend_not_configured(client):
+    register(client, email="reset@example.com", password="oldpassword1")
+    client.get("/auth/logout")
+
+    resp = client.post("/auth/forgot-password", data={"email": "reset@example.com"}, follow_redirects=True)
+    assert "ссылка для сброса пароля".encode() in resp.data
+    assert "/auth/reset-password/".encode() in resp.data
+
+
+def test_forgot_password_same_message_for_unknown_email(client):
+    resp = client.post("/auth/forgot-password", data={"email": "nobody@example.com"}, follow_redirects=True)
+    assert "Если такой email зарегистрирован".encode() in resp.data
+
+
+def test_reset_password_updates_hash_and_allows_login(client):
+    register(client, email="reset2@example.com", password="oldpassword1")
+    client.get("/auth/logout")
+
+    path = _reset_path_for(client, "reset2@example.com")
+    resp = client.post(path, data={"password": "newpassword1", "password2": "newpassword1"}, follow_redirects=True)
+    assert "Пароль обновлён".encode() in resp.data
+
+    with client.application.app_context():
+        user = User.query.filter_by(email="reset2@example.com").first()
+        assert check_password_hash(user.password_hash, "newpassword1")
+        assert not check_password_hash(user.password_hash, "oldpassword1")
+
+    resp = client.post("/auth/login", data={"email": "reset2@example.com", "password": "newpassword1"}, follow_redirects=False)
+    assert resp.status_code == 302
+
+
+def test_reset_password_rejects_mismatched_passwords(client):
+    register(client, email="reset3@example.com", password="oldpassword1")
+    client.get("/auth/logout")
+
+    path = _reset_path_for(client, "reset3@example.com")
+    resp = client.post(path, data={"password": "newpassword1", "password2": "different1"}, follow_redirects=True)
+    assert "не совпадают".encode() in resp.data
+
+    with client.application.app_context():
+        user = User.query.filter_by(email="reset3@example.com").first()
+        assert check_password_hash(user.password_hash, "oldpassword1")
+
+
+def test_reset_password_rejects_invalid_token(client):
+    resp = client.get("/auth/reset-password/not-a-real-token", follow_redirects=True)
+    assert "недействительна".encode() in resp.data
