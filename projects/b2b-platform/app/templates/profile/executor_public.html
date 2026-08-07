@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.display_name or target_user.email }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>{{ profile.display_name or 'Исполнитель' }}</h1>
+  <p class="profile-page__hint">
+    {{ {'master': 'Мастер', 'tsekh': 'Цех', 'zavod': 'Завод'}.get(profile.org_type, '—') }}
+    {% if profile.region %}· {{ profile.region.name_ru }}{% if profile.city %}, {{ profile.city.name_ru }}{% endif %}{% endif %}
+    {% if profile.rating_avg %}· рейтинг {{ '%.1f'|format(profile.rating_avg) }} ({{ profile.reviews_count }}){% endif %}
+  </p>
+
+  {% if profile.description %}<p class="order-description">{{ profile.description }}</p>{% endif %}
+
+  {% if reveal_contact %}
+  <div class="flash flash--info">
+    <strong>Контакты</strong> (доступны, так как у вас есть совместная сделка):
+    Телефон: {{ target_user.phone or '—' }} · Адрес: {{ profile.address_text or '—' }}
+  </div>
+  {% else %}
+  <p class="empty-hint">Телефон и адрес открываются после того, как вы заключите сделку по заявке с этим исполнителем.</p>
+  {% endif %}
+
+  {% if profile.equipment %}
+  <h2 class="profile-section-title">Станочный парк</h2>
+  <ul>
+    {% for item in profile.equipment %}
+    <li>{{ item.equipment_type.name_ru }}{% if item.model_name %} — {{ item.model_name }}{% endif %} ({{ item.quantity }} шт.)</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if profile.capability and profile.capability.service_categories %}
+  <h2 class="profile-section-title">Услуги</h2>
+  <p>{{ profile.capability.service_categories|map(attribute='name_ru')|join(', ') }}</p>
+  {% endif %}
+
+  {% if profile.capability and profile.capability.materials %}
+  <h2 class="profile-section-title">Материалы</h2>
+  <p>{{ profile.capability.materials|map(attribute='name_ru')|join(', ') }}</p>
+  {% endif %}
+
+  <h2 class="profile-section-title">Портфолио</h2>
+  {% if target_user.portfolio_media %}
+  <div class="portfolio-gallery">
+    {% for item in target_user.portfolio_media %}
+    <div class="portfolio-gallery__item">
+      {% if item.media_type == 'photo' %}
+        <img src="{{ item.file_url }}" alt="{{ item.caption or '' }}" class="portfolio-gallery__img">
+      {% else %}
+        <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">▶ Видео</a>
+      {% endif %}
+      {% if item.caption %}<p class="portfolio-gallery__caption">{{ item.caption }}</p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-hint">Портфолио пока пустое.</p>
+  {% endif %}
+</section>
+{% endblock %}
