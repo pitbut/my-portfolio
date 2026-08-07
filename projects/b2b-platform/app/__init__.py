@@ -8,11 +8,25 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 
 from app.cli import register_cli
 from config import config
 
 load_dotenv()
+
+
+@event.listens_for(Engine, "connect")
+def _enforce_sqlite_foreign_keys(dbapi_connection, connection_record):
+    """PostgreSQL (продакшн) всегда проверяет внешние ключи, а SQLite
+    (тесты и локальная разработка) — нет, если явно не включить. Без этого
+    тесты не замечали бы нарушения FK, которые в проде дадут IntegrityError."""
+    if type(dbapi_connection).__module__.startswith("sqlite3"):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
 
 db = SQLAlchemy()
 migrate = Migrate()

@@ -7,9 +7,11 @@ from datetime import datetime, timedelta
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
+from sqlalchemy.exc import IntegrityError
+
 from app import db
 from app.decorators import role_required
-from app.models import Dispute, Subscription, record_status_change
+from app.models import Dispute, Subscription, User, record_status_change
 from app.notify import notify
 from app.routes.disputes import _order_parties
 
@@ -108,3 +110,55 @@ def reject_subscription(subscription_id):
     db.session.commit()
     flash("Заявка на подписку отклонена.", "info")
     return redirect(url_for("admin.subscriptions_list"))
+
+
+@bp.route("/users")
+@role_required("admin")
+def users_list():
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template("admin/users.html", users=users)
+
+
+@bp.route("/users/<int:user_id>/toggle-block", methods=["POST"])
+@role_required("admin")
+def toggle_block_user(user_id):
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404)
+    if user.role == "admin":
+        flash("Нельзя заблокировать администратора.", "error")
+        return redirect(url_for("admin.users_list"))
+
+    user.is_blocked = not user.is_blocked
+    db.session.commit()
+    flash(f"{user.email}: {'заблокирован' if user.is_blocked else 'разблокирован'}.", "success")
+    return redirect(url_for("admin.users_list"))
+
+
+@bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@role_required("admin")
+def delete_user(user_id):
+    """Удаление устроено «честно»: если у пользователя уже есть связанные
+    данные (заказы, отклики, сообщения, отзывы и т.п.), база откажет по
+    внешнему ключу — в этом случае лучше заблокировать аккаунт, а не
+    удалять, чтобы не сломать историю других пользователей."""
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404)
+    if user.role == "admin":
+        flash("Нельзя удалить администратора.", "error")
+        return redirect(url_for("admin.users_list"))
+
+    email = user.email
+    db.session.delete(user)
+    try:
+        db.session.commit()
+        flash(f"{email}: аккаунт удалён.", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash(
+            f"{email}: не удалось удалить — с аккаунтом уже связаны данные "
+            "(заказы, объявления, сообщения и т.п.). Заблокируйте вместо удаления.",
+            "error",
+        )
+    return redirect(url_for("admin.users_list"))

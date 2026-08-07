@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Пользователи — админ-панель{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>Пользователи ({{ users|length }})</h1>
+  {% if users %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Email</th><th>Роль</th><th>Email подтверждён</th><th>Статус</th><th>Регистрация</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role or '—' }}</td>
+        <td>{{ 'да' if u.email_confirmed else 'нет' }}</td>
+        <td>
+          {% if u.is_blocked %}<span class="status-chip status-chip--disputed">заблокирован</span>
+          {% else %}<span class="status-chip status-chip--completed">активен</span>{% endif %}
+        </td>
+        <td>{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+          {% if u.role != 'admin' %}
+          <form method="post" action="{{ url_for('admin.toggle_block_user', user_id=u.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn--secondary">{{ 'Разблокировать' if u.is_blocked else 'Заблокировать' }}</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline" onsubmit="return confirm('Удалить {{ u.email }}? Если есть связанные данные — сайт откажет и предложит заблокировать вместо удаления.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+          </form>
+          {% else %}
+          <span class="empty-hint">админ</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Пользователей пока нет.</p>
+  {% endif %}
+</section>
+{% endblock %}
