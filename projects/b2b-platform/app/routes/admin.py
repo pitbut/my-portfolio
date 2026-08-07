@@ -12,11 +12,13 @@ from sqlalchemy.exc import IntegrityError
 from app import db
 from app.decorators import role_required
 from app.models import (
+    CustomerProfile,
     Dispute,
     Listing,
     ListingResponse,
     MaterialListing,
     MaterialListingResponse,
+    Order,
     Subscription,
     User,
     record_status_change,
@@ -136,7 +138,41 @@ def user_detail(user_id):
         abort(404)
     listings = Listing.query.filter_by(author_id=user.id).order_by(Listing.created_at.desc()).all()
     material_listings = MaterialListing.query.filter_by(author_id=user.id).order_by(MaterialListing.created_at.desc()).all()
-    return render_template("admin/user_detail.html", target_user=user, listings=listings, material_listings=material_listings)
+    customer_profile = CustomerProfile.query.filter_by(user_id=user.id).first()
+    orders = (
+        Order.query.filter_by(customer_id=customer_profile.id).order_by(Order.created_at.desc()).all()
+        if customer_profile else []
+    )
+    return render_template(
+        "admin/user_detail.html", target_user=user, listings=listings,
+        material_listings=material_listings, orders=orders,
+    )
+
+
+@bp.route("/users/<int:user_id>/orders/<int:order_id>/delete", methods=["POST"])
+@role_required("admin")
+def delete_user_order(user_id, order_id):
+    """Заявка (заказ) — не «объявление»: у неё может быть история ставок,
+    назначение исполнителя, споры и отзывы. Поэтому здесь тоже честный отказ,
+    а не тихая зачистка — для свежей заявки без откликов удаление пройдёт,
+    для заказа в работе или со спором админ увидит явную причину отказа."""
+    order = db.session.get(Order, order_id)
+    if order is None or order.customer is None or order.customer.user_id != user_id:
+        abort(404)
+
+    title = order.title
+    db.session.delete(order)
+    try:
+        db.session.commit()
+        flash(f"Заявка «{title}» удалена.", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash(
+            f"Заявку «{title}» не удалось удалить — по ней уже есть история (ставки, отзывы, спор). "
+            "Такую заявку можно только заблокировать вместе с аккаунтом, а не удалить.",
+            "error",
+        )
+    return redirect(url_for("admin.user_detail", user_id=user_id))
 
 
 @bp.route("/users/<int:user_id>/listings/<int:listing_id>/delete", methods=["POST"])

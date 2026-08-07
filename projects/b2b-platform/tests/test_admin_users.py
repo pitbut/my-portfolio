@@ -1,7 +1,16 @@
 from werkzeug.security import generate_password_hash
 
 from app import db
-from app.models import CustomerProfile, Listing, ListingCategory, Region, User
+from app.models import (
+    CustomerProfile,
+    Listing,
+    ListingCategory,
+    Order,
+    OrderStatusHistory,
+    Region,
+    ServiceCategory,
+    User,
+)
 
 from tests.conftest import register
 
@@ -176,6 +185,66 @@ def test_delete_user_with_listing_succeeds_and_removes_listing(client):
     with client.application.app_context():
         assert db.session.get(User, seller_id) is None
         assert db.session.get(Listing, listing_id) is None
+
+
+def _setup_customer_with_order(client, email, title):
+    register(client, email=email, role="customer")
+    with client.application.app_context():
+        region_id = Region.query.first().id
+        service_id = ServiceCategory.query.first().id
+    client.post(
+        "/profile/customer",
+        data={"kind": "company", "display_name": "Завод В", "region_id": str(region_id), "address_text": "Ташкент"},
+        follow_redirects=True,
+    )
+    client.post(
+        "/orders/new",
+        data={
+            "title": title, "description": "Описание заявки",
+            "order_type": "manufacturing", "service_category_id": str(service_id),
+            "region_id": str(region_id), "address_text": "Ташкент", "auction_hours": "48",
+        },
+        follow_redirects=True,
+    )
+    client.get("/auth/logout")
+
+
+def test_admin_can_view_and_delete_fresh_order(client):
+    _setup_customer_with_order(client, "orderer1@example.com", "Токарная обточка вала")
+    with client.application.app_context():
+        orderer_id = User.query.filter_by(email="orderer1@example.com").first().id
+        order_id = Order.query.filter_by(title="Токарная обточка вала").first().id
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get(f"/admin/users/{orderer_id}")
+    assert "Токарная обточка вала".encode() in resp.data
+
+    resp = client.post(f"/admin/users/{orderer_id}/orders/{order_id}/delete", follow_redirects=True)
+    assert "удалена".encode() in resp.data
+    with client.application.app_context():
+        assert db.session.get(Order, order_id) is None
+
+
+def test_admin_cannot_delete_order_with_status_history(client):
+    """У заявки с историей статусов (спор/переход по стадиям) удаление честно
+    откажет — эта история важна для другой стороны сделки и для арбитража."""
+    _setup_customer_with_order(client, "orderer2@example.com", "Заказ со спором")
+    with client.application.app_context():
+        orderer_id = User.query.filter_by(email="orderer2@example.com").first().id
+        order = Order.query.filter_by(title="Заказ со спором").first()
+        db.session.add(OrderStatusHistory(order_id=order.id, to_status="published"))
+        db.session.commit()
+        order_id = order.id
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.post(f"/admin/users/{orderer_id}/orders/{order_id}/delete", follow_redirects=True)
+    assert "не удалось удалить".encode() in resp.data
+    with client.application.app_context():
+        assert db.session.get(Order, order_id) is not None
 
 
 def test_delete_user_with_messages_fails_gracefully(client):

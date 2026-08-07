@@ -38,6 +38,8 @@ def _to_decimal(value):
 
 
 def _can_view_order(order):
+    if current_user.role == "admin":
+        return True
     if current_user.role == "customer" and order.customer.user_id == current_user.id:
         return True
     if current_user.role == "executor":
