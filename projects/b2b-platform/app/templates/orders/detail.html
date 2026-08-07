@@ -102,7 +102,7 @@
         <button type="submit" class="btn btn--primary">Начать работу</button>
       </form>
       {% endif %}
-    {% elif order.is_open_for_bids %}
+    {% elif order.is_open_for_bids and current_user.executor_profile and current_user.executor_profile.is_complete %}
       <h2 class="profile-section-title">{{ 'Ваша ставка' if my_bid else 'Подать ставку' }}</h2>
       <form method="post" action="{{ url_for('orders.submit_bid', order_id=order.id) }}" class="profile-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -119,6 +119,8 @@
         <label>Комментарий (условия, гарантия) <textarea name="comment" rows="3">{{ my_bid.comment or '' if my_bid }}</textarea></label>
         <button type="submit" class="btn btn--primary">{{ 'Обновить ставку' if my_bid else 'Отправить ставку' }}</button>
       </form>
+    {% elif order.is_open_for_bids %}
+      <p class="empty-hint">Чтобы делать ставки, сначала <a href="{{ url_for('profile.executor_edit') }}">полностью заполните профиль</a>.</p>
     {% elif my_bid %}
       <p class="empty-hint">Ваша ставка: {{ my_bid.price }} {{ my_bid.currency }} ({{ my_bid.status }}). Аукцион закрыт.</p>
     {% endif %}

@@ -1,4 +1,4 @@
-from app.models import EquipmentType, Material, Notification, Order, Region, ServiceCategory, User
+from app.models import Bid, EquipmentType, Material, Notification, Order, Region, ServiceCategory, User
 
 from tests.conftest import register
 
@@ -97,6 +97,30 @@ def test_order_matches_suitable_executor_and_notifies(client):
         executor_user = User.query.filter_by(email="exec1@example.com").first()
         notif = Notification.query.filter_by(user_id=executor_user.id, type="new_order_match").first()
         assert notif is not None
+
+
+def test_dashboard_shows_all_open_orders_with_recommended_badge(client):
+    region_id = _setup_customer(client, "cust6@example.com")
+    service_id, material_id = _setup_executor(client, "matched@example.com", region_id)
+
+    _login(client, "cust6@example.com")
+    resp = _create_order(client, region_id, service_id, material_id=str(material_id))
+    assert "Подобрано исполнителей: 1".encode() in resp.data
+    client.get("/auth/logout")
+
+    # исполнитель без заполненного профиля тоже должен видеть эту заявку в общей ленте,
+    # просто без пометки «Рекомендуем»
+    badge_html = '<span class="badge badge--ok">Рекомендуем</span>'
+    register(client, email="bystander@example.com", role="executor")
+    resp = client.get("/dashboard")
+    assert "Токарная обточка вала".encode() in resp.data
+    assert badge_html.encode() not in resp.data
+    client.get("/auth/logout")
+
+    _login(client, "matched@example.com")
+    resp = client.get("/dashboard")
+    assert "Токарная обточка вала".encode() in resp.data
+    assert badge_html.encode() in resp.data
 
 
 def test_order_excludes_executor_without_service_match(client):
@@ -231,7 +255,10 @@ def test_full_bid_and_assignment_flow(client):
         assert order.status == "completed"
 
 
-def test_stranger_cannot_view_unrelated_order(client):
+def test_any_executor_can_view_order_but_needs_complete_profile_to_bid(client):
+    """Лента заказов открытая: любой исполнитель может открыть любую заявку
+    (не только «рекомендованную» подбором) — но чтобы делать ставки, профиль
+    всё равно должен быть полностью заполнен (см. чек-лист /profile/executor)."""
     region_id = _setup_customer(client, "cust5@example.com")
     service_id, _ = _setup_executor(client, "execC@example.com", region_id)
     _login(client, "cust5@example.com")
@@ -242,4 +269,13 @@ def test_stranger_cannot_view_unrelated_order(client):
 
     register(client, email="outsider@example.com", role="executor")
     resp = client.get(f"/orders/{order_id}")
-    assert resp.status_code == 403
+    assert resp.status_code == 200
+
+    resp = client.post(
+        f"/orders/{order_id}/bid",
+        data={"price": "100000", "currency": "UZS", "lead_time_days": "3"},
+        follow_redirects=True,
+    )
+    assert "полностью заполните профиль".encode() in resp.data
+    with client.application.app_context():
+        assert Bid.query.filter_by(order_id=order_id).count() == 0
