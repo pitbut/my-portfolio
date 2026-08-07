@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash
 
 from app import db
-from app.models import CustomerProfile, User
+from app.models import CustomerProfile, Listing, ListingCategory, Region, User
 
 from tests.conftest import register
 
@@ -106,6 +106,76 @@ def test_delete_user_with_own_profile_succeeds(client):
     assert "аккаунт удалён".encode() in resp.data
     with client.application.app_context():
         assert db.session.get(User, target_id) is None
+
+
+def _post_listing(client, title="Токарный станок 1К62"):
+    with client.application.app_context():
+        category_id = ListingCategory.query.first().id
+        region_id = Region.query.first().id
+    client.post(
+        "/marketplace/new",
+        data={
+            "listing_intent": "sell", "category_id": str(category_id), "title": title,
+            "description": "Рабочее состояние", "condition": "used",
+            "price": "15000000", "currency": "UZS", "region_id": str(region_id),
+        },
+        follow_redirects=True,
+    )
+
+
+def test_user_detail_shows_listings(client):
+    register(client, email="seller@example.com", role="customer")
+    _post_listing(client, title="Токарный станок 1К62")
+    with client.application.app_context():
+        seller_id = User.query.filter_by(email="seller@example.com").first().id
+    client.get("/auth/logout")
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get(f"/admin/users/{seller_id}")
+    assert resp.status_code == 200
+    assert "Токарный станок 1К62".encode() in resp.data
+
+
+def test_admin_can_delete_specific_listing(client):
+    register(client, email="seller2@example.com", role="customer")
+    _post_listing(client, title="Фрезерный станок")
+    with client.application.app_context():
+        seller_id = User.query.filter_by(email="seller2@example.com").first().id
+        listing_id = Listing.query.filter_by(author_id=seller_id).first().id
+    client.get("/auth/logout")
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.post(f"/admin/users/{seller_id}/listings/{listing_id}/delete", follow_redirects=True)
+    assert "удалено".encode() in resp.data
+    with client.application.app_context():
+        assert db.session.get(Listing, listing_id) is None
+    with client.application.app_context():
+        assert db.session.get(User, seller_id) is not None
+
+
+def test_delete_user_with_listing_succeeds_and_removes_listing(client):
+    """Объявления — это собственный контент пользователя, не история сделки
+    между сторонами, поэтому удаление аккаунта должно сносить их
+    автоматически, а не отказывать (в отличие от сообщений/заказов)."""
+    register(client, email="seller3@example.com", role="customer")
+    _post_listing(client, title="Сверлильный станок")
+    with client.application.app_context():
+        seller_id = User.query.filter_by(email="seller3@example.com").first().id
+        listing_id = Listing.query.filter_by(author_id=seller_id).first().id
+    client.get("/auth/logout")
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.post(f"/admin/users/{seller_id}/delete", follow_redirects=True)
+    assert "аккаунт удалён".encode() in resp.data
+    with client.application.app_context():
+        assert db.session.get(User, seller_id) is None
+        assert db.session.get(Listing, listing_id) is None
 
 
 def test_delete_user_with_messages_fails_gracefully(client):

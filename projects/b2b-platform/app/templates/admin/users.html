@@ -24,11 +24,12 @@
         <td>{{ u.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
           {% if u.role != 'admin' %}
+          <a href="{{ url_for('admin.user_detail', user_id=u.id) }}">Объявления</a>
           <form method="post" action="{{ url_for('admin.toggle_block_user', user_id=u.id) }}" style="display:inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn--secondary">{{ 'Разблокировать' if u.is_blocked else 'Заблокировать' }}</button>
           </form>
-          <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline" onsubmit="return confirm('Удалить {{ u.email }}? Если есть связанные данные — сайт откажет и предложит заблокировать вместо удаления.');">
+          <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline" onsubmit="return confirm('Удалить {{ u.email }} вместе со всеми его объявлениями? Если есть другие связанные данные (заказы, сообщения и т.п.) — сайт откажет и предложит заблокировать вместо удаления.');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link btn-link--danger">Удалить</button>
           </form>

@@ -11,7 +11,16 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db
 from app.decorators import role_required
-from app.models import Dispute, Subscription, User, record_status_change
+from app.models import (
+    Dispute,
+    Listing,
+    ListingResponse,
+    MaterialListing,
+    MaterialListingResponse,
+    Subscription,
+    User,
+    record_status_change,
+)
 from app.notify import notify
 from app.routes.disputes import _order_parties
 
@@ -119,6 +128,41 @@ def users_list():
     return render_template("admin/users.html", users=users)
 
 
+@bp.route("/users/<int:user_id>")
+@role_required("admin")
+def user_detail(user_id):
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404)
+    listings = Listing.query.filter_by(author_id=user.id).order_by(Listing.created_at.desc()).all()
+    material_listings = MaterialListing.query.filter_by(author_id=user.id).order_by(MaterialListing.created_at.desc()).all()
+    return render_template("admin/user_detail.html", target_user=user, listings=listings, material_listings=material_listings)
+
+
+@bp.route("/users/<int:user_id>/listings/<int:listing_id>/delete", methods=["POST"])
+@role_required("admin")
+def delete_user_listing(user_id, listing_id):
+    listing = Listing.query.filter_by(id=listing_id, author_id=user_id).first()
+    if listing is None:
+        abort(404)
+    db.session.delete(listing)
+    db.session.commit()
+    flash("Объявление (барахолка) удалено.", "success")
+    return redirect(url_for("admin.user_detail", user_id=user_id))
+
+
+@bp.route("/users/<int:user_id>/material-listings/<int:listing_id>/delete", methods=["POST"])
+@role_required("admin")
+def delete_user_material_listing(user_id, listing_id):
+    listing = MaterialListing.query.filter_by(id=listing_id, author_id=user_id).first()
+    if listing is None:
+        abort(404)
+    db.session.delete(listing)
+    db.session.commit()
+    flash("Объявление (материалы) удалено.", "success")
+    return redirect(url_for("admin.user_detail", user_id=user_id))
+
+
 @bp.route("/users/<int:user_id>/toggle-block", methods=["POST"])
 @role_required("admin")
 def toggle_block_user(user_id):
@@ -139,9 +183,14 @@ def toggle_block_user(user_id):
 @role_required("admin")
 def delete_user(user_id):
     """Удаление устроено «честно»: если у пользователя уже есть связанные
-    данные (заказы, отклики, сообщения, отзывы и т.п.), база откажет по
-    внешнему ключу — в этом случае лучше заблокировать аккаунт, а не
-    удалять, чтобы не сломать историю других пользователей."""
+    данные, которые нельзя молча стереть без потери чужой истории (заказы,
+    сообщения, отзывы, споры и т.п.), база откажет по внешнему ключу — в этом
+    случае лучше заблокировать аккаунт, а не удалять.
+
+    Исключение — объявления (барахолка и материалы) и отклики на чужие
+    объявления: это собственный контент пользователя, а не история сделки
+    между сторонами, поэтому при удалении аккаунта его можно смело стирать
+    вместе с пользователем, не дожидаясь ручной зачистки через /admin/users/<id>."""
     user = db.session.get(User, user_id)
     if user is None:
         abort(404)
@@ -150,6 +199,13 @@ def delete_user(user_id):
         return redirect(url_for("admin.users_list"))
 
     email = user.email
+    for listing in Listing.query.filter_by(author_id=user.id).all():
+        db.session.delete(listing)
+    for listing in MaterialListing.query.filter_by(author_id=user.id).all():
+        db.session.delete(listing)
+    ListingResponse.query.filter_by(from_user_id=user.id).delete(synchronize_session=False)
+    MaterialListingResponse.query.filter_by(from_user_id=user.id).delete(synchronize_session=False)
+
     db.session.delete(user)
     try:
         db.session.commit()
@@ -158,7 +214,7 @@ def delete_user(user_id):
         db.session.rollback()
         flash(
             f"{email}: не удалось удалить — с аккаунтом уже связаны данные "
-            "(заказы, объявления, сообщения и т.п.). Заблокируйте вместо удаления.",
+            "(заказы, сообщения, отзывы и т.п.). Заблокируйте вместо удаления.",
             "error",
         )
     return redirect(url_for("admin.users_list"))
