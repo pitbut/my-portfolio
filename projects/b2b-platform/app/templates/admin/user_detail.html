@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ target_user.email }} — админ-панель{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <p><a href="{{ url_for('admin.users_list') }}">&larr; Все пользователи</a></p>
+  <h1>{{ target_user.email }}</h1>
+  <p class="empty-hint">
+    Роль: {{ target_user.role or '—' }} ·
+    Email подтверждён: {{ 'да' if target_user.email_confirmed else 'нет' }} ·
+    Статус: {{ 'заблокирован' if target_user.is_blocked else 'активен' }} ·
+    Регистрация: {{ target_user.created_at.strftime('%d.%m.%Y') }}
+  </p>
+
+  <h2>Объявления в барахолке ({{ listings|length }})</h2>
+  {% if listings %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Название</th><th>Тип</th><th>Статус</th><th>Создано</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for l in listings %}
+      <tr>
+        <td><a href="{{ url_for('marketplace.detail', listing_id=l.id) }}" target="_blank">{{ l.title }}</a></td>
+        <td>{{ 'продаю' if l.listing_intent == 'sell' else 'куплю' }}</td>
+        <td>{{ l.status }}</td>
+        <td>{{ l.created_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.delete_user_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('Удалить объявление «{{ l.title }}»?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Объявлений в барахолке нет.</p>
+  {% endif %}
+
+  <h2>Объявления о материалах ({{ material_listings|length }})</h2>
+  {% if material_listings %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Название</th><th>Тип</th><th>Статус</th><th>Создано</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for l in material_listings %}
+      <tr>
+        <td><a href="{{ url_for('materials_market.detail', listing_id=l.id) }}" target="_blank">{{ l.title }}</a></td>
+        <td>{{ 'продаю' if l.listing_intent == 'sell' else 'куплю' }}</td>
+        <td>{{ l.status }}</td>
+        <td>{{ l.created_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.delete_user_material_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('Удалить объявление «{{ l.title }}»?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Объявлений о материалах нет.</p>
+  {% endif %}
+
+  {% if target_user.role != 'admin' %}
+  <h2>Удалить аккаунт</h2>
+  <p class="empty-hint">
+    Удаляет пользователя вместе со всеми его объявлениями (барахолка и материалы) и его откликами
+    на чужие объявления. Если у аккаунта есть другие связанные данные (заказы, сообщения, отзывы,
+    споры) — удаление честно откажет, тогда используйте блокировку.
+  </p>
+  <form method="post" action="{{ url_for('admin.delete_user', user_id=target_user.id) }}" onsubmit="return confirm('Удалить {{ target_user.email }} вместе со всеми его объявлениями?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn-link btn-link--danger">Удалить пользователя</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}
