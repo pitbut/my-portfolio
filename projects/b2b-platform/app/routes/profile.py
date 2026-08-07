@@ -342,9 +342,12 @@ def portfolio_delete(item_id):
 
 def _has_concluded_deal(customer_user_id, executor_profile_id):
     """Есть ли между этой парой хотя бы одна назначенная (выигранная) сделка —
-    от этого зависит, увидит ли заказчик телефон/адрес исполнителя (и наоборот)
-    на публичной странице профиля: до сделки — только портфолио и описание,
-    контакты не публикуются всем подряд."""
+    от этого зависит, увидит ли исполнитель телефон/адрес заказчика на его
+    публичной странице профиля: до сделки — только портфолио и описание,
+    иначе заказчика мог бы обзванивать любой из откликнувшихся исполнителей.
+    В обратную сторону ограничения нет — заказчик выбирает среди ставок и ему
+    нужны контакты исполнителя сразу, чтобы вообще было из чего выбирать
+    (исполнитель — публичный цех/завод/мастер, а не частное лицо)."""
     return (
         db.session.query(Order.id)
         .join(CustomerProfile, Order.customer_id == CustomerProfile.id)
@@ -363,14 +366,8 @@ def executor_public_profile(user_id):
         abort(404)
     profile = target_user.executor_profile
 
-    reveal_contact = (
-        current_user.id == target_user.id
-        or current_user.role == "admin"
-        or (current_user.role == "customer" and _has_concluded_deal(current_user.id, profile.id))
-    )
-
     return render_template(
-        "profile/executor_public.html", target_user=target_user, profile=profile, reveal_contact=reveal_contact,
+        "profile/executor_public.html", target_user=target_user, profile=profile, reveal_contact=True,
     )
 
 
