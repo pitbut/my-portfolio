@@ -12,14 +12,9 @@
 
   {% if profile.description %}<p class="order-description">{{ profile.description }}</p>{% endif %}
 
-  {% if reveal_contact %}
   <div class="flash flash--info">
-    <strong>Контакты</strong> (доступны, так как у вас есть совместная сделка):
-    Телефон: {{ target_user.phone or '—' }} · Адрес: {{ profile.address_text or '—' }}
+    <strong>Контакты:</strong> телефон {{ target_user.phone or '—' }} · адрес {{ profile.address_text or '—' }}
   </div>
-  {% else %}
-  <p class="empty-hint">Телефон и адрес открываются после того, как вы заключите сделку по заявке с этим исполнителем.</p>
-  {% endif %}
 
   {% if profile.equipment %}
   <h2 class="profile-section-title">Станочный парк</h2>
