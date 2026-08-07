@@ -10,16 +10,23 @@ from flask_login import current_user, login_required
 from app import db
 from app.decorators import role_required
 from app.models import (
+    Bid,
     City,
     ConstructorProfile,
+    CustomerProfile,
     EquipmentType,
     ExecutorCapability,
     ExecutorEquipment,
     ExecutorProfile,
     Material,
+    Order,
+    OrderAssignment,
+    PortfolioMedia,
     Region,
     ServiceCategory,
+    User,
 )
+from app.photos import upload_photo
 
 bp = Blueprint("profile", __name__)
 
@@ -44,8 +51,6 @@ def _regions():
 @bp.route("/customer", methods=["GET", "POST"])
 @role_required("customer")
 def customer_edit():
-    from app.models import CustomerProfile
-
     profile = current_user.customer_profile
     if profile is None:
         # На GET отдаём непривязанный к сессии объект только для рендера формы —
@@ -275,3 +280,117 @@ def cities_by_region(region_id):
 
     lang = get_current_lang()
     return jsonify([{"id": c.id, "name": c.name(lang)} for c in cities])
+
+
+def _own_profile_edit_url():
+    if current_user.role == "executor":
+        return url_for("profile.executor_edit")
+    if current_user.role == "customer":
+        return url_for("profile.customer_edit")
+    return url_for("main.index")
+
+
+@bp.route("/portfolio/add", methods=["POST"])
+@login_required
+def portfolio_add():
+    """Общая галерея для рекламы — доступна и заказчику, и исполнителю.
+    Фото грузятся через ImgBB (как и остальные фото в проекте), видео —
+    просто ссылка (YouTube/Google Диск и т.п.), как и в заявках/барахолке —
+    отдельного видеохостинга у платформы нет."""
+    if current_user.role not in ("customer", "executor"):
+        abort(403)
+
+    media_type = request.form.get("media_type")
+    if media_type == "photo":
+        url, error = upload_photo(request.files.get("photo"))
+        if error:
+            flash(error, "error")
+            return redirect(_own_profile_edit_url())
+        if not url:
+            flash("Выберите файл фото.", "error")
+            return redirect(_own_profile_edit_url())
+    elif media_type == "video":
+        url = (request.form.get("video_url") or "").strip()
+        if not url:
+            flash("Укажите ссылку на видео.", "error")
+            return redirect(_own_profile_edit_url())
+    else:
+        abort(400)
+
+    caption = (request.form.get("caption") or "").strip() or None
+    sort_order = len(current_user.portfolio_media)
+    db.session.add(PortfolioMedia(
+        user_id=current_user.id, media_type=media_type, file_url=url,
+        caption=caption, sort_order=sort_order,
+    ))
+    db.session.commit()
+    flash("Добавлено в портфолио.", "success")
+    return redirect(_own_profile_edit_url())
+
+
+@bp.route("/portfolio/<int:item_id>/delete", methods=["POST"])
+@login_required
+def portfolio_delete(item_id):
+    item = db.session.get(PortfolioMedia, item_id)
+    if item is None or item.user_id != current_user.id:
+        abort(404)
+    db.session.delete(item)
+    db.session.commit()
+    flash("Удалено из портфолио.", "info")
+    return redirect(_own_profile_edit_url())
+
+
+def _has_concluded_deal(customer_user_id, executor_profile_id):
+    """Есть ли между этой парой хотя бы одна назначенная (выигранная) сделка —
+    от этого зависит, увидит ли заказчик телефон/адрес исполнителя (и наоборот)
+    на публичной странице профиля: до сделки — только портфолио и описание,
+    контакты не публикуются всем подряд."""
+    return (
+        db.session.query(Order.id)
+        .join(CustomerProfile, Order.customer_id == CustomerProfile.id)
+        .join(OrderAssignment, OrderAssignment.order_id == Order.id)
+        .join(Bid, OrderAssignment.bid_id == Bid.id)
+        .filter(CustomerProfile.user_id == customer_user_id, Bid.executor_id == executor_profile_id)
+        .first() is not None
+    )
+
+
+@bp.route("/executor/<int:user_id>")
+@login_required
+def executor_public_profile(user_id):
+    target_user = db.session.get(User, user_id)
+    if target_user is None or target_user.role != "executor" or target_user.executor_profile is None:
+        abort(404)
+    profile = target_user.executor_profile
+
+    reveal_contact = (
+        current_user.id == target_user.id
+        or current_user.role == "admin"
+        or (current_user.role == "customer" and _has_concluded_deal(current_user.id, profile.id))
+    )
+
+    return render_template(
+        "profile/executor_public.html", target_user=target_user, profile=profile, reveal_contact=reveal_contact,
+    )
+
+
+@bp.route("/customer/<int:user_id>")
+@login_required
+def customer_public_profile(user_id):
+    target_user = db.session.get(User, user_id)
+    if target_user is None or target_user.role != "customer" or target_user.customer_profile is None:
+        abort(404)
+    profile = target_user.customer_profile
+
+    reveal_contact = (
+        current_user.id == target_user.id
+        or current_user.role == "admin"
+        or (
+            current_user.role == "executor" and current_user.executor_profile
+            and _has_concluded_deal(target_user.id, current_user.executor_profile.id)
+        )
+    )
+
+    return render_template(
+        "profile/customer_public.html", target_user=target_user, profile=profile, reveal_contact=reveal_contact,
+    )

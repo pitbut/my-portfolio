@@ -62,6 +62,8 @@
 
     <button type="submit" class="btn btn--primary">Сохранить профиль</button>
   </form>
+
+  {% with section_number=2 %}{% include "profile/_portfolio_section.html" %}{% endwith %}
 </section>
 {% endblock %}
 

@@ -61,6 +61,9 @@ class User(TimestampMixin, db.Model):
     constructor_profile = db.relationship(
         "ConstructorProfile", backref="user", uselist=False, cascade="all, delete-orphan"
     )
+    portfolio_media = db.relationship(
+        "PortfolioMedia", backref="user", cascade="all, delete-orphan", order_by="PortfolioMedia.sort_order",
+    )
 
     # --- интерфейс, ожидаемый Flask-Login ---
     @property
@@ -1048,3 +1051,23 @@ class Message(db.Model):
 
     def __repr__(self):
         return f"<Message conversation_id={self.conversation_id} sender_id={self.sender_id}>"
+
+
+class PortfolioMedia(db.Model):
+    """Фото цеха/станков/продукции или ссылка на видео — «витрина» аккаунта
+    для рекламы. Привязано к User (не к конкретному профилю), потому что и
+    заказчик, и исполнитель могут вести такую галерею, а активный профиль
+    у пользователя всегда один."""
+
+    __tablename__ = "portfolio_media"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    media_type = db.Column(db.String(20), nullable=False)  # photo | video
+    file_url = db.Column(db.String(1000), nullable=False)
+    caption = db.Column(db.String(255), nullable=True)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<PortfolioMedia user_id={self.user_id} type={self.media_type!r}>"

@@ -1,0 +1,39 @@
+<h2 class="profile-section-title">{{ section_number }}. Портфолио (для рекламы)</h2>
+<p class="profile-page__hint">Фото цеха, станков, продукции или ссылка на видео — то, что увидят на вашей публичной странице.</p>
+
+{% if current_user.portfolio_media %}
+<div class="portfolio-gallery">
+  {% for item in current_user.portfolio_media %}
+  <div class="portfolio-gallery__item">
+    {% if item.media_type == 'photo' %}
+      <img src="{{ item.file_url }}" alt="{{ item.caption or '' }}" class="portfolio-gallery__img">
+    {% else %}
+      <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">▶ Видео</a>
+    {% endif %}
+    {% if item.caption %}<p class="portfolio-gallery__caption">{{ item.caption }}</p>{% endif %}
+    <form method="post" action="{{ url_for('profile.portfolio_delete', item_id=item.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty-hint">Портфолио пока пустое.</p>
+{% endif %}
+
+<form method="post" action="{{ url_for('profile.portfolio_add') }}" enctype="multipart/form-data" class="profile-form profile-form--inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="media_type" value="photo">
+  <label>Фото <input type="file" name="photo" accept="image/*"></label>
+  <label>Подпись <input type="text" name="caption" placeholder="напр. цех токарной обработки"></label>
+  <button type="submit" class="btn btn--secondary">Добавить фото</button>
+</form>
+
+<form method="post" action="{{ url_for('profile.portfolio_add') }}" class="profile-form profile-form--inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="media_type" value="video">
+  <label>Ссылка на видео <input type="url" name="video_url" placeholder="https://youtube.com/..."></label>
+  <label>Подпись <input type="text" name="caption"></label>
+  <button type="submit" class="btn btn--secondary">Добавить видео</button>
+</form>
