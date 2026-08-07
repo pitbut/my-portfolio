@@ -12,6 +12,32 @@
     Регистрация: {{ target_user.created_at.strftime('%d.%m.%Y') }}
   </p>
 
+  <h2>Заявки (заказы) ({{ orders|length }})</h2>
+  {% if orders %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Название</th><th>Статус</th><th>Создано</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><a href="{{ url_for('orders.order_detail', order_id=o.id) }}" target="_blank">{{ o.title }}</a></td>
+        <td>{{ o.status }}</td>
+        <td>{{ o.created_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.delete_user_order', user_id=target_user.id, order_id=o.id) }}" onsubmit="return confirm('Удалить заявку «{{ o.title }}»? Если по ней уже есть ставки/отзывы/спор — удаление честно откажет.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">Заявок нет.</p>
+  {% endif %}
+
   <h2>Объявления в барахолке ({{ listings|length }})</h2>
   {% if listings %}
   <table class="data-table">
