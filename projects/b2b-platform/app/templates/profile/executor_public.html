@@ -12,6 +12,17 @@
 
   {% if profile.description %}<p class="order-description">{{ profile.description }}</p>{% endif %}
 
+  {% if profile.workload %}
+  <p class="workload-indicator">
+    <span class="workload-indicator__dot" style="background:{{ workload_color(profile.workload) }}"></span>
+    Загруженность: {{ profile.workload }}/10
+  </p>
+  {% endif %}
+
+  {% if profile.payment_methods %}
+  <p>Принимает оплату: {{ payment_method_labels(profile.payment_methods)|join(', ') }}</p>
+  {% endif %}
+
   {% if current_user.id != target_user.id %}
   <p><a href="{{ url_for('chat.thread', user_id=target_user.id) }}" class="btn-link">✉ Написать</a></p>
   {% endif %}

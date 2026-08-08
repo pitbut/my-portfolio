@@ -123,6 +123,24 @@ def test_dashboard_shows_all_open_orders_with_recommended_badge(client):
     assert badge_html.encode() in resp.data
 
 
+def test_order_payment_methods_saved_and_displayed(client):
+    region_id = _setup_customer(client, "custpm@example.com")
+    with client.application.app_context():
+        service_id = ServiceCategory.query.first().id
+
+    _login(client, "custpm@example.com")
+    _create_order(client, region_id, service_id, payment_methods=["cash", "click"])
+
+    with client.application.app_context():
+        order = Order.query.first()
+        assert order.payment_methods == "cash,click"
+        order_id = order.id
+
+    resp = client.get(f"/orders/{order_id}")
+    assert "Наличные".encode() in resp.data
+    assert "Click".encode() in resp.data
+
+
 def test_order_excludes_executor_without_service_match(client):
     region_id = _setup_customer(client, "cust2@example.com")
     # исполнитель без техвозможностей вообще (не завершал онбординг)

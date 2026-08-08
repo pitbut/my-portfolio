@@ -15,6 +15,7 @@
     <span>{{ order.region.name_ru }}{% if order.city %}, {{ order.city.name_ru }}{% endif %}</span>
     {% if order.deadline_date %}<span>Срок: до {{ order.deadline_date.strftime('%d.%m.%Y') }}</span>{% endif %}
     {% if order.budget_min or order.budget_max %}<span>Бюджет: {{ order.budget_min or '?' }}–{{ order.budget_max or '?' }} UZS</span>{% endif %}
+    {% if order.payment_methods %}<span>Оплата: {{ payment_method_labels(order.payment_methods)|join(', ') }}</span>{% endif %}
   </div>
 
   <p class="order-description">{{ order.description }}</p>

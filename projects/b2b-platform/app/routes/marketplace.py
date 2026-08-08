@@ -86,6 +86,8 @@ def new_listing():
             price_negotiable=request.form.get("price_negotiable") == "1",
             region_id=region_id, city_id=_to_int(request.form.get("city_id")),
             latitude=_to_decimal(request.form.get("latitude")), longitude=_to_decimal(request.form.get("longitude")),
+            payment_methods=",".join(request.form.getlist("payment_methods")) or None,
+            delivery=request.form.get("delivery") if request.form.get("delivery") in ("none", "own", "yandex") else None,
         )
         db.session.add(listing)
         db.session.flush()

@@ -83,6 +83,13 @@
     <input type="hidden" name="latitude" id="latitude">
     <input type="hidden" name="longitude" id="longitude">
 
+    <fieldset class="checkbox-fieldset">
+      <legend>Способ оплаты (необязательно)</legend>
+      {% for code, label in payment_method_choices %}
+        <label class="checkbox-label"><input type="checkbox" name="payment_methods" value="{{ code }}"> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
     <div class="form-row">
       <label>Бюджет от, UZS <input type="number" name="budget_min" min="0"></label>
       <label>Бюджет до, UZS <input type="number" name="budget_max" min="0"></label>

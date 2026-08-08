@@ -18,6 +18,17 @@
   </p>
   <p class="order-description">{{ profile.description }}</p>
 
+  {% if profile.workload %}
+  <p class="workload-indicator">
+    <span class="workload-indicator__dot" style="background:{{ workload_color(profile.workload) }}"></span>
+    Загруженность: {{ profile.workload }}/10
+  </p>
+  {% endif %}
+
+  {% if profile.payment_methods %}
+  <p>Принимает оплату: {{ payment_method_labels(profile.payment_methods)|join(', ') }}</p>
+  {% endif %}
+
   {% if profile.portfolio_url %}
   <p><a href="{{ profile.portfolio_url }}" target="_blank" rel="noopener">Портфолио →</a></p>
   {% endif %}

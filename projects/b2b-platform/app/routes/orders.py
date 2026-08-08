@@ -108,6 +108,7 @@ def new_order():
             longitude=_to_decimal(request.form.get("longitude")),
             auction_deadline_at=datetime.utcnow() + timedelta(hours=auction_hours),
             status="published",
+            payment_methods=",".join(request.form.getlist("payment_methods")) or None,
         )
         deadline_raw = (request.form.get("deadline_date") or "").strip()
         if deadline_raw:

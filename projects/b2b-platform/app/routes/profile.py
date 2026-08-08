@@ -109,6 +109,9 @@ def constructor_edit():
         profile.price_note = (request.form.get("price_note") or "").strip() or None
         profile.region_id = _to_int(request.form.get("region_id"))
         profile.city_id = _to_int(request.form.get("city_id"))
+        profile.payment_methods = ",".join(request.form.getlist("payment_methods")) or None
+        workload = _to_int(request.form.get("workload"))
+        profile.workload = workload if workload and 1 <= workload <= 10 else None
 
         phone = (request.form.get("phone") or "").strip()
         if phone:
@@ -156,6 +159,9 @@ def executor_edit():
         profile.longitude = _to_float(request.form.get("longitude"))
         profile.service_radius_km = _to_int(request.form.get("service_radius_km")) or 50
         profile.has_design_engineer = request.form.get("has_design_engineer") == "1"
+        profile.payment_methods = ",".join(request.form.getlist("payment_methods")) or None
+        workload = _to_int(request.form.get("workload"))
+        profile.workload = workload if workload and 1 <= workload <= 10 else None
 
         phone = (request.form.get("phone") or "").strip()
         if phone:
