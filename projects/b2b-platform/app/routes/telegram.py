@@ -101,7 +101,7 @@ def webhook(secret):
         abort(404)
 
     update = request.get_json(silent=True) or {}
-    current_app.logger.info("Telegram webhook update: %s", update)
+    current_app.logger.warning("Telegram webhook update: %s", update)
     message = update.get("message") or {}
     chat = message.get("chat") or {}
     chat_id = chat.get("id")
