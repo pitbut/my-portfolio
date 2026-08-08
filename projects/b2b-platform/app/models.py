@@ -905,6 +905,23 @@ class TelegramLink(db.Model):
         return f"<TelegramLink user_id={self.user_id} chat_id={self.telegram_chat_id}>"
 
 
+class TelegramLinkCode(db.Model):
+    """Короткий код подтверждения для ручной привязки — запасной путь на
+    случай, если сама Telegram-ссылка (t.me/bot?start=токен) не долетает с
+    payload'ом: если пользователь уже писал боту раньше, клиент Telegram
+    обрезает start-параметр и шлёт голый «/start» — тогда код нужно
+    отправить боту текстом вручную, это работает всегда."""
+
+    __tablename__ = "telegram_link_codes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+    code = db.Column(db.String(8), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User")
+
+
 class SubscriptionPlan(db.Model):
     """Тариф подписки исполнителя (справочник)."""
 

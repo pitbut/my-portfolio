@@ -8,7 +8,7 @@ from app import db
 from app.decorators import paywall_required, role_required
 from app.models import Payment, Subscription, SubscriptionPlan, TelegramLink
 from app.subscriptions import current_subscription
-from app.telegram_bot import bot_deep_link
+from app.telegram_bot import bot_deep_link, link_code_for
 
 bp = Blueprint("settings", __name__)
 
@@ -19,9 +19,10 @@ SWITCHABLE_ROLES = ("customer", "executor", "constructor")
 @paywall_required
 def index():
     deep_link = bot_deep_link(current_user)
+    link_code = link_code_for(current_user) if deep_link and not current_user.telegram_link else None
     return render_template(
         "settings/index.html", telegram_link=current_user.telegram_link,
-        deep_link=deep_link, bot_configured=bool(current_app.config.get("TELEGRAM_BOT_TOKEN")),
+        deep_link=deep_link, link_code=link_code, bot_configured=bool(current_app.config.get("TELEGRAM_BOT_TOKEN")),
         switchable_roles=[r for r in SWITCHABLE_ROLES if r != current_user.role],
     )
 
