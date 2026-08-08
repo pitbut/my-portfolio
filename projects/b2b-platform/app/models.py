@@ -379,6 +379,8 @@ class ConstructorProfile(TimestampMixin, db.Model):
 
     region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=True)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     payment_methods = db.Column(db.String(200), nullable=True)  # необязательно, см. PAYMENT_METHOD_CHOICES
     workload = db.Column(db.Integer, nullable=True)  # 1 (свободен) .. 10 (полностью занят), необязательно
 

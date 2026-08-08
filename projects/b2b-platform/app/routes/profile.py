@@ -109,6 +109,8 @@ def constructor_edit():
         profile.price_note = (request.form.get("price_note") or "").strip() or None
         profile.region_id = _to_int(request.form.get("region_id"))
         profile.city_id = _to_int(request.form.get("city_id"))
+        profile.latitude = _to_float(request.form.get("latitude"))
+        profile.longitude = _to_float(request.form.get("longitude"))
         profile.payment_methods = ",".join(request.form.getlist("payment_methods")) or None
         workload = _to_int(request.form.get("workload"))
         profile.workload = workload if workload and 1 <= workload <= 10 else None
