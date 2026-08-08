@@ -55,6 +55,47 @@ def test_executors_json_excludes_incomplete_profiles(client):
     assert resp.get_json() == []
 
 
+def test_executors_json_falls_back_to_region_center_without_own_coordinates(client):
+    """Заполнил регион, оборудование и техвозможности, но карту в анкете не
+    трогал — профиль всё равно должен появиться на карте (по центру
+    региона), а не потеряться просто потому что нет точной точки."""
+    region_id = _setup_customer(client, "custnc@example.com")
+    register(client, email="noc@example.com", role="executor")
+    with client.application.app_context():
+        from app.models import EquipmentType, Material, ServiceCategory
+
+        equipment_type_id = EquipmentType.query.first().id
+        service_id = ServiceCategory.query.first().id
+        material_id = Material.query.first().id
+
+    client.post(
+        "/profile/executor",
+        data={
+            "org_type": "tsekh", "display_name": "Цех без точки", "region_id": str(region_id),
+            "address_text": "где-то в городе",
+        },
+        follow_redirects=True,
+    )
+    client.post(
+        "/profile/executor/equipment/add",
+        data={"equipment_type_id": str(equipment_type_id), "quantity": "1"},
+        follow_redirects=True,
+    )
+    client.post(
+        "/profile/executor/capabilities",
+        data={"service_category_ids": [str(service_id)], "material_ids": [str(material_id)]},
+        follow_redirects=True,
+    )
+    client.get("/auth/logout")
+
+    _login(client, "custnc@example.com")
+    resp = client.get("/map/executors.json")
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]["approximate"] is True
+    assert data[0]["lat"] is not None
+
+
 def test_executors_json_includes_complete_profile_and_filters(client):
     region_id = _setup_customer(client, "cust2@example.com")
     service_id, _ = _setup_executor(client, "full@example.com", region_id)
@@ -122,7 +163,11 @@ def test_constructors_json_shows_complete_profile_with_coordinates(client):
     assert data[0]["detail_url"].startswith("/constructors/")
 
 
-def test_constructors_json_excludes_profile_without_coordinates(client):
+def test_constructors_json_falls_back_to_region_center_without_own_coordinates(client):
+    """Большинство профилей заполняют регион/адрес, но никогда не кликают
+    по карте — точная точка необязательна везде. Без своих координат
+    показываем на карте центр региона (approximate=True), а не прячем
+    профиль целиком — иначе «полные» анкеты не находились бы на карте."""
     region_id = _setup_customer(client, "custc2@example.com")
     register(client, email="kb2@example.com", role="constructor")
     client.post(
@@ -134,7 +179,10 @@ def test_constructors_json_excludes_profile_without_coordinates(client):
 
     _login(client, "custc2@example.com")
     resp = client.get("/map/constructors.json")
-    assert resp.get_json() == []
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]["approximate"] is True
+    assert data[0]["lat"] is not None
 
 
 def test_sellers_json_shows_active_listing_with_coordinates(client):
