@@ -73,6 +73,11 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn--primary">Подтвердить приёмку заказа</button>
       </form>
+      {% elif order.status == 'assigned' %}
+      <form method="post" action="{{ url_for('orders.cancel_assignment', order_id=order.id) }}" onsubmit="return confirm('Отменить выбор исполнителя? Заявка снова откроется для ставок.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-link btn-link--danger">Отменить выбор</button>
+      </form>
       {% endif %}
     {% else %}
       <h2 class="profile-section-title">Ставки исполнителей ({{ order.bids|selectattr('status', 'equalto', 'active')|list|length }})</h2>
