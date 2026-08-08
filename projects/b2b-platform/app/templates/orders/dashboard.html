@@ -8,12 +8,13 @@
 
   {% if orders %}
   <table class="data-table">
-    <thead><tr><th></th><th>Заявка</th><th>Категория</th><th>Расстояние</th><th>Статус</th><th>Моя ставка</th><th></th></tr></thead>
+    <thead><tr><th>№</th><th></th><th>Заявка</th><th>Категория</th><th>Расстояние</th><th>Статус</th><th>Моя ставка</th><th></th></tr></thead>
     <tbody>
       {% for order in orders %}
       {% set match = matches_by_order.get(order.id) %}
       {% set bid = my_bid_by_order.get(order.id) %}
       <tr>
+        <td>№{{ order.id }}</td>
         <td>{% if match %}<span class="badge badge--ok">Рекомендуем</span>{% endif %}</td>
         <td>{{ order.title }}</td>
         <td>{{ order.service_category.name_ru }}</td>

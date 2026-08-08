@@ -10,10 +10,11 @@
 
   {% if orders %}
   <table class="data-table">
-    <thead><tr><th>Заявка</th><th>Категория</th><th>Статус</th><th>Ставок</th><th>Создан</th><th></th></tr></thead>
+    <thead><tr><th>№</th><th>Заявка</th><th>Категория</th><th>Статус</th><th>Ставок</th><th>Создан</th><th></th></tr></thead>
     <tbody>
       {% for order in orders %}
       <tr>
+        <td>№{{ order.id }}</td>
         <td>{{ order.title }}</td>
         <td>{{ order.service_category.name_ru }}</td>
         <td><span class="status-chip status-chip--{{ order.status }}">{{ order.status }}</span></td>

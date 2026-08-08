@@ -1,6 +1,7 @@
-from app.models import Conversation, Message, Notification, User
+from app.models import Conversation, Message, Notification, Order, User
 
 from tests.conftest import register
+from tests.test_orders import _create_order, _setup_customer, _setup_executor
 
 
 def _login(client, email, password="password123"):
@@ -57,6 +58,41 @@ def test_two_executors_can_cooperate(client):
     with client.application.app_context():
         message = Message.query.first()
         assert message.read_at is not None
+
+
+def test_chat_shows_order_context_banner_when_both_sides_involved(client):
+    """?order_id= в ссылке на чат должен показывать баннер с номером заявки —
+    но только если оба собеседника реально стороны именно по этой заявке
+    (иначе номер можно было бы подставить произвольно и ввести в заблуждение)."""
+    region_id = _setup_customer(client, "cust@example.com")
+    service_id, _ = _setup_executor(client, "exec@example.com", region_id)
+
+    with client.application.app_context():
+        customer_user_id = User.query.filter_by(email="cust@example.com").first().id
+        executor_user_id = User.query.filter_by(email="exec@example.com").first().id
+
+    _login(client, "cust@example.com")
+    _create_order(client, region_id, service_id)
+    with client.application.app_context():
+        order_id = Order.query.first().id
+    client.get("/auth/logout")
+
+    _login(client, "exec@example.com")
+    client.post(
+        f"/orders/{order_id}/bid",
+        data={"price": "500000", "currency": "UZS", "lead_time_days": "5"},
+        follow_redirects=True,
+    )
+
+    resp = client.get(f"/messages/u/{customer_user_id}?order_id={order_id}")
+    assert f"Обсуждаете заявку".encode() in resp.data
+    assert f"№{order_id}".encode() in resp.data
+    client.get("/auth/logout")
+
+    # заявка не при чём к этой паре — левый order_id должен молча игнорироваться
+    register(client, email="stranger@example.com", role="executor")
+    resp = client.get(f"/messages/u/{customer_user_id}?order_id={order_id}")
+    assert "Обсуждаете заявку".encode() not in resp.data
 
 
 def test_inbox_lists_conversation_with_unread_count(client):
