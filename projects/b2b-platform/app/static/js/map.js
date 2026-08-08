@@ -40,6 +40,7 @@
         if (item.price) lines.push(item.price + " " + item.currency);
       }
       if (item.distance_km !== undefined) lines.push("Расстояние: " + item.distance_km + " км");
+      if (item.approximate) lines.push("📍 Точка приблизительная (по региону) — точный адрес не указан");
       return lines;
     }
 

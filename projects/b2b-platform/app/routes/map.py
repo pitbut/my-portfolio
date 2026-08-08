@@ -9,30 +9,47 @@ from app.models import ConstructorProfile, ExecutorProfile, Listing, Region, Ser
 bp = Blueprint("map", __name__)
 
 
+def _effective_coords(entity):
+    """Своя точка на карте необязательна везде (ставится по желанию через
+    picker) — большинство профилей на практике заполняют только адрес/регион
+    текстом и никогда не кликают по карте. Не показывать их на карте вовсе
+    из-за этого неверно: раз регион выбран (а он обязателен для «полного»
+    профиля/объявления), используем координаты центра региона как приближение,
+    пока точная точка не указана."""
+    if entity.latitude is not None and entity.longitude is not None:
+        return entity.latitude, entity.longitude, False
+    region = getattr(entity, "region", None)
+    if region is not None and region.latitude is not None and region.longitude is not None:
+        return region.latitude, region.longitude, True
+    return None, None, False
+
+
 def _visible_executors_query():
     """Профиль виден на карте/в геопоиске только когда действительно
-    заполнен (есть координаты, оборудование, техвозможности) — иначе
-    показывать нечего и незачем. Плюс User.role == 'executor': если
-    пользователь переключился на другую роль в настройках, его старая
-    анкета исполнителя остаётся в базе, но с карты пропадает."""
+    заполнен (оборудование, техвозможности, регион) — иначе показывать
+    нечего и незачем. Плюс User.role == 'executor': если пользователь
+    переключился на другую роль в настройках, его старая анкета исполнителя
+    остаётся в базе, но с карты пропадает. Точные координаты необязательны —
+    см. _effective_coords()."""
     return ExecutorProfile.query.join(User, ExecutorProfile.user_id == User.id).filter(
         User.role == "executor",
-        ExecutorProfile.latitude.isnot(None),
-        ExecutorProfile.longitude.isnot(None),
+        ExecutorProfile.region_id.isnot(None),
         ExecutorProfile.display_name.isnot(None),
     )
 
 
 def _executor_payload(executor):
     services = executor.capability.service_categories if executor.capability else []
+    lat, lng, approximate = _effective_coords(executor)
     return {
         "kind": "executor",
         "id": executor.id,
         "user_id": executor.user_id,
         "name": executor.display_name,
         "org_type": executor.org_type,
-        "lat": executor.latitude,
-        "lng": executor.longitude,
+        "lat": lat,
+        "lng": lng,
+        "approximate": approximate,
         "region": executor.region.name_ru if executor.region else None,
         "rating_avg": float(executor.rating_avg) if executor.rating_avg is not None else None,
         "services": [s.name_ru for s in services],
@@ -45,8 +62,6 @@ def _executor_payload(executor):
 def _visible_constructors_query():
     return ConstructorProfile.query.join(User, ConstructorProfile.user_id == User.id).filter(
         User.role == "constructor",
-        ConstructorProfile.latitude.isnot(None),
-        ConstructorProfile.longitude.isnot(None),
         ConstructorProfile.display_name.isnot(None),
         ConstructorProfile.description.isnot(None),
         ConstructorProfile.region_id.isnot(None),
@@ -54,13 +69,15 @@ def _visible_constructors_query():
 
 
 def _constructor_payload(constructor):
+    lat, lng, approximate = _effective_coords(constructor)
     return {
         "kind": "constructor",
         "id": constructor.id,
         "user_id": constructor.user_id,
         "name": constructor.display_name,
-        "lat": constructor.latitude,
-        "lng": constructor.longitude,
+        "lat": lat,
+        "lng": lng,
+        "approximate": approximate,
         "region": constructor.region.name_ru if constructor.region else None,
         "experience_years": constructor.experience_years,
         "detail_url": url_for("constructors.detail", constructor_id=constructor.id),
@@ -68,23 +85,21 @@ def _constructor_payload(constructor):
 
 
 def _visible_sellers_query():
-    """«Продавцы» на карте — активные объявления барахолки с указанной
-    точкой (ставится через карту в форме объявления, необязательно)."""
-    return Listing.query.filter(
-        Listing.status == "active",
-        Listing.latitude.isnot(None),
-        Listing.longitude.isnot(None),
-    )
+    """«Продавцы» на карте — активные объявления барахолки. Регион у
+    объявления обязателен, точная точка — нет, см. _effective_coords()."""
+    return Listing.query.filter(Listing.status == "active")
 
 
 def _seller_payload(listing):
+    lat, lng, approximate = _effective_coords(listing)
     return {
         "kind": "seller",
         "id": listing.id,
         "user_id": listing.author_id,
         "name": listing.title,
-        "lat": listing.latitude,
-        "lng": listing.longitude,
+        "lat": lat,
+        "lng": lng,
+        "approximate": approximate,
         "region": listing.region.name_ru if listing.region else None,
         "price": float(listing.price) if listing.price is not None else None,
         "currency": listing.currency,
@@ -132,7 +147,8 @@ def executors_json():
             if e.capability and any(s.id == service_category_id for s in e.capability.service_categories)
         ]
 
-    return jsonify([_executor_payload(e) for e in executors if e.is_complete])
+    payloads = [_executor_payload(e) for e in executors if e.is_complete]
+    return jsonify([p for p in payloads if p["lat"] is not None])
 
 
 @bp.route("/map/constructors.json")
@@ -144,7 +160,8 @@ def constructors_json():
     if region_id:
         query = query.filter(ConstructorProfile.region_id == region_id)
 
-    return jsonify([_constructor_payload(c) for c in query.all() if c.is_complete])
+    payloads = [_constructor_payload(c) for c in query.all() if c.is_complete]
+    return jsonify([p for p in payloads if p["lat"] is not None])
 
 
 @bp.route("/map/sellers.json")
@@ -160,7 +177,8 @@ def sellers_json():
     if intent in ("sell", "buy"):
         query = query.filter(Listing.listing_intent == intent)
 
-    return jsonify([_seller_payload(listing) for listing in query.all()])
+    payloads = [_seller_payload(listing) for listing in query.all()]
+    return jsonify([p for p in payloads if p["lat"] is not None])
 
 
 _KIND_QUERIES = {
@@ -188,7 +206,10 @@ def nearby_json():
     for kind in kinds:
         fetch, payload_fn = _KIND_QUERIES[kind]
         for item in fetch():
-            distance = haversine_km(lat, lng, item.latitude, item.longitude)
+            item_lat, item_lng, _ = _effective_coords(item)
+            if item_lat is None:
+                continue
+            distance = haversine_km(lat, lng, item_lat, item_lng)
             if distance is not None and distance <= radius_km:
                 payload = payload_fn(item)
                 payload["distance_km"] = round(distance, 1)
