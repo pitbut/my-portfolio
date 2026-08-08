@@ -136,6 +136,31 @@ def test_order_excludes_executor_without_service_match(client):
     assert "Подходящих исполнителей пока не нашлось".encode() in resp.data
 
 
+def test_unmatched_executor_still_gets_plain_broadcast_notification(client):
+    """Лента открыта всем (см. executor_dashboard) — значит и уведомление о
+    новой заявке должен получить каждый исполнитель, просто без пометки
+    «Рекомендуем», которая идёт только тем, кого выбрал автоподбор."""
+    region_id = _setup_customer(client, "cust7@example.com")
+    service_id, material_id = _setup_executor(client, "matched2@example.com", region_id)
+
+    register(client, "unmatched@example.com", role="executor")
+    with client.application.app_context():
+        unmatched_id = User.query.filter_by(email="unmatched@example.com").first().id
+    client.get("/auth/logout")
+
+    _login(client, "cust7@example.com")
+    _create_order(client, region_id, service_id, material_id=str(material_id))
+
+    with client.application.app_context():
+        matched_notif = Notification.query.filter_by(type="new_order_match").first()
+        assert matched_notif is not None
+        assert "Рекомендуем" in matched_notif.title
+
+        broadcast_notif = Notification.query.filter_by(user_id=unmatched_id, type="new_order_broadcast").first()
+        assert broadcast_notif is not None
+        assert "Рекомендуем" not in broadcast_notif.title
+
+
 def test_new_executor_profile_matches_already_open_orders(client):
     """run_matching() при публикации заказа матчит только уже существующих
     подходящих исполнителей. Если исполнитель заполнил профиль ПОЗЖЕ, чем
