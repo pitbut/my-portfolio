@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Анкета конструктора{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
 {% block content %}
 <section class="wrap profile-page">
   <h1>Анкета конструктора</h1>
@@ -52,6 +56,12 @@
       </label>
     </div>
 
+    <label>Уточните точку на карте (необязательно — чтобы вас было видно на «Карте»)</label>
+    <div id="locationMap" class="location-map"
+         data-lat="{{ profile.latitude or '' }}" data-lng="{{ profile.longitude or '' }}"></div>
+    <input type="hidden" name="latitude" id="latitude" value="{{ profile.latitude or '' }}">
+    <input type="hidden" name="longitude" id="longitude" value="{{ profile.longitude or '' }}">
+
     <fieldset class="checkbox-fieldset">
       <legend>Способ оплаты, который принимаете (необязательно)</legend>
       {% set selected_payment = csv_to_codes(profile.payment_methods) %}
@@ -70,9 +80,11 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   initRegionCityCascade('region_id', 'city_id');
+  initLocationMap('locationMap', 'latitude', 'longitude');
 });
 </script>
 {% endblock %}

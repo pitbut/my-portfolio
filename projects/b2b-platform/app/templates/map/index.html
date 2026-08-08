@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Карта исполнителей{% endblock %}
+{% block title %}Карта{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
@@ -7,19 +7,23 @@
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>{{ 'Конструкторы' if constructors_view else 'Карта изготовителей и ремонтников' }}</h1>
-  {% if constructors_view %}
-  <p class="empty-hint">Показаны только те, у кого отмечено «есть конструктор в штате», либо кто оказывает услугу «Проектирование и конструирование». Фильтры ниже можно менять.</p>
-  {% endif %}
+  <h1>Карта изготовителей, продавцов и конструкторов</h1>
 
   <form id="mapFilters" class="map-filters" data-constructors-view="{{ '1' if constructors_view else '' }}">
-    <label>Категория услуг
+    <fieldset class="checkbox-fieldset">
+      <legend>Кого показать</legend>
+      <label class="checkbox-label"><input type="checkbox" id="f_kind_seller"> Продавцы (барахолка)</label>
+      <label class="checkbox-label"><input type="checkbox" id="f_kind_executor" checked> Исполнители</label>
+      <label class="checkbox-label"><input type="checkbox" id="f_kind_constructor"> Конструкторы</label>
+    </fieldset>
+
+    <label>Категория услуг (для исполнителей)
       <select id="f_service">
         <option value="">Все</option>
         {% for sc in service_categories %}<option value="{{ sc.id }}">{{ sc.name_ru }}</option>{% endfor %}
       </select>
     </label>
-    <label>Тип организации
+    <label>Тип организации (для исполнителей)
       <select id="f_org_type">
         <option value="">Все</option>
         <option value="master">Мастер</option>
@@ -33,14 +37,21 @@
         {% for r in regions %}<option value="{{ r.id }}">{{ r.name_ru }}</option>{% endfor %}
       </select>
     </label>
-    <label class="checkbox-label"><input type="checkbox" id="f_design_engineer"> Есть конструктор</label>
-    <button type="button" id="btnNearby" class="btn btn--secondary">📍 Показать рядом со мной</button>
+    <label class="checkbox-label"><input type="checkbox" id="f_design_engineer"> Есть конструктор в штате (для исполнителей)</label>
+
+    <div class="map-filters__buttons">
+      <button type="button" id="btnNearby" class="btn btn--secondary">📍 Показать рядом со мной</button>
+      <button type="button" id="btnManualPin" class="btn btn--secondary">✋ Указать себя на карте</button>
+    </div>
+    <p id="manualPinHint" class="empty-hint" hidden>Кликните на карту, чтобы отметить, где вы находитесь.</p>
   </form>
 
   <div id="executorsMap" class="location-map location-map--big"></div>
 
+  <div id="selectedInfo" class="selected-info" hidden></div>
+
   <div id="nearbyResults" class="nearby-results" hidden>
-    <h2 class="profile-section-title">Ближайшие исполнители</h2>
+    <h2 class="profile-section-title">Ближайшие</h2>
     <div id="nearbyList"></div>
   </div>
 </section>

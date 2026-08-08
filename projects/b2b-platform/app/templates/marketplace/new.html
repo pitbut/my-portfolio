@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Новое объявление{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
 {% block content %}
 <section class="wrap profile-page">
   <h1>Новое объявление</h1>
@@ -65,7 +69,21 @@
 
     <label>Фото (можно несколько) <input type="file" name="photos" accept="image/*" multiple></label>
 
+    <label>Отметьте на карте, где вас найти (необязательно — чтобы объявление было видно на «Карте»)</label>
+    <div id="locationMap" class="location-map"></div>
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
+
     <button type="submit" class="btn btn--primary">Опубликовать</button>
   </form>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  initLocationMap('locationMap', 'latitude', 'longitude');
+});
+</script>
 {% endblock %}

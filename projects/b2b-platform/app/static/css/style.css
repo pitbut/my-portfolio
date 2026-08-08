@@ -114,7 +114,12 @@ textarea{resize:vertical;}
 .location-map--big{height:480px;margin-bottom:20px;}
 .map-filters{display:flex;flex-wrap:wrap;gap:14px;align-items:end;background:#fff;border-radius:12px;padding:16px 18px;margin-bottom:16px;box-shadow:0 4px 14px rgba(0,0,0,.05);}
 .map-filters label{font-size:.88em;}
+.map-filters__buttons{display:flex;gap:10px;flex-wrap:wrap;}
 .nearby-results{margin-top:10px;}
+
+.selected-info{background:#fff;border-radius:12px;padding:16px 18px;margin-bottom:16px;box-shadow:0 4px 14px rgba(0,0,0,.05);}
+.selected-info h3{margin:0 0 6px;}
+.selected-info p{margin:0 0 10px;color:var(--sub);font-size:.92em;}
 
 .data-table{width:100%;border-collapse:collapse;margin:14px 0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.05);}
 .data-table th, .data-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:.9em;}
