@@ -8,6 +8,12 @@
     <a href="{{ url_for('chat.inbox') }}" class="btn-link">← Все сообщения</a>
   </div>
 
+  {% if order %}
+  <p class="flash flash--info">
+    Обсуждаете заявку <a href="{{ url_for('orders.order_detail', order_id=order.id) }}">№{{ order.id }}: {{ order.title }}</a>
+  </p>
+  {% endif %}
+
   <div class="chat-thread">
     {% if conversation and conversation.messages %}
       {% for m in conversation.messages %}
@@ -21,9 +27,9 @@
     {% endif %}
   </div>
 
-  <form method="post" action="{{ url_for('chat.thread', user_id=other.id) }}" class="profile-form">
+  <form method="post" action="{{ url_for('chat.thread', user_id=other.id, order_id=order.id if order else None) }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Сообщение <textarea name="body" rows="3" required></textarea></label>
+    <label>Сообщение <textarea name="body" rows="3" required>{{ 'По заявке №%d: '|format(order.id) if order }}</textarea></label>
     <button type="submit" class="btn btn--primary">Отправить</button>
   </form>
 </section>

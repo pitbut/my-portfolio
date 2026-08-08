@@ -12,6 +12,10 @@
 
   {% if profile.description %}<p class="order-description">{{ profile.description }}</p>{% endif %}
 
+  {% if current_user.id != target_user.id %}
+  <p><a href="{{ url_for('chat.thread', user_id=target_user.id) }}" class="btn-link">✉ Написать</a></p>
+  {% endif %}
+
   <div class="flash flash--info">
     <strong>Контакты:</strong> телефон {{ target_user.phone or '—' }} · адрес {{ profile.address_text or '—' }}
   </div>

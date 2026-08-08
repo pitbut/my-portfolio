@@ -8,10 +8,31 @@ from flask_login import current_user
 
 from app import db
 from app.decorators import paywall_required
-from app.models import Conversation, Message, User
+from app.models import Conversation, Message, Order, User
 from app.notify import notify
 
 bp = Blueprint("chat", __name__, url_prefix="/messages")
+
+
+def _order_involves(order, user_id):
+    if order.customer and order.customer.user_id == user_id:
+        return True
+    return any(bid.executor.user_id == user_id for bid in order.bids)
+
+
+def _order_context(user_id):
+    """Заявку можно передать в чат через ?order_id=, чтобы собеседники видели,
+    по какому именно номеру идёт речь (переписка общая на пару пользователей,
+    даже если у них несколько заявок друг с другом одновременно). Показываем
+    заявку только если оба — реальные стороны именно по ней (заказчик и
+    заказчик/один из откликнувшихся исполнителей), иначе номер игнорируется."""
+    order_id = request.args.get("order_id", type=int)
+    if not order_id:
+        return None
+    order = db.session.get(Order, order_id)
+    if order is None or not _order_involves(order, current_user.id) or not _order_involves(order, user_id):
+        return None
+    return order
 
 
 def _find_conversation(user_id):
@@ -62,11 +83,13 @@ def thread(user_id):
     if other is None:
         abort(404)
 
+    order = _order_context(user_id)
+
     if request.method == "POST":
         body = (request.form.get("body") or "").strip()
         if not body:
             flash("Сообщение не может быть пустым.", "error")
-            return redirect(url_for("chat.thread", user_id=user_id))
+            return redirect(url_for("chat.thread", user_id=user_id, order_id=order.id if order else None))
 
         conversation = _get_or_create_conversation(user_id)
         db.session.add(Message(conversation_id=conversation.id, sender_id=current_user.id, body=body))
@@ -76,9 +99,9 @@ def thread(user_id):
         preview = body if len(body) <= 200 else body[:197] + "..."
         notify(
             other, "direct_message", title=f"Новое сообщение от {current_user.email}",
-            body=preview, url=url_for("chat.thread", user_id=current_user.id),
+            body=preview, url=url_for("chat.thread", user_id=current_user.id, order_id=order.id if order else None),
         )
-        return redirect(url_for("chat.thread", user_id=user_id))
+        return redirect(url_for("chat.thread", user_id=user_id, order_id=order.id if order else None))
 
     conversation = _find_conversation(user_id)
     if conversation is not None:
@@ -91,4 +114,4 @@ def thread(user_id):
         if changed:
             db.session.commit()
 
-    return render_template("chat/thread.html", other=other, conversation=conversation)
+    return render_template("chat/thread.html", other=other, conversation=conversation, order=order)
