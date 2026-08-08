@@ -16,6 +16,8 @@
     {% if listing.condition %}<span>Состояние: {{ listing.condition }}</span>{% endif %}
     <span>{% if listing.price %}{{ listing.price }} {{ listing.currency }}{% if listing.price_negotiable %} (торг){% endif %}{% else %}Цена не указана{% endif %}</span>
     <span class="status-chip">{{ listing.status }}</span>
+    {% if listing.delivery %}<span>Доставка: {{ delivery_label(listing.delivery) }}</span>{% endif %}
+    {% if listing.payment_methods %}<span>Оплата: {{ payment_method_labels(listing.payment_methods)|join(', ') }}</span>{% endif %}
   </p>
   <p class="order-description">{{ listing.description }}</p>
 

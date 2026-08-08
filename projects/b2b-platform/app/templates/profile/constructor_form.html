@@ -52,6 +52,18 @@
       </label>
     </div>
 
+    <fieldset class="checkbox-fieldset">
+      <legend>Способ оплаты, который принимаете (необязательно)</legend>
+      {% set selected_payment = csv_to_codes(profile.payment_methods) %}
+      {% for code, label in payment_method_choices %}
+        <label class="checkbox-label"><input type="checkbox" name="payment_methods" value="{{ code }}" {{ 'checked' if code in selected_payment }}> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <label>Загруженность сейчас, 1–10 (необязательно; 1 — свободен, 10 — полностью занят)
+      <input type="number" name="workload" min="1" max="10" value="{{ profile.workload or '' }}">
+    </label>
+
     <button type="submit" class="btn btn--primary">Сохранить анкету</button>
   </form>
 </section>

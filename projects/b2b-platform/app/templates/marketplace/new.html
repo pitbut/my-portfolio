@@ -49,6 +49,20 @@
       </select>
     </label>
 
+    <fieldset class="checkbox-fieldset">
+      <legend>Способ оплаты (необязательно)</legend>
+      {% for code, label in payment_method_choices %}
+        <label class="checkbox-label"><input type="checkbox" name="payment_methods" value="{{ code }}"> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <fieldset class="role-fieldset">
+      <legend>Доставка (необязательно)</legend>
+      {% for code, label in delivery_choices %}
+        <label><input type="radio" name="delivery" value="{{ code }}"> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
     <label>Фото (можно несколько) <input type="file" name="photos" accept="image/*" multiple></label>
 
     <button type="submit" class="btn btn--primary">Опубликовать</button>

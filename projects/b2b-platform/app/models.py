@@ -12,6 +12,46 @@ from app import db
 # --- языки интерфейса и языки пользовательского контента ---
 LANGUAGES = ("ru", "uz_latin", "uz_cyrillic")
 
+# --- способы оплаты: необязательный мультивыбор у заявки/исполнителя/
+# конструктора/объявления барахолки. Список маленький и фиксированный
+# (не растёт как регионы/материалы), поэтому вместо отдельной M2M-таблицы
+# просто храним выбранные коды через запятую в одной колонке ("cash,card"). ---
+PAYMENT_METHOD_CHOICES = (
+    ("cash", "Наличные"),
+    ("bank_transfer", "Перечислением (банк)"),
+    ("card", "Картой"),
+    ("click", "Click"),
+    ("payme", "Payme"),
+)
+PAYMENT_METHOD_LABELS = dict(PAYMENT_METHOD_CHOICES)
+
+# --- доставка объявления барахолки (необязательное одиночное поле) ---
+DELIVERY_CHOICES = (
+    ("none", "Без доставки"),
+    ("own", "Своя доставка"),
+    ("yandex", "Яндекс.Доставка"),
+)
+DELIVERY_LABELS = dict(DELIVERY_CHOICES)
+
+
+def csv_to_codes(value):
+    return [code for code in (value or "").split(",") if code]
+
+
+def csv_to_labels(value, labels):
+    return [labels.get(code, code) for code in csv_to_codes(value)]
+
+
+def workload_color(value):
+    """Индикатор загруженности исполнителя/конструктора: белый (1, свободен)
+    -> красный (10, занят полностью). Держим красный канал максимальным и
+    линейно уменьшаем зелёный/синий — простой градиент без внешних библиотек."""
+    if not value:
+        return None
+    value = max(1, min(10, int(value)))
+    channel = round(255 - (value - 1) * 22.5)
+    return f"rgb(255,{channel},{channel})"
+
 # --- многие-ко-многим: техвозможности исполнителя <-> услуги / материалы ---
 capability_services = db.Table(
     "executor_capability_services",
@@ -245,6 +285,8 @@ class ExecutorProfile(TimestampMixin, db.Model):
     longitude = db.Column(db.Float, nullable=True)
     service_radius_km = db.Column(db.Integer, nullable=True, default=50)
     has_design_engineer = db.Column(db.Boolean, nullable=False, default=False)  # есть конструктор в штате
+    payment_methods = db.Column(db.String(200), nullable=True)  # необязательно, см. PAYMENT_METHOD_CHOICES
+    workload = db.Column(db.Integer, nullable=True)  # 1 (свободен) .. 10 (полностью занят), необязательно
 
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
     rating_avg = db.Column(db.Numeric(3, 2), nullable=True)
@@ -337,6 +379,8 @@ class ConstructorProfile(TimestampMixin, db.Model):
 
     region_id = db.Column(db.Integer, db.ForeignKey("regions.id"), nullable=True)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    payment_methods = db.Column(db.String(200), nullable=True)  # необязательно, см. PAYMENT_METHOD_CHOICES
+    workload = db.Column(db.Integer, nullable=True)  # 1 (свободен) .. 10 (полностью занят), необязательно
 
     region = db.relationship("Region")
     city = db.relationship("City")
@@ -390,6 +434,7 @@ class Order(TimestampMixin, db.Model):
 
     auction_deadline_at = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(20), nullable=False, default="published")
+    payment_methods = db.Column(db.String(200), nullable=True)  # "cash,card" — необязательно, см. PAYMENT_METHOD_CHOICES
 
     customer = db.relationship("CustomerProfile", backref="orders")
     service_category = db.relationship("ServiceCategory")
@@ -688,6 +733,8 @@ class Listing(TimestampMixin, db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     status = db.Column(db.String(20), nullable=False, default="active")  # active | reserved | closed | archived
+    payment_methods = db.Column(db.String(200), nullable=True)  # необязательно, см. PAYMENT_METHOD_CHOICES
+    delivery = db.Column(db.String(20), nullable=True)  # none | own | yandex, необязательно, см. DELIVERY_CHOICES
 
     author = db.relationship("User")
     category = db.relationship("ListingCategory")

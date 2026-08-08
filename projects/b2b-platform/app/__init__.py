@@ -107,6 +107,13 @@ def create_app(config_name=None):
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 
+    app.jinja_env.globals["payment_method_choices"] = models.PAYMENT_METHOD_CHOICES
+    app.jinja_env.globals["delivery_choices"] = models.DELIVERY_CHOICES
+    app.jinja_env.globals["csv_to_codes"] = models.csv_to_codes
+    app.jinja_env.globals["payment_method_labels"] = lambda value: models.csv_to_labels(value, models.PAYMENT_METHOD_LABELS)
+    app.jinja_env.globals["delivery_label"] = lambda value: models.DELIVERY_LABELS.get(value)
+    app.jinja_env.globals["workload_color"] = models.workload_color
+
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(models.User, int(user_id))

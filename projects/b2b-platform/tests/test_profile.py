@@ -84,6 +84,78 @@ def test_executor_fills_profile_equipment_and_capabilities(client):
         assert profile.is_complete is True
 
 
+def test_executor_payment_methods_and_workload_saved_and_shown_on_public_profile(client):
+    register(client, email="execpm@example.com", role="executor")
+    with client.application.app_context():
+        region_id = Region.query.first().id
+
+    client.post(
+        "/profile/executor",
+        data={
+            "org_type": "master", "display_name": "Мастер ПМ", "region_id": str(region_id),
+            "address_text": "Ташкент", "payment_methods": ["cash", "payme"], "workload": "7",
+        },
+        follow_redirects=True,
+    )
+
+    with client.application.app_context():
+        user = User.query.filter_by(email="execpm@example.com").first()
+        profile = user.executor_profile
+        assert profile.payment_methods == "cash,payme"
+        assert profile.workload == 7
+        user_id = user.id
+
+    resp = client.get(f"/profile/executor/{user_id}")
+    assert "Наличные".encode() in resp.data
+    assert "Payme".encode() in resp.data
+    assert "Загруженность: 7/10".encode() in resp.data
+
+
+def test_executor_workload_out_of_range_is_ignored(client):
+    register(client, email="execpm2@example.com", role="executor")
+    with client.application.app_context():
+        region_id = Region.query.first().id
+
+    client.post(
+        "/profile/executor",
+        data={
+            "org_type": "master", "display_name": "Мастер ПМ2", "region_id": str(region_id),
+            "address_text": "Ташкент", "workload": "15",
+        },
+        follow_redirects=True,
+    )
+    with client.application.app_context():
+        profile = User.query.filter_by(email="execpm2@example.com").first().executor_profile
+        assert profile.workload is None
+
+
+def test_constructor_payment_methods_and_workload_saved_and_shown(client):
+    register(client, email="constrpm@example.com", role="constructor")
+    with client.application.app_context():
+        region_id = Region.query.first().id
+
+    client.post(
+        "/profile/constructor",
+        data={
+            "display_name": "КБ Точка", "description": "Чертежи на заказ", "region_id": str(region_id),
+            "payment_methods": ["card", "click"], "workload": "3",
+        },
+        follow_redirects=True,
+    )
+
+    with client.application.app_context():
+        user = User.query.filter_by(email="constrpm@example.com").first()
+        profile = user.constructor_profile
+        assert profile.payment_methods == "card,click"
+        assert profile.workload == 3
+        profile_id = profile.id
+
+    resp = client.get(f"/constructors/{profile_id}")
+    assert "Картой".encode() in resp.data
+    assert "Click".encode() in resp.data
+    assert "Загруженность: 3/10".encode() in resp.data
+
+
 def test_executor_equipment_delete_is_scoped_to_owner(client):
     register(client, email="exec2@example.com", role="executor")
     with client.application.app_context():

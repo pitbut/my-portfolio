@@ -36,6 +36,36 @@ def test_create_and_browse_listing(client):
     assert "Токарный станок 1К62".encode() in resp.data
 
 
+def test_listing_payment_methods_and_delivery_saved_and_shown(client):
+    register(client, email="sellerpm@example.com", role="customer")
+    with client.application.app_context():
+        category_id = ListingCategory.query.first().id
+        region_id = Region.query.first().id
+
+    resp = client.post(
+        "/marketplace/new",
+        data={
+            "listing_intent": "sell", "category_id": str(category_id), "title": "Фрезерный станок",
+            "description": "Продаю", "condition": "used", "region_id": str(region_id),
+            "payment_methods": ["cash", "bank_transfer"], "delivery": "yandex",
+        },
+        follow_redirects=True,
+    )
+    assert "опубликовано".encode() in resp.data
+
+    with client.application.app_context():
+        from app.models import Listing
+
+        listing = Listing.query.first()
+        assert listing.payment_methods == "cash,bank_transfer"
+        assert listing.delivery == "yandex"
+        listing_id = listing.id
+
+    resp = client.get(f"/marketplace/{listing_id}")
+    assert "Наличные".encode() in resp.data
+    assert "Яндекс.Доставка".encode() in resp.data
+
+
 def test_respond_notifies_author_and_owner_cannot_respond_to_own(client):
     register(client, email="seller2@example.com", role="customer")
     with client.application.app_context():
