@@ -311,6 +311,41 @@ def assign_bid(order_id, bid_id):
     return redirect(url_for("orders.order_detail", order_id=order.id))
 
 
+@bp.route("/orders/<int:order_id>/cancel-assignment", methods=["POST"])
+@role_required("customer")
+def cancel_assignment(order_id):
+    """На случай случайного клика по «Выбрать» — пока исполнитель ещё не
+    начал работу (order.status == 'assigned'), заказчик может отменить выбор:
+    аукцион открывается заново, все ставки (в том числе отклонённые)
+    возвращаются в активные. После старта работы отмена уже не через эту
+    кнопку — для этого есть открытие спора."""
+    order = db.session.get(Order, order_id)
+    if order is None or order.customer.user_id != current_user.id:
+        abort(404)
+    if order.assignment is None or order.status != "assigned":
+        flash("Отменить выбор исполнителя уже нельзя — работа начата или заказ завершён.", "error")
+        return redirect(url_for("orders.order_detail", order_id=order.id))
+
+    assigned_executor_user = order.assignment.bid.executor.user
+
+    db.session.delete(order.assignment)
+    for bid in order.bids:
+        if bid.status in ("accepted", "rejected"):
+            bid.status = "active"
+
+    order.auction_deadline_at = datetime.utcnow() + timedelta(hours=24)
+    record_status_change(order, "published", current_user)
+    db.session.commit()
+
+    notify(
+        assigned_executor_user, "assignment_cancelled", title=f"Выбор отменён: {order.title}",
+        body="Заказчик отменил выбор исполнителя — заявка снова открыта для ставок.",
+        url=f"/orders/{order.id}",
+    )
+    flash("Выбор исполнителя отменён, заявка снова открыта для ставок.", "info")
+    return redirect(url_for("orders.order_detail", order_id=order.id))
+
+
 @bp.route("/orders/<int:order_id>/start", methods=["POST"])
 @role_required("executor")
 def start_order(order_id):

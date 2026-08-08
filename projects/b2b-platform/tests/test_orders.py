@@ -280,6 +280,90 @@ def test_full_bid_and_assignment_flow(client):
         assert order.status == "completed"
 
 
+def test_customer_can_cancel_accidental_assignment(client):
+    """Случайный клик по «Выбрать» не должен быть необратимым, пока
+    исполнитель ещё не начал работу — заказчику нужна кнопка «Отменить»."""
+    region_id = _setup_customer(client, "cust8@example.com")
+    service_id, _ = _setup_executor(client, "execx@example.com", region_id)
+    _setup_executor(client, "execy@example.com", region_id)
+
+    _login(client, "cust8@example.com")
+    _create_order(client, region_id, service_id)
+    with client.application.app_context():
+        order_id = Order.query.first().id
+    client.get("/auth/logout")
+
+    _login(client, "execx@example.com")
+    client.post(
+        f"/orders/{order_id}/bid",
+        data={"price": "500000", "currency": "UZS", "lead_time_days": "5"},
+        follow_redirects=True,
+    )
+    client.get("/auth/logout")
+
+    _login(client, "execy@example.com")
+    client.post(
+        f"/orders/{order_id}/bid",
+        data={"price": "400000", "currency": "UZS", "lead_time_days": "4"},
+        follow_redirects=True,
+    )
+    client.get("/auth/logout")
+
+    _login(client, "cust8@example.com")
+    with client.application.app_context():
+        order = Order.query.get(order_id)
+        bid_id = order.bids[0].id
+    client.post(f"/orders/{order_id}/assign/{bid_id}", follow_redirects=True)
+
+    resp = client.post(f"/orders/{order_id}/cancel-assignment", follow_redirects=True)
+    assert "Выбор исполнителя отменён".encode() in resp.data
+
+    with client.application.app_context():
+        order = Order.query.get(order_id)
+        assert order.status == "published"
+        assert order.assignment is None
+        assert all(b.status == "active" for b in order.bids)
+
+    # можно выбрать заново
+    resp = client.post(f"/orders/{order_id}/assign/{bid_id}", follow_redirects=True)
+    assert "Исполнитель выбран".encode() in resp.data
+
+
+def test_cannot_cancel_assignment_after_work_started(client):
+    region_id = _setup_customer(client, "cust9@example.com")
+    service_id, _ = _setup_executor(client, "execz@example.com", region_id)
+
+    _login(client, "cust9@example.com")
+    _create_order(client, region_id, service_id)
+    with client.application.app_context():
+        order_id = Order.query.first().id
+    client.get("/auth/logout")
+
+    _login(client, "execz@example.com")
+    client.post(
+        f"/orders/{order_id}/bid",
+        data={"price": "500000", "currency": "UZS", "lead_time_days": "5"},
+        follow_redirects=True,
+    )
+    client.get("/auth/logout")
+
+    _login(client, "cust9@example.com")
+    with client.application.app_context():
+        bid_id = Order.query.get(order_id).bids[0].id
+    client.post(f"/orders/{order_id}/assign/{bid_id}", follow_redirects=True)
+    client.get("/auth/logout")
+
+    _login(client, "execz@example.com")
+    client.post(f"/orders/{order_id}/start", follow_redirects=True)
+    client.get("/auth/logout")
+
+    _login(client, "cust9@example.com")
+    resp = client.post(f"/orders/{order_id}/cancel-assignment", follow_redirects=True)
+    assert "уже нельзя".encode() in resp.data
+    with client.application.app_context():
+        assert Order.query.get(order_id).status == "in_progress"
+
+
 def test_any_executor_can_view_order_but_needs_complete_profile_to_bid(client):
     """Лента заказов открытая: любой исполнитель может открыть любую заявку
     (не только «рекомендованную» подбором) — но чтобы делать ставки, профиль
