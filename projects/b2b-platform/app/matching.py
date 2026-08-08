@@ -9,7 +9,7 @@ from datetime import datetime
 
 from app import db
 from app.geo import haversine_km
-from app.models import ExecutorCapability, ExecutorProfile, Order, OrderMatch
+from app.models import ExecutorCapability, ExecutorProfile, Order, OrderMatch, User
 from app.notify import notify
 from app.subscriptions import has_active_subscription
 
@@ -102,13 +102,30 @@ def run_matching(order):
 
         notify(
             executor.user, "new_order_match",
-            title=f"Новый заказ: {order.title}",
+            title=f"⭐ Рекомендуем: {order.title}",
             body=order.description[:200],
             url=f"/orders/{order.id}",
         )
 
     db.session.commit()
     return created
+
+
+def notify_unmatched_executors(order):
+    """Лента заказов открыта всем исполнителям (см. orders.executor_dashboard),
+    а не только тем, кого выбрал автоподбор — значит и уведомление о новой
+    заявке должны получать все, иначе часть рынка просто не узнает о ней.
+    Совпавшим (run_matching) уже ушло уведомление с пометкой «Рекомендуем» —
+    этой функции нужно догнать оставшихся простым «новая заявка», без пометки."""
+    matched_user_ids = {m.executor.user_id for m in order.matches}
+    others = User.query.filter_by(role="executor").filter(User.id.notin_(matched_user_ids)).all()
+    for user in others:
+        notify(
+            user, "new_order_broadcast",
+            title=f"Новая заявка: {order.title}",
+            body=order.description[:200],
+            url=f"/orders/{order.id}",
+        )
 
 
 def match_new_executor_to_open_orders(executor):
@@ -154,7 +171,7 @@ def match_new_executor_to_open_orders(executor):
 
         notify(
             executor.user, "new_order_match",
-            title=f"Новый заказ: {order.title}",
+            title=f"⭐ Рекомендуем: {order.title}",
             body=order.description[:200],
             url=f"/orders/{order.id}",
         )

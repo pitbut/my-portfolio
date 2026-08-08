@@ -6,7 +6,7 @@ from flask_login import current_user
 
 from app import db
 from app.decorators import paywall_required, role_required
-from app.matching import run_matching
+from app.matching import notify_unmatched_executors, run_matching
 from app.models import (
     Bid,
     Material,
@@ -149,6 +149,7 @@ def new_order():
         db.session.commit()
 
         matched = run_matching(order)
+        notify_unmatched_executors(order)
         if matched:
             flash(f"Заявка опубликована. Подобрано исполнителей: {matched}.", "success")
         else:

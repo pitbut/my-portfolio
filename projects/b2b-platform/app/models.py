@@ -518,8 +518,8 @@ def record_status_change(order, to_status, user=None):
 # --- единая нотификационная шина (используется модулями 2, 7, 8, 9) ---
 
 NOTIFICATION_TYPES = (
-    "new_order_match", "outbid", "bid_accepted", "bid_rejected", "order_completed", "dispute_update",
-    "subscription_expiring", "subscription_activated", "review_received",
+    "new_order_match", "new_order_broadcast", "outbid", "bid_accepted", "bid_rejected", "order_completed",
+    "dispute_update", "subscription_expiring", "subscription_activated", "review_received",
     "listing_response", "vacancy_response", "resume_invite", "material_response", "direct_message",
 )
 
