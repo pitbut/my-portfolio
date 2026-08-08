@@ -35,6 +35,27 @@ def test_customer_profile_incomplete_without_required_fields(client):
         assert user.customer_profile is None  # ещё не создан до первого сохранения
 
 
+def test_portfolio_section_prompts_telegram_link_when_bot_configured_and_unlinked(client):
+    """Напоминание про Telegram теперь показывается прямо в анкете (в блоке
+    «Портфолио»), а не только в отдельных Настройках — чтобы не потерялось."""
+    register(client, email="execnolink@example.com", role="executor")
+    client.application.config["TELEGRAM_BOT_USERNAME"] = "test_bot"
+    client.application.config["TELEGRAM_BOT_TOKEN"] = "test_token"
+    try:
+        resp = client.get("/profile/executor")
+        assert "подключите Telegram".encode() in resp.data
+        assert "t.me/test_bot".encode() in resp.data
+    finally:
+        client.application.config["TELEGRAM_BOT_USERNAME"] = None
+        client.application.config["TELEGRAM_BOT_TOKEN"] = None
+
+
+def test_portfolio_section_hides_telegram_prompt_when_bot_not_configured(client):
+    register(client, email="execnobot@example.com", role="executor")
+    resp = client.get("/profile/executor")
+    assert "подключите Telegram".encode() not in resp.data
+
+
 def test_executor_fills_profile_equipment_and_capabilities(client):
     register(client, email="exec@example.com", role="executor")
 
