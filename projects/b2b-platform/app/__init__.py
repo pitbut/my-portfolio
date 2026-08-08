@@ -114,9 +114,10 @@ def create_app(config_name=None):
     app.jinja_env.globals["delivery_label"] = lambda value: models.DELIVERY_LABELS.get(value)
     app.jinja_env.globals["workload_color"] = models.workload_color
 
-    from app.telegram_bot import deep_link_for_current_user
+    from app.telegram_bot import deep_link_for_current_user, link_code_for_current_user
 
     app.jinja_env.globals["telegram_deep_link"] = deep_link_for_current_user
+    app.jinja_env.globals["telegram_link_code"] = link_code_for_current_user
 
     @login_manager.user_loader
     def load_user(user_id):

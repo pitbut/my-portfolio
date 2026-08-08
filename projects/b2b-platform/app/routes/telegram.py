@@ -1,13 +1,16 @@
 """Webhook Telegram-бота (модуль 7) — привязка аккаунта и базовые команды."""
+import re
 from datetime import datetime
 
 from flask import Blueprint, abort, current_app, jsonify, request
 
 from app import db, telegram_bot
-from app.models import Bid, Order, OrderMatch, TelegramLink, User
+from app.models import Bid, Order, OrderMatch, TelegramLink, TelegramLinkCode, User
 from app.subscriptions import current_subscription
 
 bp = Blueprint("telegram", __name__)
+
+LINK_CODE_RE = re.compile(r"^[0-9A-F]{8}$")
 
 
 def send_message(chat_id, text):
@@ -21,21 +24,7 @@ def verify_link_token(token):
     return telegram_bot.verify_link_token(token)
 
 
-def _handle_start(chat_id, username, token):
-    if not token:
-        send_message(chat_id, "Чтобы привязать аккаунт, откройте ссылку из раздела «Настройки» на сайте.")
-        return
-
-    user_id = verify_link_token(token)
-    if user_id is None:
-        send_message(chat_id, "Ссылка для привязки устарела. Запросите новую на сайте — в разделе «Настройки».")
-        return
-
-    user = db.session.get(User, user_id)
-    if user is None:
-        send_message(chat_id, "Пользователь не найден.")
-        return
-
+def _link_account(chat_id, username, user):
     existing_for_chat = TelegramLink.query.filter_by(telegram_chat_id=chat_id).first()
     if existing_for_chat is not None and existing_for_chat.user_id != user.id:
         db.session.delete(existing_for_chat)
@@ -52,6 +41,44 @@ def _handle_start(chat_id, username, token):
     db.session.commit()
 
     send_message(chat_id, f"Аккаунт {user.email} привязан. Теперь уведомления о заказах будут приходить сюда.")
+
+
+def _handle_start(chat_id, username, token):
+    if not token:
+        send_message(
+            chat_id,
+            "Чтобы привязать аккаунт, откройте ссылку из раздела «Настройки» на сайте. "
+            "Если вы уже писали этому боту раньше, ссылка может не сработать — тогда отправьте сюда "
+            "код подтверждения, который тоже показан в «Настройках».",
+        )
+        return
+
+    user_id = verify_link_token(token)
+    if user_id is None:
+        send_message(chat_id, "Ссылка для привязки устарела. Запросите новую на сайте — в разделе «Настройки».")
+        return
+
+    user = db.session.get(User, user_id)
+    if user is None:
+        send_message(chat_id, "Пользователь не найден.")
+        return
+
+    _link_account(chat_id, username, user)
+
+
+def _handle_link_code(chat_id, username, code):
+    if not code:
+        send_message(chat_id, "Код не распознан. Скопируйте его из раздела «Настройки» на сайте.")
+        return
+
+    record = TelegramLinkCode.query.filter_by(code=code).first()
+    if record is None or datetime.utcnow() - record.created_at > telegram_bot.LINK_CODE_MAX_AGE:
+        send_message(chat_id, "Код устарел или неверен. Обновите страницу «Настройки» на сайте — там будет новый.")
+        return
+
+    user = record.user
+    db.session.delete(record)
+    _link_account(chat_id, username, user)
 
 
 def _handle_orders(chat_id, user):
@@ -101,7 +128,6 @@ def webhook(secret):
         abort(404)
 
     update = request.get_json(silent=True) or {}
-    current_app.logger.warning("Telegram webhook update: %s", update)
     message = update.get("message") or {}
     chat = message.get("chat") or {}
     chat_id = chat.get("id")
@@ -115,9 +141,18 @@ def webhook(secret):
         _handle_start(chat_id, chat.get("username"), parts[1] if len(parts) > 1 else None)
         return jsonify({"ok": True})
 
+    bare_code = text.replace("/link", "", 1).strip().upper()
+    if LINK_CODE_RE.match(bare_code):
+        _handle_link_code(chat_id, chat.get("username"), bare_code)
+        return jsonify({"ok": True})
+
     link = TelegramLink.query.filter_by(telegram_chat_id=chat_id).first()
     if link is None:
-        send_message(chat_id, "Аккаунт ещё не привязан — перейдите по ссылке из раздела «Настройки» на сайте.")
+        send_message(
+            chat_id,
+            "Аккаунт ещё не привязан — перейдите по ссылке из раздела «Настройки» на сайте, "
+            "либо отправьте сюда код подтверждения оттуда же.",
+        )
         return jsonify({"ok": True})
 
     user = link.user

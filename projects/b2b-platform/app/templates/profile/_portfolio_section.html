@@ -5,6 +5,8 @@
 <div class="flash flash--warn">
   Кстати: чтобы не пропускать уведомления о заказах и откликах, подключите Telegram —
   <a href="{{ telegram_deep_link() }}" target="_blank" rel="noopener">нажмите здесь</a> и в открывшемся боте нажмите <strong>Start</strong>.
+  Если вы уже писали этому боту раньше и кнопка не привязала аккаунт — просто отправьте боту сообщением код
+  <strong>{{ telegram_link_code() }}</strong> (подробнее в <a href="{{ url_for('settings.index') }}">Настройках</a>).
 </div>
 {% endif %}
 

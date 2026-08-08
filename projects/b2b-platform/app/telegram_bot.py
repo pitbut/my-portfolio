@@ -7,8 +7,10 @@
 на месте и заработает сразу, как только токен появится в переменных
 окружения."""
 import json
+import secrets
 import urllib.error
 import urllib.request
+from datetime import datetime, timedelta
 
 from flask import current_app, has_request_context, request
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
@@ -16,6 +18,7 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 TELEGRAM_API_URL = "https://api.telegram.org/bot{token}/{method}"
 LINK_SALT = "telegram-link"
 LINK_TOKEN_MAX_AGE = 3600  # час на переход по deep-link'у из личного кабинета
+LINK_CODE_MAX_AGE = timedelta(minutes=30)
 
 
 def _serializer():
@@ -38,6 +41,35 @@ def bot_deep_link(user):
     if not username:
         return None
     return f"https://t.me/{username}?start={link_token_for(user)}"
+
+
+def link_code_for(user):
+    """Короткий код для ручной отправки боту — запасной путь, если ссылка
+    открылась в уже существующем чате и Telegram обрезал start-параметр
+    (см. TelegramLinkCode). Переиспользует ещё не устаревший код, чтобы
+    при повторном заходе на «Настройки» код не менялся каждый раз."""
+    from app import db
+    from app.models import TelegramLinkCode
+
+    existing = TelegramLinkCode.query.filter_by(user_id=user.id).first()
+    if existing is not None and datetime.utcnow() - existing.created_at < LINK_CODE_MAX_AGE:
+        return existing.code
+
+    if existing is not None:
+        db.session.delete(existing)
+
+    code = secrets.token_hex(4).upper()
+    db.session.add(TelegramLinkCode(user_id=user.id, code=code))
+    db.session.commit()
+    return code
+
+
+def link_code_for_current_user():
+    from flask_login import current_user
+
+    if not current_user.is_authenticated:
+        return None
+    return link_code_for(current_user)
 
 
 def deep_link_for_current_user():

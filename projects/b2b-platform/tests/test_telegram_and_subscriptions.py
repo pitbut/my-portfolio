@@ -72,6 +72,59 @@ def test_telegram_deep_link_and_webhook_binding(client, monkeypatch):
         assert link.telegram_username == "ivanov"
 
 
+def test_telegram_link_code_fallback_when_start_payload_dropped(client, monkeypatch):
+    """Если пользователь уже писал боту раньше, Telegram при переходе по
+    deep-link'у иногда шлёт голый «/start» без токена (сам клиент обрезает
+    start-параметр для уже существующих чатов) — тогда должен сработать
+    запасной путь: код подтверждения, отправленный обычным текстом."""
+    client.application.config["TELEGRAM_BOT_USERNAME"] = "TestPlatformBot"
+    client.application.config["TELEGRAM_WEBHOOK_SECRET"] = "test-secret"
+
+    register(client, email="code@example.com", role="customer")
+    resp = client.get("/settings")
+    assert "может открыть чат без автоматической привязки" in resp.get_data(as_text=True)
+
+    with client.application.app_context():
+        from app.models import TelegramLinkCode
+
+        user = User.query.filter_by(email="code@example.com").first()
+        user_id = user.id
+        code = TelegramLinkCode.query.filter_by(user_id=user_id).first().code
+
+    sent_messages = []
+    monkeypatch.setattr("app.telegram_bot.send_message", lambda chat_id, text: sent_messages.append((chat_id, text)) or True)
+
+    resp = client.post(
+        "/telegram/webhook/test-secret",
+        data=json.dumps({"message": {"chat": {"id": 777222, "username": "petrov"}, "text": code}}),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+    assert len(sent_messages) == 1
+
+    with client.application.app_context():
+        link = TelegramLink.query.filter_by(user_id=user_id).first()
+        assert link is not None
+        assert link.telegram_chat_id == 777222
+        from app.models import TelegramLinkCode
+
+        assert TelegramLinkCode.query.filter_by(user_id=user_id).first() is None
+
+
+def test_telegram_link_code_rejects_unknown_code(client, monkeypatch):
+    client.application.config["TELEGRAM_WEBHOOK_SECRET"] = "test-secret"
+    sent_messages = []
+    monkeypatch.setattr("app.telegram_bot.send_message", lambda chat_id, text: sent_messages.append((chat_id, text)) or True)
+
+    resp = client.post(
+        "/telegram/webhook/test-secret",
+        data=json.dumps({"message": {"chat": {"id": 1}, "text": "DEADBEEF"}}),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+    assert "устарел или неверен" in sent_messages[0][1]
+
+
 def test_webhook_rejects_wrong_secret(client):
     client.application.config["TELEGRAM_WEBHOOK_SECRET"] = "real-secret"
     resp = client.post(
