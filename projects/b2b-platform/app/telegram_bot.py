@@ -40,6 +40,18 @@ def bot_deep_link(user):
     return f"https://t.me/{username}?start={link_token_for(user)}"
 
 
+def deep_link_for_current_user():
+    """Обёртка для использования в шаблонах через Jinja-глобал (см.
+    app/__init__.py) — там, где неудобно прокидывать deep_link через
+    каждый render_template (например, в общем куске «Портфолио»,
+    подключаемом и в анкету исполнителя, и в анкету заказчика)."""
+    from flask_login import current_user
+
+    if not current_user.is_authenticated:
+        return None
+    return bot_deep_link(current_user)
+
+
 def _call(method, payload):
     token = current_app.config.get("TELEGRAM_BOT_TOKEN")
     if not token:

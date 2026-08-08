@@ -1,6 +1,13 @@
 <h2 class="profile-section-title">{{ section_number }}. Портфолио (для рекламы)</h2>
 <p class="profile-page__hint">Фото цеха, станков, продукции или ссылка на видео — то, что увидят на вашей публичной странице.</p>
 
+{% if telegram_bot_available and not current_user.telegram_link %}
+<div class="flash flash--warn">
+  Кстати: чтобы не пропускать уведомления о заказах и откликах, подключите Telegram —
+  <a href="{{ telegram_deep_link() }}" target="_blank" rel="noopener">нажмите здесь</a> и в открывшемся боте нажмите <strong>Start</strong>.
+</div>
+{% endif %}
+
 {% if current_user.portfolio_media %}
 <div class="portfolio-gallery">
   {% for item in current_user.portfolio_media %}
