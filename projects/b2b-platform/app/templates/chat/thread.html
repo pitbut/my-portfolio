@@ -14,7 +14,7 @@
   </p>
   {% endif %}
 
-  <div class="chat-thread">
+  <div class="chat-thread" id="chatThread" data-last-id="{{ conversation.messages[-1].id if conversation and conversation.messages else 0 }}" data-poll-url="{{ url_for('chat.new_messages', user_id=other.id) }}">
     {% if conversation and conversation.messages %}
       {% for m in conversation.messages %}
       <div class="chat-bubble {{ 'chat-bubble--own' if m.sender_id == current_user.id else 'chat-bubble--other' }}">
@@ -23,7 +23,7 @@
       </div>
       {% endfor %}
     {% else %}
-      <p class="empty-hint">Сообщений пока нет — напишите первым.</p>
+      <p class="empty-hint" id="chatEmptyHint">Сообщений пока нет — напишите первым.</p>
     {% endif %}
   </div>
 
@@ -33,4 +33,40 @@
     <button type="submit" class="btn btn--primary">Отправить</button>
   </form>
 </section>
+
+<script>
+(function () {
+  var thread = document.getElementById("chatThread");
+  if (!thread) return;
+
+  function poll() {
+    var lastId = thread.dataset.lastId || "0";
+    fetch(thread.dataset.pollUrl + "?after_id=" + lastId, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.messages || !data.messages.length) return;
+        var emptyHint = document.getElementById("chatEmptyHint");
+        if (emptyHint) emptyHint.remove();
+        data.messages.forEach(function (m) {
+          var bubble = document.createElement("div");
+          bubble.className = "chat-bubble " + (m.own ? "chat-bubble--own" : "chat-bubble--other");
+          var body = document.createElement("div");
+          body.className = "chat-bubble__body";
+          body.textContent = m.body;
+          var meta = document.createElement("div");
+          meta.className = "notif-item__meta";
+          meta.textContent = m.created_at;
+          bubble.appendChild(body);
+          bubble.appendChild(meta);
+          thread.appendChild(bubble);
+          thread.dataset.lastId = m.id;
+        });
+        thread.scrollTop = thread.scrollHeight;
+      })
+      .catch(function () {});
+  }
+
+  setInterval(poll, 5000);
+})();
+</script>
 {% endblock %}

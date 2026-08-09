@@ -60,6 +60,41 @@ def test_two_executors_can_cooperate(client):
         assert message.read_at is not None
 
 
+def test_new_messages_polling_returns_and_marks_read(client):
+    """Страница диалога опрашивает этот эндпоинт раз в несколько секунд
+    (см. thread.html), чтобы сообщения появлялись без ручного обновления."""
+    register(client, email="poll1@example.com", role="executor")
+    with client.application.app_context():
+        user1_id = User.query.filter_by(email="poll1@example.com").first().id
+    client.get("/auth/logout")
+
+    register(client, email="poll2@example.com", role="executor")
+    with client.application.app_context():
+        user2_id = User.query.filter_by(email="poll2@example.com").first().id
+
+    client.post(f"/messages/u/{user1_id}", data={"body": "Привет"})
+
+    resp = client.get(f"/messages/u/{user1_id}/new.json?after_id=0")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data["messages"]) == 1
+    assert data["messages"][0]["body"] == "Привет"
+    assert data["messages"][0]["own"] is True
+
+    client.get("/auth/logout")
+    _login(client, "poll1@example.com")
+    resp2 = client.get(f"/messages/u/{user2_id}/new.json?after_id=0")
+    data2 = resp2.get_json()
+    assert data2["messages"][0]["own"] is False
+
+    with client.application.app_context():
+        message = Message.query.first()
+        assert message.read_at is not None  # опрос второй стороны пометил прочитанным
+
+    resp3 = client.get(f"/messages/u/{user2_id}/new.json?after_id={data2['messages'][0]['id']}")
+    assert resp3.get_json()["messages"] == []
+
+
 def test_chat_shows_order_context_banner_when_both_sides_involved(client):
     """?order_id= в ссылке на чат должен показывать баннер с номером заявки —
     но только если оба собеседника реально стороны именно по этой заявке

@@ -3,7 +3,7 @@
 вопрос по объявлению и т.п.), не привязанный к конкретному заказу."""
 from datetime import datetime
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 
 from app import db
@@ -115,3 +115,37 @@ def thread(user_id):
             db.session.commit()
 
     return render_template("chat/thread.html", other=other, conversation=conversation, order=order)
+
+
+@bp.route("/u/<int:user_id>/new.json")
+@paywall_required
+def new_messages(user_id):
+    """Опрашивается со страницы диалога (см. thread.html), чтобы новые
+    сообщения появлялись без ручного обновления страницы — без вебсокетов,
+    просто короткий polling раз в несколько секунд."""
+    after_id = request.args.get("after_id", type=int) or 0
+    conversation = _find_conversation(user_id)
+    if conversation is None:
+        return jsonify({"messages": []})
+
+    new = [m for m in conversation.messages if m.id > after_id]
+    now = datetime.utcnow()
+    changed = False
+    for m in new:
+        if m.sender_id != current_user.id and m.read_at is None:
+            m.read_at = now
+            changed = True
+    if changed:
+        db.session.commit()
+
+    return jsonify({
+        "messages": [
+            {
+                "id": m.id,
+                "own": m.sender_id == current_user.id,
+                "body": m.body,
+                "created_at": m.created_at.strftime("%d.%m.%Y %H:%M"),
+            }
+            for m in new
+        ]
+    })
