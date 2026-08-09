@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Поиск{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>Поиск по сайту</h1>
+  </div>
+  <p class="empty-hint">Ищет среди исполнителей, конструкторов, барахолки станков, материалов и вакансий.</p>
+
+  <form method="get" class="map-filters">
+    <label>Запрос
+      <input type="text" name="q" value="{{ q }}" placeholder="например, токарный станок" autofocus>
+    </label>
+    <label>Совпадение
+      <select name="mode">
+        <option value="partial" {{ 'selected' if mode == 'partial' }}>Частичное (содержит)</option>
+        <option value="exact" {{ 'selected' if mode == 'exact' }}>Точное (полное совпадение)</option>
+      </select>
+    </label>
+    <button type="submit" class="btn btn--primary">Искать</button>
+  </form>
+
+  {% if q %}
+    {% if total == 0 %}
+    <p class="empty-hint">По запросу «{{ q }}» ({{ 'точное совпадение' if mode == 'exact' else 'частичное совпадение' }}) ничего не найдено.</p>
+    {% endif %}
+
+    {% if results.executors %}
+    <h2 class="profile-section-title">Исполнители</h2>
+    <div class="listing-grid">
+      {% for e in results.executors %}
+      <a class="listing-card" href="{{ url_for('profile.executor_public_profile', user_id=e.user_id) }}">
+        <h3>{{ e.display_name }}</h3>
+        <p class="listing-card__meta">{{ e.region.name_ru if e.region }}</p>
+        {% if e.description %}<p class="listing-card__meta">{{ e.description[:140] }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if results.constructors %}
+    <h2 class="profile-section-title">Конструкторы</h2>
+    <div class="listing-grid">
+      {% for c in results.constructors %}
+      <a class="listing-card" href="{{ url_for('constructors.detail', constructor_id=c.id) }}">
+        <h3>{{ c.display_name }}</h3>
+        <p class="listing-card__meta">{{ c.region.name_ru if c.region }}</p>
+        {% if c.description %}<p class="listing-card__meta">{{ c.description[:140] }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if results.listings %}
+    <h2 class="profile-section-title">Барахолка станков и инструмента</h2>
+    <div class="listing-grid">
+      {% for l in results.listings %}
+      <a class="listing-card" href="{{ url_for('marketplace.detail', listing_id=l.id) }}">
+        <h3>{{ l.title }}</h3>
+        <p class="listing-card__meta">{{ l.region.name_ru if l.region }}{% if l.price %} · {{ l.price }} {{ l.currency }}{% endif %}</p>
+        <p class="listing-card__meta">{{ l.description[:140] }}</p>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if results.materials %}
+    <h2 class="profile-section-title">Материалы и сырьё</h2>
+    <div class="listing-grid">
+      {% for m in results.materials %}
+      <a class="listing-card" href="{{ url_for('materials_market.detail', listing_id=m.id) }}">
+        <h3>{{ m.title }}</h3>
+        <p class="listing-card__meta">{{ m.region.name_ru if m.region }}{% if m.price %} · {{ m.price }} {{ m.currency }}{% endif %}</p>
+        <p class="listing-card__meta">{{ m.description[:140] }}</p>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if results.vacancies %}
+    <h2 class="profile-section-title">Вакансии</h2>
+    <div class="listing-grid">
+      {% for v in results.vacancies %}
+      <a class="listing-card" href="{{ url_for('jobs.vacancy_detail', vacancy_id=v.id) }}">
+        <h3>{{ v.title }}</h3>
+        <p class="listing-card__meta">{{ v.region.name_ru if v.region }}</p>
+        <p class="listing-card__meta">{{ v.description[:140] }}</p>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}
