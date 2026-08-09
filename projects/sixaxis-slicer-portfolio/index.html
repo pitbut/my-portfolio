@@ -1,0 +1,3052 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SixAxis Slicer — STL → G-code</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #07090d;
+  --surface: #0e1117;
+  --panel:   #131720;
+  --border:  #1c2333;
+  --accent:  #39ff14;
+  --blue:    #00aaff;
+  --orange:  #ff7d00;
+  --red:     #ff2d55;
+  --text:    #ccd6f6;
+  --muted:   #4a5568;
+  --mono:    'JetBrains Mono', monospace;
+  --title:   'Orbitron', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* SCANLINE OVERLAY */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex; align-items: center; gap: 20px;
+  padding: 8px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.logo {
+  font-family: var(--title);
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-shadow: 0 0 20px rgba(57,255,20,0.6), 0 0 40px rgba(57,255,20,0.2);
+}
+.logo span { color: var(--blue); }
+
+.hdr-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+.phase-indicator {
+  margin-left: auto;
+  display: flex; gap: 6px;
+}
+.phase {
+  font-size: 9px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.phase.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(57,255,20,0.06);
+  box-shadow: 0 0 8px rgba(57,255,20,0.15);
+}
+.phase.done { border-color: var(--muted); color: var(--muted); }
+
+/* ── LAYOUT ── */
+.app {
+  display: grid;
+  grid-template-columns: 300px 1fr 320px;
+  flex: 1;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+
+.section {
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+}
+
+.sec-title {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sec-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* DROP ZONE */
+.dropzone {
+  border: 1px dashed var(--border);
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  background: var(--panel);
+}
+.dropzone:hover, .dropzone.dragover {
+  border-color: var(--accent);
+  background: rgba(57,255,20,0.04);
+  box-shadow: inset 0 0 20px rgba(57,255,20,0.05);
+}
+.dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.dz-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+}
+.dz-text { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.dz-text strong { color: var(--accent); }
+
+.file-info {
+  display: none;
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: rgba(57,255,20,0.06);
+  border: 1px solid rgba(57,255,20,0.2);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* PARAM ROWS */
+.param { margin-bottom: 10px; }
+.param-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  display: flex; justify-content: space-between;
+}
+.param-label span { color: var(--text); font-size: 11px; }
+
+input[type="range"] {
+  width: 100%; -webkit-appearance: none;
+  height: 2px; background: var(--border);
+  outline: none; margin-bottom: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(57,255,20,0.5);
+}
+
+.num-input {
+  width: 100%; padding: 6px 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  transition: border-color 0.2s;
+}
+.num-input:focus { outline: none; border-color: var(--accent); }
+
+/* XYZ TRANSFORM GRID */
+.xyz-grid { display: flex; gap: 5px; margin-bottom: 8px; }
+.xyz-cell { flex: 1; min-width: 0; }
+.xyz-tag {
+  font-size: 9px; text-align: center; margin-bottom: 3px;
+  letter-spacing: 1px; font-weight: bold;
+}
+.xyz-tag.x { color: #ff5a5a; }
+.xyz-tag.y { color: #39ff14; }
+.xyz-tag.z { color: #4da6ff; }
+.xyz-cell input {
+  width: 100%; padding: 5px 4px; text-align: center;
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--mono); font-size: 11px;
+}
+.xyz-cell input:focus { outline: none; border-color: var(--accent); }
+.reset-btn {
+  width: 100%; padding: 5px; margin-bottom: 12px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); font-family: var(--mono); font-size: 9px;
+  letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+.link-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.link-row label { font-size: 10px; color: var(--muted); }
+.sub-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin: 10px 0 6px; }
+
+select {
+  width: 100%; padding: 6px 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+select:focus { outline: none; border-color: var(--accent); }
+
+/* TABS inside params */
+.tab-row { display: flex; gap: 4px; margin-bottom: 10px; }
+.tab {
+  flex: 1; padding: 5px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab.active { border-color: var(--blue); color: var(--blue); background: rgba(0,170,255,0.06); }
+
+/* 6-AXIS PARAMS */
+.axis-param {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  background: var(--panel);
+}
+.axis-tag {
+  font-size: 12px; font-weight: 700;
+  width: 18px; text-align: center;
+}
+.axis-tag.lin { color: var(--blue); }
+.axis-tag.rot { color: var(--orange); }
+.axis-desc { flex: 1; font-size: 10px; color: var(--muted); }
+.axis-toggle {
+  width: 28px; height: 14px;
+  background: var(--border);
+  border-radius: 7px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  border: none;
+}
+.axis-toggle.on { background: var(--accent); }
+.axis-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.axis-toggle.on::after { transform: translateX(14px); }
+
+/* SLICE BUTTON */
+.slice-btn {
+  width: 100%; padding: 14px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--title);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.slice-btn::before {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(57,255,20,0.15), transparent);
+  transition: left 0.4s;
+}
+.slice-btn:hover { background: rgba(57,255,20,0.08); box-shadow: 0 0 20px rgba(57,255,20,0.2); }
+.slice-btn:hover::before { left: 100%; }
+.slice-btn:disabled { border-color: var(--muted); color: var(--muted); cursor: not-allowed; }
+.slice-btn:disabled::before { display: none; }
+
+/* ── VIEWPORT ── */
+.viewport {
+  position: relative;
+  background: #050709;
+  overflow: hidden;
+}
+
+#three-canvas {
+  display: block;
+  width: 100%; height: 100%;
+}
+
+.viewport-overlay {
+  position: absolute; bottom: 14px; left: 14px;
+  display: flex; gap: 6px;
+}
+.vp-btn {
+  padding: 5px 12px;
+  background: rgba(14,17,23,0.85);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  backdrop-filter: blur(4px);
+}
+.vp-btn:hover { border-color: var(--blue); color: var(--blue); }
+.vp-btn.active { border-color: var(--blue); color: var(--blue); background: rgba(0,170,255,0.1); }
+
+.layer-slider-wrap {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  display: none;
+}
+.layer-slider-wrap.visible { display: flex; }
+
+#layerSlider {
+  writing-mode: bt-lr;
+  -webkit-appearance: slider-vertical;
+  width: 20px; height: 200px;
+}
+
+.layer-info {
+  font-size: 10px; color: var(--accent); text-align: center;
+  background: rgba(14,17,23,0.9);
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+}
+
+/* Loading bar */
+.progress-overlay {
+  position: absolute; inset: 0;
+  background: rgba(7,9,13,0.92);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 50;
+}
+.progress-overlay.visible { display: flex; }
+.progress-label { font-size: 11px; color: var(--accent); letter-spacing: 2px; }
+
+/* ── PROCESS MODAL (как FFF-параметры в Simplify3D) ── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(5,7,9,0.75);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 200;
+}
+.modal-backdrop.visible { display: flex; }
+.modal-panel {
+  width: 640px; max-width: 92vw; max-height: 88vh;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 12px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+.modal-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; line-height: 1; }
+.modal-close:hover { color: var(--red); }
+.modal-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.modal-tab {
+  flex: 1; padding: 10px 6px; text-align: center;
+  background: var(--panel); border: none; border-right: 1px solid var(--border);
+  color: var(--muted); font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  cursor: pointer; text-transform: uppercase;
+}
+.modal-tab:last-child { border-right: none; }
+.modal-tab.active { background: var(--surface); color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+.modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+.modal-pane { display: none; }
+.modal-pane.active { display: block; }
+.modal-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-end; }
+.modal-field { flex: 1; }
+.modal-field label {
+  display: block; font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px;
+}
+.modal-field input, .modal-field select {
+  width: 100%; padding: 7px 10px;
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--mono); font-size: 12px;
+}
+.modal-field input:focus, .modal-field select:focus { outline: none; border-color: var(--accent); }
+.modal-note { font-size: 10px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+.modal-footer {
+  padding: 12px 18px; border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px;
+}
+.modal-footer button {
+  padding: 8px 20px; font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+  cursor: pointer; text-transform: uppercase;
+}
+.modal-btn-primary { background: var(--accent); color: #06110a; border: none; }
+.modal-btn-primary:hover { filter: brightness(1.1); }
+.modal-btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.modal-btn-secondary:hover { border-color: var(--red); color: var(--red); }
+
+/* Компактные карточки процессов в сайдбаре */
+.proc-card {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: var(--panel);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.proc-card:hover { border-color: var(--accent); }
+.proc-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.proc-card-name { font-size: 11px; color: var(--orange); font-weight: 700; }
+.proc-card-del { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; line-height: 1; }
+.proc-card-del:hover { color: var(--red); }
+.proc-card-summary { font-size: 10px; color: var(--muted); line-height: 1.5; }
+.progress-track {
+  width: 300px; height: 3px;
+  background: var(--border);
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--blue));
+  transition: width 0.1s;
+}
+.progress-msg { font-size: 10px; color: var(--muted); }
+
+/* ── RIGHT PANEL: G-code output ── */
+.gcode-panel {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gp-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.gp-title {
+  font-size: 9px; letter-spacing: 3px; color: var(--blue);
+  text-transform: uppercase;
+}
+
+.gp-stats {
+  margin-left: auto;
+  display: flex; gap: 12px;
+}
+.stat { text-align: right; }
+.stat-val { font-size: 14px; color: var(--accent); font-weight: 700; display: block; }
+.stat-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+
+.gcode-output {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 1.8;
+  background: var(--bg);
+  white-space: pre;
+  color: #5a6a80;
+}
+.gcode-output::-webkit-scrollbar { width: 3px; }
+.gcode-output::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* G-code syntax */
+.gc-comment { color: #3a4a5a; }
+.gc-move    { color: #ccd6f6; }
+.gc-temp    { color: #ff7d00; }
+.gc-macro   { color: #39ff14; }
+.gc-layer   { color: #00aaff; font-weight: bold; }
+
+.gp-footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+  flex-shrink: 0;
+}
+.dl-btn {
+  flex: 1; padding: 10px;
+  background: rgba(57,255,20,0.08);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dl-btn:hover { background: rgba(57,255,20,0.15); }
+.dl-btn:disabled { border-color: var(--muted); color: var(--muted); cursor: not-allowed; background: transparent; }
+.copy-btn {
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.copy-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+/* Empty state */
+.empty-state {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--muted);
+  padding: 20px;
+  text-align: center;
+}
+.empty-icon { font-size: 36px; opacity: 0.3; }
+.empty-text { font-size: 11px; line-height: 1.7; }
+
+/* GRID CROSSHAIR in viewport */
+.crosshair {
+  position: absolute; top: 14px; left: 14px;
+  font-size: 10px; color: rgba(57,255,20,0.4);
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+/* Notify */
+.notify {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 8px 20px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  z-index: 9998;
+  transition: transform 0.3s;
+  box-shadow: 0 0 20px rgba(57,255,20,0.2);
+}
+.notify.show { transform: translateX(-50%) translateY(0); }
+
+/* Ranges & Supports */
+.zone-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  position: relative;
+}
+.zone-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--orange);
+  border-radius: 3px 0 0 3px;
+}
+.zone-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
+.zone-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; width: 30px; flex-shrink:0; }
+.zone-input {
+  flex: 1; padding: 4px 7px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.zone-input:focus { outline:none; border-color: var(--orange); }
+.zone-del {
+  width: 20px; height: 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.zone-del:hover { border-color: var(--red); color: var(--red); }
+.add-btn {
+  width: 100%; padding: 7px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 4px;
+}
+.add-btn:hover { border-color: var(--orange); color: var(--orange); }
+.sup-type-row { display: flex; gap: 4px; margin-bottom: 8px; }
+.sup-tab {
+  flex: 1; padding: 5px 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+.sup-tab.active { border-color: var(--orange); color: var(--orange); background: rgba(255,125,0,0.07); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SIX<span>SLICER</span></div>
+  <div class="hdr-badge">6-AXIS</div>
+  <div class="hdr-badge">STL → GCODE</div>
+  <div class="phase-indicator">
+    <div class="phase active" id="ph1">① ЗАГРУЗКА</div>
+    <div class="phase" id="ph2">② ПАРАМЕТРЫ</div>
+    <div class="phase" id="ph3">③ СЛАЙСИНГ</div>
+    <div class="phase" id="ph4">④ G-CODE</div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- ══ ЛЕВАЯ ПАНЕЛЬ ══ -->
+  <div class="sidebar">
+
+    <!-- Загрузка STL -->
+    <div class="section">
+      <div class="sec-title">STL Файл</div>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="stlFile" accept=".stl" onchange="loadSTL(this)">
+        <span class="dz-icon">📦</span>
+        <div class="dz-text">
+          <strong>Перетащи STL сюда</strong><br>
+          или кликни для выбора файла<br>
+          <span style="font-size:10px">Binary и ASCII STL</span>
+        </div>
+      </div>
+      <div class="file-info" id="fileInfo"></div>
+    </div>
+
+    <!-- Позиция / Поворот / Масштаб -->
+    <div class="section" id="transformSection">
+      <div class="sec-title">Позиция · Поворот · Масштаб</div>
+
+      <div class="sub-label">◈ ПОЗИЦИЯ (СМЕЩЕНИЕ), ММ</div>
+      <div class="xyz-grid">
+        <div class="xyz-cell"><div class="xyz-tag x">X</div>
+          <input type="number" id="posX" value="0" step="1" onchange="onTransformInput()"></div>
+        <div class="xyz-cell"><div class="xyz-tag y">Y</div>
+          <input type="number" id="posY" value="0" step="1" onchange="onTransformInput()"></div>
+        <div class="xyz-cell"><div class="xyz-tag z">Z</div>
+          <input type="number" id="posZ" value="0" step="1" onchange="onTransformInput()"></div>
+      </div>
+      <button class="reset-btn" onclick="resetTransform('pos')">СБРОС ПОЗИЦИИ</button>
+
+      <div class="sub-label">◈ ПОВОРОТ, ГРАД</div>
+      <div class="xyz-grid">
+        <div class="xyz-cell"><div class="xyz-tag x">X</div>
+          <input type="number" id="rotX" value="0" step="5" onchange="onTransformInput()"></div>
+        <div class="xyz-cell"><div class="xyz-tag y">Y</div>
+          <input type="number" id="rotY" value="0" step="5" onchange="onTransformInput()"></div>
+        <div class="xyz-cell"><div class="xyz-tag z">Z</div>
+          <input type="number" id="rotZ" value="0" step="5" onchange="onTransformInput()"></div>
+      </div>
+      <button class="reset-btn" onclick="resetTransform('rot')">СБРОС ПОВОРОТА</button>
+
+      <div class="sub-label">◈ МАСШТАБ</div>
+      <div class="xyz-grid">
+        <div class="xyz-cell"><div class="xyz-tag x">X мм</div>
+          <input type="number" id="sizeX" value="0" step="1" onchange="onSizeInput('x')"></div>
+        <div class="xyz-cell"><div class="xyz-tag y">Y мм</div>
+          <input type="number" id="sizeY" value="0" step="1" onchange="onSizeInput('y')"></div>
+        <div class="xyz-cell"><div class="xyz-tag z">Z мм</div>
+          <input type="number" id="sizeZ" value="0" step="1" onchange="onSizeInput('z')"></div>
+      </div>
+      <div class="xyz-grid">
+        <div class="xyz-cell"><div class="xyz-tag x">X %</div>
+          <input type="number" id="scaleX" value="100" step="5" onchange="onScaleInput('x')"></div>
+        <div class="xyz-cell"><div class="xyz-tag y">Y %</div>
+          <input type="number" id="scaleY" value="100" step="5" onchange="onScaleInput('y')"></div>
+        <div class="xyz-cell"><div class="xyz-tag z">Z %</div>
+          <input type="number" id="scaleZ" value="100" step="5" onchange="onScaleInput('z')"></div>
+      </div>
+      <div class="link-row">
+        <input type="checkbox" id="scaleLinked" checked>
+        <label for="scaleLinked">Связанное масштабирование</label>
+      </div>
+      <button class="reset-btn" onclick="resetTransform('scale')">СБРОС МАСШТАБА</button>
+
+      <button class="add-btn" style="width:100%;margin-top:4px" onclick="organizeAndCenter()">⌖ ОРГАНИЗОВАТЬ И ЦЕНТРИРОВАТЬ</button>
+    </div>
+
+    <!-- Ориентация детали -->
+    <div class="section">
+      <div class="sec-title">Ориентация детали</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.6">
+        Перебор поворотов модели (X/Y) для минимизации нависаний → меньше поддержек и работы. Порог нависания берётся из настройки «Поддержки → Порог нависания».
+      </div>
+      <div class="param">
+        <div class="param-label">Точность перебора</div>
+        <select id="orientRes">
+          <option value="30">Грубо (30°, быстро)</option>
+          <option value="15" selected>Средне (15°)</option>
+          <option value="10">Точно (10°, медленнее)</option>
+          <option value="5">Максимум (5°, долго)</option>
+        </select>
+      </div>
+      <button class="add-btn" style="width:100%" onclick="autoOrient()">🔄 Найти оптимальную ориентацию</button>
+      <div id="orientResult" style="font-size:10px;color:var(--accent);margin-top:8px;line-height:1.6"></div>
+    </div>
+
+    <!-- Параметры печати -->
+    <div class="section">
+      <div class="sec-title">Параметры печати</div>
+
+      <div class="param">
+        <div class="param-label">Высота слоя <span id="lhVal">0.20</span> мм</div>
+        <input type="range" min="0.05" max="0.5" step="0.05" value="0.20"
+          oninput="document.getElementById('lhVal').textContent=parseFloat(this.value).toFixed(2);params.layerHeight=parseFloat(this.value)">
+      </div>
+
+      <div class="param">
+        <div class="param-label">Скорость печати <span id="spVal">60</span> мм/с</div>
+        <input type="range" min="10" max="200" step="5" value="60"
+          oninput="document.getElementById('spVal').textContent=this.value;params.speed=parseInt(this.value)">
+      </div>
+
+      <div class="param">
+        <div class="param-label">Заполнение <span id="infVal">20</span>%</div>
+        <input type="range" min="0" max="100" step="5" value="20"
+          oninput="document.getElementById('infVal').textContent=this.value;params.infill=parseInt(this.value)">
+      </div>
+
+      <div class="param">
+        <div class="param-label">Периметры</div>
+        <input class="num-input" type="number" value="2" min="1" max="8"
+          onchange="params.perimeters=parseInt(this.value)">
+      </div>
+
+      <div class="param">
+        <div class="param-label">Заполнение — внутреннее</div>
+        <select onchange="params.infillPattern=this.value">
+          <option value="rectilinear">Rectilinear (линии)</option>
+          <option value="grid">Grid (сетка)</option>
+          <option value="triangular">Triangular (треугольники)</option>
+          <option value="wiggle">Wiggle (змейка)</option>
+          <option value="honeycomb-fast">Fast Honeycomb (соты, редкие)</option>
+          <option value="honeycomb-full">Full Honeycomb (соты, частые)</option>
+        </select>
+      </div>
+
+      <div class="param">
+        <div class="param-label">Заполнение — сплошные слои</div>
+        <select onchange="params.topBottomPattern=this.value">
+          <option value="rectilinear">Rectilinear (линии)</option>
+          <option value="concentric">Concentric (кольца)</option>
+        </select>
+      </div>
+
+      <div class="param">
+        <div class="param-label">Слои крышки/дна</div>
+        <input class="num-input" type="number" value="3" min="0" max="10"
+          onchange="params.topBottomLayers=parseInt(this.value)">
+      </div>
+    </div>
+
+    <!-- Температуры -->
+    <div class="section">
+      <div class="sec-title">Температуры</div>
+
+      <div class="tab-row">
+        <button class="tab active" onclick="selectPreset('PLA',this)">PLA</button>
+        <button class="tab" onclick="selectPreset('PETG',this)">PETG</button>
+        <button class="tab" onclick="selectPreset('ABS',this)">ABS</button>
+        <button class="tab" onclick="selectPreset('TPU',this)">TPU</button>
+      </div>
+
+      <div class="param">
+        <div class="param-label">Сопло °C <span id="extVal">215</span></div>
+        <input type="range" min="150" max="300" step="5" value="215" id="extSlider"
+          oninput="document.getElementById('extVal').textContent=this.value;params.extTemp=parseInt(this.value)">
+      </div>
+
+      <div class="param">
+        <div class="param-label">Стол °C <span id="bedVal">60</span></div>
+        <input type="range" min="0" max="130" step="5" value="60" id="bedSlider"
+          oninput="document.getElementById('bedVal').textContent=this.value;params.bedTemp=parseInt(this.value)">
+      </div>
+
+      <div class="param">
+        <div class="param-label">Вентилятор <span id="fanPVal">100</span>%</div>
+        <input type="range" min="0" max="100" step="5" value="100"
+          oninput="document.getElementById('fanPVal').textContent=this.value;params.fanSpeed=parseInt(this.value)">
+      </div>
+    </div>
+
+    <!-- 6-осевые настройки -->
+    <div class="section">
+      <div class="sec-title">6-Осевые настройки</div>
+
+      <div class="axis-param">
+        <span class="axis-tag lin">X</span>
+        <span class="axis-desc">Горизонталь</span>
+        <button class="axis-toggle on" onclick="toggleAxis(this,'x')"></button>
+      </div>
+      <div class="axis-param">
+        <span class="axis-tag lin">Y</span>
+        <span class="axis-desc">Глубина</span>
+        <button class="axis-toggle on" onclick="toggleAxis(this,'y')"></button>
+      </div>
+      <div class="axis-param">
+        <span class="axis-tag lin">Z</span>
+        <span class="axis-desc">Высота слоёв</span>
+        <button class="axis-toggle on" onclick="toggleAxis(this,'z')"></button>
+      </div>
+      <div class="axis-param">
+        <span class="axis-tag rot">A</span>
+        <span class="axis-desc">Наклон экструдера</span>
+        <button class="axis-toggle" onclick="toggleAxis(this,'a')"></button>
+      </div>
+      <div class="axis-param">
+        <span class="axis-tag rot">B</span>
+        <span class="axis-desc">Поворот стола</span>
+        <button class="axis-toggle" onclick="toggleAxis(this,'b')"></button>
+      </div>
+      <div class="axis-param">
+        <span class="axis-tag rot">C</span>
+        <span class="axis-desc">Доп. вращение</span>
+        <button class="axis-toggle" onclick="toggleAxis(this,'c')"></button>
+      </div>
+
+      <div class="param" style="margin-top:10px">
+        <div class="param-label">Угол A (наклон) <span id="aAngVal">0</span>°</div>
+        <input type="range" min="-45" max="45" step="5" value="0"
+          oninput="document.getElementById('aAngVal').textContent=this.value;params.axisA=parseInt(this.value)">
+      </div>
+      <div class="param">
+        <div class="param-label">Угол B (поворот) <span id="bAngVal">0</span>°</div>
+        <input type="range" min="-180" max="180" step="15" value="0"
+          oninput="document.getElementById('bAngVal').textContent=this.value;params.axisB=parseInt(this.value)">
+      </div>
+    </div>
+
+    <!-- Доп. параметры -->
+    <div class="section">
+      <div class="sec-title">Доп. параметры</div>
+      <div class="param">
+        <div class="param-label">Стол X, мм</div>
+        <input class="num-input" type="number" value="300" step="10"
+          onchange="params.bedX=parseInt(this.value)">
+      </div>
+      <div class="param">
+        <div class="param-label">Стол Y, мм</div>
+        <input class="num-input" type="number" value="300" step="10"
+          onchange="params.bedY=parseInt(this.value)">
+      </div>
+      <div class="param">
+        <div class="param-label">Skirt / Brim</div>
+        <select onchange="params.skirtType=this.value">
+          <option value="none">Нет</option>
+          <option value="skirt" selected>Skirt (юбка)</option>
+          <option value="brim">Brim (поля)</option>
+        </select>
+      </div>
+      <div class="param">
+        <div class="param-label">Skirt контуров / Brim мм</div>
+        <input class="num-input" type="number" value="3" step="1"
+          onchange="params.skirtCount=parseInt(this.value)">
+      </div>
+      <div class="param">
+        <div class="param-label">Диаметр нити, мм</div>
+        <input class="num-input" type="number" value="1.75" step="0.05"
+          onchange="params.filamentDiameter=parseFloat(this.value)">
+      </div>
+      <div class="param">
+        <div class="param-label">Диаметр сопла, мм</div>
+        <input class="num-input" type="number" value="0.4" step="0.05"
+          onchange="params.nozzle=parseFloat(this.value)">
+      </div>
+      <div class="param">
+        <div class="param-label">Ретракт, мм</div>
+        <input class="num-input" type="number" value="5" step="0.5"
+          onchange="params.retract=parseFloat(this.value)">
+      </div>
+      <div class="param">
+        <div class="param-label">Скорость ретракта, мм/с</div>
+        <input class="num-input" type="number" value="45" step="5"
+          onchange="params.retractSpeed=parseInt(this.value)">
+      </div>
+    </div>
+
+    <!-- Поддержки -->
+    <div class="section">
+      <div class="sec-title">Поддержки</div>
+
+      <div class="sup-type-row">
+        <button class="sup-tab active" onclick="setSupMode('auto',this)">АВТО</button>
+        <button class="sup-tab" onclick="setSupMode('manual',this)">РУЧНЫЕ</button>
+        <button class="sup-tab" onclick="setSupMode('none',this)">ОТКЛ</button>
+      </div>
+
+      <div id="supSettings">
+        <div class="param">
+          <div class="param-label">Тип поддержки</div>
+          <select onchange="params.supports.type=this.value">
+            <option value="grid">Сетка (Grid)</option>
+            <option value="lines">Линии (Lines)</option>
+            <option value="zigzag">Зигзаг</option>
+            <option value="tree">Дерево (Tree)</option>
+          </select>
+        </div>
+        <div class="param">
+          <div class="param-label">Плотность <span id="supDenVal">15</span>%</div>
+          <input type="range" min="5" max="50" step="5" value="15"
+            oninput="document.getElementById('supDenVal').textContent=this.value;params.supports.density=parseInt(this.value)">
+        </div>
+        <div class="param">
+          <div class="param-label">Z-зазор <span id="supZVal">0.2</span> мм</div>
+          <input type="range" min="0.1" max="0.5" step="0.1" value="0.2"
+            oninput="document.getElementById('supZVal').textContent=parseFloat(this.value).toFixed(1);params.supports.zGap=parseFloat(this.value)">
+        </div>
+        <div class="param">
+          <div class="param-label">Порог нависания <span id="supAngVal">45</span>°</div>
+          <input type="range" min="20" max="80" step="5" value="45"
+            oninput="document.getElementById('supAngVal').textContent=this.value;params.supports.angle=parseInt(this.value)">
+        </div>
+        <div id="manualSupHelp" style="display:none;font-size:10px;color:var(--orange);padding:6px 0;line-height:1.6">
+          Кликни на 3D модель в viewport<br>чтобы добавить точку поддержки.<br>
+          <span id="manualSupCount" style="color:var(--accent)">Точек: 0</span>
+          <button style="margin-left:8px;padding:2px 8px;background:transparent;border:1px solid var(--red);color:var(--red);font-family:var(--mono);font-size:10px;cursor:pointer" onclick="clearManualSupports()">ОЧИСТИТЬ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Печать без поддержки (уступом) -->
+    <div class="section">
+      <div class="sec-title">Печать без поддержки</div>
+      <div class="param" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="noSupEnabled"
+          onchange="params.noSupport.enabled=this.checked;document.getElementById('noSupSettings').style.display=this.checked?'block':'none'">
+        <label for="noSupEnabled" style="font-size:11px;color:var(--text)">Уступ вместо поддержки (полка уголка)</label>
+      </div>
+      <div id="noSupSettings" style="display:none">
+        <div style="font-size:10px;color:var(--muted);margin:6px 0 10px;line-height:1.6">
+          Периметр в зоне нависания печатается со смещением наружу по чуть-чуть за проход — каждая новая линия наполовину опирается на предыдущий слой, наполовину висит в воздухе, пока не выстроится полка.
+        </div>
+        <div class="param">
+          <div class="param-label">Макс. вылет за проход <span id="noSupStepVal">0.30</span> мм</div>
+          <input type="range" min="0.10" max="0.60" step="0.05" value="0.30"
+            oninput="document.getElementById('noSupStepVal').textContent=parseFloat(this.value).toFixed(2);params.noSupport.maxStep=parseFloat(this.value)">
+        </div>
+        <div class="param" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="noSupFine" checked onchange="params.noSupport.fineLayer=this.checked">
+          <label for="noSupFine" style="font-size:11px;color:var(--text)">Дробить на под-слои в зоне нависания</label>
+        </div>
+        <div class="param">
+          <div class="param-label">Высота под-слоя <span id="noSupFineVal">0.10</span> мм</div>
+          <input type="range" min="0.05" max="0.20" step="0.01" value="0.10"
+            oninput="document.getElementById('noSupFineVal').textContent=parseFloat(this.value).toFixed(2);params.noSupport.fineLayerHeight=parseFloat(this.value)">
+        </div>
+        <div class="param">
+          <div class="param-label">Замедление в зоне нависания <span id="noSupSlowVal">50</span>%</div>
+          <input type="range" min="20" max="100" step="5" value="50"
+            oninput="document.getElementById('noSupSlowVal').textContent=this.value;params.noSupport.slowFactor=parseInt(this.value)/100">
+        </div>
+        <div class="param" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="noSupCool" checked onchange="params.noSupport.boostCooling=this.checked">
+          <label for="noSupCool" style="font-size:11px;color:var(--text)">Обдув 100% в зоне нависания</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Процессы (зоны по высоте) -->
+    <div class="section">
+      <div class="sec-title">Процессы по высоте</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+        Как несколько процессов на одну деталь в Simplify3D — свой набор параметров (заполнение, скорость, температура, поддержки) для своего диапазона высот.
+      </div>
+      <div id="zonesList"></div>
+      <button class="add-btn" onclick="addZone()">+ Добавить процесс</button>
+    </div>
+
+    <!-- Кнопка слайсинга -->
+    <div class="section">
+      <button class="slice-btn" id="sliceBtn" onclick="slice()" disabled>
+        ⚡ SLICE
+      </button>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ══ VIEWPORT ══ -->
+  <div class="viewport">
+    <div class="crosshair" id="coordDisplay">X:0.00 Y:0.00 Z:0.00</div>
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Прогресс -->
+    <div class="progress-overlay" id="progressOverlay">
+      <div class="progress-label">SLICING...</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-msg" id="progressMsg">Инициализация...</div>
+    </div>
+
+    <!-- Контролы вида -->
+    <div class="viewport-overlay">
+      <button class="vp-btn active" id="btnSTL" onclick="setView('stl')">3D МОДЕЛЬ</button>
+      <button class="vp-btn" id="btnSlice" onclick="setView('slice')" id="btnSliceView">СЛОИ</button>
+      <button class="vp-btn" onclick="resetCamera()">СБРОС КАМЕРЫ</button>
+    </div>
+
+    <!-- Слайдер слоёв -->
+    <div class="layer-slider-wrap" id="layerSliderWrap">
+      <span class="layer-info" id="layerInfo">Слой 0</span>
+      <input type="range" id="layerSlider" min="0" value="0"
+        oninput="showLayer(parseInt(this.value))">
+    </div>
+
+    <div class="notify" id="notify"></div>
+  </div>
+
+  <!-- ══ G-CODE ПАНЕЛЬ ══ -->
+  <div class="gcode-panel">
+    <div class="gp-header">
+      <div class="gp-title">G-Code Output</div>
+      <div class="gp-stats">
+        <div class="stat">
+          <span class="stat-val" id="statLayers">—</span>
+          <span class="stat-lbl">СЛОЁВ</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="statLines">—</span>
+          <span class="stat-lbl">СТРОК</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="statTime">—</span>
+          <span class="stat-lbl">МИН</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="statWeight">—</span>
+          <span class="stat-lbl">ГРАММ</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="gcodeEmpty" class="empty-state">
+      <div class="empty-icon">⚙</div>
+      <div class="empty-text">
+        Загрузи STL-файл,<br>
+        настрой параметры<br>
+        и нажми SLICE
+      </div>
+    </div>
+
+    <div class="gcode-output" id="gcodeOut" style="display:none"></div>
+
+    <div class="gp-footer">
+      <button class="dl-btn" id="dlBtn" onclick="downloadGcode()" disabled>↓ СКАЧАТЬ .GCODE</button>
+      <button class="copy-btn" onclick="copyGcode()">COPY</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ МОДАЛЬНОЕ ОКНО ПРОЦЕССА (как FFF-параметры в Simplify3D) ══ -->
+<div class="modal-backdrop" id="zoneModal">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <div class="modal-title">Параметры процесса <span id="zmTitle"></span></div>
+      <button class="modal-close" onclick="closeZoneModal()">✕</button>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-pane="zmSlice" onclick="switchModalTab('zmSlice',this)">Слой / Высота</button>
+      <button class="modal-tab" data-pane="zmFill" onclick="switchModalTab('zmFill',this)">Заполнение</button>
+      <button class="modal-tab" data-pane="zmSpeedTemp" onclick="switchModalTab('zmSpeedTemp',this)">Скорость / Температура</button>
+      <button class="modal-tab" data-pane="zmSupports" onclick="switchModalTab('zmSupports',this)">Поддержки</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="modal-pane active" id="zmSlice">
+        <div class="modal-note">Диапазон высот Z, к которому применяется этот процесс. Диапазоны нескольких процессов не должны пересекаться.</div>
+        <div class="modal-row">
+          <div class="modal-field"><label>Z от, мм</label>
+            <input type="number" id="zm_zMin" step="0.5" onchange="onZoneModalInput('zMin')"></div>
+          <div class="modal-field"><label>Z до, мм</label>
+            <input type="number" id="zm_zMax" step="0.5" onchange="onZoneModalInput('zMax')"></div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field"><label>Периметры</label>
+            <input type="number" id="zm_perimeters" min="1" max="8" step="1" onchange="onZoneModalInput('perimeters')"></div>
+        </div>
+      </div>
+
+      <div class="modal-pane" id="zmFill">
+        <div class="modal-row">
+          <div class="modal-field"><label>Заполнение, %</label>
+            <input type="number" id="zm_infill" min="0" max="100" step="5" onchange="onZoneModalInput('infill')"></div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field"><label>Вид внутреннего заполнения</label>
+            <select id="zm_infillPattern" onchange="onZoneModalInput('infillPattern')">
+              <option value="rectilinear">Rectilinear</option>
+              <option value="grid">Grid</option>
+              <option value="triangular">Triangular</option>
+              <option value="wiggle">Wiggle</option>
+              <option value="honeycomb-fast">Fast Honeycomb</option>
+              <option value="honeycomb-full">Full Honeycomb</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field"><label>Вид для сплошных слоёв</label>
+            <select id="zm_topBottomPattern" onchange="onZoneModalInput('topBottomPattern')">
+              <option value="rectilinear">Rectilinear</option>
+              <option value="concentric">Concentric</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-pane" id="zmSpeedTemp">
+        <div class="modal-row">
+          <div class="modal-field"><label>Скорость печати, мм/с</label>
+            <input type="number" id="zm_speed" min="5" max="300" step="5" onchange="onZoneModalInput('speed')"></div>
+          <div class="modal-field"><label>Обдув, %</label>
+            <input type="number" id="zm_fanSpeed" min="0" max="100" step="5" onchange="onZoneModalInput('fanSpeed')"></div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field"><label>Температура сопла, °C</label>
+            <input type="number" id="zm_extTemp" min="150" max="300" step="5" onchange="onZoneModalInput('extTemp')"></div>
+        </div>
+      </div>
+
+      <div class="modal-pane" id="zmSupports">
+        <div class="modal-note">Переопределение поддержек только для этого диапазона высот (общие настройки типа/плотности берутся из основной секции «Поддержки»).</div>
+        <div class="modal-row">
+          <div class="modal-field"><label>Поддержки в этой зоне</label>
+            <select id="zm_supportsOverride" onchange="onZoneModalInput('supportsOverride')">
+              <option value="inherit">Наследовать общие</option>
+              <option value="on">Включить</option>
+              <option value="off">Выключить</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-btn-secondary" onclick="deleteZoneFromModal()">Удалить процесс</button>
+      <button class="modal-btn-primary" onclick="closeZoneModal()">Готово</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  PARAMETERS
+// ════════════════════════════════════════════════════════
+const params = {
+  layerHeight: 0.20,
+  speed: 60,
+  infill: 20,
+  perimeters: 2,
+  infillPattern: 'rectilinear',
+  topBottomPattern: 'rectilinear',
+  topBottomLayers: 3,
+  extTemp: 215,
+  bedTemp: 60,
+  fanSpeed: 100,
+  filamentDiameter: 1.75,
+  nozzle: 0.4,
+  retract: 5,
+  retractSpeed: 45,
+  bedX: 300,
+  bedY: 300,
+  skirtType: 'skirt',
+  skirtCount: 3,
+  axes: { x:true, y:true, z:true, a:false, b:false, c:false },
+  axisA: 0,
+  axisB: 0,
+  supports: {
+    mode: 'auto',        // 'auto' | 'manual' | 'none'
+    type: 'grid',        // 'grid' | 'lines' | 'zigzag' | 'tree'
+    density: 15,
+    zGap: 0.2,
+    angle: 45,
+    manualPoints: [],    // [{x, y}] — точки ручных поддержек
+  },
+  noSupport: {
+    enabled: false,       // печать нависаний уступом вместо генерации поддержек
+    maxStep: 0.30,        // макс. горизонтальный вылет периметра за один проход, мм
+    fineLayer: true,      // дробить слой на под-слои в зоне нависания
+    fineLayerHeight: 0.10,// высота под-слоя, мм
+    slowFactor: 0.5,      // множитель скорости в зоне нависания
+    boostCooling: true,   // обдув 100% в зоне нависания
+  },
+  zones: [],             // процессы: [{zMin, zMax, speed, infill, infillPattern, topBottomPattern, extTemp, fanSpeed, perimeters, supportsOverride}]
+};
+
+const PRESETS = {
+  PLA:  { ext: 215, bed: 60,  fan: 100 },
+  PETG: { ext: 240, bed: 80,  fan: 50  },
+  ABS:  { ext: 250, bed: 100, fan: 0   },
+  TPU:  { ext: 230, bed: 45,  fan: 30  },
+};
+
+function selectPreset(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const p = PRESETS[name];
+  params.extTemp = p.ext; params.bedTemp = p.bed; params.fanSpeed = p.fan;
+  document.getElementById('extSlider').value = p.ext;
+  document.getElementById('extVal').textContent = p.ext;
+  document.getElementById('bedSlider').value = p.bed;
+  document.getElementById('bedVal').textContent = p.bed;
+  document.getElementById('fanPVal').textContent = p.fan;
+}
+
+function toggleAxis(btn, axis) {
+  btn.classList.toggle('on');
+  params.axes[axis] = btn.classList.contains('on');
+}
+
+// ── ПОДДЕРЖКИ ──
+function setSupMode(mode, btn) {
+  document.querySelectorAll('.sup-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  params.supports.mode = mode;
+  document.getElementById('manualSupHelp').style.display = mode === 'manual' ? 'block' : 'none';
+  document.getElementById('supSettings').style.opacity = mode === 'none' ? '0.4' : '1';
+}
+
+function clearManualSupports() {
+  params.supports.manualPoints = [];
+  document.getElementById('manualSupCount').textContent = 'Точек: 0';
+  // Удалить маркеры из сцены
+  scene.children.filter(c => c.userData.isSupMarker).forEach(c => scene.remove(c));
+  notify('Ручные поддержки очищены');
+}
+
+// [click handler moved below canvas init]
+
+// ── ВЫСОТНЫЕ ЗОНЫ ──
+let zoneIdCounter = 0;
+
+function addZone() {
+  const id = ++zoneIdCounter;
+  const zone = {
+    id, zMin: 0, zMax: 10,
+    speed: params.speed,
+    infill: params.infill,
+    infillPattern: params.infillPattern,
+    topBottomPattern: params.topBottomPattern,
+    extTemp: params.extTemp,
+    fanSpeed: params.fanSpeed,
+    perimeters: params.perimeters,
+    supportsOverride: 'inherit',   // 'inherit' | 'on' | 'off'
+  };
+  params.zones.push(zone);
+  renderZones();
+  openZoneModal(id);
+}
+
+function removeZone(id) {
+  params.zones = params.zones.filter(z => z.id !== id);
+  renderZones();
+}
+
+function updateZone(id, key, val) {
+  const z = params.zones.find(z => z.id === id);
+  if (z) z[key] = isNaN(parseFloat(val)) ? val : parseFloat(val);
+}
+
+function renderZones() {
+  const el = document.getElementById('zonesList');
+  if (!params.zones.length) { el.innerHTML = ''; return; }
+  el.innerHTML = params.zones.map(z => `
+    <div class="proc-card" onclick="openZoneModal(${z.id})">
+      <div class="proc-card-top">
+        <span class="proc-card-name">Процесс Z${z.id}</span>
+        <button class="proc-card-del" onclick="event.stopPropagation();removeZone(${z.id})">×</button>
+      </div>
+      <div class="proc-card-summary">
+        Z ${z.zMin}–${z.zMax}мм · ${z.speed}мм/с · заполн. ${z.infill}% (${z.infillPattern})<br>
+        ${z.extTemp}°C · периметров ${z.perimeters} · поддержки: ${
+          z.supportsOverride==='on' ? 'вкл' : z.supportsOverride==='off' ? 'выкл' : 'наследуются'
+        }
+      </div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════════════
+//  МОДАЛЬНОЕ ОКНО ПРОЦЕССА
+// ════════════════════════════════════════════════════════
+let editingZoneId = null;
+
+function openZoneModal(id) {
+  const z = params.zones.find(zz => zz.id === id);
+  if (!z) return;
+  editingZoneId = id;
+  document.getElementById('zmTitle').textContent = `— Z${id} (${z.zMin}–${z.zMax}мм)`;
+  document.getElementById('zm_zMin').value = z.zMin;
+  document.getElementById('zm_zMax').value = z.zMax;
+  document.getElementById('zm_perimeters').value = z.perimeters;
+  document.getElementById('zm_infill').value = z.infill;
+  document.getElementById('zm_infillPattern').value = z.infillPattern;
+  document.getElementById('zm_topBottomPattern').value = z.topBottomPattern;
+  document.getElementById('zm_speed').value = z.speed;
+  document.getElementById('zm_fanSpeed').value = z.fanSpeed;
+  document.getElementById('zm_extTemp').value = z.extTemp;
+  document.getElementById('zm_supportsOverride').value = z.supportsOverride;
+  document.getElementById('zoneModal').classList.add('visible');
+}
+
+function closeZoneModal() {
+  document.getElementById('zoneModal').classList.remove('visible');
+  editingZoneId = null;
+  renderZones();
+}
+
+function deleteZoneFromModal() {
+  if (editingZoneId != null) removeZone(editingZoneId);
+  closeZoneModal();
+}
+
+function switchModalTab(paneId, btn) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.modal-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+
+function onZoneModalInput(key) {
+  const z = params.zones.find(zz => zz.id === editingZoneId);
+  if (!z) return;
+  const el = document.getElementById('zm_' + key);
+  const numeric = ['zMin','zMax','perimeters','infill','speed','fanSpeed','extTemp'];
+  z[key] = numeric.includes(key) ? parseFloat(el.value) || 0 : el.value;
+  document.getElementById('zmTitle').textContent = `— Z${z.id} (${z.zMin}–${z.zMax}мм)`;
+}
+
+// ════════════════════════════════════════════════════════
+//  THREE.JS SCENE
+// ════════════════════════════════════════════════════════
+const canvas3 = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvas3, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x050709, 1);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
+camera.position.set(0, -200, 150);
+camera.lookAt(0, 0, 0);
+
+// Lights
+scene.add(new THREE.AmbientLight(0x334466, 0.8));
+const dirLight = new THREE.DirectionalLight(0x00aaff, 0.6);
+dirLight.position.set(1, 1, 2);
+scene.add(dirLight);
+const dirLight2 = new THREE.DirectionalLight(0x39ff14, 0.3);
+dirLight2.position.set(-1, -1, 0.5);
+scene.add(dirLight2);
+
+// Grid
+const gridHelper = new THREE.GridHelper(300, 30, 0x1c2333, 0x1c2333);
+gridHelper.rotation.x = Math.PI / 2;
+scene.add(gridHelper);
+
+// Build plate
+const plateGeo = new THREE.PlaneGeometry(300, 300);
+const plateMat = new THREE.MeshBasicMaterial({ color: 0x0a0d14, transparent: true, opacity: 0.5 });
+scene.add(new THREE.Mesh(plateGeo, plateMat));
+
+// Axes helper
+const axesHelper = new THREE.AxesHelper(40);
+scene.add(axesHelper);
+
+let modelMesh = null;
+let sliceLines = [];
+let currentView = 'stl';
+
+// Orbit controls (manual)
+let isDragging = false, lastMouse = {x:0,y:0};
+let spherical = { theta: -0.5, phi: 1.0, radius: 280 };
+
+canvas3.addEventListener('mousedown', e => { isDragging = true; lastMouse = {x:e.clientX, y:e.clientY}; });
+canvas3.addEventListener('mouseup', () => isDragging = false);
+canvas3.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = (e.clientX - lastMouse.x) * 0.005;
+  const dy = (e.clientY - lastMouse.y) * 0.005;
+  spherical.theta -= dx;
+  spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy));
+  lastMouse = {x:e.clientX, y:e.clientY};
+  updateCamera();
+});
+canvas3.addEventListener('wheel', e => {
+  spherical.radius = Math.max(50, Math.min(800, spherical.radius + e.deltaY * 0.3));
+  updateCamera();
+}, { passive: true });
+
+// Клик на viewport для ручных поддержек
+canvas3.addEventListener('click', e => {
+  if (params.supports.mode !== 'manual') return;
+  const rect = canvas3.getBoundingClientRect();
+  const mouse = new THREE.Vector2(
+    ((e.clientX - rect.left) / rect.width) * 2 - 1,
+    -((e.clientY - rect.top) / rect.height) * 2 + 1
+  );
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+  if (modelMesh) {
+    const hits = raycaster.intersectObject(modelMesh);
+    if (hits.length) {
+      const pt = hits[0].point;
+      params.supports.manualPoints.push({ x: pt.x, y: pt.y, z: pt.z });
+      const marker = new THREE.Mesh(
+        new THREE.CylinderGeometry(1, 3, Math.max(pt.z + 10, 5), 8),
+        new THREE.MeshBasicMaterial({ color: 0xff7d00, transparent: true, opacity: 0.6 })
+      );
+      marker.position.set(pt.x, pt.y, (pt.z + 10) / 2 - 5);
+      marker.rotation.x = Math.PI / 2;
+      marker.userData.isSupMarker = true;
+      scene.add(marker);
+      document.getElementById('manualSupCount').textContent =
+        'Точек: ' + params.supports.manualPoints.length;
+      notify('Поддержка добавлена (' + pt.x.toFixed(1) + ', ' + pt.y.toFixed(1) + ')');
+    }
+  }
+});
+
+function updateCamera() {
+  camera.position.set(
+    spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta),
+    -spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta),
+    spherical.radius * Math.cos(spherical.phi)
+  );
+  camera.lookAt(0, 0, 0);
+}
+
+function resetCamera() {
+  spherical = { theta: -0.5, phi: 1.0, radius: 280 };
+  updateCamera();
+}
+
+function resize() {
+  const vp = canvas3.parentElement;
+  renderer.setSize(vp.clientWidth, vp.clientHeight);
+  camera.aspect = vp.clientWidth / vp.clientHeight;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(canvas3.parentElement);
+resize();
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+animate();
+
+// ════════════════════════════════════════════════════════
+//  STL PARSER
+// ════════════════════════════════════════════════════════
+let triangles = []; // [{n, v1, v2, v3}]
+let stlBounds = { min:{x:0,y:0,z:0}, max:{x:0,y:0,z:0} };
+let loadedFileName = '';
+
+function loadSTL(input) {
+  const file = input.files[0];
+  if (!file) return;
+  loadedFileName = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const buf = e.target.result;
+      triangles = parseSTL(buf);
+      computeBounds();
+      buildThreeModel();
+      rebaseTriangles();
+      document.getElementById('orientResult').textContent = '';
+      document.getElementById('fileInfo').style.display = 'block';
+      document.getElementById('fileInfo').innerHTML =
+        `${file.name}<br>Треугольников: ${triangles.length.toLocaleString()}<br>` +
+        `Размер: ${(stlBounds.max.x - stlBounds.min.x).toFixed(1)} × ` +
+        `${(stlBounds.max.y - stlBounds.min.y).toFixed(1)} × ` +
+        `${(stlBounds.max.z - stlBounds.min.z).toFixed(1)} мм`;
+      document.getElementById('sliceBtn').disabled = false;
+      setPhase(2);
+      notify('✓ STL загружен: ' + triangles.length.toLocaleString() + ' треугольников');
+    } catch(err) {
+      notify('Ошибка парсинга STL: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseSTL(buffer) {
+  const view = new DataView(buffer);
+  // Check if ASCII
+  const head = new Uint8Array(buffer, 0, 5);
+  const isAscii = (new TextDecoder().decode(head)).toLowerCase().startsWith('solid');
+
+  if (isAscii) {
+    const text = new TextDecoder().decode(buffer);
+    // Check it's really ASCII (binary STL starting with "solid" exists)
+    if (text.includes('facet normal')) return parseSTLAscii(text);
+  }
+  return parseSTLBinary(view);
+}
+
+function parseSTLBinary(view) {
+  const count = view.getUint32(80, true);
+  const tris = [];
+  let offset = 84;
+  for (let i = 0; i < count; i++) {
+    const nx = view.getFloat32(offset,    true);
+    const ny = view.getFloat32(offset+4,  true);
+    const nz = view.getFloat32(offset+8,  true);
+    const v1 = { x: view.getFloat32(offset+12,true), y: view.getFloat32(offset+16,true), z: view.getFloat32(offset+20,true) };
+    const v2 = { x: view.getFloat32(offset+24,true), y: view.getFloat32(offset+28,true), z: view.getFloat32(offset+32,true) };
+    const v3 = { x: view.getFloat32(offset+36,true), y: view.getFloat32(offset+40,true), z: view.getFloat32(offset+44,true) };
+    tris.push({ n:{x:nx,y:ny,z:nz}, v1, v2, v3 });
+    offset += 50;
+  }
+  return tris;
+}
+
+function parseSTLAscii(text) {
+  const tris = [];
+  const facetRe = /facet normal\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)[\s\S]*?vertex\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)\s+vertex\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)\s+vertex\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)/g;
+  let m;
+  while ((m = facetRe.exec(text)) !== null) {
+    tris.push({
+      n: { x:+m[1], y:+m[2], z:+m[3] },
+      v1:{ x:+m[4], y:+m[5], z:+m[6] },
+      v2:{ x:+m[7], y:+m[8], z:+m[9] },
+      v3:{ x:+m[10],y:+m[11],z:+m[12] },
+    });
+  }
+  return tris;
+}
+
+// ════════════════════════════════════════════════════════
+//  ПОЗИЦИЯ / ПОВОРОТ / МАСШТАБ (ручная трансформация)
+// ════════════════════════════════════════════════════════
+let baseTriangles = [];               // «эталон» — состояние сразу после импорта / после ребейза
+let baseCenter = { x:0, y:0, z:0 };
+let baseSize   = { x:0, y:0, z:0 };
+const xform = { posX:0, posY:0, posZ:0, rotX:0, rotY:0, rotZ:0, scaleX:100, scaleY:100, scaleZ:100 };
+
+function cloneTriangles(src) {
+  return src.map(t => ({
+    n: { x:t.n.x, y:t.n.y, z:t.n.z },
+    v1:{ x:t.v1.x, y:t.v1.y, z:t.v1.z },
+    v2:{ x:t.v2.x, y:t.v2.y, z:t.v2.z },
+    v3:{ x:t.v3.x, y:t.v3.y, z:t.v3.z },
+  }));
+}
+
+// Фиксирует текущий triangles как новый «эталон» (после импорта или после автоориентации)
+function rebaseTriangles() {
+  baseTriangles = cloneTriangles(triangles);
+  computeBounds();
+  baseCenter = {
+    x: (stlBounds.min.x + stlBounds.max.x) / 2,
+    y: (stlBounds.min.y + stlBounds.max.y) / 2,
+    z: (stlBounds.min.z + stlBounds.max.z) / 2,
+  };
+  baseSize = {
+    x: stlBounds.max.x - stlBounds.min.x,
+    y: stlBounds.max.y - stlBounds.min.y,
+    z: stlBounds.max.z - stlBounds.min.z,
+  };
+  xform.posX=0; xform.posY=0; xform.posZ=0;
+  xform.rotX=0; xform.rotY=0; xform.rotZ=0;
+  xform.scaleX=100; xform.scaleY=100; xform.scaleZ=100;
+  refreshTransformUI();
+}
+
+function rotPointDeg(p, axis, deg) {
+  const r = deg * Math.PI/180, c = Math.cos(r), s = Math.sin(r);
+  if (axis === 'x') return { x:p.x, y:p.y*c - p.z*s, z:p.y*s + p.z*c };
+  if (axis === 'y') return { x:p.x*c + p.z*s, y:p.y, z:-p.x*s + p.z*c };
+  return { x:p.x*c - p.y*s, y:p.x*s + p.y*c, z:p.z }; // 'z'
+}
+
+// Пересчитывает triangles = f(baseTriangles, xform) — масштаб → поворот X,Y,Z → смещение
+function applyTransform() {
+  if (!baseTriangles.length) return;
+  const sx = xform.scaleX/100, sy = xform.scaleY/100, sz = xform.scaleZ/100;
+  const tf = (v) => {
+    let p = { x:(v.x-baseCenter.x)*sx, y:(v.y-baseCenter.y)*sy, z:(v.z-baseCenter.z)*sz };
+    p = rotPointDeg(p, 'x', xform.rotX);
+    p = rotPointDeg(p, 'y', xform.rotY);
+    p = rotPointDeg(p, 'z', xform.rotZ);
+    return { x: p.x + baseCenter.x + xform.posX, y: p.y + baseCenter.y + xform.posY, z: p.z + baseCenter.z + xform.posZ };
+  };
+  triangles = baseTriangles.map(t => {
+    const v1=tf(t.v1), v2=tf(t.v2), v3=tf(t.v3);
+    const ux=v2.x-v1.x, uy=v2.y-v1.y, uz=v2.z-v1.z;
+    const vx=v3.x-v1.x, vy=v3.y-v1.y, vz=v3.z-v1.z;
+    const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    const len=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+    return { n:{x:nx/len,y:ny/len,z:nz/len}, v1, v2, v3 };
+  });
+  computeBounds();
+  buildThreeModel();
+  invalidateSliceResult();
+  refreshSizeFields();
+}
+
+function onTransformInput() {
+  xform.posX = parseFloat(document.getElementById('posX').value) || 0;
+  xform.posY = parseFloat(document.getElementById('posY').value) || 0;
+  xform.posZ = parseFloat(document.getElementById('posZ').value) || 0;
+  xform.rotX = parseFloat(document.getElementById('rotX').value) || 0;
+  xform.rotY = parseFloat(document.getElementById('rotY').value) || 0;
+  xform.rotZ = parseFloat(document.getElementById('rotZ').value) || 0;
+  applyTransform();
+}
+
+function onScaleInput(axis) {
+  const val = parseFloat(document.getElementById('scale'+axis.toUpperCase()).value) || 100;
+  const linked = document.getElementById('scaleLinked').checked;
+  if (linked) {
+    xform.scaleX = val; xform.scaleY = val; xform.scaleZ = val;
+    document.getElementById('scaleX').value = val.toFixed(0);
+    document.getElementById('scaleY').value = val.toFixed(0);
+    document.getElementById('scaleZ').value = val.toFixed(0);
+  } else {
+    xform['scale'+axis.toUpperCase()] = val;
+  }
+  applyTransform();
+}
+
+function onSizeInput(axis) {
+  const key = 'size'+axis.toUpperCase();
+  const newSize = parseFloat(document.getElementById(key).value) || 0;
+  const base = baseSize[axis] || 1;
+  const pct = base > 0 ? (newSize/base)*100 : 100;
+  const linked = document.getElementById('scaleLinked').checked;
+  if (linked) {
+    xform.scaleX = pct; xform.scaleY = pct; xform.scaleZ = pct;
+    document.getElementById('scaleX').value = pct.toFixed(0);
+    document.getElementById('scaleY').value = pct.toFixed(0);
+    document.getElementById('scaleZ').value = pct.toFixed(0);
+  } else {
+    xform['scale'+axis.toUpperCase()] = pct;
+    document.getElementById('scale'+axis.toUpperCase()).value = pct.toFixed(0);
+  }
+  applyTransform();
+}
+
+function resetTransform(which) {
+  if (which === 'pos') { xform.posX=0; xform.posY=0; xform.posZ=0; }
+  if (which === 'rot') { xform.rotX=0; xform.rotY=0; xform.rotZ=0; }
+  if (which === 'scale') { xform.scaleX=100; xform.scaleY=100; xform.scaleZ=100; }
+  refreshTransformUI();
+  applyTransform();
+}
+
+// «Организовать и центрировать» — сброс смещения (деталь и так центрируется относительно стола
+// при слайсинге), плюс возврат вида по центру стола в viewport
+function organizeAndCenter() {
+  if (!triangles.length) { notify('Сначала загрузи STL'); return; }
+  xform.posX = 0; xform.posY = 0; xform.posZ = 0;
+  refreshTransformUI();
+  applyTransform();
+  resetCamera();
+  notify('✓ Деталь отцентрирована на столе');
+}
+
+function refreshTransformUI() {
+  document.getElementById('posX').value = xform.posX;
+  document.getElementById('posY').value = xform.posY;
+  document.getElementById('posZ').value = xform.posZ;
+  document.getElementById('rotX').value = xform.rotX;
+  document.getElementById('rotY').value = xform.rotY;
+  document.getElementById('rotZ').value = xform.rotZ;
+  document.getElementById('scaleX').value = xform.scaleX;
+  document.getElementById('scaleY').value = xform.scaleY;
+  document.getElementById('scaleZ').value = xform.scaleZ;
+  refreshSizeFields();
+}
+
+function refreshSizeFields() {
+  document.getElementById('sizeX').value = (stlBounds.max.x - stlBounds.min.x).toFixed(2);
+  document.getElementById('sizeY').value = (stlBounds.max.y - stlBounds.min.y).toFixed(2);
+  document.getElementById('sizeZ').value = (stlBounds.max.z - stlBounds.min.z).toFixed(2);
+}
+
+// Слайсинг/G-code устарели после ручной трансформации — прячем старые результаты
+function invalidateSliceResult() {
+  const wrap = document.getElementById('layerSliderWrap');
+  if (wrap) wrap.classList.remove('visible');
+  const out = document.getElementById('gcodeOut');
+  if (out) out.style.display = 'none';
+  const empty = document.getElementById('gcodeEmpty');
+  if (empty) empty.style.display = 'block';
+  const dl = document.getElementById('dlBtn');
+  if (dl) dl.disabled = true;
+  setPhase(2);
+}
+
+function computeBounds() {
+  let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+  for (const t of triangles) {
+    for (const v of [t.v1, t.v2, t.v3]) {
+      if (v.x < minX) minX=v.x; if (v.x > maxX) maxX=v.x;
+      if (v.y < minY) minY=v.y; if (v.y > maxY) maxY=v.y;
+      if (v.z < minZ) minZ=v.z; if (v.z > maxZ) maxZ=v.z;
+    }
+  }
+  stlBounds = { min:{x:minX,y:minY,z:minZ}, max:{x:maxX,y:maxY,z:maxZ} };
+}
+
+function buildThreeModel() {
+  if (modelMesh) { scene.remove(modelMesh); modelMesh.geometry.dispose(); }
+
+  const geo = new THREE.BufferGeometry();
+  const verts = new Float32Array(triangles.length * 9);
+  const cx = (stlBounds.min.x + stlBounds.max.x) / 2;
+  const cy = (stlBounds.min.y + stlBounds.max.y) / 2;
+  const cz = stlBounds.min.z;
+
+  let i = 0;
+  for (const t of triangles) {
+    for (const v of [t.v1, t.v2, t.v3]) {
+      verts[i++] = v.x - cx;
+      verts[i++] = v.y - cy;
+      verts[i++] = v.z - cz;
+    }
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+  geo.computeVertexNormals();
+
+  const mat = new THREE.MeshPhongMaterial({
+    color: 0x0066aa,
+    emissive: 0x001122,
+    specular: 0x00aaff,
+    shininess: 60,
+    transparent: true,
+    opacity: 0.85,
+    side: THREE.DoubleSide
+  });
+
+  modelMesh = new THREE.Mesh(geo, mat);
+  scene.add(modelMesh);
+
+  // Wireframe overlay
+  const wf = new THREE.LineSegments(
+    new THREE.WireframeGeometry(geo),
+    new THREE.LineBasicMaterial({ color: 0x003355, transparent: true, opacity: 0.3 })
+  );
+  modelMesh.add(wf);
+
+  // Adjust camera
+  const h = stlBounds.max.z - stlBounds.min.z;
+  const w = Math.max(stlBounds.max.x-stlBounds.min.x, stlBounds.max.y-stlBounds.min.y);
+  spherical.radius = Math.max(w, h) * 2.5;
+  updateCamera();
+}
+
+// ════════════════════════════════════════════════════════
+//  АВТО-ОРИЕНТАЦИЯ — перебор поворотов X/Y для минимизации нависаний
+// ════════════════════════════════════════════════════════
+async function autoOrient() {
+  if (!triangles.length) { notify('Сначала загрузи STL'); return; }
+
+  const stepDeg = parseInt(document.getElementById('orientRes').value);
+  const thresholdDeg = params.supports.angle;          // порог нависания, °
+  const thresholdRad = thresholdDeg * Math.PI / 180;
+  const critNz = -Math.sin(thresholdRad);               // порог по nz нормали
+
+  // Базовая нормаль + площадь каждого треугольника (считаем сами, не полагаясь на n из STL)
+  const base = new Array(triangles.length);
+  for (let i = 0; i < triangles.length; i++) {
+    const t = triangles[i];
+    const ux = t.v2.x-t.v1.x, uy = t.v2.y-t.v1.y, uz = t.v2.z-t.v1.z;
+    const vx = t.v3.x-t.v1.x, vy = t.v3.y-t.v1.y, vz = t.v3.z-t.v1.z;
+    const nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx;
+    const len = Math.sqrt(nx*nx+ny*ny+nz*nz) || 1;
+    base[i] = { nx: nx/len, ny: ny/len, nz: nz/len, area: len/2 };
+  }
+
+  // 8 углов bbox — для грубой (но дешёвой) оценки итоговой высоты печати
+  const bb = stlBounds;
+  const corners = [
+    {x:bb.min.x,y:bb.min.y,z:bb.min.z}, {x:bb.max.x,y:bb.min.y,z:bb.min.z},
+    {x:bb.min.x,y:bb.max.y,z:bb.min.z}, {x:bb.max.x,y:bb.max.y,z:bb.min.z},
+    {x:bb.min.x,y:bb.min.y,z:bb.max.z}, {x:bb.max.x,y:bb.min.y,z:bb.max.z},
+    {x:bb.min.x,y:bb.max.y,z:bb.max.z}, {x:bb.max.x,y:bb.max.y,z:bb.max.z},
+  ];
+
+  document.getElementById('progressOverlay').classList.add('visible');
+  setMsg('Перебор ориентаций...');
+  setProgress(0);
+  await new Promise(r => setTimeout(r, 20));
+
+  const angles = [];
+  for (let a = 0; a < 360; a += stepDeg) angles.push(a * Math.PI/180);
+  const combos = [];
+  for (const ax of angles) for (const by of angles) combos.push([ax, by]);
+
+  let best = { cost: Infinity, height: Infinity, a: 0, b: 0 };
+  const chunk = 4;
+
+  for (let ci = 0; ci < combos.length; ci += chunk) {
+    const end = Math.min(ci + chunk, combos.length);
+    for (let k = ci; k < end; k++) {
+      const [ax, by] = combos[k];
+      const ca = Math.cos(ax), sa = Math.sin(ax);
+      const cb = Math.cos(by), sb = Math.sin(by);
+
+      // Стоимость нависаний = сумма (площадь × превышение угла над порогом)
+      let cost = 0;
+      for (let i = 0; i < base.length; i++) {
+        const n = base[i];
+        const ny1 = n.ny*ca - n.nz*sa;
+        const nz1 = n.ny*sa + n.nz*ca;
+        const nz2 = -n.nx*sb + nz1*cb;
+        if (nz2 >= critNz) continue; // не проблемный треугольник
+        const overhangAngle = 90 - Math.acos(Math.max(-1, Math.min(1, -nz2))) * 180/Math.PI;
+        cost += n.area * Math.max(0, overhangAngle - thresholdDeg);
+      }
+
+      // Оценка высоты после поворота
+      let zMin = Infinity, zMax = -Infinity;
+      for (const c of corners) {
+        const y1 = c.y*ca - c.z*sa;
+        const z1 = c.y*sa + c.z*ca;
+        const z2 = -c.x*sb + z1*cb;
+        if (z2 < zMin) zMin = z2;
+        if (z2 > zMax) zMax = z2;
+      }
+      const height = zMax - zMin;
+
+      if (cost < best.cost - 1e-6 || (Math.abs(cost-best.cost) < 1e-6 && height < best.height)) {
+        best = { cost, height, a: ax, b: by };
+      }
+    }
+    setProgress((end/combos.length)*100);
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  // Применяем найденный поворот к модели насовсем (как "Lay flat" в обычных слайсерах)
+  const ca = Math.cos(best.a), sa = Math.sin(best.a);
+  const cb = Math.cos(best.b), sb = Math.sin(best.b);
+  const rotPt = (p) => {
+    const y1 = p.y*ca - p.z*sa, z1 = p.y*sa + p.z*ca;
+    const x2 = p.x*cb + z1*sb,  z2 = -p.x*sb + z1*cb;
+    return { x: x2, y: y1, z: z2 };
+  };
+  for (const t of triangles) {
+    t.v1 = rotPt(t.v1); t.v2 = rotPt(t.v2); t.v3 = rotPt(t.v3);
+    const ux=t.v2.x-t.v1.x, uy=t.v2.y-t.v1.y, uz=t.v2.z-t.v1.z;
+    const vx=t.v3.x-t.v1.x, vy=t.v3.y-t.v1.y, vz=t.v3.z-t.v1.z;
+    const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    const len=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+    t.n = { x:nx/len, y:ny/len, z:nz/len };
+  }
+
+  computeBounds();
+  buildThreeModel();
+  rebaseTriangles();   // печать/трансформ-панель теперь отсчитывается от новой ориентации
+
+  // Сброс устаревших результатов слайсинга
+  document.getElementById('layerSliderWrap').classList.remove('visible');
+  document.getElementById('gcodeOut').style.display = 'none';
+  document.getElementById('gcodeEmpty').style.display = 'block';
+  document.getElementById('dlBtn').disabled = true;
+  setPhase(2);
+
+  if (loadedFileName) {
+    document.getElementById('fileInfo').innerHTML =
+      `${loadedFileName}<br>Треугольников: ${triangles.length.toLocaleString()}<br>` +
+      `Размер: ${(stlBounds.max.x - stlBounds.min.x).toFixed(1)} × ` +
+      `${(stlBounds.max.y - stlBounds.min.y).toFixed(1)} × ` +
+      `${(stlBounds.max.z - stlBounds.min.z).toFixed(1)} мм`;
+  }
+
+  document.getElementById('progressOverlay').classList.remove('visible');
+
+  const aDeg = Math.round(best.a * 180/Math.PI);
+  const bDeg = Math.round(best.b * 180/Math.PI);
+  document.getElementById('orientResult').textContent =
+    (best.cost < 1e-6 ? '✓ Найдена ориентация без нависаний. ' : `Остаточная стоимость нависаний: ${Math.round(best.cost)} мм². `) +
+    `Поворот X=${aDeg}° Y=${bDeg}° применён к модели.`;
+  notify(`✓ Ориентация подобрана: X=${aDeg}° Y=${bDeg}°`);
+}
+
+// ════════════════════════════════════════════════════════
+//  SLICER
+// ════════════════════════════════════════════════════════
+let gcodeResult = '';
+let layerData   = []; // [{z, segments}]
+
+async function slice() {
+  if (!triangles.length) return;
+
+  document.getElementById('progressOverlay').classList.add('visible');
+  document.getElementById('progressFill').style.width = '0%';
+  setPhase(3);
+
+  await new Promise(r => setTimeout(r, 30));
+
+  gcodeResult = '';
+  layerData   = [];
+
+  const lh = params.layerHeight;
+  const zMin = stlBounds.min.z;
+  const zMax = stlBounds.max.z;
+  const cx   = (stlBounds.min.x + stlBounds.max.x) / 2;
+  const cy   = (stlBounds.min.y + stlBounds.max.y) / 2;
+  const nLayers = Math.ceil((zMax - zMin) / lh);
+
+  // Collect segments per layer in chunks for responsiveness
+  setMsg('Нарезка на слои...');
+  const layerSegs = new Array(nLayers).fill(null).map(() => []);
+
+  const chunkSize = 500;
+  for (let ti = 0; ti < triangles.length; ti += chunkSize) {
+    const end = Math.min(ti + chunkSize, triangles.length);
+    for (let j = ti; j < end; j++) {
+      const t = triangles[j];
+      intersectTriangleLayers(t, zMin, lh, nLayers, cx, cy, layerSegs);
+    }
+    setProgress((ti / triangles.length) * 40);
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  // Build contours & generate G-code
+  setMsg('Генерация G-code...');
+  const lines = buildGcode(layerSegs, nLayers, zMin, lh);
+  gcodeResult = lines.join('\n');
+
+  setProgress(100);
+  setMsg('Готово!');
+  await new Promise(r => setTimeout(r, 200));
+
+  document.getElementById('progressOverlay').classList.remove('visible');
+
+  // Show stats
+  document.getElementById('statLayers').textContent = nLayers;
+  document.getElementById('statLines').textContent  = lines.length.toLocaleString();
+  const estTime = Math.round(estimateTime(lines));
+  document.getElementById('statTime').textContent   = estTime;
+  // Вес филамента: объём = πr²·L, масса = ρ·V (PLA ≈ 1.24 г/см³)
+  const filRad = params.filamentDiameter / 2 / 10; // cm
+  const filLen = (buildGcode._totalE || 0) / 10;    // cm
+  const filVol = Math.PI * filRad * filRad * filLen;
+  const weight = Math.round(filVol * 1.24);
+  document.getElementById('statWeight').textContent = weight + 'г';
+
+  // Render G-code in panel
+  renderGcodePanel(lines);
+  document.getElementById('dlBtn').disabled = false;
+  document.getElementById('gcodeEmpty').style.display = 'none';
+  document.getElementById('gcodeOut').style.display = 'block';
+
+  // Show layer preview
+  buildSlicePreview(layerSegs, nLayers, cx, cy, zMin, lh);
+  document.getElementById('layerSlider').max = nLayers - 1;
+  document.getElementById('layerSlider').value = 0;
+  document.getElementById('layerSliderWrap').classList.add('visible');
+
+  // Детектор нависаний
+  const overhangPts = detectOverhangs(layerSegs, nLayers, zMin, lh);
+  if (params.noSupport && params.noSupport.enabled) {
+    const nsCount = buildGcode._noSupportLayers || 0;
+    setTimeout(() => notify(nsCount > 0
+      ? `✓ Без поддержки: уступом напечатано ${nsCount} слоёв`
+      : '✓ Нависаний, требующих уступа, не найдено'), 1500);
+  } else if (overhangPts > 0) {
+    const msg = overhangPts > 100
+      ? `⚠ Обнаружено ${overhangPts} точек нависания! Рекомендуется включить ось A.`
+      : `✓ Нависания минимальны (${overhangPts} точек)`;
+    setTimeout(() => notify(msg), 1500);
+  }
+
+  setPhase(4);
+  notify('✓ Слайсинг завершён: ' + nLayers + ' слоёв, ~' + estTime + ' мин');
+}
+
+function setProgress(pct) {
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+function setMsg(msg) {
+  document.getElementById('progressMsg').textContent = msg;
+}
+
+// Пересечение треугольника с z-плоскостями
+function intersectTriangleLayers(tri, zMin, lh, nLayers, cx, cy, layerSegs) {
+  const verts = [tri.v1, tri.v2, tri.v3].map(v => ({
+    x: v.x - cx, y: v.y - cy, z: v.z
+  }));
+
+  const triZmin = Math.min(verts[0].z, verts[1].z, verts[2].z);
+  const triZmax = Math.max(verts[0].z, verts[1].z, verts[2].z);
+
+  const L0 = Math.max(0, Math.floor((triZmin - zMin) / lh));
+  const L1 = Math.min(nLayers - 1, Math.ceil((triZmax - zMin) / lh));
+
+  for (let li = L0; li <= L1; li++) {
+    const z = zMin + (li + 0.5) * lh; // sample at midlayer
+    const seg = intersectTriPlane(verts, z);
+    if (seg) layerSegs[li].push(seg);
+  }
+}
+
+function intersectTriPlane(verts, z) {
+  const pts = [];
+  const [A, B, C] = verts;
+  const edges = [[A,B],[B,C],[C,A]];
+  for (const [p, q] of edges) {
+    const dz = q.z - p.z;
+    if (Math.abs(dz) < 1e-9) continue;
+    const t = (z - p.z) / dz;
+    if (t < 0 || t > 1) continue;
+    pts.push({ x: p.x + t*(q.x-p.x), y: p.y + t*(q.y-p.y) });
+  }
+  if (pts.length < 2) return null;
+  return [pts[0], pts[1]];
+}
+
+// ════════════════════════════════════════════════════════
+//  CONTOUR & INFILL
+// ════════════════════════════════════════════════════════
+function chainSegments(segs) {
+  if (!segs.length) return [];
+  // eps^2 для сравнения dist2
+  const EPS2 = 0.05 * 0.05;  // 0.05мм — допуск сшивания
+  const used = new Uint8Array(segs.length);
+  const contours = [];
+
+  for (let start = 0; start < segs.length; start++) {
+    if (used[start]) continue;
+    const contour = [segs[start][0], segs[start][1]];
+    used[start] = 1;
+    let extended = true;
+    while (extended) {
+      extended = false;
+      const last = contour[contour.length - 1];
+      let bestDist = EPS2, bestIdx = -1, bestFlip = false;
+      for (let i = 0; i < segs.length; i++) {
+        if (used[i]) continue;
+        const [a, b] = segs[i];
+        const da = dist2(last, a);
+        const db = dist2(last, b);
+        if (da < bestDist) { bestDist = da; bestIdx = i; bestFlip = false; }
+        if (db < bestDist) { bestDist = db; bestIdx = i; bestFlip = true; }
+      }
+      if (bestIdx >= 0) {
+        const [a, b] = segs[bestIdx];
+        contour.push(bestFlip ? a : b);
+        used[bestIdx] = 1;
+        extended = true;
+      }
+    }
+    if (contour.length > 2) contours.push(contour);
+  }
+  return contours;
+}
+
+function dist2(a, b) { return (a.x-b.x)**2 + (a.y-b.y)**2; }
+
+// ── ПЕЧАТЬ БЕЗ ПОДДЕРЖКИ (уступом) ──
+// Подтягивает точки текущего контура к ближайшим точкам ранее напечатанного контура,
+// если вылет превышает maxStep. Так каждый проход в зоне нависания в основном опирается
+// на уже остывший слой ниже и лишь немного висит в воздухе — «полка» уголка растёт постепенно.
+function clampOverhangPoints(rawContours, prevPoints, maxStep) {
+  if (!prevPoints.length) return { contours: rawContours, hadOverhang: false };
+  let hadOverhang = false;
+  const clamped = rawContours.map(contour => contour.map(pt => {
+    let bestD2 = Infinity, best = null;
+    for (let i = 0; i < prevPoints.length; i++) {
+      const d2 = dist2(pt, prevPoints[i]);
+      if (d2 < bestD2) { bestD2 = d2; best = prevPoints[i]; }
+    }
+    if (!best) return pt;
+    const d = Math.sqrt(bestD2);
+    if (d <= maxStep) return pt;
+    hadOverhang = true;
+    const t = maxStep / d;
+    return { x: best.x + (pt.x - best.x) * t, y: best.y + (pt.y - best.y) * t };
+  }));
+  return { contours: clamped, hadOverhang };
+}
+
+// ── SCANLINE INFILL — правильное заполнение с клиппингом по полигону ──
+
+// Находим пересечения горизонтального луча Y=scanY с полигоном
+function scanlineIntersections(polygon, scanY) {
+  const xs = [];
+  const n = polygon.length;
+  for (let i = 0; i < n; i++) {
+    const a = polygon[i];
+    const b = polygon[(i + 1) % n];
+    // Нужно пересечение с y=scanY
+    if ((a.y <= scanY && b.y > scanY) || (b.y <= scanY && a.y > scanY)) {
+      const t = (scanY - a.y) / (b.y - a.y);
+      xs.push(a.x + t * (b.x - a.x));
+    }
+  }
+  xs.sort((a, b) => a - b);
+  return xs;
+}
+
+// Пересечения вертикального луча X=scanX с полигоном
+function scanlineIntersectionsV(polygon, scanX) {
+  const ys = [];
+  const n = polygon.length;
+  for (let i = 0; i < n; i++) {
+    const a = polygon[i];
+    const b = polygon[(i + 1) % n];
+    if ((a.x <= scanX && b.x > scanX) || (b.x <= scanX && a.x > scanX)) {
+      const t = (scanX - a.x) / (b.x - a.x);
+      ys.push(a.y + t * (b.y - a.y));
+    }
+  }
+  ys.sort((a, b) => a - b);
+  return ys;
+}
+
+function generateInfill(segs, layerIdx, infillPct, nozzle) {
+  if (infillPct === 0) return [];
+
+  // Строим контуры из сегментов
+  const contours = chainSegments(segs);
+  if (!contours.length) return [];
+
+  const result = [];
+  const spacing = nozzle / (infillPct / 100);
+  const useHorizontal = (layerIdx % 2 === 0);
+
+  for (const polygon of contours) {
+    if (polygon.length < 3) continue;
+
+    // Bounding box полигона
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    for (const p of polygon) {
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+    }
+
+    if (useHorizontal) {
+      // Горизонтальные линии — scanline по Y
+      for (let y = minY + spacing * 0.5; y < maxY; y += spacing) {
+        const xs = scanlineIntersections(polygon, y);
+        // Заполняем между парами пересечений (чётное-нечётное правило)
+        for (let i = 0; i + 1 < xs.length; i += 2) {
+          const x0 = xs[i], x1 = xs[i + 1];
+          if (x1 - x0 > 0.01) {
+            result.push([{ x: x0, y }, { x: x1, y }]);
+          }
+        }
+      }
+    } else {
+      // Вертикальные линии — scanline по X
+      for (let x = minX + spacing * 0.5; x < maxX; x += spacing) {
+        const ys = scanlineIntersectionsV(polygon, x);
+        for (let i = 0; i + 1 < ys.length; i += 2) {
+          const y0 = ys[i], y1 = ys[i + 1];
+          if (y1 - y0 > 0.01) {
+            result.push([{ x, y: y0 }, { x, y: y1 }]);
+          }
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+// ════════════════════════════════════════════════════════
+//  ТИПЫ ЗАПОЛНЕНИЯ (как в Simplify3D: внутреннее + для сплошных слоёв)
+// ════════════════════════════════════════════════════════
+function rotatePt(p, rad) {
+  const c = Math.cos(rad), s = Math.sin(rad);
+  return { x: p.x*c - p.y*s, y: p.x*s + p.y*c };
+}
+
+// Прямые линии заполнения под произвольным углом — вращаем полигон в локальную
+// систему координат (лини становятся горизонтальными), сканируем, вращаем обратно.
+function generateRectilinearAt(polygon, angleDeg, spacing) {
+  const rad = angleDeg * Math.PI / 180;
+  const rotPoly = polygon.map(p => rotatePt(p, -rad));
+  let minY = Infinity, maxY = -Infinity;
+  for (const p of rotPoly) { if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y; }
+  const segs = [];
+  for (let y = minY + spacing * 0.5; y < maxY; y += spacing) {
+    const xs = scanlineIntersections(rotPoly, y);
+    for (let i = 0; i + 1 < xs.length; i += 2) {
+      const x0 = xs[i], x1 = xs[i+1];
+      if (x1 - x0 > 0.01) {
+        segs.push([ rotatePt({x:x0,y}, rad), rotatePt({x:x1,y}, rad) ]);
+      }
+    }
+  }
+  return segs;
+}
+
+// Точка внутри полигона (чётно-нечётное правило)
+function pointInPolygon(pt, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x, yi = polygon[i].y, xj = polygon[j].x, yj = polygon[j].y;
+    const intersect = ((yi > pt.y) !== (yj > pt.y)) &&
+      (pt.x < (xj - xi) * (pt.y - yi) / (yj - yi + 1e-12) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// Обрезает отрезок a-b по границе полигона — возвращает только части, лежащие внутри
+function clipSegmentToPolygon(a, b, polygon) {
+  const ts = [0, 1];
+  const dx = b.x - a.x, dy = b.y - a.y;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const p1 = polygon[j], p2 = polygon[i];
+    const ex = p2.x - p1.x, ey = p2.y - p1.y;
+    const denom = dx*ey - dy*ex;
+    if (Math.abs(denom) < 1e-12) continue;
+    const t = ((p1.x - a.x)*ey - (p1.y - a.y)*ex) / denom;
+    const u = ((p1.x - a.x)*dy - (p1.y - a.y)*dx) / denom;
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) ts.push(t);
+  }
+  ts.sort((x, y) => x - y);
+  const out = [];
+  for (let k = 0; k < ts.length - 1; k++) {
+    const t0 = ts[k], t1 = ts[k+1];
+    if (t1 - t0 < 1e-6) continue;
+    const mt = (t0 + t1) / 2;
+    const mid = { x: a.x + dx*mt, y: a.y + dy*mt };
+    if (pointInPolygon(mid, polygon)) {
+      out.push([{ x: a.x + dx*t0, y: a.y + dy*t0 }, { x: a.x + dx*t1, y: a.y + dy*t1 }]);
+    }
+  }
+  return out;
+}
+
+// Соты — гексагональная решётка, обрезанная по контуру. cellR больше → реже («Fast»), меньше → чаще («Full»)
+function generateHoneycomb(polygon, cellR) {
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for (const p of polygon) { if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x; if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y; }
+  const segs = [];
+  const dx = Math.sqrt(3) * cellR;
+  const dy = 1.5 * cellR;
+  const angs = [30,90,150,210,270,330].map(a => a*Math.PI/180);
+  let row = 0;
+  for (let cy = minY - cellR; cy <= maxY + cellR; cy += dy, row++) {
+    const offX = (row % 2 === 0) ? 0 : dx/2;
+    for (let cx = minX - cellR + offX; cx <= maxX + cellR; cx += dx) {
+      const verts = angs.map(a => ({ x: cx + cellR*Math.cos(a), y: cy + cellR*Math.sin(a) }));
+      for (let i = 0; i < 6; i++) {
+        segs.push(...clipSegmentToPolygon(verts[i], verts[(i+1)%6], polygon));
+      }
+    }
+  }
+  return segs;
+}
+
+function polygonArea(poly) {
+  let a = 0;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) a += (poly[j].x + poly[i].x) * (poly[j].y - poly[i].y);
+  return Math.abs(a / 2);
+}
+
+function lineIntersect(p1, dx1, dy1, p2, dx2, dy2) {
+  const denom = dx1*dy2 - dy1*dx2;
+  if (Math.abs(denom) < 1e-9) return null;
+  const t = ((p2.x-p1.x)*dy2 - (p2.y-p1.y)*dx2) / denom;
+  return { x: p1.x + dx1*t, y: p1.y + dy1*t };
+}
+
+// Смещает полигон внутрь на d (простое смещение рёбер по нормали + пересечение соседних).
+// Упрощение: считается «сам с собой», для отверстий (внутренних петель) направление может
+// быть не всегда идеальным — приемлемо для демонстрационного концентрического заполнения.
+function offsetPolygonInward(poly, d) {
+  const n = poly.length;
+  if (n < 3) return null;
+  const area = polygonArea(poly);
+  let signedArea = 0;
+  for (let i = 0, j = n-1; i < n; j = i++) signedArea += poly[j].x*poly[i].y - poly[i].x*poly[j].y;
+  const ccw = signedArea > 0;
+  const offsetLines = [];
+  for (let i = 0; i < n; i++) {
+    const a = poly[i], b = poly[(i+1)%n];
+    let ex = b.x - a.x, ey = b.y - a.y;
+    const len = Math.sqrt(ex*ex + ey*ey) || 1;
+    ex /= len; ey /= len;
+    const nx = ccw ? -ey : ey, ny = ccw ? ex : -ex;
+    offsetLines.push({ a: { x: a.x + nx*d, y: a.y + ny*d }, ex, ey });
+  }
+  const newPoly = [];
+  for (let i = 0; i < n; i++) {
+    const L1 = offsetLines[(i-1+n)%n], L2 = offsetLines[i];
+    const pt = lineIntersect(L1.a, L1.ex, L1.ey, L2.a, L2.ex, L2.ey);
+    newPoly.push(pt || L2.a);
+  }
+  return newPoly;
+}
+
+// Концентрическое заполнение (для сплошных верх/низ слоёв) — вложенные кольца-контуры
+// Концентрическое заполнение (для сплошных верх/низ слоёв) — вложенные кольца-контуры
+function generateConcentric(polygon, spacing) {
+  // chainSegments отдаёт контур с повторной замыкающей точкой (last === first) —
+  // для offsetPolygonInward это лишнее вырожденное ребро, ломающее пересечения. Убираем.
+  let poly = polygon;
+  if (poly.length > 1) {
+    const a = poly[0], b = poly[poly.length - 1];
+    if (Math.abs(a.x - b.x) < 1e-6 && Math.abs(a.y - b.y) < 1e-6) poly = poly.slice(0, -1);
+  }
+  const segs = [];
+  let current = poly;
+  let guard = 0;
+  while (current && current.length >= 3 && guard < 300) {
+    for (let i = 0; i < current.length; i++) {
+      segs.push([current[i], current[(i+1)%current.length]]);
+    }
+    const next = offsetPolygonInward(current, spacing);
+    if (!next || next.length < 3 || polygonArea(next) < spacing*spacing*0.5) break;
+    current = next;
+    guard++;
+  }
+  return segs;
+}
+
+// Диспетчер: выбирает генератор по имени паттерна и возвращает отрезки заполнения слоя
+function generateInfillPattern(segs, pattern, layerIdx, infillPct, nozzle) {
+  if (infillPct === 0) return [];
+  const contours = chainSegments(segs);
+  if (!contours.length) return [];
+  const spacing = nozzle / (infillPct / 100);
+  let result = [];
+
+  if (pattern === 'concentric') {
+    for (const polygon of contours) {
+      if (polygon.length < 3) continue;
+      result.push(...generateConcentric(polygon, spacing));
+    }
+    return result;
+  }
+
+  if (pattern === 'honeycomb-fast' || pattern === 'honeycomb-full') {
+    const cellR = pattern === 'honeycomb-fast' ? spacing * 1.3 : spacing * 0.8;
+    for (const polygon of contours) {
+      if (polygon.length < 3) continue;
+      result.push(...generateHoneycomb(polygon, cellR));
+    }
+    return result;
+  }
+
+  let angles;
+  if (pattern === 'grid') angles = [45, -45];
+  else if (pattern === 'triangular') angles = [0, 60, 120];
+  else angles = [ (layerIdx % 2 === 0) ? 45 : -45 ];   // rectilinear / wiggle
+
+  const effSpacing = spacing * angles.length;   // компенсация плотности при неск. направлениях
+  for (const polygon of contours) {
+    if (polygon.length < 3) continue;
+    for (const ang of angles) {
+      result.push(...generateRectilinearAt(polygon, ang, effSpacing));
+    }
+  }
+
+  if (pattern === 'wiggle') {
+    // Змейка — соединяем соседние линии концами, меньше отрывов/ретрактов
+    const chained = [];
+    for (let ri = 0; ri < result.length - 1; ri++) {
+      chained.push(result[ri]);
+      const endPt   = ri % 2 === 0 ? result[ri][1]   : result[ri][0];
+      const startPt = ri % 2 === 0 ? result[ri+1][1] : result[ri+1][0];
+      chained.push([endPt, startPt]);
+    }
+    if (result.length) chained.push(result[result.length - 1]);
+    result = chained;
+  }
+
+  return result;
+}
+
+// ════════════════════════════════════════════════════════
+//  G-CODE GENERATOR
+// ════════════════════════════════════════════════════════
+//  ГЕНЕРАЦИЯ ПОДДЕРЖЕК
+// ════════════════════════════════════════════════════════
+function generateSupports(layerSegs, li, lh, p, px, py, eFactor, E_in, FR, F) {
+  const gcodeLines = [];
+  let E = E_in;
+  let extruded = 0;
+  const sup = p.supports;
+
+  if (li === 0) return { gcodeLines, E, extruded };
+
+  const currSegs = layerSegs[li];
+  const prevSegs = layerSegs[li - 1];
+  if (!currSegs.length || !prevSegs.length) return { gcodeLines, E, extruded };
+
+  // Bounding box предыдущего слоя
+  let pMinX=1e9, pMaxX=-1e9, pMinY=1e9, pMaxY=-1e9;
+  for (const s of prevSegs) for (const pt of s) {
+    if(pt.x<pMinX)pMinX=pt.x; if(pt.x>pMaxX)pMaxX=pt.x;
+    if(pt.y<pMinY)pMinY=pt.y; if(pt.y>pMaxY)pMaxY=pt.y;
+  }
+
+  // Точки текущего слоя, выходящие за пределы предыдущего (нависание)
+  const threshold = lh * Math.tan((sup.angle || 45) * Math.PI / 180);
+  const overhangPts = [];
+
+  if (sup.mode === 'manual') {
+    // Ручные точки — только под ними
+    const z = (li + 1) * lh;
+    for (const mp of (sup.manualPoints || [])) {
+      if (mp.z >= z - lh * 0.5 && mp.z <= z + lh * 0.5) {
+        overhangPts.push({ x: mp.x, y: mp.y });
+      }
+    }
+  } else {
+    // Авто — сканируем точки вне bbox предыдущего + threshold
+    for (const s of currSegs) {
+      for (const pt of s) {
+        if (pt.x < pMinX - threshold || pt.x > pMaxX + threshold ||
+            pt.y < pMinY - threshold || pt.y > pMaxY + threshold) {
+          overhangPts.push(pt);
+        }
+      }
+    }
+  }
+
+  if (!overhangPts.length) return { gcodeLines, E, extruded };
+
+  // Bounding box нависаний
+  let sMinX=1e9, sMaxX=-1e9, sMinY=1e9, sMaxY=-1e9;
+  for (const pt of overhangPts) {
+    if(pt.x<sMinX)sMinX=pt.x; if(pt.x>sMaxX)sMaxX=pt.x;
+    if(pt.y<sMinY)sMinY=pt.y; if(pt.y>sMaxY)sMaxY=pt.y;
+  }
+
+  // Генерируем поддержки по типу
+  const density = sup.density || 15;
+  const spacing = p.nozzle / (density / 100);
+  const zGap = sup.zGap || 0.2;
+  const supZ = ((li + 1) * lh) - zGap;
+  const supType = sup.type || 'grid';
+
+  // Строим линии поддержки
+  const supSegs = [];
+
+  if (supType === 'lines' || supType === 'zigzag') {
+    for (let y = sMinY; y <= sMaxY; y += spacing) {
+      supSegs.push([{x: sMinX, y}, {x: sMaxX, y}]);
+    }
+  } else if (supType === 'grid') {
+    for (let y = sMinY; y <= sMaxY; y += spacing) {
+      supSegs.push([{x: sMinX, y}, {x: sMaxX, y}]);
+    }
+    for (let x = sMinX; x <= sMaxX; x += spacing) {
+      supSegs.push([{x, y: sMinY}, {x, y: sMaxY}]);
+    }
+  } else if (supType === 'tree') {
+    // Упрощённое дерево — диагональные рёбра к центру
+    const cx = (sMinX + sMaxX) / 2;
+    const cy = (sMinY + sMaxY) / 2;
+    for (let y = sMinY; y <= sMaxY; y += spacing * 2) {
+      supSegs.push([{x: cx, y: cy}, {x: sMinX + (sMaxX - sMinX) * Math.random(), y}]);
+    }
+  }
+
+  // G-code поддержек
+  gcodeLines.push(`; Поддержки [${supType}] (${overhangPts.length} точек нависания)`);
+  for (const seg of supSegs) {
+    const [a, b] = seg;
+    const d = Math.sqrt((b.x-a.x)**2 + (b.y-a.y)**2);
+    if (d < 0.5) continue;
+    E -= p.retract;
+    gcodeLines.push(`G1 E${E.toFixed(5)} F${FR}`);
+    gcodeLines.push(`G1 X${px(a.x)} Y${py(a.y)} F${F * 1.5}`);
+    E += p.retract;
+    gcodeLines.push(`G1 E${E.toFixed(5)} F${FR}`);
+    const supEf = eFactor * 0.7;  // поддержки печатаются пореже
+    E += d * supEf; extruded += d * supEf;
+    gcodeLines.push(`G1 X${px(b.x)} Y${py(b.y)} E${E.toFixed(5)} F${F}`);
+  }
+
+  return { gcodeLines, E, extruded };
+}
+
+// ════════════════════════════════════════════════════════
+function buildGcode(layerSegs, nLayers, zMin, lh) {
+  const p = params;
+  const lines = [];
+  const F  = p.speed * 60;
+  const FZ = 10 * 60;
+  const FR = p.retractSpeed * 60;
+  const nozzleArea = Math.PI * (p.nozzle / 2) ** 2;
+  const filArea    = Math.PI * (p.filamentDiameter / 2) ** 2;
+  const eFactor = (nozzleArea * lh) / filArea;
+
+  // Центрирование на столе — все координаты смещаются на центр стола
+  const BX = p.bedX / 2;  // 150 для стола 300мм
+  const BY = p.bedY / 2;
+  // Хелперы — переводят координаты слайсера в координаты принтера
+  const px = x => (x + BX).toFixed(3);
+  const py = y => (y + BY).toFixed(3);
+  // Z всегда от 0 (первый слой = lh), не от zMin модели
+
+  let E = 0;
+  let totalExtruded = 0;
+
+  // ── HEADER ──
+  lines.push('; ============================================================');
+  lines.push('; SixAxis Slicer — Generated G-code');
+  lines.push(`; Слоёв: ${nLayers}  Высота слоя: ${lh}мм`);
+  lines.push(`; Скорость: ${p.speed}мм/с  Заполнение: ${p.infill}%`);
+  lines.push(`; Сопло: ${p.extTemp}°C  Стол: ${p.bedTemp}°C`);
+  if (p.axes.a) lines.push(`; Ось A: ${p.axisA}°`);
+  if (p.axes.b) lines.push(`; Ось B: ${p.axisB}°`);
+  if (p.noSupport && p.noSupport.enabled) {
+    lines.push(`; Без поддержки: вылет ≤${p.noSupport.maxStep}мм/шаг` +
+      (p.noSupport.fineLayer ? `, под-слой ${p.noSupport.fineLayerHeight}мм` : ''));
+  }
+  lines.push('; ============================================================');
+  lines.push('');
+  lines.push('; === СТАРТ ===');
+  lines.push(`M140 S${p.bedTemp}          ; Прогрев стола`);
+  lines.push(`M104 S${p.extTemp}          ; Прогрев сопла`);
+  lines.push('G21                         ; Миллиметры');
+  lines.push('G90                         ; Абсолютные координаты');
+  lines.push('M82                         ; Абсолютный экструдер');
+  lines.push('G28                         ; Хоминг X Y Z');
+  if (p.axes.a || p.axes.b || p.axes.c) {
+    lines.push('SIXAXIS_HOME                ; Хоминг вращательных осей');
+  }
+  lines.push(`M190 S${p.bedTemp}          ; Ожидание стола`);
+  lines.push(`M109 S${p.extTemp}          ; Ожидание сопла`);
+  lines.push('BED_MESH_CALIBRATE          ; Калибровка сетки');
+  lines.push('G92 E0                      ; Сброс экструдера');
+  lines.push('');
+
+  // 6-AXIS SETUP
+  if (p.axes.a && p.axisA !== 0) {
+    lines.push(`; === Установка оси A (наклон ${p.axisA}°) ===`);
+    lines.push(`MOVE_A ANGLE=${p.axisA} SPEED=10`);
+  }
+  if (p.axes.b && p.axisB !== 0) {
+    lines.push(`; === Установка оси B (поворот ${p.axisB}°) ===`);
+    lines.push(`MOVE_B ANGLE=${p.axisB} SPEED=10`);
+  }
+
+  // Skirt / Brim / Prime line
+  lines.push('');
+  const sType = p.skirtType || 'skirt';
+
+  if (sType === 'brim') {
+    // BRIM — широкие поля вокруг первого слоя
+    lines.push('; === BRIM ===');
+    lines.push(`G1 Z${lh.toFixed(3)} F${FZ}`);
+    const brimW = p.skirtCount * p.nozzle;
+    const segs0 = layerSegs[0] || [];
+    const ctrs0 = chainSegments(segs0);
+    for (let bi = 1; bi <= p.skirtCount; bi++) {
+      const off = bi * p.nozzle;
+      for (const c of ctrs0) {
+        if (c.length < 2) continue;
+        const first = c[0];
+        E -= p.retract;
+        lines.push(`G1 E${E.toFixed(5)} F${FR}`);
+        lines.push(`G1 X${px(first.x - off)} Y${py(first.y - off)} F${F}`);
+        E += p.retract;
+        lines.push(`G1 E${E.toFixed(5)} F${FR}`);
+        for (let ci = 1; ci < c.length; ci++) {
+          const d = Math.sqrt((c[ci].x-c[ci-1].x)**2+(c[ci].y-c[ci-1].y)**2);
+          E += d * eFactor;
+          lines.push(`G1 X${px(c[ci].x - off)} Y${py(c[ci].y - off)} E${E.toFixed(5)} F${F}`);
+        }
+      }
+    }
+  } else if (sType === 'skirt') {
+    // SKIRT — юбка на расстоянии от детали
+    lines.push('; === SKIRT ===');
+    lines.push(`G1 Z${lh.toFixed(3)} F${FZ}`);
+    const segs0 = layerSegs[0] || [];
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    for (const s of segs0) for (const pt of s) {
+      if(pt.x<minX)minX=pt.x; if(pt.x>maxX)maxX=pt.x;
+      if(pt.y<minY)minY=pt.y; if(pt.y>maxY)maxY=pt.y;
+    }
+    for (let si = 1; si <= p.skirtCount; si++) {
+      const off = si * 2;  // 2мм от детали между контурами
+      const sx0 = minX - off, sx1 = maxX + off;
+      const sy0 = minY - off, sy1 = maxY + off;
+      E -= p.retract;
+      lines.push(`G1 E${E.toFixed(5)} F${FR}`);
+      lines.push(`G1 X${px(sx0)} Y${py(sy0)} F${F * 2}`);
+      E += p.retract; lines.push(`G1 E${E.toFixed(5)} F${FR}`);
+      [[sx1,sy0],[sx1,sy1],[sx0,sy1],[sx0,sy0]].forEach(([x,y]) => {
+        const d = Math.sqrt(4 + 4);  // approx
+        E += p.nozzle * eFactor * 10;
+        lines.push(`G1 X${px(x)} Y${py(y)} E${E.toFixed(5)} F${F}`);
+      });
+    }
+  } else {
+    // Прочистная линия
+    lines.push('; === Прочистная линия ===');
+    lines.push('G1 Z5 F3000');
+    lines.push(`G1 X5 Y5 F5000`);
+    lines.push(`G1 Z${lh.toFixed(3)} F${FZ}`);
+    lines.push(`G1 X5 Y${BY} F1500 E15`);
+  }
+
+  lines.push('G92 E0');
+  E = 0; totalExtruded = 0;
+  lines.push('');
+
+  // ── LAYERS ──
+  let lastExtTemp = p.extTemp;
+  let lastSpeed = p.speed;
+  let lastInfill = p.infill;
+  let lastPattern = p.infillPattern;
+  let prevPrintedPoints = [];   // точки предыдущего фактически напечатанного контура (для режима "без поддержки")
+  let noSupportLayerCount = 0;
+
+  for (let li = 0; li < nLayers; li++) {
+    const z = (li + 1) * lh;   // Z всегда от 0, zMin уже вычтен
+
+    // ── Применяем зону/процесс по высоте ──
+    let zSpeed = p.speed, zInfill = p.infill, zPattern = p.infillPattern, zTBPattern = p.topBottomPattern,
+        zExtTemp = p.extTemp, zPerimeters = p.perimeters, zFan = p.fanSpeed, zSupportsMode = p.supports.mode;
+    for (const zone of (p.zones || [])) {
+      if (z >= zone.zMin && z <= zone.zMax) {
+        zSpeed = zone.speed || zSpeed;
+        zInfill = zone.infill !== undefined ? zone.infill : zInfill;
+        zPattern = zone.infillPattern || zPattern;
+        zTBPattern = zone.topBottomPattern || zTBPattern;
+        zExtTemp = zone.extTemp || zExtTemp;
+        zPerimeters = zone.perimeters || zPerimeters;
+        zFan = zone.fanSpeed !== undefined ? zone.fanSpeed : zFan;
+        if (zone.supportsOverride === 'on') zSupportsMode = (p.supports.mode !== 'none' ? p.supports.mode : 'auto');
+        if (zone.supportsOverride === 'off') zSupportsMode = 'none';
+        break;
+      }
+    }
+    const Fz_layer = zSpeed * 60;
+
+    // Сообщения о смене зоны
+    if (zExtTemp !== lastExtTemp) {
+      lines.push(`M104 S${zExtTemp}  ; Зона: смена температуры → ${zExtTemp}°C`);
+      lastExtTemp = zExtTemp;
+    }
+
+    lines.push(`; ── СЛОЙ ${li+1}/${nLayers} Z=${z.toFixed(3)}${zSpeed!==p.speed?` [зона: ${zSpeed}мм/с ${zInfill}%]`:''} ──`);
+
+    const segs = layerSegs[li];
+    if (!segs.length) {
+      lines.push(`G1 Z${z.toFixed(3)} F${FZ}`);
+      lines.push('; (пустой слой)');
+      continue;
+    }
+
+    const rawContours = chainSegments(segs);
+    const F = Fz_layer;
+
+    // ── Определяем, нужен ли режим "без поддержки" для этого слоя ──
+    let overhangInfo = { hadOverhang: false, contours: rawContours };
+    if (p.noSupport && p.noSupport.enabled && prevPrintedPoints.length) {
+      overhangInfo = clampOverhangPoints(rawContours, prevPrintedPoints, p.noSupport.maxStep);
+    }
+
+    let contours = rawContours;
+
+    if (overhangInfo.hadOverhang) {
+      // ── ПЕЧАТЬ УСТУПОМ: несколько под-слоёв, периметр постепенно смещается наружу ──
+      noSupportLayerCount++;
+      const subSteps = p.noSupport.fineLayer ? Math.max(1, Math.round(lh / p.noSupport.fineLayerHeight)) : 1;
+      const subDZ = lh / subSteps;
+      const subMaxStep = p.noSupport.maxStep / subSteps;
+      const subF = Math.max(300, Math.round(Fz_layer * p.noSupport.slowFactor));
+      const zPrevFull = z - lh;
+
+      lines.push(`; -- БЕЗ ПОДДЕРЖКИ: полка нависания, ${subSteps} шаг${subSteps>1?'а(ов)':''} по ${subDZ.toFixed(3)}мм, вылет ≤${subMaxStep.toFixed(2)}мм/шаг --`);
+      if (p.noSupport.boostCooling) lines.push('M106 S255            ; обдув 100% — зона нависания');
+
+      let subPrevPts = prevPrintedPoints;
+      let subContours = rawContours;
+      for (let s = 1; s <= subSteps; s++) {
+        const subZ = zPrevFull + s * subDZ;
+        const cl = clampOverhangPoints(rawContours, subPrevPts, subMaxStep);
+        subContours = cl.contours;
+        lines.push(`G1 Z${subZ.toFixed(3)} F${FZ}`);
+        for (let pi = 0; pi < zPerimeters; pi++) {
+          for (const contour of subContours) {
+            if (contour.length < 3) continue;
+            const first = contour[0];
+            E -= p.retract;
+            lines.push(`G1 E${E.toFixed(5)} F${FR}  ; ретракт`);
+            lines.push(`G1 X${px(first.x)} Y${py(first.y)} F${subF * 2}`);
+            E += p.retract;
+            lines.push(`G1 E${E.toFixed(5)} F${FR}  ; деретракт`);
+            for (let ci = 1; ci < contour.length; ci++) {
+              const pt = contour[ci], prev = contour[ci-1];
+              const d = Math.sqrt((pt.x-prev.x)**2 + (pt.y-prev.y)**2);
+              E += d * eFactor; totalExtruded += d * eFactor;
+              lines.push(`G1 X${px(pt.x)} Y${py(pt.y)} E${E.toFixed(5)} F${subF}`);
+            }
+            const dClose = Math.sqrt((first.x-contour[contour.length-1].x)**2+(first.y-contour[contour.length-1].y)**2);
+            E += dClose * eFactor; totalExtruded += dClose * eFactor;
+            lines.push(`G1 X${px(first.x)} Y${py(first.y)} E${E.toFixed(5)} F${subF}`);
+          }
+        }
+        subPrevPts = subContours.flat();
+      }
+      contours = subContours;
+      if (p.noSupport.boostCooling) lines.push(`M106 S${Math.round(zFan * 2.55)}   ; вентилятор обратно ${zFan}%`);
+    } else {
+      lines.push(`G1 Z${z.toFixed(3)} F${FZ}`);
+    }
+
+    // Fan on after layer 3
+    if (li === 2 && zFan > 0) {
+      lines.push(`M106 S${Math.round(zFan * 2.55)}   ; Вентилятор ${zFan}%`);
+    }
+
+    // ── ПОДДЕРЖКИ ──
+    if (zSupportsMode !== 'none') {
+      const supP = (zSupportsMode !== p.supports.mode) ? { ...p, supports: { ...p.supports, mode: zSupportsMode } } : p;
+      const supLines = generateSupports(layerSegs, li, lh, supP, px, py, eFactor, E, FR, Fz_layer);
+      if (supLines.gcodeLines.length) {
+        lines.push('; -- Поддержки --');
+        lines.push(...supLines.gcodeLines);
+        E = supLines.E;
+        totalExtruded += supLines.extruded;
+      }
+    }
+
+    // Perimeters (обычный путь — если слой уже не напечатан уступом выше)
+    if (!overhangInfo.hadOverhang) {
+      for (let pi = 0; pi < zPerimeters; pi++) {
+        for (const contour of contours) {
+          if (contour.length < 3) continue;
+          const first = contour[0];
+          E -= p.retract;
+          lines.push(`G1 E${E.toFixed(5)} F${FR}  ; ретракт`);
+          lines.push(`G1 X${px(first.x)} Y${py(first.y)} F${F * 2}`);
+          E += p.retract;
+          lines.push(`G1 E${E.toFixed(5)} F${FR}  ; деретракт`);
+          for (let ci = 1; ci < contour.length; ci++) {
+            const pt = contour[ci], prev = contour[ci-1];
+            const d = Math.sqrt((pt.x-prev.x)**2 + (pt.y-prev.y)**2);
+            E += d * eFactor; totalExtruded += d * eFactor;
+            lines.push(`G1 X${px(pt.x)} Y${py(pt.y)} E${E.toFixed(5)} F${F}`);
+          }
+          const dClose = Math.sqrt((first.x-contour[contour.length-1].x)**2+(first.y-contour[contour.length-1].y)**2);
+          E += dClose * eFactor; totalExtruded += dClose * eFactor;
+          lines.push(`G1 X${px(first.x)} Y${py(first.y)} E${E.toFixed(5)} F${F}`);
+        }
+      }
+    }
+
+    // Точки этого слоя становятся опорой для следующего
+    prevPrintedPoints = contours.flat();
+
+    // Infill (solid top/bottom or sparse)
+    const isTopBottom = li < p.topBottomLayers || li >= nLayers - p.topBottomLayers;
+    const fillPct = isTopBottom ? 100 : p.infill;
+    let fills = [];
+    if (fillPct > 0) {
+      fills = isTopBottom
+        ? generateInfillPattern(segs, zTBPattern || 'rectilinear', li, fillPct, p.nozzle)
+        : generateInfillPattern(segs, zPattern || p.infillPattern, li, fillPct, p.nozzle);
+    }
+
+    if (fills.length && fillPct > 0) {
+      lines.push(`; Заполнение ${fillPct}%`);
+      for (const seg of fills) {
+        const [a, b] = seg;
+        const d = Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2);
+        E -= p.retract;
+        lines.push(`G1 E${E.toFixed(5)} F${FR}`);
+        lines.push(`G1 X${px(a.x)} Y${py(a.y)} F${F * 2}`);
+        E += p.retract;
+        lines.push(`G1 E${E.toFixed(5)} F${FR}`);
+        E += d * eFactor; totalExtruded += d * eFactor;
+        lines.push(`G1 X${px(b.x)} Y${py(b.y)} E${E.toFixed(5)} F${F}`);
+      }
+    }
+  }
+
+  // ── FOOTER ──
+  lines.push('');
+  lines.push('; === ФИНИШ ===');
+  lines.push('G91                  ; Относительные');
+  lines.push('G1 E-5 F3600         ; Ретракт');
+  lines.push('G1 Z10 F3000         ; Поднять Z');
+  lines.push('G90                  ; Абсолютные');
+  lines.push(`G1 X${(p.bedX/2).toFixed(0)} Y${(p.bedY - 10).toFixed(0)} F3000  ; Выдвинуть стол`);
+  lines.push('M104 S0              ; Выкл экструдер');
+  lines.push('M140 S0              ; Выкл стол');
+  lines.push('M106 S0              ; Выкл вентилятор');
+  if (p.axes.a || p.axes.b) {
+    lines.push('MOVE_A ANGLE=0       ; Сбросить A');
+    lines.push('MOVE_B ANGLE=0       ; Сбросить B');
+  }
+  lines.push('M84                  ; Выкл моторы');
+  lines.push('; === КОНЕЦ ===');
+  // Сохраняем данные для статистики
+  buildGcode._totalE = totalExtruded;
+  buildGcode._noSupportLayers = noSupportLayerCount;
+  return lines;
+}
+
+function estimateTime(lines) {
+  let dist = 0;
+  let px=0,py=0;
+  const re = /G1[^X]*(?:X([\d.\-]+))?[^Y]*(?:Y([\d.\-]+))?/;
+  for (const ln of lines) {
+    const m = ln.match(re);
+    if (!m) continue;
+    const x = m[1] !== undefined ? +m[1] : px;
+    const y = m[2] !== undefined ? +m[2] : py;
+    dist += Math.sqrt((x-px)**2+(y-py)**2);
+    px=x; py=y;
+  }
+  return Math.round(dist / params.speed / 60);
+}
+
+// ════════════════════════════════════════════════════════
+//  SLICE PREVIEW (3D lines per layer)
+// ════════════════════════════════════════════════════════
+let sliceGroup = null;
+
+function buildSlicePreview(layerSegs, nLayers, cx, cy, zMin, lh) {
+  if (sliceGroup) { scene.remove(sliceGroup); }
+  sliceGroup = new THREE.Group();
+  sliceGroup.visible = false;
+
+  for (let li = 0; li < nLayers; li++) {
+    const z = (li + 1) * lh;
+    const segs = layerSegs[li];
+    if (!segs.length) continue;
+
+    const pts = [];
+    for (const seg of segs) {
+      pts.push(new THREE.Vector3(seg[0].x, seg[0].y, z));
+      pts.push(new THREE.Vector3(seg[1].x, seg[1].y, z));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const t = li / nLayers;
+    const col = new THREE.Color().setHSL(0.55 - t*0.4, 1, 0.55);
+    const mat = new THREE.LineBasicMaterial({ color: col });
+    const lineObj = new THREE.LineSegments(geo, mat);
+    lineObj.name = 'layer_' + li;
+    lineObj.visible = false;
+    sliceGroup.add(lineObj);
+  }
+  scene.add(sliceGroup);
+  layerData = layerSegs;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ДЕТЕКТОР НАВИСАНИЙ
+// ═══════════════════════════════════════════════════════
+function detectOverhangs(layerSegs, nLayers, zMin, lh) {
+  let overhangCount = 0;
+  const OVERHANG_THRESH = 0.7; // cos(45°) ≈ 0.7
+
+  // Для каждого слоя сравниваем с предыдущим
+  for (let li = 1; li < nLayers; li++) {
+    const curr = layerSegs[li];
+    const prev = layerSegs[li - 1];
+    if (!curr.length || !prev.length) continue;
+
+    // Bounding box предыдущего слоя
+    let pMinX=Infinity,pMaxX=-Infinity,pMinY=Infinity,pMaxY=-Infinity;
+    for (const s of prev) for (const pt of s) {
+      if(pt.x<pMinX)pMinX=pt.x; if(pt.x>pMaxX)pMaxX=pt.x;
+      if(pt.y<pMinY)pMinY=pt.y; if(pt.y>pMaxY)pMaxY=pt.y;
+    }
+
+    // Точки текущего слоя за пределами предыдущего
+    for (const s of curr) {
+      for (const pt of s) {
+        const outside = pt.x < pMinX - 1 || pt.x > pMaxX + 1 ||
+                        pt.y < pMinY - 1 || pt.y > pMaxY + 1;
+        if (outside) overhangCount++;
+      }
+    }
+  }
+  return overhangCount;
+}
+
+let currentLayer = 0;
+function showLayer(idx) {
+  currentLayer = idx;
+  document.getElementById('layerInfo').textContent = `Слой ${idx+1}`;
+  if (!sliceGroup) return;
+  sliceGroup.children.forEach((c, i) => {
+    c.visible = i <= idx;
+  });
+}
+
+function setView(mode) {
+  currentView = mode;
+  document.getElementById('btnSTL').classList.toggle('active', mode==='stl');
+  document.getElementById('btnSlice').classList.toggle('active', mode==='slice');
+  if (modelMesh) modelMesh.visible = mode === 'stl';
+  if (sliceGroup) sliceGroup.visible = mode === 'slice';
+  if (mode === 'slice') {
+    showLayer(parseInt(document.getElementById('layerSlider').value));
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  G-CODE SYNTAX HIGHLIGHT
+// ════════════════════════════════════════════════════════
+function renderGcodePanel(lines) {
+  const out = document.getElementById('gcodeOut');
+  // Show first 2000 lines for performance
+  const preview = lines.slice(0, 2000);
+  out.innerHTML = preview.map(l => highlightLine(l)).join('\n');
+  if (lines.length > 2000) {
+    out.innerHTML += `\n<span style="color:var(--muted)">... ещё ${lines.length - 2000} строк (в скачанном файле)</span>`;
+  }
+}
+
+function highlightLine(line) {
+  const safe = line.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  if (safe.startsWith(';')) {
+    if (safe.includes('СЛОЙ')) return `<span class="gc-layer">${safe}</span>`;
+    return `<span class="gc-comment">${safe}</span>`;
+  }
+  if (/^M1[0-9][0-9]/.test(safe)) return `<span class="gc-temp">${safe}</span>`;
+  if (/^(MOVE_|SIXAXIS|BED_MESH)/.test(safe)) return `<span class="gc-macro">${safe}</span>`;
+  if (/^G[01]/.test(safe)) return `<span class="gc-move">${safe}</span>`;
+  return safe;
+}
+
+// ════════════════════════════════════════════════════════
+//  EXPORT
+// ════════════════════════════════════════════════════════
+function downloadGcode() {
+  const blob = new Blob([gcodeResult], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sixaxis_print.gcode';
+  a.click();
+  notify('✓ G-code скачан');
+}
+
+function copyGcode() {
+  navigator.clipboard.writeText(gcodeResult).then(() => notify('✓ Скопировано в буфер'));
+}
+
+// ════════════════════════════════════════════════════════
+//  UI HELPERS
+// ════════════════════════════════════════════════════════
+function setPhase(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('ph' + i);
+    el.classList.remove('active', 'done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+}
+
+function notify(msg) {
+  const el = document.getElementById('notify');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Drag & drop
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.stl')) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('stlFile').files = dt.files;
+    loadSTL(document.getElementById('stlFile'));
+  }
+});
+</script>
+</body>
+</html>
