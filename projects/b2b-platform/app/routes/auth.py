@@ -118,7 +118,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        login_user(user)
+        login_user(user, remember=True)
         session["lang"] = language
 
         sent, confirm_url = _send_confirmation_email(user)
@@ -166,7 +166,7 @@ def login():
 
         user.last_login_at = datetime.utcnow()
         db.session.commit()
-        login_user(user)
+        login_user(user, remember=True)
         flash("Вы вошли на сайт.", "success")
         return _post_login_redirect()
 
@@ -355,7 +355,7 @@ def google_callback():
     user.last_login_at = datetime.utcnow()
     db.session.commit()
 
-    login_user(user)
+    login_user(user, remember=True)
     flash("Вы вошли через Google.", "success")
 
     if user.role is None:
