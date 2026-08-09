@@ -1,4 +1,5 @@
 """Конфигурация приложения. Значения читаются из переменных окружения (.env)."""
+import base64
 import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -59,11 +60,20 @@ class Config:
     PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL")
 
     # Push-уведомления в мобильное приложение (модуль 7, app/push.py).
-    # Содержимое service-account JSON целиком, одной строкой (Firebase
-    # Console → Настройки проекта → Сервисные аккаунты → Создать новый
-    # закрытый ключ). Без него push не отправляются — работают in-app и
-    # Telegram-каналы.
-    FIREBASE_SERVICE_ACCOUNT_JSON = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
+    # Service-account JSON из Firebase Console → Настройки проекта →
+    # Сервисные аккаунты → Generate new private key. Ключ содержит кавычки
+    # и переносы строк внутри private_key — чтобы не мучиться с
+    # экранированием при вставке в .env (особенно с телефона/Termius, где
+    # спецсимволы легко теряются), поддерживаем base64-обёртку:
+    # FIREBASE_SERVICE_ACCOUNT_JSON_B64=<весь json в одну base64-строку>.
+    # Обычный FIREBASE_SERVICE_ACCOUNT_JSON (сырой JSON) тоже работает —
+    # для случаев, когда его удобнее задать напрямую (тесты, локально).
+    _firebase_b64 = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON_B64")
+    FIREBASE_SERVICE_ACCOUNT_JSON = (
+        base64.b64decode(_firebase_b64).decode("utf-8")
+        if _firebase_b64
+        else os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
+    )
 
     WTF_CSRF_TIME_LIMIT = None  # токен не должен протухать раньше сессии
 
