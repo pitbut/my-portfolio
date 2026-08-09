@@ -19,10 +19,13 @@ def notify(user, type_, title, body=None, url=None):
     db.session.flush()
 
     from app.telegram_bot import send_telegram_notification  # локальный импорт — модуль 7
+    from app.push import send_push_to_user
 
     sent = send_telegram_notification(user, title, body, url)
     if sent:
         notification.telegram_sent = True
+
+    send_push_to_user(user, title, body, url)
 
     return notification
 

@@ -168,4 +168,41 @@
   };
 
   document.addEventListener("DOMContentLoaded", initAuthModal);
+
+  // Push-уведомления в мобильном приложении (Capacitor-обёртка, репозиторий
+  // pitbut/B2b). В обычном браузере window.Capacitor отсутствует — функция
+  // просто ничего не делает, это не заглушка, а нормальная работа только
+  // внутри приложения. См. app/push.py на бэкенде.
+  var initAppPushNotifications = function () {
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
+    var Push = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+    if (!Push) return;
+
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    var csrfToken = csrfMeta ? csrfMeta.content : "";
+
+    var sendTokenToServer = function (token) {
+      fetch("/push/register", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify({ token: token, platform: "android" }),
+      }).catch(function () {});
+    };
+
+    Push.addListener("registration", function (token) {
+      sendTokenToServer(token.value);
+    });
+    Push.addListener("registrationError", function (err) {
+      console.warn("Push registration error", err);
+    });
+
+    Push.requestPermissions().then(function (result) {
+      if (result.receive === "granted") {
+        Push.register();
+      }
+    });
+  };
+
+  document.addEventListener("DOMContentLoaded", initAppPushNotifications);
 })();
