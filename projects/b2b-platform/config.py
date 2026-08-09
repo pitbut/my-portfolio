@@ -58,6 +58,13 @@ class Config:
     # абсолютных ссылок в тексте сообщения.
     PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL")
 
+    # Push-уведомления в мобильное приложение (модуль 7, app/push.py).
+    # Содержимое service-account JSON целиком, одной строкой (Firebase
+    # Console → Настройки проекта → Сервисные аккаунты → Создать новый
+    # закрытый ключ). Без него push не отправляются — работают in-app и
+    # Telegram-каналы.
+    FIREBASE_SERVICE_ACCOUNT_JSON = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
+
     WTF_CSRF_TIME_LIMIT = None  # токен не должен протухать раньше сессии
 
 

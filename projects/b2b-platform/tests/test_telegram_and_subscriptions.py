@@ -176,6 +176,87 @@ def test_notify_stays_in_app_only_when_no_token_and_not_linked(client):
         assert notif.telegram_sent is False
 
 
+def test_push_register_and_notify_degrades_without_firebase_key(client, monkeypatch):
+    """Второй канал уведомлений (мобильное приложение, app/push.py) — тот же
+    принцип честной деградации: без FIREBASE_SERVICE_ACCOUNT_JSON push не
+    уходит по-настоящему, но in-app уведомление всё равно создаётся."""
+    from app.models import PushDeviceToken
+
+    region_id = _setup_customer(client, "pushcust@example.com")
+    _setup_executor(client, "pushexec@example.com", region_id)
+    _login(client, "pushexec@example.com")
+
+    resp = client.post("/push/register", json={"token": "device-token-1", "platform": "android"})
+    assert resp.status_code == 200
+    assert resp.get_json()["ok"] is True
+
+    with client.application.app_context():
+        user = User.query.filter_by(email="pushexec@example.com").first()
+        assert PushDeviceToken.query.filter_by(user_id=user.id, token="device-token-1").first() is not None
+
+    client.get("/auth/logout")
+    _login(client, "pushcust@example.com")
+    with client.application.app_context():
+        from app.models import ServiceCategory as SC
+        sc = SC.query.first()
+    _create_order(client, region_id, sc.id)
+
+    with client.application.app_context():
+        notif = Notification.query.filter_by(type="new_order_match").first()
+        assert notif is not None  # in-app уведомление всё равно создалось
+
+
+def test_push_register_requires_login(client):
+    resp = client.post("/push/register", json={"token": "x"}, follow_redirects=False)
+    assert resp.status_code == 302
+
+
+def test_send_push_to_user_sends_via_fcm_when_configured(client, monkeypatch):
+    """Мокаем сам HTTP-вызов к FCM — проверяем, что send_push_to_user
+    реально пытается отправить и уважает список токенов пользователя."""
+    from app.models import PushDeviceToken
+
+    region_id = _setup_customer(client, "pushcust2@example.com")
+    with client.application.app_context():
+        user = User.query.filter_by(email="pushcust2@example.com").first()
+        db.session.add(PushDeviceToken(user_id=user.id, token="tok-abc", platform="android"))
+        db.session.commit()
+
+    client.application.config["FIREBASE_SERVICE_ACCOUNT_JSON"] = (
+        '{"client_email": "svc@example.iam.gserviceaccount.com", '
+        '"private_key": "-----BEGIN PRIVATE KEY-----\\nfake\\n-----END PRIVATE KEY-----\\n", '
+        '"project_id": "test-project"}'
+    )
+    try:
+        monkeypatch.setattr("app.push._get_access_token", lambda account: "fake-access-token")
+
+        sent = []
+
+        class FakeResponse:
+            status_code = 200
+            text = "{}"
+
+            def json(self):
+                return {}
+
+        def fake_post(url, headers=None, json=None, data=None, timeout=None):
+            sent.append((url, headers, json))
+            return FakeResponse()
+
+        monkeypatch.setattr("app.push.requests.post", fake_post)
+
+        with client.application.app_context():
+            from app.push import send_push_to_user
+
+            user = User.query.filter_by(email="pushcust2@example.com").first()
+            result = send_push_to_user(user, "Тест", body="Текст", url="/orders")
+            assert result is True
+            assert len(sent) == 1
+            assert "test-project" in sent[0][0]
+    finally:
+        client.application.config["FIREBASE_SERVICE_ACCOUNT_JSON"] = None
+
+
 def test_subscription_request_and_admin_approval_flow(client):
     from werkzeug.security import generate_password_hash
 

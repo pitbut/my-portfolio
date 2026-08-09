@@ -85,6 +85,7 @@ def create_app(config_name=None):
     from app.routes.constructors import bp as constructors_bp
     from app.routes.settings import bp as settings_bp
     from app.routes.telegram import bp as telegram_bp
+    from app.routes.push import bp as push_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -102,6 +103,7 @@ def create_app(config_name=None):
     app.register_blueprint(settings_bp)
     app.register_blueprint(telegram_bp)
     csrf.exempt(telegram_bp)  # вебхук Telegram не может передать наш CSRF-токен
+    app.register_blueprint(push_bp)
 
     register_cli(app)
 

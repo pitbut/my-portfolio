@@ -922,6 +922,26 @@ class TelegramLinkCode(db.Model):
     user = db.relationship("User")
 
 
+class PushDeviceToken(db.Model):
+    """FCM-токен устройства (мобильное приложение, модуль 7) — второй канал
+    push-уведомлений рядом с Telegram (см. app/push.py). В отличие от
+    TelegramLink — не 1:1: у пользователя может быть несколько устройств
+    (телефон + переустановка), поэтому просто список токенов."""
+
+    __tablename__ = "push_device_tokens"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    token = db.Column(db.String(255), unique=True, nullable=False)
+    platform = db.Column(db.String(20), nullable=False, default="android")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", backref=db.backref("push_tokens", lazy="dynamic"))
+
+    def __repr__(self):
+        return f"<PushDeviceToken user_id={self.user_id} platform={self.platform}>"
+
+
 class SubscriptionPlan(db.Model):
     """Тариф подписки исполнителя (справочник)."""
 
