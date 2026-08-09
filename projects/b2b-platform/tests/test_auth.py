@@ -50,6 +50,23 @@ def test_login_success_redirects_to_profile(client):
     assert "/profile/executor" in resp.headers["Location"]
 
 
+def test_login_sets_persistent_remember_cookie(client):
+    """Мобильное приложение (Capacitor-обёртка) убивается системой Android
+    в фоне намного агрессивнее браузера — обычная сессионная кука
+    (без Max-Age) при этом теряется, и пользователю приходится логиниться
+    заново при каждом запуске. login_user(..., remember=True) выдаёт
+    долгоживущую remember-куку поверх сессионной, чтобы вход переживал
+    перезапуск процесса."""
+    register(client, email="remember@example.com", password="password123", role="executor")
+    client.get("/auth/logout")
+
+    client.post("/auth/login", data={"email": "remember@example.com", "password": "password123"})
+
+    remember_cookie = client.get_cookie("remember_token")
+    assert remember_cookie is not None
+    assert remember_cookie.expires is not None  # не сессионная — переживает закрытие приложения
+
+
 def test_email_confirmation_flow(client):
     register(client, email="confirm@example.com")
     with client.application.app_context():
