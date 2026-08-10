@@ -1,12 +1,13 @@
-<h2 class="profile-section-title">{{ section_number }}. Портфолио (для рекламы)</h2>
-<p class="profile-page__hint">Фото цеха, станков, продукции или ссылка на видео — то, что увидят на вашей публичной странице.</p>
+<h2 class="profile-section-title">{{ section_number }}. {{ t('portfolio.title') }}</h2>
+<p class="profile-page__hint">{{ t('portfolio.hint') }}</p>
 
 {% if telegram_bot_available and not current_user.telegram_link %}
 <div class="flash flash--warn">
-  Кстати: чтобы не пропускать уведомления о заказах и откликах, подключите Telegram —
-  <a href="{{ telegram_deep_link() }}" target="_blank" rel="noopener">нажмите здесь</a> и в открывшемся боте нажмите <strong>Start</strong>.
-  Если вы уже писали этому боту раньше и кнопка не привязала аккаунт — просто отправьте боту сообщением код
-  <strong>{{ telegram_link_code() }}</strong> (подробнее в <a href="{{ url_for('settings.index') }}">Настройках</a>).
+  {{ t('portfolio.telegram_before') }}
+  <a href="{{ telegram_deep_link() }}" target="_blank" rel="noopener">{{ t('portfolio.telegram_click_here') }}</a>
+  {{ t('portfolio.telegram_mid') }} <strong>Start</strong>.
+  {{ t('portfolio.telegram_fallback') }}
+  <strong>{{ telegram_link_code() }}</strong> ({{ t('portfolio.telegram_details') }} <a href="{{ url_for('settings.index') }}">{{ t('portfolio.settings_link_text') }}</a>).
 </div>
 {% endif %}
 
@@ -17,32 +18,32 @@
     {% if item.media_type == 'photo' %}
       <img src="{{ item.file_url }}" alt="{{ item.caption or '' }}" class="portfolio-gallery__img">
     {% else %}
-      <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">▶ Видео</a>
+      <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">{{ t('portfolio.watch_video') }}</a>
     {% endif %}
     {% if item.caption %}<p class="portfolio-gallery__caption">{{ item.caption }}</p>{% endif %}
     <form method="post" action="{{ url_for('profile.portfolio_delete', item_id=item.id) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+      <button type="submit" class="btn-link btn-link--danger">{{ t('common.delete') }}</button>
     </form>
   </div>
   {% endfor %}
 </div>
 {% else %}
-<p class="empty-hint">Портфолио пока пустое.</p>
+<p class="empty-hint">{{ t('portfolio.empty') }}</p>
 {% endif %}
 
 <form method="post" action="{{ url_for('profile.portfolio_add') }}" enctype="multipart/form-data" class="profile-form profile-form--inline">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="media_type" value="photo">
-  <label>Фото <input type="file" name="photo" accept="image/*"></label>
-  <label>Подпись <input type="text" name="caption" placeholder="напр. цех токарной обработки"></label>
-  <button type="submit" class="btn btn--secondary">Добавить фото</button>
+  <label>{{ t('portfolio.photo') }} <input type="file" name="photo" accept="image/*"></label>
+  <label>{{ t('portfolio.caption') }} <input type="text" name="caption" placeholder="{{ t('portfolio.caption_placeholder') }}"></label>
+  <button type="submit" class="btn btn--secondary">{{ t('portfolio.add_photo') }}</button>
 </form>
 
 <form method="post" action="{{ url_for('profile.portfolio_add') }}" class="profile-form profile-form--inline">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="media_type" value="video">
-  <label>Ссылка на видео <input type="url" name="video_url" placeholder="https://youtube.com/..."></label>
-  <label>Подпись <input type="text" name="caption"></label>
-  <button type="submit" class="btn btn--secondary">Добавить видео</button>
+  <label>{{ t('portfolio.video_link') }} <input type="url" name="video_url" placeholder="https://youtube.com/..."></label>
+  <label>{{ t('portfolio.caption') }} <input type="text" name="caption"></label>
+  <button type="submit" class="btn btn--secondary">{{ t('portfolio.add_video') }}</button>
 </form>

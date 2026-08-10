@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% block title %}Лента заказов{% endblock %}
+{% block title %}{{ t('order.dashboard_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Лента заказов</h1>
-  <p class="profile-page__hint">Все открытые заявки. Отмеченные «Рекомендуем» лучше всего подходят под ваш профиль (станочный парк, габариты, регион).</p>
+  <h1>{{ t('order.dashboard_title') }}</h1>
+  <p class="profile-page__hint">{{ t('order.dashboard_hint') }}</p>
 
   {% if orders %}
   <table class="data-table">
-    <thead><tr><th>№</th><th></th><th>Заявка</th><th>Категория</th><th>Расстояние</th><th>Статус</th><th>Моя ставка</th><th></th></tr></thead>
+    <thead><tr><th>{{ t('order.table_number') }}</th><th></th><th>{{ t('order.table_order') }}</th><th>{{ t('order.table_category') }}</th><th>{{ t('order.table_distance') }}</th><th>{{ t('order.table_status') }}</th><th>{{ t('order.table_my_bid') }}</th><th></th></tr></thead>
     <tbody>
       {% for order in orders %}
       {% set match = matches_by_order.get(order.id) %}
       {% set bid = my_bid_by_order.get(order.id) %}
       <tr>
         <td>№{{ order.id }}</td>
-        <td>{% if match %}<span class="badge badge--ok">Рекомендуем</span>{% endif %}</td>
+        <td>{% if match %}<span class="badge badge--ok">{{ t('order.recommended_badge') }}</span>{% endif %}</td>
         <td>{{ order.title }}</td>
         <td>{{ order.service_category.name_ru }}</td>
-        <td>{{ '%.0f км'|format(match.distance_km) if match and match.distance_km is not none else '—' }}</td>
-        <td><span class="status-chip status-chip--{{ order.status }}">{{ order.status }}</span></td>
-        <td>{% if bid %}{{ bid.price }} {{ bid.currency }} / {{ bid.lead_time_days }} дн. ({{ bid.status }}){% else %}—{% endif %}</td>
-        <td><a href="{{ url_for('orders.order_detail', order_id=order.id) }}">Открыть</a></td>
+        <td>{{ t('order.km_short', value='%.0f'|format(match.distance_km)) if match and match.distance_km is not none else '—' }}</td>
+        <td><span class="status-chip status-chip--{{ order.status }}">{{ order_status_label(order.status) }}</span></td>
+        <td>{% if bid %}{{ bid.price }} {{ bid.currency }} / {{ bid.lead_time_days }} {{ t('order.days_short') }} ({{ bid_status_label(bid.status) }}){% else %}—{% endif %}</td>
+        <td><a href="{{ url_for('orders.order_detail', order_id=order.id) }}">{{ t('common.open') }}</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Пока нет открытых заявок — как только заказчик опубликует новую, вы увидите её здесь.</p>
+  <p class="empty-hint">{{ t('order.no_open_orders') }}</p>
   {% endif %}
 </section>
 {% endblock %}

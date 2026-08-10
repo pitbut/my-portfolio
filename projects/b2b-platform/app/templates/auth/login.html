@@ -19,8 +19,8 @@
     {% if google_login_available %}
     <a class="btn btn--google btn--block" href="{{ url_for('auth.google_login', next=next_url) }}">{{ t('auth.google') }}</a>
     {% endif %}
-    <p class="auth-card__switch"><a href="{{ url_for('auth.forgot_password') }}">Забыли пароль?</a></p>
-    <p class="auth-card__switch">Нет аккаунта? <a href="{{ url_for('auth.register', next=next_url) }}">{{ t('nav.register') }}</a></p>
+    <p class="auth-card__switch"><a href="{{ url_for('auth.forgot_password') }}">{{ t('auth.forgot_password_link') }}</a></p>
+    <p class="auth-card__switch">{{ t('auth.no_account') }} <a href="{{ url_for('auth.register', next=next_url) }}">{{ t('nav.register') }}</a></p>
   </div>
 </section>
 {% endblock %}

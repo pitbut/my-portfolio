@@ -4,47 +4,47 @@
 {% block content %}
 <section class="wrap profile-page">
   <div class="page-head">
-    <h1>Заявка №{{ order.id }}: {{ order.title }}</h1>
-    <span class="status-chip status-chip--{{ order.status }}">{{ order.status }}</span>
+    <h1>{{ t('order.number_title', id=order.id, title=order.title) }}</h1>
+    <span class="status-chip status-chip--{{ order.status }}">{{ order_status_label(order.status) }}</span>
   </div>
 
   <div class="order-meta">
-    <span>{{ 'Изготовление' if order.order_type == 'manufacturing' else 'Ремонт' }}</span>
+    <span>{{ t('order.manufacturing') if order.order_type == 'manufacturing' else t('order.repair') }}</span>
     <span>{{ order.service_category.name_ru }}</span>
-    {% if order.material %}<span>Материал: {{ order.material.name_ru }}</span>{% endif %}
+    {% if order.material %}<span>{{ t('order.material_label') }} {{ order.material.name_ru }}</span>{% endif %}
     <span>{{ order.region.name_ru }}{% if order.city %}, {{ order.city.name_ru }}{% endif %}</span>
-    {% if order.deadline_date %}<span>Срок: до {{ order.deadline_date.strftime('%d.%m.%Y') }}</span>{% endif %}
-    {% if order.budget_min or order.budget_max %}<span>Бюджет: {{ order.budget_min or '?' }}–{{ order.budget_max or '?' }} UZS</span>{% endif %}
-    {% if order.payment_methods %}<span>Оплата: {{ payment_method_labels(order.payment_methods)|join(', ') }}</span>{% endif %}
+    {% if order.deadline_date %}<span>{{ t('order.deadline_label', date=order.deadline_date.strftime('%d.%m.%Y')) }}</span>{% endif %}
+    {% if order.budget_min or order.budget_max %}<span>{{ t('order.budget_label', min=order.budget_min or '?', max=order.budget_max or '?') }}</span>{% endif %}
+    {% if order.payment_methods %}<span>{{ t('order.payment_label', methods=payment_method_labels(order.payment_methods)|join(', ')) }}</span>{% endif %}
   </div>
 
   <p class="order-description">{{ order.description }}</p>
 
   {% if current_user.role == 'executor' %}
   <p>
-    <a href="{{ url_for('profile.customer_public_profile', user_id=order.customer.user_id) }}">Профиль и портфолио заказчика ↗</a>
-    · <a href="{{ url_for('chat.thread', user_id=order.customer.user_id, order_id=order.id) }}">Написать 💬</a>
+    <a href="{{ url_for('profile.customer_public_profile', user_id=order.customer.user_id) }}">{{ t('order.customer_profile_link') }}</a>
+    · <a href="{{ url_for('chat.thread', user_id=order.customer.user_id, order_id=order.id) }}">{{ t('order.write_chat') }}</a>
   </p>
   {% endif %}
 
   {% set is_assigned_executor = current_user.role == 'executor' and order.assignment and order.assignment.bid.executor_id == current_user.executor_profile.id %}
 
   {% if order.status == 'completed' and (is_owner or is_assigned_executor) %}
-  <a class="btn btn--secondary" href="{{ url_for('reviews.leave_review', order_id=order.id) }}">Оставить отзыв</a>
+  <a class="btn btn--secondary" href="{{ url_for('reviews.leave_review', order_id=order.id) }}">{{ t('review.leave') }}</a>
   {% endif %}
 
   {% if order.dispute %}
-  <a class="btn btn--secondary" href="{{ url_for('disputes.dispute_detail', dispute_id=order.dispute.id) }}">Спор по заказу ({{ order.dispute.status }})</a>
+  <a class="btn btn--secondary" href="{{ url_for('disputes.dispute_detail', dispute_id=order.dispute.id) }}">{{ t('dispute.for_order', status=order.dispute.status) }}</a>
   {% elif order.status in ('assigned', 'in_progress', 'completed') and (is_owner or is_assigned_executor) %}
-  <a class="btn-link btn-link--danger" href="{{ url_for('disputes.open_dispute', order_id=order.id) }}">Открыть спор</a>
+  <a class="btn-link btn-link--danger" href="{{ url_for('disputes.open_dispute', order_id=order.id) }}">{{ t('dispute.open') }}</a>
   {% endif %}
 
   {% if order.dimensions_length_mm or order.dimensions_diameter_mm or order.weight_kg %}
   <p class="order-dimensions">
-    Габариты:
-    {% if order.dimensions_length_mm %}длина {{ order.dimensions_length_mm }} мм{% endif %}
-    {% if order.dimensions_diameter_mm %}, диаметр {{ order.dimensions_diameter_mm }} мм{% endif %}
-    {% if order.weight_kg %}, вес {{ order.weight_kg }} кг{% endif %}
+    {{ t('order.dimensions_label') }}
+    {% if order.dimensions_length_mm %}{{ t('order.length_short', value=order.dimensions_length_mm) }}{% endif %}
+    {% if order.dimensions_diameter_mm %}{{ t('order.diameter_short', value=order.dimensions_diameter_mm) }}{% endif %}
+    {% if order.weight_kg %}{{ t('order.weight_short', value=order.weight_kg) }}{% endif %}
   </p>
   {% endif %}
 
@@ -54,7 +54,7 @@
       {% if item.media_type == 'photo' or item.media_type == 'drawing' %}
         <a href="{{ item.file_url }}" target="_blank" rel="noopener"><img src="{{ item.file_url }}" alt="{{ item.media_type }}" class="order-media__thumb"></a>
       {% else %}
-        <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="order-media__link">{{ 'Видео' if item.media_type == 'video' else 'Документ' }} ↗</a>
+        <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="order-media__link">{{ t('order.video_link_text') if item.media_type == 'video' else t('order.document_link_text') }}</a>
       {% endif %}
     {% endfor %}
   </div>
@@ -62,45 +62,45 @@
 
   {% if is_owner %}
     {% if order.assignment %}
-      <h2 class="profile-section-title">Исполнитель</h2>
+      <h2 class="profile-section-title">{{ t('order.executor_section') }}</h2>
       <p>
         <a href="{{ url_for('profile.executor_public_profile', user_id=order.assignment.bid.executor.user_id) }}">{{ order.assignment.bid.executor.display_name }}</a>
         — {{ order.assignment.agreed_price }} {{ order.assignment.bid.currency }},
-        срок до {{ order.assignment.agreed_deadline.strftime('%d.%m.%Y') if order.assignment.agreed_deadline }}
-        · <a href="{{ url_for('chat.thread', user_id=order.assignment.bid.executor.user_id, order_id=order.id) }}">Написать 💬</a>
+        {{ t('order.deadline_until', date=order.assignment.agreed_deadline.strftime('%d.%m.%Y') if order.assignment.agreed_deadline else '—') }}
+        · <a href="{{ url_for('chat.thread', user_id=order.assignment.bid.executor.user_id, order_id=order.id) }}">{{ t('order.write_chat') }}</a>
       </p>
       {% if order.status == 'in_progress' %}
       <form method="post" action="{{ url_for('orders.complete_order', order_id=order.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn btn--primary">Подтвердить приёмку заказа</button>
+        <button type="submit" class="btn btn--primary">{{ t('order.confirm_completion') }}</button>
       </form>
       {% elif order.status == 'assigned' %}
-      <form method="post" action="{{ url_for('orders.cancel_assignment', order_id=order.id) }}" onsubmit="return confirm('Отменить выбор исполнителя? Заявка снова откроется для ставок.');">
+      <form method="post" action="{{ url_for('orders.cancel_assignment', order_id=order.id) }}" onsubmit="return confirm('{{ t('order.cancel_selection_confirm') }}');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn-link btn-link--danger">Отменить выбор</button>
+        <button type="submit" class="btn-link btn-link--danger">{{ t('order.cancel_selection') }}</button>
       </form>
       {% endif %}
     {% else %}
-      <h2 class="profile-section-title">Ставки исполнителей ({{ order.bids|selectattr('status', 'equalto', 'active')|list|length }})</h2>
+      <h2 class="profile-section-title">{{ t('order.bids_section', count=order.bids|selectattr('status', 'equalto', 'active')|list|length) }}</h2>
       {% set active_bids = order.bids|selectattr('status', 'equalto', 'active')|list %}
       {% if active_bids %}
       <table class="data-table">
-        <thead><tr><th>Исполнитель</th><th>Цена</th><th>Срок</th><th>Комментарий</th><th></th></tr></thead>
+        <thead><tr><th>{{ t('order.table_executor') }}</th><th>{{ t('order.table_price') }}</th><th>{{ t('order.table_deadline') }}</th><th>{{ t('order.table_comment') }}</th><th></th></tr></thead>
         <tbody>
           {% for bid in active_bids|sort(attribute='price') %}
           <tr>
             <td>
               <a href="{{ url_for('profile.executor_public_profile', user_id=bid.executor.user_id) }}">{{ bid.executor.display_name }}</a>
-              ({{ bid.executor.org_type }}, {{ '%.1f'|format(bid.executor.rating_avg) if bid.executor.rating_avg else 'нет рейтинга' }})
-              · <a href="{{ url_for('chat.thread', user_id=bid.executor.user_id, order_id=order.id) }}">Написать 💬</a>
+              ({{ bid.executor.org_type }}, {{ '%.1f'|format(bid.executor.rating_avg) if bid.executor.rating_avg else t('order.no_rating') }})
+              · <a href="{{ url_for('chat.thread', user_id=bid.executor.user_id, order_id=order.id) }}">{{ t('order.write_chat') }}</a>
             </td>
             <td>{{ bid.price }} {{ bid.currency }}</td>
-            <td>{{ bid.lead_time_days }} дн.</td>
+            <td>{{ bid.lead_time_days }} {{ t('order.days_short') }}</td>
             <td>{{ bid.comment or '—' }}</td>
             <td>
               <form method="post" action="{{ url_for('orders.assign_bid', order_id=order.id, bid_id=bid.id) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn--secondary">Выбрать</button>
+                <button type="submit" class="btn btn--secondary">{{ t('order.select_bid') }}</button>
               </form>
             </td>
           </tr>
@@ -108,42 +108,42 @@
         </tbody>
       </table>
       {% else %}
-      <p class="empty-hint">Ставок пока нет{% if order.is_open_for_bids %} — аукцион открыт до {{ order.auction_deadline_at.strftime('%d.%m.%Y %H:%M') }}{% endif %}.</p>
+      <p class="empty-hint">{{ t('order.no_bids_yet') }}{% if order.is_open_for_bids %}{{ t('order.auction_open_until', date=order.auction_deadline_at.strftime('%d.%m.%Y %H:%M')) }}{% endif %}.</p>
       {% endif %}
     {% endif %}
   {% endif %}
 
   {% if current_user.role == 'executor' %}
     {% if order.assignment and order.assignment.bid.executor_id == current_user.executor_profile.id %}
-      <h2 class="profile-section-title">Ваш заказ</h2>
-      <p>Согласованная цена: {{ order.assignment.agreed_price }} {{ order.assignment.bid.currency }}</p>
+      <h2 class="profile-section-title">{{ t('order.your_order_section') }}</h2>
+      <p>{{ t('order.agreed_price_label', price=order.assignment.agreed_price, currency=order.assignment.bid.currency) }}</p>
       {% if order.status == 'assigned' %}
       <form method="post" action="{{ url_for('orders.start_order', order_id=order.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn btn--primary">Начать работу</button>
+        <button type="submit" class="btn btn--primary">{{ t('order.start_work') }}</button>
       </form>
       {% endif %}
     {% elif order.is_open_for_bids and current_user.executor_profile and current_user.executor_profile.is_complete %}
-      <h2 class="profile-section-title">{{ 'Ваша ставка' if my_bid else 'Подать ставку' }}</h2>
+      <h2 class="profile-section-title">{{ t('order.your_bid_section') if my_bid else t('order.submit_bid_section') }}</h2>
       <form method="post" action="{{ url_for('orders.submit_bid', order_id=order.id) }}" class="profile-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-row">
-          <label>Цена <input type="number" name="price" min="0" value="{{ my_bid.price if my_bid else '' }}" required></label>
-          <label>Валюта
+          <label>{{ t('order.price_field') }} <input type="number" name="price" min="0" value="{{ my_bid.price if my_bid else '' }}" required></label>
+          <label>{{ t('order.currency_field') }}
             <select name="currency">
               <option value="UZS" {{ 'selected' if my_bid and my_bid.currency == 'UZS' }}>UZS</option>
               <option value="USD" {{ 'selected' if my_bid and my_bid.currency == 'USD' }}>USD</option>
             </select>
           </label>
         </div>
-        <label>Срок выполнения, дней <input type="number" name="lead_time_days" min="1" value="{{ my_bid.lead_time_days if my_bid else '' }}" required></label>
-        <label>Комментарий (условия, гарантия) <textarea name="comment" rows="3">{{ my_bid.comment or '' if my_bid }}</textarea></label>
-        <button type="submit" class="btn btn--primary">{{ 'Обновить ставку' if my_bid else 'Отправить ставку' }}</button>
+        <label>{{ t('order.lead_time_field') }} <input type="number" name="lead_time_days" min="1" value="{{ my_bid.lead_time_days if my_bid else '' }}" required></label>
+        <label>{{ t('order.comment_field') }} <textarea name="comment" rows="3">{{ my_bid.comment or '' if my_bid }}</textarea></label>
+        <button type="submit" class="btn btn--primary">{{ t('order.update_bid') if my_bid else t('order.submit_bid_btn') }}</button>
       </form>
     {% elif order.is_open_for_bids %}
-      <p class="empty-hint">Чтобы делать ставки, сначала <a href="{{ url_for('profile.executor_edit') }}">полностью заполните профиль</a>.</p>
+      <p class="empty-hint">{{ t('order.complete_profile_before') }} <a href="{{ url_for('profile.executor_edit') }}">{{ t('order.complete_profile_link') }}</a>.</p>
     {% elif my_bid %}
-      <p class="empty-hint">Ваша ставка: {{ my_bid.price }} {{ my_bid.currency }} ({{ my_bid.status }}). Аукцион закрыт.</p>
+      <p class="empty-hint">{{ t('order.your_bid_closed', price=my_bid.price, currency=my_bid.currency, status=bid_status_label(my_bid.status)) }}</p>
     {% endif %}
   {% endif %}
 </section>

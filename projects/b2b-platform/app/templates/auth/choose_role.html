@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Выбор роли{% endblock %}
+{% block title %}{{ t('auth.choose_role_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap auth-page">
   <div class="auth-card">
-    <h1>Кто вы на платформе?</h1>
-    <p>Google не передаёт эту информацию — выберите роль один раз, дальше её можно будет сменить только через поддержку.</p>
+    <h1>{{ t('auth.who_are_you_title') }}</h1>
+    <p>{{ t('auth.google_no_role_hint') }}</p>
     <form method="post" action="{{ url_for('auth.choose_role') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="next" value="{{ next_url }}">
@@ -14,7 +14,7 @@
         <label><input type="radio" name="role" value="executor"> {{ t('auth.role_executor') }}</label>
         <label><input type="radio" name="role" value="constructor"> {{ t('auth.role_constructor') }}</label>
       </fieldset>
-      <button type="submit" class="btn btn--primary btn--block">Продолжить</button>
+      <button type="submit" class="btn btn--primary btn--block">{{ t('common.continue') }}</button>
     </form>
   </div>
 </section>

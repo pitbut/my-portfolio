@@ -28,49 +28,49 @@
       <nav class="account-nav">
         {% if current_user.is_authenticated %}
           {% if current_user.role == 'customer' %}
-            <a href="{{ url_for('orders.my_orders') }}">Мои заказы</a>
-            <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
-            <a href="{{ url_for('map.index') }}">Карта</a>
-            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
-            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
-            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
-            <a href="{{ url_for('materials_market.index') }}">Материалы</a>
-            <a href="{{ url_for('reviews.my_reviews') }}">Отзывы</a>
+            <a href="{{ url_for('orders.my_orders') }}">{{ t('nav.my_orders') }}</a>
+            <a href="{{ url_for('orders.new_order') }}">{{ t('nav.new_order') }}</a>
+            <a href="{{ url_for('map.index') }}">{{ t('nav.map') }}</a>
+            <a href="{{ url_for('constructors.index') }}">{{ t('nav.constructors') }}</a>
+            <a href="{{ url_for('marketplace.index') }}">{{ t('nav.marketplace') }}</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">{{ t('nav.jobs') }}</a>
+            <a href="{{ url_for('materials_market.index') }}">{{ t('nav.materials') }}</a>
+            <a href="{{ url_for('reviews.my_reviews') }}">{{ t('nav.reviews') }}</a>
             <a href="{{ url_for('profile.customer_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'executor' %}
-            <a href="{{ url_for('orders.executor_dashboard') }}">Лента заказов</a>
-            <a href="{{ url_for('map.index') }}">Карта</a>
-            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
-            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
-            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
-            <a href="{{ url_for('materials_market.index') }}">Материалы</a>
-            <a href="{{ url_for('reviews.my_reviews') }}">Отзывы</a>
-            <a href="{{ url_for('settings.subscription_page') }}">Подписка</a>
+            <a href="{{ url_for('orders.executor_dashboard') }}">{{ t('nav.orders_feed') }}</a>
+            <a href="{{ url_for('map.index') }}">{{ t('nav.map') }}</a>
+            <a href="{{ url_for('constructors.index') }}">{{ t('nav.constructors') }}</a>
+            <a href="{{ url_for('marketplace.index') }}">{{ t('nav.marketplace') }}</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">{{ t('nav.jobs') }}</a>
+            <a href="{{ url_for('materials_market.index') }}">{{ t('nav.materials') }}</a>
+            <a href="{{ url_for('reviews.my_reviews') }}">{{ t('nav.reviews') }}</a>
+            <a href="{{ url_for('settings.subscription_page') }}">{{ t('nav.subscription') }}</a>
             <a href="{{ url_for('profile.executor_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'constructor' %}
-            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
-            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
-            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
-            <a href="{{ url_for('materials_market.index') }}">Материалы</a>
+            <a href="{{ url_for('constructors.index') }}">{{ t('nav.constructors') }}</a>
+            <a href="{{ url_for('marketplace.index') }}">{{ t('nav.marketplace') }}</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">{{ t('nav.jobs') }}</a>
+            <a href="{{ url_for('materials_market.index') }}">{{ t('nav.materials') }}</a>
             <a href="{{ url_for('profile.constructor_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'admin' %}
-            <a href="{{ url_for('orders.my_orders') }}">Заказы</a>
-            <a href="{{ url_for('orders.new_order') }}">Новая заявка</a>
-            <a href="{{ url_for('map.index') }}">Карта</a>
-            <a href="{{ url_for('constructors.index') }}">Конструкторы</a>
-            <a href="{{ url_for('marketplace.index') }}">Барахолка</a>
-            <a href="{{ url_for('jobs.vacancies_index') }}">Вакансии</a>
-            <a href="{{ url_for('materials_market.index') }}">Материалы</a>
-            <a href="{{ url_for('admin.disputes_list') }}">Споры (админ)</a>
-            <a href="{{ url_for('admin.subscriptions_list') }}">Подписки (админ)</a>
-            <a href="{{ url_for('admin.users_list') }}">Пользователи (админ)</a>
+            <a href="{{ url_for('orders.my_orders') }}">{{ t('nav.orders') }}</a>
+            <a href="{{ url_for('orders.new_order') }}">{{ t('nav.new_order') }}</a>
+            <a href="{{ url_for('map.index') }}">{{ t('nav.map') }}</a>
+            <a href="{{ url_for('constructors.index') }}">{{ t('nav.constructors') }}</a>
+            <a href="{{ url_for('marketplace.index') }}">{{ t('nav.marketplace') }}</a>
+            <a href="{{ url_for('jobs.vacancies_index') }}">{{ t('nav.jobs') }}</a>
+            <a href="{{ url_for('materials_market.index') }}">{{ t('nav.materials') }}</a>
+            <a href="{{ url_for('admin.disputes_list') }}">{{ t('nav.admin_disputes') }}</a>
+            <a href="{{ url_for('admin.subscriptions_list') }}">{{ t('nav.admin_subscriptions') }}</a>
+            <a href="{{ url_for('admin.users_list') }}">{{ t('nav.admin_users') }}</a>
           {% endif %}
           {% if current_user.role in ('customer', 'executor', 'constructor') %}
-            <a href="{{ url_for('settings.index') }}">⚙️</a>
+            <a href="{{ url_for('settings.index') }}" title="{{ t('nav.settings') }}">⚙️</a>
           {% endif %}
-          <a href="{{ url_for('search.index') }}" title="Поиск по сайту">🔎</a>
-          <a href="{{ url_for('chat.inbox') }}">💬{% if unread_messages %}<span class="notif-badge">{{ unread_messages }}</span>{% endif %}</a>
-          <a href="{{ url_for('main.notifications') }}">🔔{% if unread_notifications %}<span class="notif-badge">{{ unread_notifications }}</span>{% endif %}</a>
+          <a href="{{ url_for('search.index') }}" title="{{ t('nav.search') }}">🔎</a>
+          <a href="{{ url_for('chat.inbox') }}" title="{{ t('nav.messages') }}">💬{% if unread_messages %}<span class="notif-badge">{{ unread_messages }}</span>{% endif %}</a>
+          <a href="{{ url_for('main.notifications') }}" title="{{ t('nav.notifications') }}">🔔{% if unread_notifications %}<span class="notif-badge">{{ unread_notifications }}</span>{% endif %}</a>
           <span class="account-nav__email">{{ current_user.email }}</span>
           <a href="{{ url_for('auth.logout') }}">{{ t('nav.logout') }}</a>
         {% else %}
@@ -95,8 +95,7 @@
   {% if pending_confirm_url %}
   <div class="wrap flash-messages">
     <div class="flash flash--info">
-      Почтовый сервер на сайте пока не настроен — письмо не отправляется автоматически.
-      Подтвердите email по ссылке: <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
+      {{ t('flash.email_not_configured') }} <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
     </div>
   </div>
   {% endif %}
@@ -108,9 +107,8 @@
   {% if current_user.is_authenticated and current_user.role in ('customer', 'executor', 'constructor') and current_user.google_sub and telegram_bot_available and not current_user.telegram_link %}
   <div class="wrap flash-messages">
     <div class="flash flash--warn">
-      Вы вошли через Google — телефон и Telegram у нас ещё не привязаны. Обязательно привяжите Telegram
-      в <a href="{{ url_for('settings.index') }}">настройках</a>, иначе не будете получать уведомления
-      о заказах, откликах и сообщениях.
+      {{ t('flash.google_no_telegram_before') }}
+      <a href="{{ url_for('settings.index') }}">{{ t('flash.google_no_telegram_link') }}</a>{{ t('flash.google_no_telegram_after') }}
     </div>
   </div>
   {% endif %}
@@ -120,7 +118,7 @@
 
 <footer class="site-footer">
   <div class="wrap site-footer__inner">
-    <span>🏭 B2B Platform UZ — изготовители и ремонтники оборудования Узбекистана</span>
+    <span>🏭 {{ t('footer.tagline') }}</span>
   </div>
 </footer>
 

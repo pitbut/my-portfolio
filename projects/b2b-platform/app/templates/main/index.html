@@ -13,10 +13,10 @@
     </div>
 
     <div class="hero__stats">
-      <div class="hero__stat"><span class="hero__stat-num">{{ stats.total }}</span><span class="hero__stat-label">зарегистрировано всего</span></div>
-      <div class="hero__stat"><span class="hero__stat-num">{{ stats.customer }}</span><span class="hero__stat-label">заказчиков</span></div>
-      <div class="hero__stat"><span class="hero__stat-num">{{ stats.executor }}</span><span class="hero__stat-label">исполнителей</span></div>
-      <div class="hero__stat"><span class="hero__stat-num">{{ stats.constructor }}</span><span class="hero__stat-label">конструкторов</span></div>
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.total }}</span><span class="hero__stat-label">{{ t('home.stat_total') }}</span></div>
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.customer }}</span><span class="hero__stat-label">{{ t('home.stat_customer') }}</span></div>
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.executor }}</span><span class="hero__stat-label">{{ t('home.stat_executor') }}</span></div>
+      <div class="hero__stat"><span class="hero__stat-num">{{ stats.constructor }}</span><span class="hero__stat-label">{{ t('home.stat_constructor') }}</span></div>
     </div>
   </div>
 </section>
@@ -24,25 +24,23 @@
 <section class="how-it-works wrap">
   <div class="how-card">
     <span class="how-card__num">1</span>
-    <h3>Регистрация</h3>
-    <p>Заказчик, исполнитель или конструктор регистрируются сами — по email или через Google — и сами заполняют свой профиль.</p>
+    <h3>{{ t('home.step1_title') }}</h3>
+    <p>{{ t('home.step1_text') }}</p>
   </div>
   <div class="how-card">
     <span class="how-card__num">2</span>
-    <h3>Профиль</h3>
-    <p>Исполнитель указывает станочный парк, допустимые габариты и материалы — это основа автоподбора заказов.</p>
+    <h3>{{ t('home.step2_title') }}</h3>
+    <p>{{ t('home.step2_text') }}</p>
   </div>
   <div class="how-card">
     <span class="how-card__num">3</span>
-    <h3>Заказы и аукцион</h3>
-    <p>Публикация заявок, автоподбор исполнителей поблизости и аукцион ставок — заказчик сам выбирает победителя.</p>
+    <h3>{{ t('home.step3_title') }}</h3>
+    <p>{{ t('home.step3_text') }}</p>
   </div>
 </section>
 
 <section class="wrap status-note">
-  <p>На платформе работают: заказы и автоподбор, карта и геопоиск, отзывы, арбитраж, Telegram-бот и подписки,
-  барахолка станков и инструмента, вакансии и резюме, рынок сырья и материалов, роль «Конструктор», прямые
-  сообщения между пользователями. Подробнее — в <a href="../b2b-equipment-platform-uz/index.html">техническом задании</a>.</p>
+  <p>{{ t('home.status_note') }} <a href="../b2b-equipment-platform-uz/index.html">{{ t('home.status_note_link') }}</a>.</p>
 </section>
 {% endblock %}
 
@@ -51,7 +49,7 @@
 <div id="authModal" class="modal {{ 'is-open' if auth_required }}" aria-hidden="{{ 'false' if auth_required else 'true' }}">
   <div class="modal__backdrop" data-close-modal></div>
   <div class="modal__dialog">
-    <button type="button" class="modal__close" data-close-modal aria-label="Закрыть">×</button>
+    <button type="button" class="modal__close" data-close-modal aria-label="{{ t('common.close') }}">×</button>
     <h2>{{ t('paywall.title') }}</h2>
     <p class="modal__body-text">{{ t('paywall.body') }}</p>
 
@@ -79,13 +77,13 @@
         <input type="hidden" name="next" value="{{ next_url }}">
         <label>{{ t('auth.email') }}<input type="email" name="email" required></label>
         <label>{{ t('auth.password') }}<input type="password" name="password" required minlength="8"></label>
-        <label>Повторите пароль<input type="password" name="password2" required minlength="8"></label>
+        <label>{{ t('auth.password2') }}<input type="password" name="password2" required minlength="8"></label>
         <fieldset class="role-fieldset">
           <label><input type="radio" name="role" value="customer" required> {{ t('auth.role_customer') }}</label>
           <label><input type="radio" name="role" value="executor"> {{ t('auth.role_executor') }}</label>
           <label><input type="radio" name="role" value="constructor"> {{ t('auth.role_constructor') }}</label>
         </fieldset>
-        <label>Язык интерфейса
+        <label>{{ t('auth.language') }}
           <select name="language">
             {% for code in supported_languages %}
               <option value="{{ code }}" {{ 'selected' if code == current_lang }}>{{ language_labels[code] }}</option>

@@ -1,32 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Мои заказы{% endblock %}
+{% block title %}{{ t('order.my_orders_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
   <div class="page-head">
-    <h1>Мои заказы</h1>
-    <a class="btn btn--primary" href="{{ url_for('orders.new_order') }}">+ Новая заявка</a>
+    <h1>{{ t('order.my_orders_title') }}</h1>
+    <a class="btn btn--primary" href="{{ url_for('orders.new_order') }}">+ {{ t('nav.new_order') }}</a>
   </div>
 
   {% if orders %}
   <table class="data-table">
-    <thead><tr><th>№</th><th>Заявка</th><th>Категория</th><th>Статус</th><th>Ставок</th><th>Создан</th><th></th></tr></thead>
+    <thead><tr><th>{{ t('order.table_number') }}</th><th>{{ t('order.table_order') }}</th><th>{{ t('order.table_category') }}</th><th>{{ t('order.table_status') }}</th><th>{{ t('order.table_bids') }}</th><th>{{ t('order.table_created') }}</th><th></th></tr></thead>
     <tbody>
       {% for order in orders %}
       <tr>
         <td>№{{ order.id }}</td>
         <td>{{ order.title }}</td>
         <td>{{ order.service_category.name_ru }}</td>
-        <td><span class="status-chip status-chip--{{ order.status }}">{{ order.status }}</span></td>
+        <td><span class="status-chip status-chip--{{ order.status }}">{{ order_status_label(order.status) }}</span></td>
         <td>{{ order.bids|length }}</td>
         <td>{{ order.created_at.strftime('%d.%m.%Y') }}</td>
-        <td><a href="{{ url_for('orders.order_detail', order_id=order.id) }}">Открыть</a></td>
+        <td><a href="{{ url_for('orders.order_detail', order_id=order.id) }}">{{ t('common.open') }}</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Заявок пока нет. <a href="{{ url_for('orders.new_order') }}">Разместить первую</a>.</p>
+  <p class="empty-hint">{{ t('order.no_orders_yet') }} <a href="{{ url_for('orders.new_order') }}">{{ t('order.post_first') }}</a>.</p>
   {% endif %}
 </section>
 {% endblock %}

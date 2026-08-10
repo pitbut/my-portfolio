@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Профиль заказчика{% endblock %}
+{% block title %}{{ t('profile.customer_title') }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
@@ -7,60 +7,60 @@
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Профиль заказчика</h1>
+  <h1>{{ t('profile.customer_title') }}</h1>
   <p class="profile-page__hint">
-    Заполните карточку сами — это займёт пару минут. Обязательные поля отмечены *.
-    {% if profile.is_complete %}<span class="badge badge--ok">Профиль заполнен</span>{% else %}<span class="badge badge--warn">Профиль не заполнен</span>{% endif %}
+    {{ t('profile.fill_hint') }}
+    {% if profile.is_complete %}<span class="badge badge--ok">{{ t('profile.complete_badge') }}</span>{% else %}<span class="badge badge--warn">{{ t('profile.incomplete_badge') }}</span>{% endif %}
   </p>
 
   <form method="post" action="{{ url_for('profile.customer_edit') }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <fieldset class="role-fieldset">
-      <legend>Кто вы? *</legend>
-      <label><input type="radio" name="kind" value="individual" {{ 'checked' if profile.kind == 'individual' }} required> Физическое лицо</label>
-      <label><input type="radio" name="kind" value="company" {{ 'checked' if profile.kind == 'company' }}> Компания (юр. лицо)</label>
+      <legend>{{ t('profile.who_are_you') }}</legend>
+      <label><input type="radio" name="kind" value="individual" {{ 'checked' if profile.kind == 'individual' }} required> {{ t('profile.individual') }}</label>
+      <label><input type="radio" name="kind" value="company" {{ 'checked' if profile.kind == 'company' }}> {{ t('profile.company') }}</label>
     </fieldset>
 
-    <label>Название компании / ФИО *
+    <label>{{ t('profile.company_or_name') }}
       <input type="text" name="display_name" value="{{ profile.display_name or '' }}" required>
     </label>
 
-    <label>Контактный телефон
+    <label>{{ t('profile.phone') }}
       <input type="tel" name="phone" value="{{ current_user.phone or '' }}" placeholder="+998 90 123 45 67">
     </label>
 
-    <label>ИНН / СТИР (если компания)
+    <label>{{ t('profile.stir_inn') }}
       <input type="text" name="stir_inn" value="{{ profile.stir_inn or '' }}">
     </label>
 
     <div class="form-row">
-      <label>Регион *
+      <label>{{ t('profile.region') }}
         <select name="region_id" id="region_id" required>
-          <option value="">— выберите —</option>
+          <option value="">{{ t('profile.select_placeholder') }}</option>
           {% for region in regions %}
             <option value="{{ region.id }}" {{ 'selected' if profile.region_id == region.id }}>{{ region.name_ru }}</option>
           {% endfor %}
         </select>
       </label>
-      <label>Город
+      <label>{{ t('profile.city') }}
         <select name="city_id" id="city_id" data-selected="{{ profile.city_id or '' }}">
-          <option value="">— сначала выберите регион —</option>
+          <option value="">{{ t('profile.city_placeholder') }}</option>
         </select>
       </label>
     </div>
 
-    <label>Адрес объекта *
+    <label>{{ t('profile.object_address') }}
       <input type="text" name="address_text" id="address_text" value="{{ profile.address_text or '' }}" required>
     </label>
 
-    <label>Уточните точку на карте (нажмите на карту, чтобы поставить/передвинуть маркер)</label>
+    <label>{{ t('profile.map_hint') }}</label>
     <div id="locationMap" class="location-map"
          data-lat="{{ profile.latitude or '' }}" data-lng="{{ profile.longitude or '' }}"></div>
     <input type="hidden" name="latitude" id="latitude" value="{{ profile.latitude or '' }}">
     <input type="hidden" name="longitude" id="longitude" value="{{ profile.longitude or '' }}">
 
-    <button type="submit" class="btn btn--primary">Сохранить профиль</button>
+    <button type="submit" class="btn btn--primary">{{ t('profile.save') }}</button>
   </form>
 
   {% with section_number=2 %}{% include "profile/_portfolio_section.html" %}{% endwith %}
