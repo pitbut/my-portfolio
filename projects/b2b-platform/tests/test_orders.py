@@ -1,4 +1,6 @@
-from app.models import Bid, EquipmentType, Material, Notification, Order, Region, ServiceCategory, User
+import io
+
+from app.models import Bid, EquipmentType, Material, Notification, Order, OrderMedia, Region, ServiceCategory, User
 
 from tests.conftest import register
 
@@ -406,3 +408,69 @@ def test_any_executor_can_view_order_but_needs_complete_profile_to_bid(client):
     assert "полностью заполните профиль".encode() in resp.data
     with client.application.app_context():
         assert Bid.query.filter_by(order_id=order_id).count() == 0
+
+
+def test_customer_can_attach_file_to_order_and_download_it(client):
+    """Заявка может быть нестандартной (не всё описывается формой), поэтому
+    заказчику даём приложить произвольный файл (PDF/архив), не только
+    фото/чертёж-картинку — хранится на диске сервера, не через ImgBB."""
+    region_id = _setup_customer(client, "filecust@example.com")
+    with client.application.app_context():
+        service_id = ServiceCategory.query.first().id
+
+    _login(client, "filecust@example.com")
+    _create_order(
+        client, region_id, service_id, title="Заявка с файлом",
+        attachment=(io.BytesIO(b"%PDF-1.4 fake pdf content"), "chertezh.pdf"),
+    )
+
+    with client.application.app_context():
+        order = Order.query.filter_by(title="Заявка с файлом").first()
+        media = OrderMedia.query.filter_by(order_id=order.id, media_type="file").first()
+        assert media is not None
+        download_url = media.file_url
+
+    resp = client.get(download_url)
+    assert resp.status_code == 200
+    assert resp.data == b"%PDF-1.4 fake pdf content"
+    assert "chertezh.pdf" in resp.headers.get("Content-Disposition", "")
+
+
+def test_order_attachment_rejects_disallowed_extension(client):
+    region_id = _setup_customer(client, "badfile@example.com")
+    with client.application.app_context():
+        service_id = ServiceCategory.query.first().id
+
+    _login(client, "badfile@example.com")
+    resp = _create_order(
+        client, region_id, service_id, title="Заявка с плохим файлом",
+        attachment=(io.BytesIO(b"MZ fake exe"), "virus.exe"),
+    )
+    assert "Недопустимый тип файла".encode() in resp.data
+    with client.application.app_context():
+        order = Order.query.filter_by(title="Заявка с плохим файлом").first()
+        assert order is not None
+        assert OrderMedia.query.filter_by(order_id=order.id, media_type="file").first() is None
+
+
+def test_order_attachment_download_forbidden_for_unrelated_customer(client):
+    region_id = _setup_customer(client, "ownercust@example.com")
+    with client.application.app_context():
+        service_id = ServiceCategory.query.first().id
+
+    _login(client, "ownercust@example.com")
+    _create_order(
+        client, region_id, service_id, title="Приватная заявка с файлом",
+        attachment=(io.BytesIO(b"file bytes"), "spec.pdf"),
+    )
+    client.get("/auth/logout")
+
+    with client.application.app_context():
+        order = Order.query.filter_by(title="Приватная заявка с файлом").first()
+        media = OrderMedia.query.filter_by(order_id=order.id, media_type="file").first()
+        download_url = media.file_url
+
+    _setup_customer(client, "strangercust@example.com")
+    _login(client, "strangercust@example.com")
+    resp = client.get(download_url)
+    assert resp.status_code == 403

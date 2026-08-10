@@ -882,6 +882,10 @@ STRINGS = {
         "uz_cyrillic": "Видео ҳаволаси (YouTube, Google Disk ва ҳ.к.)",
         "en": "Video link (YouTube, Google Drive, etc.)",
     },
+    "order.attachment_label": {
+        "ru": "Файл (PDF, чертёж, архив и т.п.)", "uz_latin": "Fayl (PDF, chizma, arxiv va h.k.)",
+        "uz_cyrillic": "Файл (PDF, чизма, архив ва ҳ.к.)", "en": "File (PDF, drawing, archive, etc.)",
+    },
     "order.document_url_label": {
         "ru": "Ссылка на документ (PDF-чертёж и т.п.)",
         "uz_latin": "Hujjat havolasi (PDF-chizma va h.k.)",

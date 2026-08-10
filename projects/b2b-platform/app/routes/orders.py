@@ -1,11 +1,12 @@
 """Модуль 2 — публикация заказа, автоподбор, лента исполнителя, аукцион ставок."""
 from datetime import date, datetime, timedelta
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user
 
 from app import db
 from app.decorators import paywall_required, role_required
+from app.files import order_uploads_dir, upload_order_file
 from app.matching import notify_unmatched_executors, run_matching
 from app.models import (
     Bid,
@@ -146,6 +147,20 @@ def new_order():
         document_url = (request.form.get("document_url") or "").strip()
         if document_url:
             db.session.add(OrderMedia(order_id=order.id, media_type="document", file_url=document_url, sort_order=sort_order))
+            sort_order += 1
+
+        attachment = request.files.get("attachment")
+        if attachment and attachment.filename:
+            stored_name, error = upload_order_file(attachment, order.id)
+            if stored_name:
+                db.session.add(OrderMedia(
+                    order_id=order.id, media_type="file",
+                    file_url=url_for("orders.download_attachment", order_id=order.id, filename=stored_name),
+                    sort_order=sort_order,
+                ))
+                sort_order += 1
+            elif error:
+                flash(error, "info")
 
         db.session.commit()
 
@@ -163,6 +178,22 @@ def new_order():
         service_categories=ServiceCategory.query.order_by(ServiceCategory.name_ru).all(),
         materials=Material.query.order_by(Material.name_ru).all(), form={},
     )
+
+
+@bp.route("/orders/<int:order_id>/attachment/<path:filename>")
+@paywall_required
+def download_attachment(order_id, filename):
+    """Отдаёт файл, загруженный к заявке через upload_order_file — доступ
+    по тем же правилам, что и просмотр самой заявки (_can_view_order),
+    чтобы вложение не утекло случайному залогиненному пользователю."""
+    order = db.session.get(Order, order_id)
+    if order is None:
+        abort(404)
+    if not _can_view_order(order):
+        abort(403)
+
+    display_name = filename.split("_", 1)[1] if "_" in filename else filename
+    return send_from_directory(order_uploads_dir(order_id), filename, download_name=display_name)
 
 
 @bp.route("/orders")
