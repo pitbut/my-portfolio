@@ -1941,6 +1941,221 @@ STRINGS = {
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },
+    "settings.title": {
+        "ru": "Настройки", "uz_latin": "Sozlamalar", "uz_cyrillic": "Созламалар", "en": "Settings",
+    },
+    "settings.telegram_heading": {
+        "ru": "Telegram", "uz_latin": "Telegram", "uz_cyrillic": "Telegram", "en": "Telegram",
+    },
+    "settings.telegram_linked": {
+        "ru": "Привязан аккаунт {account}.", "uz_latin": "{account} hisobi bogʻlangan.",
+        "uz_cyrillic": "{account} ҳисоби боғланган.", "en": "Linked account: {account}.",
+    },
+    "settings.notifications_on": {
+        "ru": "включены", "uz_latin": "yoqilgan", "uz_cyrillic": "ёқилган", "en": "on",
+    },
+    "settings.notifications_off": {
+        "ru": "выключены", "uz_latin": "oʻchirilgan", "uz_cyrillic": "ўчирилган", "en": "off",
+    },
+    "settings.notifications_status": {
+        "ru": "Уведомления: {status}.", "uz_latin": "Bildirishnomalar: {status}.",
+        "uz_cyrillic": "Билдиришномалар: {status}.", "en": "Notifications: {status}.",
+    },
+    "settings.toggle_disable": {
+        "ru": "Выключить", "uz_latin": "Oʻchirish", "uz_cyrillic": "Ўчириш", "en": "Turn off",
+    },
+    "settings.toggle_enable": {
+        "ru": "Включить", "uz_latin": "Yoqish", "uz_cyrillic": "Ёқиш", "en": "Turn on",
+    },
+    "settings.toggle_notifications_btn": {
+        "ru": "{action} уведомления", "uz_latin": "Bildirishnomalarni {action}",
+        "uz_cyrillic": "Билдиришномаларни {action}", "en": "{action} notifications",
+    },
+    "settings.unlink": {
+        "ru": "Отвязать", "uz_latin": "Uzish", "uz_cyrillic": "Узиш", "en": "Unlink",
+    },
+    "settings.telegram_not_linked_hint": {
+        "ru": "Telegram не привязан. Нажмите кнопку и в открывшемся боте нажмите Start — уведомления о заказах, откликах и спорах начнут приходить туда же.",
+        "uz_latin": "Telegram bogʻlanmagan. Tugmani bosing va ochilgan botda Start tugmasini bosing — buyurtmalar, takliflar va nizolar haqidagi bildirishnomalar shu yerga kela boshlaydi.",
+        "uz_cyrillic": "Telegram боғланмаган. Тугмани босинг ва очилган ботда Start тугмасини босинг — буюртмалар, таклифлар ва низолар ҳақидаги билдиришномалар шу ерга кела бошлайди.",
+        "en": "Telegram is not linked. Press the button and tap Start in the bot that opens — notifications about orders, bids and disputes will start arriving there too.",
+    },
+    "settings.connect_telegram": {
+        "ru": "Подключить Telegram", "uz_latin": "Telegramni ulash", "uz_cyrillic": "Telegramни улаш",
+        "en": "Connect Telegram",
+    },
+    "settings.link_code_before": {
+        "ru": "Если вы уже писали этому боту раньше, кнопка выше может открыть чат без автоматической привязки — Telegram в этом случае не передаёт ссылку. В таком случае просто отправьте боту сообщением этот код:",
+        "uz_latin": "Agar bu botga avval yozgan boʻlsangiz, yuqoridagi tugma chatni avtomatik bogʻlanishsiz ochishi mumkin — bu holatda Telegram havolani uzatmaydi. Bunday holda botga xabar sifatida shu kodni yuboring:",
+        "uz_cyrillic": "Агар бу ботга аввал ёзган бўлсангиз, юқоридаги тугма чатни автоматик боғланишсиз очиши мумкин — бу ҳолатда Telegram ҳаволани узатмайди. Бундай ҳолда ботга хабар сифатида шу кодни юборинг:",
+        "en": "If you've already messaged this bot before, the button above may open the chat without linking automatically — Telegram doesn't pass the link in that case. Just send the bot this code as a message:",
+    },
+    "settings.link_code_after": {
+        "ru": "(действует 30 минут).", "uz_latin": "(30 daqiqa amal qiladi).", "uz_cyrillic": "(30 дақиқа амал қилади).",
+        "en": "(valid for 30 minutes).",
+    },
+    "settings.bot_not_configured_hint": {
+        "ru": "Бот ещё не отправляет сообщения — администратор платформы не задал TELEGRAM_BOT_TOKEN. Привязка аккаунта уже работает и сохранится, отправка уведомлений включится автоматически, как только токен будет добавлен.",
+        "uz_latin": "Bot hali xabar yubormaydi — platforma administratori TELEGRAM_BOT_TOKEN ni sozlamagan. Hisobni bogʻlash allaqachon ishlaydi va saqlanadi, bildirishnomalar yuborish token qoʻshilishi bilan avtomatik yoqiladi.",
+        "uz_cyrillic": "Бот ҳали хабар юбормайди — платформа администратори TELEGRAM_BOT_TOKEN ни созламаган. Ҳисобни боғлаш аллақачон ишлайди ва сақланади, билдиришномалар юбориш token қўшилиши билан автоматик ёқилади.",
+        "en": "The bot isn't sending messages yet — the platform admin hasn't set TELEGRAM_BOT_TOKEN. Account linking already works and is saved; notifications will turn on automatically once the token is added.",
+    },
+    "settings.bot_not_connected_hint": {
+        "ru": "Telegram-бот пока не подключён администратором платформы (не задан TELEGRAM_BOT_USERNAME) — уведомления приходят только в личном кабинете, в разделе «Уведомления».",
+        "uz_latin": "Telegram-bot hali platforma administratori tomonidan ulanmagan (TELEGRAM_BOT_USERNAME sozlanmagan) — bildirishnomalar faqat shaxsiy kabinetda, «Bildirishnomalar» boʻlimida keladi.",
+        "uz_cyrillic": "Telegram-бот ҳали платформа администратори томонидан уланмаган (TELEGRAM_BOT_USERNAME созланмаган) — билдиришномалар фақат шахсий кабинетда, «Билдиришномалар» бўлимида келади.",
+        "en": "The Telegram bot hasn't been connected by the platform admin yet (TELEGRAM_BOT_USERNAME not set) — notifications only arrive in your account, in the \"Notifications\" section.",
+    },
+    "settings.role_heading": {
+        "ru": "Роль на платформе", "uz_latin": "Platformadagi rol", "uz_cyrillic": "Платформадаги роль",
+        "en": "Platform role",
+    },
+    "settings.current_role": {
+        "ru": "Сейчас вы — {role}.", "uz_latin": "Hozir siz — {role}.", "uz_cyrillic": "Ҳозир сиз — {role}.",
+        "en": "You are currently — {role}.",
+    },
+    "settings.role_switch_hint": {
+        "ru": "Можно переключиться на другую роль в любой момент — старая анкета и данные не удаляются, просто становятся неактивны, пока вы не вернётесь обратно.",
+        "uz_latin": "Istalgan vaqtda boshqa rolga oʻtishingiz mumkin — eski anketa va maʼlumotlar oʻchirilmaydi, faqat siz qaytmaguningizcha faolsiz boʻladi.",
+        "uz_cyrillic": "Истаган вақтда бошқа ролга ўтишингиз мумкин — эски анкета ва маълумотлар ўчирилмайди, фақат сиз қайтмагунингизча фаолсиз бўлади.",
+        "en": "You can switch to another role at any time — the old profile and data aren't deleted, they just stay inactive until you switch back.",
+    },
+    "settings.become_label": {
+        "ru": "Стать", "uz_latin": "Boʻlish", "uz_cyrillic": "Бўлиш", "en": "Become",
+    },
+    "settings.switch_role_btn": {
+        "ru": "Сменить роль", "uz_latin": "Rolni almashtirish", "uz_cyrillic": "Ролни алмаштириш",
+        "en": "Switch role",
+    },
+    "role.customer": {
+        "ru": "заказчик", "uz_latin": "mijoz", "uz_cyrillic": "мижоз", "en": "customer",
+    },
+    "role.executor": {
+        "ru": "исполнитель", "uz_latin": "ijrochi", "uz_cyrillic": "ижрочи", "en": "executor",
+    },
+    "role.constructor": {
+        "ru": "конструктор", "uz_latin": "konstruktor", "uz_cyrillic": "конструктор", "en": "constructor",
+    },
+    "role.become_customer": {
+        "ru": "заказчиком", "uz_latin": "mijoz sifatida", "uz_cyrillic": "мижоз сифатида", "en": "a customer",
+    },
+    "role.become_executor": {
+        "ru": "исполнителем", "uz_latin": "ijrochi sifatida", "uz_cyrillic": "ижрочи сифатида", "en": "an executor",
+    },
+    "role.become_constructor": {
+        "ru": "конструктором", "uz_latin": "konstruktor sifatida", "uz_cyrillic": "конструктор сифатида",
+        "en": "a constructor",
+    },
+    "subscription.title": {
+        "ru": "Подписка", "uz_latin": "Obuna", "uz_cyrillic": "Обуна", "en": "Subscription",
+    },
+    "subscription.current_plan": {
+        "ru": "Текущий тариф: {title}", "uz_latin": "Joriy tarif: {title}", "uz_cyrillic": "Жорий тариф: {title}",
+        "en": "Current plan: {title}",
+    },
+    "subscription.status_line": {
+        "ru": "Статус: {status}. Действует до: {expires}.", "uz_latin": "Holat: {status}. Muddati: {expires}.",
+        "uz_cyrillic": "Ҳолат: {status}. Муддати: {expires}.", "en": "Status: {status}. Valid until: {expires}.",
+    },
+    "subscription.unlimited": {
+        "ru": "бессрочно", "uz_latin": "muddatsiz", "uz_cyrillic": "муддатсиз", "en": "unlimited",
+    },
+    "subscription.inactive_hint": {
+        "ru": "Подписка не активна — заказы не подбираются. Оформите тариф ниже (или заполните профиль полностью, если ещё не получили бесплатный пробный период).",
+        "uz_latin": "Obuna faol emas — buyurtmalar tanlanmaydi. Quyida tarif rasmiylashtiring (yoki bepul sinov muddatini olmagan boʻlsangiz, anketani toʻliq toʻldiring).",
+        "uz_cyrillic": "Обуна фаол эмас — буюртмалар танланмайди. Қуйида тариф расмийлаштиринг (ёки бепул синов муддатини олмаган бўлсангиз, анкетани тўлиқ тўлдиринг).",
+        "en": "Subscription is not active — orders aren't matched to you. Choose a plan below (or fill out your profile fully, if you haven't received the free trial yet).",
+    },
+    "subscription.pending_hint": {
+        "ru": "Заявка на тариф отправлена и ожидает подтверждения администратором ({provider}, {amount} UZS).",
+        "uz_latin": "Tarif uchun ariza yuborildi va administrator tasdigʻini kutmoqda ({provider}, {amount} UZS).",
+        "uz_cyrillic": "Тариф учун ариза юборилди ва администратор тасдиғини кутмоқда ({provider}, {amount} UZS).",
+        "en": "Your plan request was sent and is awaiting admin confirmation ({provider}, {amount} UZS).",
+    },
+    "subscription.plans_heading": {
+        "ru": "Тарифы", "uz_latin": "Tariflar", "uz_cyrillic": "Тарифлар", "en": "Plans",
+    },
+    "subscription.th_plan": {
+        "ru": "Тариф", "uz_latin": "Tarif", "uz_cyrillic": "Тариф", "en": "Plan",
+    },
+    "subscription.th_price": {
+        "ru": "Цена/мес", "uz_latin": "Narx/oy", "uz_cyrillic": "Нарх/ой", "en": "Price/mo",
+    },
+    "subscription.per_month": {
+        "ru": "мес", "uz_latin": "oy", "uz_cyrillic": "ой", "en": "mo",
+    },
+    "subscription.th_bids": {
+        "ru": "Ставок в месяц", "uz_latin": "Oyiga takliflar", "uz_cyrillic": "Ойига таклифлар",
+        "en": "Bids per month",
+    },
+    "subscription.th_alert_speed": {
+        "ru": "Скорость Telegram-алертов", "uz_latin": "Telegram-ogohlantirish tezligi",
+        "uz_cyrillic": "Telegram-огоҳлантириш тезлиги", "en": "Telegram alert speed",
+    },
+    "subscription.th_priority": {
+        "ru": "Приоритет", "uz_latin": "Ustuvorlik", "uz_cyrillic": "Устуворлик", "en": "Priority",
+    },
+    "subscription.no_limit": {
+        "ru": "без лимита", "uz_latin": "cheklovsiz", "uz_cyrillic": "чекловсиз", "en": "unlimited",
+    },
+    "subscription.delayed_alert": {
+        "ru": "с задержкой ~{hours} ч", "uz_latin": "~{hours} soat kechikish bilan",
+        "uz_cyrillic": "~{hours} соат кечикиш билан", "en": "~{hours}h delay",
+    },
+    "subscription.instant_alert": {
+        "ru": "мгновенно", "uz_latin": "darhol", "uz_cyrillic": "дарҳол", "en": "instant",
+    },
+    "subscription.plan_field": {
+        "ru": "Тариф", "uz_latin": "Tarif", "uz_cyrillic": "Тариф", "en": "Plan",
+    },
+    "subscription.payment_method_field": {
+        "ru": "Способ оплаты", "uz_latin": "Toʻlov usuli", "uz_cyrillic": "Тўлов усули", "en": "Payment method",
+    },
+    "subscription.submit": {
+        "ru": "Оформить", "uz_latin": "Rasmiylashtirish", "uz_cyrillic": "Расмийлаштириш", "en": "Subscribe",
+    },
+    "subscription.manual_hint": {
+        "ru": "Онлайн-оплата подключается по мере получения мерчант-аккаунта — сейчас заявка обрабатывается администратором вручную.",
+        "uz_latin": "Onlayn toʻlov merchant-hisob olingach ulanadi — hozircha ariza administrator tomonidan qoʻlda koʻrib chiqiladi.",
+        "uz_cyrillic": "Онлайн тўлов merchant-ҳисоб олингач уланади — ҳозирча ариза администратор томонидан қўлда кўриб чиқилади.",
+        "en": "Online payment will be enabled once we get a merchant account — for now requests are processed manually by the admin.",
+    },
+    "constructor.title": {
+        "ru": "Конструкторы", "uz_latin": "Konstruktorlar", "uz_cyrillic": "Конструкторлар", "en": "Constructors",
+    },
+    "constructor.description": {
+        "ru": "Специалисты, разрабатывающие чертежи на заказ — обратиться может и заказчик, и исполнитель, у которого нет своего конструктора в штате.",
+        "uz_latin": "Buyurtma asosida chizma tayyorlaydigan mutaxassislar — murojaat qilishi mumkin ham mijoz, ham oʻz shtatida konstruktori boʻlmagan ijrochi.",
+        "uz_cyrillic": "Буюртма асосида чизма тайёрлайдиган мутахассислар — мурожаат қилиши мумкин ҳам мижоз, ҳам ўз штатида конструктори бўлмаган ижрочи.",
+        "en": "Specialists who prepare drawings on request — either a customer or an executor without an in-house designer can reach out.",
+    },
+    "constructor.experience_suffix": {
+        "ru": "· опыт {years} лет", "uz_latin": "· {years} yil tajriba", "uz_cyrillic": "· {years} йил тажриба",
+        "en": "· {years} yrs experience",
+    },
+    "constructor.no_results": {
+        "ru": "Пока нет заполненных анкет конструкторов по этим фильтрам.",
+        "uz_latin": "Bu filtrlar boʻyicha hali toʻldirilgan konstruktor anketalari yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича ҳали тўлдирилган конструктор анкеталари йўқ.",
+        "en": "No filled-out constructor profiles match these filters yet.",
+    },
+    "constructor.title_suffix": {
+        "ru": "— конструктор", "uz_latin": "— konstruktor", "uz_cyrillic": "— конструктор", "en": "— constructor",
+    },
+    "notif.title": {
+        "ru": "Уведомления", "uz_latin": "Bildirishnomalar", "uz_cyrillic": "Билдиришномалар", "en": "Notifications",
+    },
+    "notif.open_link": {
+        "ru": "Открыть", "uz_latin": "Ochish", "uz_cyrillic": "Очиш", "en": "Open",
+    },
+    "notif.sent_to_telegram": {
+        "ru": "отправлено в Telegram", "uz_latin": "Telegramga yuborildi", "uz_cyrillic": "Telegramга юборилди",
+        "en": "sent to Telegram",
+    },
+    "notif.empty": {
+        "ru": "Пока нет уведомлений.", "uz_latin": "Hozircha bildirishnomalar yoʻq.", "uz_cyrillic": "Ҳозирча билдиришномалар йўқ.",
+        "en": "No notifications yet.",
+    },
 }
 
 
