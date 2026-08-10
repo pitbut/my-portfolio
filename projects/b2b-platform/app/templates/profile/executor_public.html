@@ -3,11 +3,11 @@
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>{{ profile.display_name or 'Исполнитель' }}</h1>
+  <h1>{{ profile.display_name or t('profile.executor_fallback_name') }}</h1>
   <p class="profile-page__hint">
-    {{ {'master': 'Мастер', 'tsekh': 'Цех', 'zavod': 'Завод'}.get(profile.org_type, '—') }}
+    {{ {'master': t('profile.org_master_short'), 'tsekh': t('profile.org_tsekh'), 'zavod': t('profile.org_zavod')}.get(profile.org_type, '—') }}
     {% if profile.region %}· {{ profile.region.name_ru }}{% if profile.city %}, {{ profile.city.name_ru }}{% endif %}{% endif %}
-    {% if profile.rating_avg %}· рейтинг {{ '%.1f'|format(profile.rating_avg) }} ({{ profile.reviews_count }}){% endif %}
+    {% if profile.rating_avg %}· {{ t('profile.rating_label') }} {{ '%.1f'|format(profile.rating_avg) }} ({{ profile.reviews_count }}){% endif %}
   </p>
 
   {% if profile.description %}<p class="order-description">{{ profile.description }}</p>{% endif %}
@@ -15,42 +15,42 @@
   {% if profile.workload %}
   <p class="workload-indicator">
     <span class="workload-indicator__dot" style="background:{{ workload_color(profile.workload) }}"></span>
-    Загруженность: {{ profile.workload }}/10
+    {{ t('profile.workload_display', value=profile.workload) }}
   </p>
   {% endif %}
 
   {% if profile.payment_methods %}
-  <p>Принимает оплату: {{ payment_method_labels(profile.payment_methods)|join(', ') }}</p>
+  <p>{{ t('profile.accepts_payment') }} {{ payment_method_labels(profile.payment_methods)|join(', ') }}</p>
   {% endif %}
 
   {% if current_user.id != target_user.id %}
-  <p><a href="{{ url_for('chat.thread', user_id=target_user.id) }}" class="btn-link">✉ Написать</a></p>
+  <p><a href="{{ url_for('chat.thread', user_id=target_user.id) }}" class="btn-link">{{ t('common.write_message') }}</a></p>
   {% endif %}
 
   <div class="flash flash--info">
-    <strong>Контакты:</strong> телефон {{ target_user.phone or '—' }} · адрес {{ profile.address_text or '—' }}
+    <strong>{{ t('profile.contacts_label') }}</strong> {{ t('profile.phone_label') }} {{ target_user.phone or '—' }} · {{ t('profile.address_label') }} {{ profile.address_text or '—' }}
   </div>
 
   {% if profile.equipment %}
-  <h2 class="profile-section-title">Станочный парк</h2>
+  <h2 class="profile-section-title">{{ t('profile.fleet_title') }}</h2>
   <ul>
     {% for item in profile.equipment %}
-    <li>{{ item.equipment_type.name_ru }}{% if item.model_name %} — {{ item.model_name }}{% endif %} ({{ item.quantity }} шт.)</li>
+    <li>{{ item.equipment_type.name_ru }}{% if item.model_name %} — {{ item.model_name }}{% endif %} ({{ item.quantity }} {{ t('profile.pcs_unit') }})</li>
     {% endfor %}
   </ul>
   {% endif %}
 
   {% if profile.capability and profile.capability.service_categories %}
-  <h2 class="profile-section-title">Услуги</h2>
+  <h2 class="profile-section-title">{{ t('profile.services_title') }}</h2>
   <p>{{ profile.capability.service_categories|map(attribute='name_ru')|join(', ') }}</p>
   {% endif %}
 
   {% if profile.capability and profile.capability.materials %}
-  <h2 class="profile-section-title">Материалы</h2>
+  <h2 class="profile-section-title">{{ t('profile.materials_title') }}</h2>
   <p>{{ profile.capability.materials|map(attribute='name_ru')|join(', ') }}</p>
   {% endif %}
 
-  <h2 class="profile-section-title">Портфолио</h2>
+  <h2 class="profile-section-title">{{ t('profile.portfolio_section_title') }}</h2>
   {% if target_user.portfolio_media %}
   <div class="portfolio-gallery">
     {% for item in target_user.portfolio_media %}
@@ -58,14 +58,14 @@
       {% if item.media_type == 'photo' %}
         <img src="{{ item.file_url }}" alt="{{ item.caption or '' }}" class="portfolio-gallery__img">
       {% else %}
-        <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">▶ Видео</a>
+        <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">{{ t('portfolio.watch_video') }}</a>
       {% endif %}
       {% if item.caption %}<p class="portfolio-gallery__caption">{{ item.caption }}</p>{% endif %}
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <p class="empty-hint">Портфолио пока пустое.</p>
+  <p class="empty-hint">{{ t('portfolio.empty') }}</p>
   {% endif %}
 </section>
 {% endblock %}

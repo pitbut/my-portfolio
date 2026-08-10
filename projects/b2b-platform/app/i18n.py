@@ -607,6 +607,194 @@ STRINGS = {
         "ru": "Сохранить техвозможности", "uz_latin": "Texnik imkoniyatlarni saqlash",
         "uz_cyrillic": "Техник имкониятларни сақлаш", "en": "Save technical capabilities",
     },
+    "profile.constructor_title": {
+        "ru": "Анкета конструктора", "uz_latin": "Konstruktor anketasi", "uz_cyrillic": "Конструктор анкетаси",
+        "en": "Designer profile",
+    },
+    "profile.constructor_hint": {
+        "ru": "Заполните анкету — по ней вас будут находить заказчики и исполнители, у которых нет своего конструктора в штате. Обязательные поля отмечены *.",
+        "uz_latin": "Anketani toʻldiring — shtatda konstruktori boʻlmagan buyurtmachilar va ijrochilar sizni shu orqali topadi. Majburiy maydonlar * bilan belgilangan.",
+        "uz_cyrillic": "Анкетани тўлдиринг — штатда конструктори бўлмаган буюртмачилар ва ижрочилар сизни шу орқали топади. Мажбурий майдонлар * билан белгиланган.",
+        "en": "Fill in the profile — customers and executors without an in-house designer will find you through it. Required fields are marked *.",
+    },
+    "profile.constructor_complete_badge": {
+        "ru": "Анкета заполнена — видна в каталоге", "uz_latin": "Anketa toʻldirilgan — katalogda koʻrinadi",
+        "uz_cyrillic": "Анкета тўлдирилган — каталогда кўринади", "en": "Profile complete — visible in the catalog",
+    },
+    "profile.constructor_incomplete_badge": {
+        "ru": "Анкета не заполнена", "uz_latin": "Anketa toʻldirilmagan", "uz_cyrillic": "Анкета тўлдирилмаган",
+        "en": "Profile incomplete",
+    },
+    "profile.studio_name": {
+        "ru": "Имя / название студии *", "uz_latin": "Ism / studiya nomi *", "uz_cyrillic": "Исм / студия номи *",
+        "en": "Name / studio name *",
+    },
+    "profile.about_specialization": {
+        "ru": "О себе, специализация *", "uz_latin": "O‘zingiz haqingizda, ixtisoslik *",
+        "uz_cyrillic": "Ўзингиз ҳақингизда, ихтисослик *", "en": "About you, specialization *",
+    },
+    "profile.about_placeholder": {
+        "ru": "Какие чертежи делаете, в каких программах (КОМПАС, AutoCAD, SolidWorks...), опыт",
+        "uz_latin": "Qanday chizmalar tayyorlaysiz, qaysi dasturlarda (KOMPAS, AutoCAD, SolidWorks...), tajriba",
+        "uz_cyrillic": "Қандай чизмалар тайёрлайсиз, қайси дастурларда (КОМПАС, AutoCAD, SolidWorks...), тажриба",
+        "en": "What drawings you make, which software (KOMPAS, AutoCAD, SolidWorks...), experience",
+    },
+    "profile.experience_years": {
+        "ru": "Опыт работы, лет", "uz_latin": "Ish tajribasi, yil", "uz_cyrillic": "Иш тажрибаси, йил",
+        "en": "Years of experience",
+    },
+    "profile.portfolio_link": {
+        "ru": "Ссылка на портфолио", "uz_latin": "Portfolio havolasi", "uz_cyrillic": "Портфолио ҳаволаси",
+        "en": "Portfolio link",
+    },
+    "profile.price_note": {
+        "ru": "Стоимость работ", "uz_latin": "Ish narxi", "uz_cyrillic": "Иш нархи", "en": "Pricing",
+    },
+    "profile.price_note_placeholder": {
+        "ru": "Например: от 200 000 сум за чертёж", "uz_latin": "Masalan: chizma uchun 200 000 so‘mdan",
+        "uz_cyrillic": "Масалан: чизма учун 200 000 сўмдан", "en": "E.g.: from 200,000 UZS per drawing",
+    },
+    "profile.map_hint_optional": {
+        "ru": "Уточните точку на карте (необязательно — чтобы вас было видно на «Карте»)",
+        "uz_latin": "Xaritada nuqtani aniqlashtiring (ixtiyoriy — «Xarita»da koʻrinishingiz uchun)",
+        "uz_cyrillic": "Харитада нуқтани аниқлаштиринг (ихтиёрий — «Харита»да кўринишингиз учун)",
+        "en": "Refine the point on the map (optional — so you appear on the \"Map\")",
+    },
+    "profile.save_form": {
+        "ru": "Сохранить анкету", "uz_latin": "Anketani saqlash", "uz_cyrillic": "Анкетани сақлаш",
+        "en": "Save profile",
+    },
+    "portfolio.title": {
+        "ru": "Портфолио (для рекламы)", "uz_latin": "Portfolio (reklama uchun)", "uz_cyrillic": "Портфолио (реклама учун)",
+        "en": "Portfolio (for advertising)",
+    },
+    "portfolio.hint": {
+        "ru": "Фото цеха, станков, продукции или ссылка на видео — то, что увидят на вашей публичной странице.",
+        "uz_latin": "Sex, stanoklar, mahsulot fotolari yoki video havolasi — ochiq sahifangizda koʻrinadigan narsalar.",
+        "uz_cyrillic": "Сех, станоклар, маҳсулот фотолари ёки видео ҳаволаси — очиқ саҳифангизда кўринадиган нарсалар.",
+        "en": "Photos of your shop, machines, products, or a video link — what visitors see on your public page.",
+    },
+    "portfolio.telegram_before": {
+        "ru": "Кстати: чтобы не пропускать уведомления о заказах и откликах, подключите Telegram —",
+        "uz_latin": "Aytgancha: buyurtmalar va takliflar haqidagi bildirishnomalarni oʻtkazib yubormaslik uchun Telegramni ulang —",
+        "uz_cyrillic": "Айтганча: буюртмалар ва таклифлар ҳақидаги билдиришномаларни ўтказиб юбормаслик учун Telegramни улаnг —",
+        "en": "By the way: to not miss notifications about orders and bids, connect Telegram —",
+    },
+    "portfolio.telegram_click_here": {
+        "ru": "нажмите здесь", "uz_latin": "bu yerni bosing", "uz_cyrillic": "бу ерни босинг",
+        "en": "click here",
+    },
+    "portfolio.telegram_mid": {
+        "ru": "и в открывшемся боте нажмите", "uz_latin": "va ochilgan botda bosing", "uz_cyrillic": "ва очилган ботда босинг",
+        "en": "and in the bot that opens, press",
+    },
+    "portfolio.telegram_fallback": {
+        "ru": "Если вы уже писали этому боту раньше и кнопка не привязала аккаунт — просто отправьте боту сообщением код",
+        "uz_latin": "Agar bu botga avval yozgan boʻlsangiz va tugma hisobni bogʻlamagan boʻlsa — botga xabar sifatida shu kodni yuboring",
+        "uz_cyrillic": "Агар бу ботга аввал ёзган бўлсангиз ва тугма ҳисобни боғламаган бўлса — ботга хабар сифатида шу кодни юборинг",
+        "en": "If you've already messaged this bot before and the button didn't link your account — just send the bot this code as a message:",
+    },
+    "portfolio.telegram_details": {
+        "ru": "подробнее в", "uz_latin": "batafsil:", "uz_cyrillic": "батафсил:", "en": "more details in",
+    },
+    "portfolio.settings_link_text": {
+        "ru": "Настройках", "uz_latin": "Sozlamalarda", "uz_cyrillic": "Созламаларда", "en": "Settings",
+    },
+    "portfolio.empty": {
+        "ru": "Портфолио пока пустое.", "uz_latin": "Portfolio hozircha boʻsh.", "uz_cyrillic": "Портфолио ҳозирча бўш.",
+        "en": "Portfolio is empty so far.",
+    },
+    "portfolio.photo": {
+        "ru": "Фото", "uz_latin": "Foto", "uz_cyrillic": "Фото", "en": "Photo",
+    },
+    "portfolio.caption": {
+        "ru": "Подпись", "uz_latin": "Izoh", "uz_cyrillic": "Изоҳ", "en": "Caption",
+    },
+    "portfolio.caption_placeholder": {
+        "ru": "напр. цех токарной обработки", "uz_latin": "masalan, tokarlik sexi", "uz_cyrillic": "масалан, токарлик сехи",
+        "en": "e.g. turning workshop",
+    },
+    "portfolio.add_photo": {
+        "ru": "Добавить фото", "uz_latin": "Foto qoʻshish", "uz_cyrillic": "Фото қўшиш", "en": "Add photo",
+    },
+    "portfolio.video_link": {
+        "ru": "Ссылка на видео", "uz_latin": "Video havolasi", "uz_cyrillic": "Видео ҳаволаси", "en": "Video link",
+    },
+    "portfolio.add_video": {
+        "ru": "Добавить видео", "uz_latin": "Video qoʻshish", "uz_cyrillic": "Видео қўшиш", "en": "Add video",
+    },
+    "portfolio.watch_video": {
+        "ru": "▶ Видео", "uz_latin": "▶ Video", "uz_cyrillic": "▶ Видео", "en": "▶ Video",
+    },
+    "profile.executor_fallback_name": {
+        "ru": "Исполнитель", "uz_latin": "Ijrochi", "uz_cyrillic": "Ижрочи", "en": "Executor",
+    },
+    "profile.org_master_short": {
+        "ru": "Мастер", "uz_latin": "Usta", "uz_cyrillic": "Уста", "en": "Craftsman",
+    },
+    "profile.rating_label": {
+        "ru": "рейтинг", "uz_latin": "reyting", "uz_cyrillic": "рейтинг", "en": "rating",
+    },
+    "profile.workload_display": {
+        "ru": "Загруженность: {value}/10", "uz_latin": "Yuklama: {value}/10", "uz_cyrillic": "Юклама: {value}/10",
+        "en": "Workload: {value}/10",
+    },
+    "profile.accepts_payment": {
+        "ru": "Принимает оплату:", "uz_latin": "Toʻlov qabul qiladi:", "uz_cyrillic": "Тўлов қабул қилади:",
+        "en": "Accepts payment:",
+    },
+    "common.write_message": {
+        "ru": "✉ Написать", "uz_latin": "✉ Yozish", "uz_cyrillic": "✉ Ёзиш", "en": "✉ Message",
+    },
+    "profile.contacts_label": {
+        "ru": "Контакты:", "uz_latin": "Kontaktlar:", "uz_cyrillic": "Контактлар:", "en": "Contacts:",
+    },
+    "profile.phone_label": {
+        "ru": "телефон", "uz_latin": "telefon", "uz_cyrillic": "телефон", "en": "phone",
+    },
+    "profile.address_label": {
+        "ru": "адрес", "uz_latin": "manzil", "uz_cyrillic": "манзил", "en": "address",
+    },
+    "profile.fleet_title": {
+        "ru": "Станочный парк", "uz_latin": "Stanoklar parki", "uz_cyrillic": "Станоклар парки",
+        "en": "Machine fleet",
+    },
+    "profile.pcs_unit": {
+        "ru": "шт.", "uz_latin": "dona", "uz_cyrillic": "дона", "en": "pcs",
+    },
+    "profile.services_title": {
+        "ru": "Услуги", "uz_latin": "Xizmatlar", "uz_cyrillic": "Хизматлар", "en": "Services",
+    },
+    "profile.materials_title": {
+        "ru": "Материалы", "uz_latin": "Materiallar", "uz_cyrillic": "Материаллар", "en": "Materials",
+    },
+    "profile.portfolio_section_title": {
+        "ru": "Портфолио", "uz_latin": "Portfolio", "uz_cyrillic": "Портфолио", "en": "Portfolio",
+    },
+    "profile.customer_fallback_name": {
+        "ru": "Заказчик", "uz_latin": "Buyurtmachi", "uz_cyrillic": "Буюртмачи", "en": "Customer",
+    },
+    "profile.contacts_available": {
+        "ru": "Контакты", "uz_latin": "Kontaktlar", "uz_cyrillic": "Контактлар", "en": "Contacts",
+    },
+    "profile.contacts_available_reason": {
+        "ru": "(доступны, так как у вас есть совместная сделка):",
+        "uz_latin": "(sizda umumiy bitim borligi uchun ochiq):",
+        "uz_cyrillic": "(сизда умумий битим борлиги учун очиқ):",
+        "en": "(available because you have a shared deal):",
+    },
+    "profile.phone_colon": {
+        "ru": "Телефон:", "uz_latin": "Telefon:", "uz_cyrillic": "Телефон:", "en": "Phone:",
+    },
+    "profile.address_colon": {
+        "ru": "Адрес:", "uz_latin": "Manzil:", "uz_cyrillic": "Манзил:", "en": "Address:",
+    },
+    "profile.contacts_hidden": {
+        "ru": "Телефон и адрес открываются после того, как вы заключите сделку по заявке этого заказчика.",
+        "uz_latin": "Telefon va manzil bu buyurtmachining buyurtmasi boʻyicha bitim tuzganingizdan keyin ochiladi.",
+        "uz_cyrillic": "Телефон ва манзил бу буюртмачининг буюртмаси бўйича битим тузганингиздан кейин очилади.",
+        "en": "Phone and address are revealed once you make a deal on this customer's order.",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },

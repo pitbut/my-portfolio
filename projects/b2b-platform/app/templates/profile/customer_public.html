@@ -3,26 +3,26 @@
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>{{ profile.display_name or 'Заказчик' }}</h1>
+  <h1>{{ profile.display_name or t('profile.customer_fallback_name') }}</h1>
   <p class="profile-page__hint">
-    {{ 'Компания' if profile.kind == 'company' else 'Физическое лицо' }}
+    {{ t('profile.company') if profile.kind == 'company' else t('profile.individual') }}
     {% if profile.region %}· {{ profile.region.name_ru }}{% if profile.city %}, {{ profile.city.name_ru }}{% endif %}{% endif %}
   </p>
 
   {% if current_user.id != target_user.id %}
-  <p><a href="{{ url_for('chat.thread', user_id=target_user.id) }}" class="btn-link">✉ Написать</a></p>
+  <p><a href="{{ url_for('chat.thread', user_id=target_user.id) }}" class="btn-link">{{ t('common.write_message') }}</a></p>
   {% endif %}
 
   {% if reveal_contact %}
   <div class="flash flash--info">
-    <strong>Контакты</strong> (доступны, так как у вас есть совместная сделка):
-    Телефон: {{ target_user.phone or '—' }} · Адрес: {{ profile.address_text or '—' }}
+    <strong>{{ t('profile.contacts_available') }}</strong> {{ t('profile.contacts_available_reason') }}
+    {{ t('profile.phone_colon') }} {{ target_user.phone or '—' }} · {{ t('profile.address_colon') }} {{ profile.address_text or '—' }}
   </div>
   {% else %}
-  <p class="empty-hint">Телефон и адрес открываются после того, как вы заключите сделку по заявке этого заказчика.</p>
+  <p class="empty-hint">{{ t('profile.contacts_hidden') }}</p>
   {% endif %}
 
-  <h2 class="profile-section-title">Портфолио</h2>
+  <h2 class="profile-section-title">{{ t('profile.portfolio_section_title') }}</h2>
   {% if target_user.portfolio_media %}
   <div class="portfolio-gallery">
     {% for item in target_user.portfolio_media %}
@@ -30,14 +30,14 @@
       {% if item.media_type == 'photo' %}
         <img src="{{ item.file_url }}" alt="{{ item.caption or '' }}" class="portfolio-gallery__img">
       {% else %}
-        <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">▶ Видео</a>
+        <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="portfolio-gallery__video">{{ t('portfolio.watch_video') }}</a>
       {% endif %}
       {% if item.caption %}<p class="portfolio-gallery__caption">{{ item.caption }}</p>{% endif %}
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <p class="empty-hint">Портфолио пока пустое.</p>
+  <p class="empty-hint">{{ t('portfolio.empty') }}</p>
   {% endif %}
 </section>
 {% endblock %}
