@@ -1194,6 +1194,229 @@ STRINGS = {
         "uz_cyrillic": "Сизнинг таклифингиз: {price} {currency} ({status}). Аукцион ёпиқ.",
         "en": "Your bid: {price} {currency} ({status}). The auction is closed.",
     },
+    "listing.sell": {
+        "ru": "Продаю", "uz_latin": "Sotaman", "uz_cyrillic": "Сотаман", "en": "Selling",
+    },
+    "listing.buy": {
+        "ru": "Куплю", "uz_latin": "Sotib olaman", "uz_cyrillic": "Сотиб оламан", "en": "Buying",
+    },
+    "listing.looking_to_buy": {
+        "ru": "Ищу купить", "uz_latin": "Sotib olmoqchiman", "uz_cyrillic": "Сотиб олмоқчиман", "en": "Looking to buy",
+    },
+    "listing.price_not_set": {
+        "ru": "Цена не указана", "uz_latin": "Narx koʻrsatilmagan", "uz_cyrillic": "Нарх кўрсатилмаган",
+        "en": "Price not specified",
+    },
+    "listing.negotiable": {
+        "ru": "торг", "uz_latin": "kelishiladi", "uz_cyrillic": "келишилади", "en": "negotiable",
+    },
+    "listing.negotiable_checkbox": {
+        "ru": "Торг уместен", "uz_latin": "Kelishish mumkin", "uz_cyrillic": "Келишиш мумкин",
+        "en": "Price negotiable",
+    },
+    "listing.no_listings": {
+        "ru": "Пока нет объявлений по этим фильтрам.", "uz_latin": "Bu filtrlar boʻyicha eʼlonlar hozircha yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича эълонлар ҳозирча йўқ.", "en": "No listings match these filters yet.",
+    },
+    "listing.post_listing": {
+        "ru": "Разместить объявление", "uz_latin": "Eʼlon joylashtirish", "uz_cyrillic": "Эълон жойлаштириш",
+        "en": "Post a listing",
+    },
+    "listing.filter_type": {
+        "ru": "Тип", "uz_latin": "Turi", "uz_cyrillic": "Тури", "en": "Type",
+    },
+    "listing.filter_all": {
+        "ru": "Все", "uz_latin": "Barchasi", "uz_cyrillic": "Барчаси", "en": "All",
+    },
+    "listing.filter_category": {
+        "ru": "Категория", "uz_latin": "Toifa", "uz_cyrillic": "Тоифа", "en": "Category",
+    },
+    "listing.marketplace_title": {
+        "ru": "Барахолка: станки и инструмент", "uz_latin": "Bozorcha: stanoklar va asboblar",
+        "uz_cyrillic": "Бозорча: станоклар ва асбоблар", "en": "Marketplace: machines and tools",
+    },
+    "listing.type_label": {
+        "ru": "Тип объявления *", "uz_latin": "Eʼlon turi *", "uz_cyrillic": "Эълон тури *",
+        "en": "Listing type *",
+    },
+    "listing.category_label": {
+        "ru": "Категория *", "uz_latin": "Toifa *", "uz_cyrillic": "Тоифа *", "en": "Category *",
+    },
+    "listing.title_label": {
+        "ru": "Название *", "uz_latin": "Nomi *", "uz_cyrillic": "Номи *", "en": "Title *",
+    },
+    "listing.title_placeholder_marketplace": {
+        "ru": "напр. Токарный станок 1К62, б/у", "uz_latin": "masalan, Tokarlik stanogi 1K62, ishlatilgan",
+        "uz_cyrillic": "масалан, Токарлик станоги 1К62, ишлатилган", "en": "e.g. Lathe 1K62, used",
+    },
+    "listing.description_label": {
+        "ru": "Описание *", "uz_latin": "Tavsif *", "uz_cyrillic": "Тавсиф *", "en": "Description *",
+    },
+    "listing.condition_legend": {
+        "ru": "Состояние (для «Продаю»)", "uz_latin": "Holati («Sotaman» uchun)",
+        "uz_cyrillic": "Ҳолати («Сотаман» учун)", "en": "Condition (for \"Selling\")",
+    },
+    "listing.condition_new": {
+        "ru": "Новое", "uz_latin": "Yangi", "uz_cyrillic": "Янги", "en": "New",
+    },
+    "listing.condition_used": {
+        "ru": "Б/у", "uz_latin": "Ishlatilgan", "uz_cyrillic": "Ишлатилган", "en": "Used",
+    },
+    "listing.condition_parts": {
+        "ru": "На запчасти", "uz_latin": "Ehtiyot qismlarga", "uz_cyrillic": "Эҳтиёт қисмларга",
+        "en": "For parts",
+    },
+    "listing.price_label": {
+        "ru": "Цена", "uz_latin": "Narx", "uz_cyrillic": "Нарх", "en": "Price",
+    },
+    "listing.currency_label": {
+        "ru": "Валюта", "uz_latin": "Valyuta", "uz_cyrillic": "Валюта", "en": "Currency",
+    },
+    "listing.region_required": {
+        "ru": "Регион *", "uz_latin": "Viloyat *", "uz_cyrillic": "Вилоят *", "en": "Region *",
+    },
+    "listing.payment_methods_legend": {
+        "ru": "Способ оплаты (необязательно)", "uz_latin": "Toʻlov usuli (ixtiyoriy)",
+        "uz_cyrillic": "Тўлов усули (ихтиёрий)", "en": "Payment method (optional)",
+    },
+    "listing.delivery_legend": {
+        "ru": "Доставка (необязательно)", "uz_latin": "Yetkazib berish (ixtiyoriy)",
+        "uz_cyrillic": "Етказиб бериш (ихтиёрий)", "en": "Delivery (optional)",
+    },
+    "listing.photos_label": {
+        "ru": "Фото (можно несколько)", "uz_latin": "Foto (bir nechta boʻlishi mumkin)",
+        "uz_cyrillic": "Фото (бир нечта бўлиши мумкин)", "en": "Photos (multiple allowed)",
+    },
+    "listing.map_hint": {
+        "ru": "Отметьте на карте, где вас найти (необязательно — чтобы объявление было видно на «Карте»)",
+        "uz_latin": "Sizni qayerdan topish mumkinligini xaritada belgilang (ixtiyoriy — eʼlon «Xarita»da koʻrinishi uchun)",
+        "uz_cyrillic": "Сизни қаердан топиш мумкинлигини харитада белгиланг (ихтиёрий — эълон «Харита»да кўриниши учун)",
+        "en": "Mark on the map where to find you (optional — so the listing appears on the \"Map\")",
+    },
+    "listing.publish": {
+        "ru": "Опубликовать", "uz_latin": "Eʼlon qilish", "uz_cyrillic": "Эълон қилиш", "en": "Publish",
+    },
+    "listing.write_to_author": {
+        "ru": "✉ Написать автору", "uz_latin": "✉ Muallifga yozish", "uz_cyrillic": "✉ Муаллифга ёзиш",
+        "en": "✉ Message the author",
+    },
+    "listing.condition_state": {
+        "ru": "Состояние: {value}", "uz_latin": "Holati: {value}", "uz_cyrillic": "Ҳолати: {value}",
+        "en": "Condition: {value}",
+    },
+    "listing.delivery_state": {
+        "ru": "Доставка: {value}", "uz_latin": "Yetkazib berish: {value}", "uz_cyrillic": "Етказиб бериш: {value}",
+        "en": "Delivery: {value}",
+    },
+    "listing.payment_state": {
+        "ru": "Оплата: {value}", "uz_latin": "Toʻlov: {value}", "uz_cyrillic": "Тўлов: {value}",
+        "en": "Payment: {value}",
+    },
+    "listing.photo_alt": {
+        "ru": "фото", "uz_latin": "foto", "uz_cyrillic": "фото", "en": "photo",
+    },
+    "listing.responses_section": {
+        "ru": "Отклики ({count})", "uz_latin": "Takliflar ({count})", "uz_cyrillic": "Таклифлар ({count})",
+        "en": "Responses ({count})",
+    },
+    "listing.offered_price": {
+        "ru": " — предложено {value}", "uz_latin": " — taklif qilingan {value}", "uz_cyrillic": " — таклиф қилинган {value}",
+        "en": " — offered {value}",
+    },
+    "listing.no_responses": {
+        "ru": "Откликов пока нет.", "uz_latin": "Hozircha takliflar yoʻq.", "uz_cyrillic": "Ҳозирча таклифлар йўқ.",
+        "en": "No responses yet.",
+    },
+    "listing.status_label": {
+        "ru": "Статус", "uz_latin": "Holat", "uz_cyrillic": "Ҳолат", "en": "Status",
+    },
+    "listing.status_active": {
+        "ru": "Активно", "uz_latin": "Faol", "uz_cyrillic": "Фаол", "en": "Active",
+    },
+    "listing.status_reserved": {
+        "ru": "Зарезервировано", "uz_latin": "Zaxiralangan", "uz_cyrillic": "Захираланган", "en": "Reserved",
+    },
+    "listing.status_closed": {
+        "ru": "Сделка состоялась", "uz_latin": "Bitim tuzildi", "uz_cyrillic": "Битим тузилди",
+        "en": "Deal closed",
+    },
+    "common.update": {
+        "ru": "Обновить", "uz_latin": "Yangilash", "uz_cyrillic": "Янгилаш", "en": "Update",
+    },
+    "listing.respond_section": {
+        "ru": "Откликнуться", "uz_latin": "Taklif berish", "uz_cyrillic": "Таклиф бериш", "en": "Respond",
+    },
+    "listing.message_label": {
+        "ru": "Сообщение", "uz_latin": "Xabar", "uz_cyrillic": "Хабар", "en": "Message",
+    },
+    "listing.message_placeholder": {
+        "ru": "Интересует, уточните...", "uz_latin": "Qiziqaman, aniqlashtiring...", "uz_cyrillic": "Қизиқаман, аниқлаштиринг...",
+        "en": "Interested, please clarify...",
+    },
+    "listing.offered_price_label": {
+        "ru": "Ваша цена (если торг)", "uz_latin": "Sizning narxingiz (agar kelishiladigan boʻlsa)",
+        "uz_cyrillic": "Сизнинг нархингиз (агар келишиладиган бўлса)", "en": "Your price (if negotiable)",
+    },
+    "listing.send_response": {
+        "ru": "Отправить отклик", "uz_latin": "Taklifni yuborish", "uz_cyrillic": "Таклифни юбориш",
+        "en": "Send response",
+    },
+    "listing.not_active": {
+        "ru": "Объявление больше не активно.", "uz_latin": "Eʼlon endi faol emas.", "uz_cyrillic": "Эълон энди фаол эмас.",
+        "en": "This listing is no longer active.",
+    },
+    "material.market_title": {
+        "ru": "Материалы и сырьё", "uz_latin": "Materiallar va xomashyo", "uz_cyrillic": "Материаллар ва хомашё",
+        "en": "Materials and raw stock",
+    },
+    "material.filter_material": {
+        "ru": "Материал", "uz_latin": "Material", "uz_cyrillic": "Материал", "en": "Material",
+    },
+    "material.filter_form": {
+        "ru": "Вид/форма", "uz_latin": "Turi/shakli", "uz_cyrillic": "Тури/шакли", "en": "Kind/form",
+    },
+    "material.new_title": {
+        "ru": "Новое объявление о материале", "uz_latin": "Material haqida yangi eʼlon",
+        "uz_cyrillic": "Материал ҳақида янги эълон", "en": "New material listing",
+    },
+    "material.new_heading": {
+        "ru": "Новое объявление: материал/сырьё", "uz_latin": "Yangi eʼlon: material/xomashyo",
+        "uz_cyrillic": "Янги эълон: материал/хомашё", "en": "New listing: material/raw stock",
+    },
+    "material.material_required": {
+        "ru": "Материал *", "uz_latin": "Material *", "uz_cyrillic": "Материал *", "en": "Material *",
+    },
+    "material.form_field": {
+        "ru": "Вид/форма", "uz_latin": "Turi/shakli", "uz_cyrillic": "Тури/шакли", "en": "Kind/form",
+    },
+    "material.form_any": {
+        "ru": "— не важно —", "uz_latin": "— muhim emas —", "uz_cyrillic": "— муҳим эмас —", "en": "— any —",
+    },
+    "material.title_placeholder": {
+        "ru": "напр. Лист нержавейки AISI 304, 2 мм", "uz_latin": "masalan, AISI 304 zanglamas list, 2 mm",
+        "uz_cyrillic": "масалан, AISI 304 зангламас лист, 2 мм", "en": "e.g. AISI 304 stainless sheet, 2 mm",
+    },
+    "material.quantity_label": {
+        "ru": "Количество", "uz_latin": "Miqdori", "uz_cyrillic": "Миқдори", "en": "Quantity",
+    },
+    "material.unit_label": {
+        "ru": "Единица", "uz_latin": "Birlik", "uz_cyrillic": "Бирлик", "en": "Unit",
+    },
+    "material.unit_kg": {
+        "ru": "кг", "uz_latin": "kg", "uz_cyrillic": "кг", "en": "kg",
+    },
+    "material.unit_t": {
+        "ru": "тонны", "uz_latin": "tonna", "uz_cyrillic": "тонна", "en": "tons",
+    },
+    "material.unit_m": {
+        "ru": "метры", "uz_latin": "metr", "uz_cyrillic": "метр", "en": "meters",
+    },
+    "material.unit_m2": {
+        "ru": "м²", "uz_latin": "m²", "uz_cyrillic": "м²", "en": "m²",
+    },
+    "material.unit_pcs": {
+        "ru": "шт", "uz_latin": "dona", "uz_cyrillic": "дона", "en": "pcs",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },
@@ -1221,6 +1444,14 @@ def bid_status_label(status):
     return translate(f"bid.status_{status}")
 
 
+LISTING_STATUS_KEYS = {"active": "listing.status_active", "reserved": "listing.status_reserved", "closed": "listing.status_closed"}
+
+
+def listing_status_label(status):
+    key = LISTING_STATUS_KEYS.get(status)
+    return translate(key) if key else status
+
+
 def register_i18n(app):
     @app.context_processor
     def inject_i18n():
@@ -1233,6 +1464,7 @@ def register_i18n(app):
     app.jinja_env.globals["t"] = translate
     app.jinja_env.globals["order_status_label"] = order_status_label
     app.jinja_env.globals["bid_status_label"] = bid_status_label
+    app.jinja_env.globals["listing_status_label"] = listing_status_label
 
 
 def get_current_lang():

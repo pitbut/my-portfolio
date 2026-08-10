@@ -5,66 +5,66 @@
 <section class="wrap profile-page">
   <div class="page-head">
     <h1>{{ listing.title }}</h1>
-    <span class="listing-card__intent listing-card__intent--{{ listing.listing_intent }}">{{ 'Продаю' if listing.listing_intent == 'sell' else 'Куплю' }}</span>
+    <span class="listing-card__intent listing-card__intent--{{ listing.listing_intent }}">{{ t('listing.sell') if listing.listing_intent == 'sell' else t('listing.buy') }}</span>
   </div>
   {% if not is_owner %}
-  <p><a href="{{ url_for('chat.thread', user_id=listing.author_id) }}" class="btn-link">✉ Написать автору</a></p>
+  <p><a href="{{ url_for('chat.thread', user_id=listing.author_id) }}" class="btn-link">{{ t('listing.write_to_author') }}</a></p>
   {% endif %}
   <p class="order-meta">
     <span>{{ listing.material.name_ru }}</span>
     {% if listing.form %}<span>{{ listing.form.name_ru }}</span>{% endif %}
     {% if listing.quantity %}<span>{{ listing.quantity }} {{ listing.unit }}</span>{% endif %}
     <span>{{ listing.region.name_ru }}</span>
-    <span>{% if listing.price %}{{ listing.price }} {{ listing.currency }}{% if listing.price_negotiable %} (торг){% endif %}{% else %}Цена не указана{% endif %}</span>
-    <span class="status-chip">{{ listing.status }}</span>
+    <span>{% if listing.price %}{{ listing.price }} {{ listing.currency }}{% if listing.price_negotiable %} ({{ t('listing.negotiable') }}){% endif %}{% else %}{{ t('listing.price_not_set') }}{% endif %}</span>
+    <span class="status-chip">{{ listing_status_label(listing.status) }}</span>
   </p>
   <p class="order-description">{{ listing.description }}</p>
 
   {% if listing.media %}
   <div class="order-media">
     {% for m in listing.media %}
-    <a href="{{ m.file_url }}" target="_blank" rel="noopener"><img src="{{ m.file_url }}" class="order-media__thumb" alt="фото"></a>
+    <a href="{{ m.file_url }}" target="_blank" rel="noopener"><img src="{{ m.file_url }}" class="order-media__thumb" alt="{{ t('listing.photo_alt') }}"></a>
     {% endfor %}
   </div>
   {% endif %}
 
   {% if is_owner %}
-    <h2 class="profile-section-title">Отклики ({{ listing.responses|length }})</h2>
+    <h2 class="profile-section-title">{{ t('listing.responses_section', count=listing.responses|length) }}</h2>
     {% if listing.responses %}
     <div class="notif-list">
       {% for r in listing.responses %}
       <div class="notif-item">
-        <div class="notif-item__title">{{ r.from_user.email }}{% if r.offered_price %} — предложено {{ r.offered_price }}{% endif %}</div>
+        <div class="notif-item__title">{{ r.from_user.email }}{% if r.offered_price %}{{ t('listing.offered_price', value=r.offered_price) }}{% endif %}</div>
         {% if r.message %}<div class="notif-item__body">{{ r.message }}</div>{% endif %}
         <div class="notif-item__meta">{{ r.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="empty-hint">Откликов пока нет.</p>
+    <p class="empty-hint">{{ t('listing.no_responses') }}</p>
     {% endif %}
 
     <form method="post" action="{{ url_for('materials_market.set_status', listing_id=listing.id) }}" class="profile-form profile-form--inline">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label>Статус
+      <label>{{ t('listing.status_label') }}
         <select name="status">
-          <option value="active" {{ 'selected' if listing.status == 'active' }}>Активно</option>
-          <option value="reserved" {{ 'selected' if listing.status == 'reserved' }}>Зарезервировано</option>
-          <option value="closed" {{ 'selected' if listing.status == 'closed' }}>Сделка состоялась</option>
+          <option value="active" {{ 'selected' if listing.status == 'active' }}>{{ t('listing.status_active') }}</option>
+          <option value="reserved" {{ 'selected' if listing.status == 'reserved' }}>{{ t('listing.status_reserved') }}</option>
+          <option value="closed" {{ 'selected' if listing.status == 'closed' }}>{{ t('listing.status_closed') }}</option>
         </select>
       </label>
-      <button type="submit" class="btn btn--secondary">Обновить</button>
+      <button type="submit" class="btn btn--secondary">{{ t('common.update') }}</button>
     </form>
   {% elif listing.status == 'active' %}
-    <h2 class="profile-section-title">Откликнуться</h2>
+    <h2 class="profile-section-title">{{ t('listing.respond_section') }}</h2>
     <form method="post" action="{{ url_for('materials_market.respond', listing_id=listing.id) }}" class="profile-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label>Сообщение <textarea name="message" rows="3" placeholder="Интересует, уточните..."></textarea></label>
-      <label>Ваша цена (если торг) <input type="number" name="offered_price" min="0"></label>
-      <button type="submit" class="btn btn--primary">Отправить отклик</button>
+      <label>{{ t('listing.message_label') }} <textarea name="message" rows="3" placeholder="{{ t('listing.message_placeholder') }}"></textarea></label>
+      <label>{{ t('listing.offered_price_label') }} <input type="number" name="offered_price" min="0"></label>
+      <button type="submit" class="btn btn--primary">{{ t('listing.send_response') }}</button>
     </form>
   {% else %}
-    <p class="empty-hint">Объявление больше не активно.</p>
+    <p class="empty-hint">{{ t('listing.not_active') }}</p>
   {% endif %}
 </section>
 {% endblock %}
