@@ -282,6 +282,70 @@ STRINGS = {
         "uz_cyrillic": "Бизнинг томондан хатолик юз берди. Биз бундан хабардормиз — саҳифани бироз кейинроқ янгилаб кўринг.",
         "en": "Something went wrong on our end. We're already aware — try refreshing the page in a moment.",
     },
+    "auth.forgot_password_link": {
+        "ru": "Забыли пароль?", "uz_latin": "Parolni unutdingizmi?", "uz_cyrillic": "Паролни унутдингизми?",
+        "en": "Forgot password?",
+    },
+    "auth.no_account": {
+        "ru": "Нет аккаунта?", "uz_latin": "Hisobingiz yoʻqmi?", "uz_cyrillic": "Ҳисобингиз йўқми?",
+        "en": "No account yet?",
+    },
+    "auth.have_account": {
+        "ru": "Уже есть аккаунт?", "uz_latin": "Hisobingiz bormi?", "uz_cyrillic": "Ҳисобингиз борми?",
+        "en": "Already have an account?",
+    },
+    "auth.who_are_you_title": {
+        "ru": "Кто вы на платформе?", "uz_latin": "Siz platformada kimsiz?", "uz_cyrillic": "Сиз платформада кимсиз?",
+        "en": "Who are you on the platform?",
+    },
+    "auth.google_no_role_hint": {
+        "ru": "Google не передаёт эту информацию — выберите роль один раз, дальше её можно будет сменить только через поддержку.",
+        "uz_latin": "Google bu maʼlumotni yubormaydi — rolni bir marta tanlang, keyin uni faqat qoʻllab-quvvatlash xizmati orqali oʻzgartirish mumkin boʻladi.",
+        "uz_cyrillic": "Google бу маълумотни юбормайди — рольни бир марта танланг, кейин уни фақат қўллаб-қувватлаш хизмати орқали ўзгартириш мумкин бўлади.",
+        "en": "Google doesn't share this information — choose a role once; after that it can only be changed via support.",
+    },
+    "common.continue": {
+        "ru": "Продолжить", "uz_latin": "Davom etish", "uz_cyrillic": "Давом этиш", "en": "Continue",
+    },
+    "auth.forgot_password_title": {
+        "ru": "Забыли пароль?", "uz_latin": "Parolni unutdingizmi?", "uz_cyrillic": "Паролни унутдингизми?",
+        "en": "Forgot password?",
+    },
+    "auth.forgot_password_hint": {
+        "ru": "Укажите email, с которым регистрировались — пришлём ссылку для сброса пароля.",
+        "uz_latin": "Roʻyxatdan oʻtgan emailingizni koʻrsating — parolni tiklash uchun havola yuboramiz.",
+        "uz_cyrillic": "Рўйхатдан ўтган emailингизни кўрсатинг — паролни тиклаш учун ҳавола юборамиз.",
+        "en": "Enter the email you registered with — we'll send a password reset link.",
+    },
+    "auth.send_link": {
+        "ru": "Отправить ссылку", "uz_latin": "Havolani yuborish", "uz_cyrillic": "Ҳаволани юбориш",
+        "en": "Send link",
+    },
+    "auth.back_to_login": {
+        "ru": "← Вернуться ко входу", "uz_latin": "← Kirishga qaytish", "uz_cyrillic": "← Киришга қайтиш",
+        "en": "← Back to login",
+    },
+    "auth.reset_password_title": {
+        "ru": "Задайте новый пароль", "uz_latin": "Yangi parol oʻrnating", "uz_cyrillic": "Янги парол ўрнатинг",
+        "en": "Set a new password",
+    },
+    "auth.new_password": {
+        "ru": "Новый пароль", "uz_latin": "Yangi parol", "uz_cyrillic": "Янги парол", "en": "New password",
+    },
+    "auth.save_password": {
+        "ru": "Сохранить пароль", "uz_latin": "Parolni saqlash", "uz_cyrillic": "Паролни сақлаш",
+        "en": "Save password",
+    },
+    "auth.choose_role_title": {
+        "ru": "Выбор роли", "uz_latin": "Rolni tanlash", "uz_cyrillic": "Рольни танлаш", "en": "Choose role",
+    },
+    "auth.forgot_password_page_title": {
+        "ru": "Восстановление пароля", "uz_latin": "Parolni tiklash", "uz_cyrillic": "Паролни тиклаш",
+        "en": "Password recovery",
+    },
+    "auth.reset_password_page_title": {
+        "ru": "Новый пароль", "uz_latin": "Yangi parol", "uz_cyrillic": "Янги парол", "en": "New password",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },

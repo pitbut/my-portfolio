@@ -14,16 +14,16 @@
       <label>{{ t('auth.password') }}
         <input type="password" name="password" required minlength="8">
       </label>
-      <label>Повторите пароль
+      <label>{{ t('auth.password2') }}
         <input type="password" name="password2" required minlength="8">
       </label>
       <fieldset class="role-fieldset">
-        <legend>Кто вы?</legend>
+        <legend>{{ t('auth.who_are_you_title') }}</legend>
         <label><input type="radio" name="role" value="customer" {{ 'checked' if role == 'customer' }} required> {{ t('auth.role_customer') }}</label>
         <label><input type="radio" name="role" value="executor" {{ 'checked' if role == 'executor' }}> {{ t('auth.role_executor') }}</label>
         <label><input type="radio" name="role" value="constructor" {{ 'checked' if role == 'constructor' }}> {{ t('auth.role_constructor') }}</label>
       </fieldset>
-      <label>Язык интерфейса
+      <label>{{ t('auth.language') }}
         <select name="language">
           {% for code in supported_languages %}
             <option value="{{ code }}" {{ 'selected' if code == language }}>{{ language_labels[code] }}</option>
@@ -35,7 +35,7 @@
     {% if google_login_available %}
     <a class="btn btn--google btn--block" href="{{ url_for('auth.google_login', next=next_url) }}">{{ t('auth.google') }}</a>
     {% endif %}
-    <p class="auth-card__switch">Уже есть аккаунт? <a href="{{ url_for('auth.login', next=next_url) }}">{{ t('nav.login') }}</a></p>
+    <p class="auth-card__switch">{{ t('auth.have_account') }} <a href="{{ url_for('auth.login', next=next_url) }}">{{ t('nav.login') }}</a></p>
   </div>
 </section>
 {% endblock %}
