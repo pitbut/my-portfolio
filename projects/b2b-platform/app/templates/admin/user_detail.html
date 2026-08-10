@@ -1,33 +1,34 @@
 {% extends "base.html" %}
-{% block title %}{{ target_user.email }} — админ-панель{% endblock %}
+{% block title %}{{ target_user.email }} {{ t('admin.panel_suffix') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <p><a href="{{ url_for('admin.users_list') }}">&larr; Все пользователи</a></p>
+  <p><a href="{{ url_for('admin.users_list') }}">{{ t('admin.user_detail_back') }}</a></p>
   <h1>{{ target_user.email }}</h1>
   <p class="empty-hint">
-    Роль: {{ target_user.role or '—' }} ·
-    Email подтверждён: {{ 'да' if target_user.email_confirmed else 'нет' }} ·
-    Статус: {{ 'заблокирован' if target_user.is_blocked else 'активен' }} ·
-    Регистрация: {{ target_user.created_at.strftime('%d.%m.%Y') }}
+    {{ t('admin.user_detail_meta',
+         role=(t('role.' + target_user.role) if target_user.role else '—'),
+         confirmed=(t('admin.yes') if target_user.email_confirmed else t('admin.no')),
+         status=(t('admin.status_blocked') if target_user.is_blocked else t('admin.status_active')),
+         date=target_user.created_at.strftime('%d.%m.%Y')) }}
   </p>
 
-  <h2>Заявки (заказы) ({{ orders|length }})</h2>
+  <h2>{{ t('admin.orders_heading', count=orders|length) }}</h2>
   {% if orders %}
   <table class="data-table">
     <thead>
-      <tr><th>Название</th><th>Статус</th><th>Создано</th><th></th></tr>
+      <tr><th>{{ t('admin.th_title') }}</th><th>{{ t('admin.th_status') }}</th><th>{{ t('admin.th_created') }}</th><th></th></tr>
     </thead>
     <tbody>
       {% for o in orders %}
       <tr>
         <td><a href="{{ url_for('orders.order_detail', order_id=o.id) }}" target="_blank">{{ o.title }}</a></td>
-        <td>{{ o.status }}</td>
+        <td>{{ order_status_label(o.status) }}</td>
         <td>{{ o.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.delete_user_order', user_id=target_user.id, order_id=o.id) }}" onsubmit="return confirm('Удалить заявку «{{ o.title }}»? Если по ней уже есть ставки/отзывы/спор — удаление честно откажет.');">
+          <form method="post" action="{{ url_for('admin.delete_user_order', user_id=target_user.id, order_id=o.id) }}" onsubmit="return confirm('{{ t('admin.delete_order_confirm', title=o.title) }}');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+            <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete') }}</button>
           </form>
         </td>
       </tr>
@@ -35,26 +36,26 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Заявок нет.</p>
+  <p class="empty-hint">{{ t('admin.no_orders') }}</p>
   {% endif %}
 
-  <h2>Объявления в барахолке ({{ listings|length }})</h2>
+  <h2>{{ t('admin.marketplace_listings_heading', count=listings|length) }}</h2>
   {% if listings %}
   <table class="data-table">
     <thead>
-      <tr><th>Название</th><th>Тип</th><th>Статус</th><th>Создано</th><th></th></tr>
+      <tr><th>{{ t('admin.th_title') }}</th><th>{{ t('admin.th_type') }}</th><th>{{ t('admin.th_status') }}</th><th>{{ t('admin.th_created') }}</th><th></th></tr>
     </thead>
     <tbody>
       {% for l in listings %}
       <tr>
         <td><a href="{{ url_for('marketplace.detail', listing_id=l.id) }}" target="_blank">{{ l.title }}</a></td>
-        <td>{{ 'продаю' if l.listing_intent == 'sell' else 'куплю' }}</td>
-        <td>{{ l.status }}</td>
+        <td>{{ t('admin.intent_sell') if l.listing_intent == 'sell' else t('admin.intent_buy') }}</td>
+        <td>{{ listing_status_label(l.status) }}</td>
         <td>{{ l.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.delete_user_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('Удалить объявление «{{ l.title }}»?');">
+          <form method="post" action="{{ url_for('admin.delete_user_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('{{ t('admin.delete_listing_confirm', title=l.title) }}');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+            <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete') }}</button>
           </form>
         </td>
       </tr>
@@ -62,26 +63,26 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Объявлений в барахолке нет.</p>
+  <p class="empty-hint">{{ t('admin.no_marketplace_listings') }}</p>
   {% endif %}
 
-  <h2>Объявления о материалах ({{ material_listings|length }})</h2>
+  <h2>{{ t('admin.material_listings_heading', count=material_listings|length) }}</h2>
   {% if material_listings %}
   <table class="data-table">
     <thead>
-      <tr><th>Название</th><th>Тип</th><th>Статус</th><th>Создано</th><th></th></tr>
+      <tr><th>{{ t('admin.th_title') }}</th><th>{{ t('admin.th_type') }}</th><th>{{ t('admin.th_status') }}</th><th>{{ t('admin.th_created') }}</th><th></th></tr>
     </thead>
     <tbody>
       {% for l in material_listings %}
       <tr>
         <td><a href="{{ url_for('materials_market.detail', listing_id=l.id) }}" target="_blank">{{ l.title }}</a></td>
-        <td>{{ 'продаю' if l.listing_intent == 'sell' else 'куплю' }}</td>
-        <td>{{ l.status }}</td>
+        <td>{{ t('admin.intent_sell') if l.listing_intent == 'sell' else t('admin.intent_buy') }}</td>
+        <td>{{ listing_status_label(l.status) }}</td>
         <td>{{ l.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.delete_user_material_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('Удалить объявление «{{ l.title }}»?');">
+          <form method="post" action="{{ url_for('admin.delete_user_material_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('{{ t('admin.delete_listing_confirm', title=l.title) }}');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+            <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete') }}</button>
           </form>
         </td>
       </tr>
@@ -89,19 +90,17 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Объявлений о материалах нет.</p>
+  <p class="empty-hint">{{ t('admin.no_material_listings') }}</p>
   {% endif %}
 
   {% if target_user.role != 'admin' %}
-  <h2>Удалить аккаунт</h2>
+  <h2>{{ t('admin.delete_account_heading') }}</h2>
   <p class="empty-hint">
-    Удаляет пользователя вместе со всеми его объявлениями (барахолка и материалы) и его откликами
-    на чужие объявления. Если у аккаунта есть другие связанные данные (заказы, сообщения, отзывы,
-    споры) — удаление честно откажет, тогда используйте блокировку.
+    {{ t('admin.delete_account_hint') }}
   </p>
-  <form method="post" action="{{ url_for('admin.delete_user', user_id=target_user.id) }}" onsubmit="return confirm('Удалить {{ target_user.email }} вместе со всеми его объявлениями?');">
+  <form method="post" action="{{ url_for('admin.delete_user', user_id=target_user.id) }}" onsubmit="return confirm('{{ t('admin.delete_user_final_confirm', email=target_user.email) }}');">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="btn-link btn-link--danger">Удалить пользователя</button>
+    <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete_user_btn') }}</button>
   </form>
   {% endif %}
 </section>

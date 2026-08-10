@@ -2156,6 +2156,215 @@ STRINGS = {
         "ru": "Пока нет уведомлений.", "uz_latin": "Hozircha bildirishnomalar yoʻq.", "uz_cyrillic": "Ҳозирча билдиришномалар йўқ.",
         "en": "No notifications yet.",
     },
+    "role.admin": {
+        "ru": "админ", "uz_latin": "admin", "uz_cyrillic": "админ", "en": "admin",
+    },
+    "profile.model_name_example": {
+        "ru": "напр. DMG MORI NLX 2500", "uz_latin": "masalan, DMG MORI NLX 2500",
+        "uz_cyrillic": "масалан, DMG MORI NLX 2500", "en": "e.g. DMG MORI NLX 2500",
+    },
+    "site.default_title": {
+        "ru": "B2B-платформа изготовителей и ремонтников оборудования",
+        "uz_latin": "Uskunalar ishlab chiqaruvchilari va ta’mirlovchilari uchun B2B-platforma",
+        "uz_cyrillic": "Ускуналар ишлаб чиқарувчилари ва таъмирловчилари учун B2B-платформа",
+        "en": "B2B platform for equipment manufacturers and repair specialists",
+    },
+    "admin.panel_suffix": {
+        "ru": "— админ-панель", "uz_latin": "— administrator paneli", "uz_cyrillic": "— администратор панели",
+        "en": "— admin panel",
+    },
+    "admin.disputes_heading": {
+        "ru": "Споры", "uz_latin": "Nizolar", "uz_cyrillic": "Низолар", "en": "Disputes",
+    },
+    "admin.disputes_open_heading": {
+        "ru": "Открытые ({count})", "uz_latin": "Ochiq ({count})", "uz_cyrillic": "Очиқ ({count})",
+        "en": "Open ({count})",
+    },
+    "admin.disputes_resolved_heading": {
+        "ru": "Разрешённые (последние 30)", "uz_latin": "Hal qilingan (oxirgi 30 ta)",
+        "uz_cyrillic": "Ҳал қилинган (охирги 30 та)", "en": "Resolved (last 30)",
+    },
+    "admin.th_order": {
+        "ru": "Заказ", "uz_latin": "Buyurtma", "uz_cyrillic": "Буюртма", "en": "Order",
+    },
+    "admin.th_reason": {
+        "ru": "Причина", "uz_latin": "Sabab", "uz_cyrillic": "Сабаб", "en": "Reason",
+    },
+    "admin.th_status": {
+        "ru": "Статус", "uz_latin": "Holat", "uz_cyrillic": "Ҳолат", "en": "Status",
+    },
+    "admin.th_opened": {
+        "ru": "Открыт", "uz_latin": "Ochilgan", "uz_cyrillic": "Очилган", "en": "Opened",
+    },
+    "admin.th_resolution": {
+        "ru": "Решение", "uz_latin": "Qaror", "uz_cyrillic": "Қарор", "en": "Resolution",
+    },
+    "admin.th_date": {
+        "ru": "Дата", "uz_latin": "Sana", "uz_cyrillic": "Сана", "en": "Date",
+    },
+    "admin.no_open_disputes": {
+        "ru": "Открытых споров нет.", "uz_latin": "Ochiq nizolar yoʻq.", "uz_cyrillic": "Очиқ низолар йўқ.",
+        "en": "No open disputes.",
+    },
+    "admin.no_resolved_disputes": {
+        "ru": "Разрешённых споров пока нет.", "uz_latin": "Hal qilingan nizolar hali yoʻq.",
+        "uz_cyrillic": "Ҳал қилинган низолар ҳали йўқ.", "en": "No resolved disputes yet.",
+    },
+    "admin.subscriptions_heading": {
+        "ru": "Заявки на подписку", "uz_latin": "Obuna arizalari", "uz_cyrillic": "Обуна аризалари",
+        "en": "Subscription requests",
+    },
+    "admin.th_executor": {
+        "ru": "Исполнитель", "uz_latin": "Ijrochi", "uz_cyrillic": "Ижрочи", "en": "Executor",
+    },
+    "admin.th_payment": {
+        "ru": "Оплата", "uz_latin": "Toʻlov", "uz_cyrillic": "Тўлов", "en": "Payment",
+    },
+    "admin.th_request_date": {
+        "ru": "Дата заявки", "uz_latin": "Ariza sanasi", "uz_cyrillic": "Ариза санаси", "en": "Request date",
+    },
+    "admin.reference_placeholder": {
+        "ru": "№ операции", "uz_latin": "Operatsiya №", "uz_cyrillic": "Операция №", "en": "Reference #",
+    },
+    "admin.activate": {
+        "ru": "Активировать", "uz_latin": "Faollashtirish", "uz_cyrillic": "Фаоллаштириш", "en": "Activate",
+    },
+    "admin.reject": {
+        "ru": "Отклонить", "uz_latin": "Rad etish", "uz_cyrillic": "Рад этиш", "en": "Reject",
+    },
+    "admin.no_pending_subscriptions": {
+        "ru": "Заявок на подписку нет.", "uz_latin": "Obuna arizalari yoʻq.", "uz_cyrillic": "Обуна аризалари йўқ.",
+        "en": "No subscription requests.",
+    },
+    "admin.users_heading": {
+        "ru": "Пользователи ({count})", "uz_latin": "Foydalanuvchilar ({count})", "uz_cyrillic": "Фойдаланувчилар ({count})",
+        "en": "Users ({count})",
+    },
+    "admin.th_email": {
+        "ru": "Email", "uz_latin": "Email", "uz_cyrillic": "Email", "en": "Email",
+    },
+    "admin.th_role": {
+        "ru": "Роль", "uz_latin": "Rol", "uz_cyrillic": "Роль", "en": "Role",
+    },
+    "admin.th_email_confirmed": {
+        "ru": "Email подтверждён", "uz_latin": "Email tasdiqlangan", "uz_cyrillic": "Email тасдиқланган",
+        "en": "Email confirmed",
+    },
+    "admin.yes": {
+        "ru": "да", "uz_latin": "ha", "uz_cyrillic": "ҳа", "en": "yes",
+    },
+    "admin.no": {
+        "ru": "нет", "uz_latin": "yoʻq", "uz_cyrillic": "йўқ", "en": "no",
+    },
+    "admin.status_blocked": {
+        "ru": "заблокирован", "uz_latin": "bloklangan", "uz_cyrillic": "блокланган", "en": "blocked",
+    },
+    "admin.status_active": {
+        "ru": "активен", "uz_latin": "faol", "uz_cyrillic": "фаол", "en": "active",
+    },
+    "admin.th_registered": {
+        "ru": "Регистрация", "uz_latin": "Roʻyxatdan oʻtish", "uz_cyrillic": "Рўйхатдан ўтиш", "en": "Registered",
+    },
+    "admin.listings_link": {
+        "ru": "Объявления", "uz_latin": "Eʼlonlar", "uz_cyrillic": "Эълонлар", "en": "Listings",
+    },
+    "admin.unblock": {
+        "ru": "Разблокировать", "uz_latin": "Blokdan chiqarish", "uz_cyrillic": "Блокдан чиқариш", "en": "Unblock",
+    },
+    "admin.block": {
+        "ru": "Заблокировать", "uz_latin": "Bloklash", "uz_cyrillic": "Блоклаш", "en": "Block",
+    },
+    "admin.delete": {
+        "ru": "Удалить", "uz_latin": "Oʻchirish", "uz_cyrillic": "Ўчириш", "en": "Delete",
+    },
+    "admin.delete_user_confirm": {
+        "ru": "Удалить {email} вместе со всеми его объявлениями? Если есть другие связанные данные (заказы, сообщения и т.п.) — сайт откажет и предложит заблокировать вместо удаления.",
+        "uz_latin": "{email} barcha eʼlonlari bilan birga oʻchirilsinmi? Agar boshqa bogʻliq maʼlumotlar boʻlsa (buyurtmalar, xabarlar va h.k.) — sayt rad etadi va oʻchirish oʻrniga bloklashni taklif qiladi.",
+        "uz_cyrillic": "{email} барча эълонлари билан бирга ўчирилсинми? Агар бошқа боғлиқ маълумотлар бўлса (буюртмалар, хабарлар ва ҳ.к.) — сайт рад этади ва ўчириш ўрнига блоклашни таклиф қилади.",
+        "en": "Delete {email} along with all their listings? If other related data exists (orders, messages, etc.) — the site will refuse and suggest blocking instead of deleting.",
+    },
+    "admin.no_users": {
+        "ru": "Пользователей пока нет.", "uz_latin": "Hozircha foydalanuvchilar yoʻq.", "uz_cyrillic": "Ҳозирча фойдаланувчилар йўқ.",
+        "en": "No users yet.",
+    },
+    "admin.user_detail_back": {
+        "ru": "← Все пользователи", "uz_latin": "← Barcha foydalanuvchilar", "uz_cyrillic": "← Барча фойдаланувчилар",
+        "en": "← All users",
+    },
+    "admin.user_detail_meta": {
+        "ru": "Роль: {role} · Email подтверждён: {confirmed} · Статус: {status} · Регистрация: {date}",
+        "uz_latin": "Rol: {role} · Email tasdiqlangan: {confirmed} · Holat: {status} · Roʻyxatdan oʻtish: {date}",
+        "uz_cyrillic": "Роль: {role} · Email тасдиқланган: {confirmed} · Ҳолат: {status} · Рўйхатдан ўтиш: {date}",
+        "en": "Role: {role} · Email confirmed: {confirmed} · Status: {status} · Registered: {date}",
+    },
+    "admin.orders_heading": {
+        "ru": "Заявки (заказы) ({count})", "uz_latin": "Arizalar (buyurtmalar) ({count})",
+        "uz_cyrillic": "Аризалар (буюртмалар) ({count})", "en": "Requests (orders) ({count})",
+    },
+    "admin.th_title": {
+        "ru": "Название", "uz_latin": "Nomi", "uz_cyrillic": "Номи", "en": "Title",
+    },
+    "admin.th_created": {
+        "ru": "Создано", "uz_latin": "Yaratilgan", "uz_cyrillic": "Яратилган", "en": "Created",
+    },
+    "admin.delete_order_confirm": {
+        "ru": "Удалить заявку «{title}»? Если по ней уже есть ставки/отзывы/спор — удаление честно откажет.",
+        "uz_latin": "«{title}» arizasi oʻchirilsinmi? Agar unga takliflar/sharhlar/nizo boʻlsa — oʻchirish rad etadi.",
+        "uz_cyrillic": "«{title}» аризаси ўчирилсинми? Агар унга таклифлар/шарҳлар/низо бўлса — ўчириш рад этади.",
+        "en": "Delete request \"{title}\"? If it already has bids/reviews/a dispute — deletion will honestly refuse.",
+    },
+    "admin.no_orders": {
+        "ru": "Заявок нет.", "uz_latin": "Arizalar yoʻq.", "uz_cyrillic": "Аризалар йўқ.", "en": "No requests.",
+    },
+    "admin.marketplace_listings_heading": {
+        "ru": "Объявления в барахолке ({count})", "uz_latin": "Bozorchadagi eʼlonlar ({count})",
+        "uz_cyrillic": "Бозорчадаги эълонлар ({count})", "en": "Marketplace listings ({count})",
+    },
+    "admin.th_type": {
+        "ru": "Тип", "uz_latin": "Turi", "uz_cyrillic": "Тури", "en": "Type",
+    },
+    "admin.intent_sell": {
+        "ru": "продаю", "uz_latin": "sotaman", "uz_cyrillic": "сотаман", "en": "selling",
+    },
+    "admin.intent_buy": {
+        "ru": "куплю", "uz_latin": "sotib olaman", "uz_cyrillic": "сотиб оламан", "en": "buying",
+    },
+    "admin.delete_listing_confirm": {
+        "ru": "Удалить объявление «{title}»?", "uz_latin": "«{title}» eʼloni oʻchirilsinmi?",
+        "uz_cyrillic": "«{title}» эълони ўчирилсинми?", "en": "Delete listing \"{title}\"?",
+    },
+    "admin.no_marketplace_listings": {
+        "ru": "Объявлений в барахолке нет.", "uz_latin": "Bozorchada eʼlonlar yoʻq.",
+        "uz_cyrillic": "Бозорчада эълонлар йўқ.", "en": "No marketplace listings.",
+    },
+    "admin.material_listings_heading": {
+        "ru": "Объявления о материалах ({count})", "uz_latin": "Materiallar haqidagi eʼlonlar ({count})",
+        "uz_cyrillic": "Материаллар ҳақидаги эълонлар ({count})", "en": "Material listings ({count})",
+    },
+    "admin.no_material_listings": {
+        "ru": "Объявлений о материалах нет.", "uz_latin": "Materiallar haqida eʼlonlar yoʻq.",
+        "uz_cyrillic": "Материаллар ҳақида эълонлар йўқ.", "en": "No material listings.",
+    },
+    "admin.delete_account_heading": {
+        "ru": "Удалить аккаунт", "uz_latin": "Hisobni oʻchirish", "uz_cyrillic": "Ҳисобни ўчириш",
+        "en": "Delete account",
+    },
+    "admin.delete_account_hint": {
+        "ru": "Удаляет пользователя вместе со всеми его объявлениями (барахолка и материалы) и его откликами на чужие объявления. Если у аккаунта есть другие связанные данные (заказы, сообщения, отзывы, споры) — удаление честно откажет, тогда используйте блокировку.",
+        "uz_latin": "Foydalanuvchini barcha eʼlonlari (bozorcha va materiallar) va boshqa eʼlonlarga bergan javoblari bilan birga oʻchiradi. Agar hisobda boshqa bogʻliq maʼlumotlar boʻlsa (buyurtmalar, xabarlar, sharhlar, nizolar) — oʻchirish rad etadi, bunday holda blokdan foydalaning.",
+        "uz_cyrillic": "Фойдаланувчини барча эълонлари (бозорча ва материаллар) ва бошқа эълонларга берган жавоблари билан бирга ўчиради. Агар ҳисобда бошқа боғлиқ маълумотлар бўлса (буюртмалар, хабарлар, шарҳлар, низолар) — ўчириш рад этади, бундай ҳолда блокдан фойдаланинг.",
+        "en": "Deletes the user along with all their listings (marketplace and materials) and their responses to other listings. If the account has other related data (orders, messages, reviews, disputes) — deletion will honestly refuse; use blocking instead.",
+    },
+    "admin.delete_user_btn": {
+        "ru": "Удалить пользователя", "uz_latin": "Foydalanuvchini oʻchirish", "uz_cyrillic": "Фойдаланувчини ўчириш",
+        "en": "Delete user",
+    },
+    "admin.delete_user_final_confirm": {
+        "ru": "Удалить {email} вместе со всеми его объявлениями?",
+        "uz_latin": "{email} barcha eʼlonlari bilan birga oʻchirilsinmi?",
+        "uz_cyrillic": "{email} барча эълонлари билан бирга ўчирилсинми?",
+        "en": "Delete {email} along with all their listings?",
+    },
 }
 
 

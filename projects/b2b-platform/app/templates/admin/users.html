@@ -1,40 +1,40 @@
 {% extends "base.html" %}
-{% block title %}Пользователи — админ-панель{% endblock %}
+{% block title %}{{ t('admin.th_role') }} {{ t('admin.panel_suffix') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Пользователи ({{ users|length }})</h1>
+  <h1>{{ t('admin.users_heading', count=users|length) }}</h1>
   {% if users %}
   <table class="data-table">
     <thead>
       <tr>
-        <th>Email</th><th>Роль</th><th>Email подтверждён</th><th>Статус</th><th>Регистрация</th><th></th>
+        <th>{{ t('admin.th_email') }}</th><th>{{ t('admin.th_role') }}</th><th>{{ t('admin.th_email_confirmed') }}</th><th>{{ t('admin.th_status') }}</th><th>{{ t('admin.th_registered') }}</th><th></th>
       </tr>
     </thead>
     <tbody>
       {% for u in users %}
       <tr>
         <td>{{ u.email }}</td>
-        <td>{{ u.role or '—' }}</td>
-        <td>{{ 'да' if u.email_confirmed else 'нет' }}</td>
+        <td>{{ t('role.' + u.role) if u.role else '—' }}</td>
+        <td>{{ t('admin.yes') if u.email_confirmed else t('admin.no') }}</td>
         <td>
-          {% if u.is_blocked %}<span class="status-chip status-chip--disputed">заблокирован</span>
-          {% else %}<span class="status-chip status-chip--completed">активен</span>{% endif %}
+          {% if u.is_blocked %}<span class="status-chip status-chip--disputed">{{ t('admin.status_blocked') }}</span>
+          {% else %}<span class="status-chip status-chip--completed">{{ t('admin.status_active') }}</span>{% endif %}
         </td>
         <td>{{ u.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
           {% if u.role != 'admin' %}
-          <a href="{{ url_for('admin.user_detail', user_id=u.id) }}">Объявления</a>
+          <a href="{{ url_for('admin.user_detail', user_id=u.id) }}">{{ t('admin.listings_link') }}</a>
           <form method="post" action="{{ url_for('admin.toggle_block_user', user_id=u.id) }}" style="display:inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn btn--secondary">{{ 'Разблокировать' if u.is_blocked else 'Заблокировать' }}</button>
+            <button type="submit" class="btn btn--secondary">{{ t('admin.unblock') if u.is_blocked else t('admin.block') }}</button>
           </form>
-          <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline" onsubmit="return confirm('Удалить {{ u.email }} вместе со всеми его объявлениями? Если есть другие связанные данные (заказы, сообщения и т.п.) — сайт откажет и предложит заблокировать вместо удаления.');">
+          <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline" onsubmit="return confirm('{{ t('admin.delete_user_confirm', email=u.email) }}');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+            <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete') }}</button>
           </form>
           {% else %}
-          <span class="empty-hint">админ</span>
+          <span class="empty-hint">{{ t('role.admin') }}</span>
           {% endif %}
         </td>
       </tr>
@@ -42,7 +42,7 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Пользователей пока нет.</p>
+  <p class="empty-hint">{{ t('admin.no_users') }}</p>
   {% endif %}
 </section>
 {% endblock %}
