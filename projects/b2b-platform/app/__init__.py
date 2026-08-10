@@ -153,25 +153,24 @@ def create_app(config_name=None):
             )
         }
 
+    from app.i18n import translate as _t
+
     @app.errorhandler(403)
     def forbidden(error):
         return render_template(
-            "errors/error.html", code=403, heading="Доступ запрещён",
-            message="У вас нет прав на просмотр этой страницы — возможно, она относится к другой роли или другому пользователю.",
+            "errors/error.html", code=403, heading=_t("error.403_heading"), message=_t("error.403_message"),
         ), 403
 
     @app.errorhandler(404)
     def not_found(error):
         return render_template(
-            "errors/error.html", code=404, heading="Страница не найдена",
-            message="Такой страницы не существует, либо она была удалена.",
+            "errors/error.html", code=404, heading=_t("error.404_heading"), message=_t("error.404_message"),
         ), 404
 
     @app.errorhandler(500)
     def server_error(error):
         return render_template(
-            "errors/error.html", code=500, heading="Ошибка сервера",
-            message="Что-то пошло не так на нашей стороне. Мы уже знаем об этом — попробуйте обновить страницу чуть позже.",
+            "errors/error.html", code=500, heading=_t("error.500_heading"), message=_t("error.500_message"),
         ), 500
 
     @app.context_processor

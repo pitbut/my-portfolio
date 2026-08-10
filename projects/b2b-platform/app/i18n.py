@@ -185,13 +185,116 @@ STRINGS = {
         "uz_cyrillic": ", акс ҳолда буюртмалар, таклифлар ва хабарлар ҳақида билдиришнома олмайсиз.",
         "en": ", otherwise you won't receive notifications about orders, bids and messages.",
     },
+    "home.stat_total": {
+        "ru": "зарегистрировано всего", "uz_latin": "jami roʻyxatdan oʻtgan", "uz_cyrillic": "жами рўйхатдан ўтган",
+        "en": "total registered",
+    },
+    "home.stat_customer": {
+        "ru": "заказчиков", "uz_latin": "buyurtmachilar", "uz_cyrillic": "буюртмачилар", "en": "customers",
+    },
+    "home.stat_executor": {
+        "ru": "исполнителей", "uz_latin": "ijrochilar", "uz_cyrillic": "ижрочилар", "en": "executors",
+    },
+    "home.stat_constructor": {
+        "ru": "конструкторов", "uz_latin": "konstruktorlar", "uz_cyrillic": "конструкторлар", "en": "designers",
+    },
+    "home.step1_title": {
+        "ru": "Регистрация", "uz_latin": "Roʻyxatdan oʻtish", "uz_cyrillic": "Рўйхатдан ўтиш", "en": "Sign up",
+    },
+    "home.step1_text": {
+        "ru": "Заказчик, исполнитель или конструктор регистрируются сами — по email или через Google — и сами заполняют свой профиль.",
+        "uz_latin": "Buyurtmachi, ijrochi yoki konstruktor oʻzi roʻyxatdan oʻtadi — email yoki Google orqali — va profilini oʻzi toʻldiradi.",
+        "uz_cyrillic": "Буюртмачи, ижрочи ёки конструктор ўзи рўйхатдан ўтади — email ёки Google орқали — ва профилини ўзи тўлдиради.",
+        "en": "A customer, executor or designer signs up independently — by email or via Google — and fills in their own profile.",
+    },
+    "home.step2_title": {
+        "ru": "Профиль", "uz_latin": "Profil", "uz_cyrillic": "Профиль", "en": "Profile",
+    },
+    "home.step2_text": {
+        "ru": "Исполнитель указывает станочный парк, допустимые габариты и материалы — это основа автоподбора заказов.",
+        "uz_latin": "Ijrochi stanoklar parkini, ruxsat etilgan oʻlchamlarni va materiallarni koʻrsatadi — bu buyurtmalarni avtomatik tanlash asosi.",
+        "uz_cyrillic": "Ижрочи станоклар паркини, рухсат этилган ўлчамларни ва материалларни кўрсатади — бу буюртмаларни автоматик танлаш асоси.",
+        "en": "The executor specifies their machine fleet, allowed dimensions and materials — the basis for automatic order matching.",
+    },
+    "home.step3_title": {
+        "ru": "Заказы и аукцион", "uz_latin": "Buyurtmalar va auksion", "uz_cyrillic": "Буюртмалар ва аукцион",
+        "en": "Orders and bidding",
+    },
+    "home.step3_text": {
+        "ru": "Публикация заявок, автоподбор исполнителей поблизости и аукцион ставок — заказчик сам выбирает победителя.",
+        "uz_latin": "Buyurtmalarni joylashtirish, yaqin atrofdagi ijrochilarni avtomatik tanlash va takliflar auksioni — buyurtmachi gʻolibni oʻzi tanlaydi.",
+        "uz_cyrillic": "Буюртмаларни жойлаштириш, яқин атрофдаги ижрочиларни автоматик танлаш ва таклифлар аукциони — буюртмачи ғолибни ўзи танлайди.",
+        "en": "Posting orders, automatic matching of nearby executors, and a bidding auction — the customer picks the winner themselves.",
+    },
+    "home.status_note": {
+        "ru": "На платформе работают: заказы и автоподбор, карта и геопоиск, отзывы, арбитраж, Telegram-бот и подписки, барахолка станков и инструмента, вакансии и резюме, рынок сырья и материалов, роль «Конструктор», прямые сообщения между пользователями. Подробнее — в",
+        "uz_latin": "Platformada ishlaydi: buyurtmalar va avtomatik tanlash, xarita va geo-qidiruv, sharhlar, arbitraj, Telegram-bot va obunalar, stanok va asbob-uskuna bozorchasi, ish oʻrinlari va rezyumelar, xomashyo va materiallar bozori, «Konstruktor» roli, foydalanuvchilar orasidagi toʻgʻridan-toʻgʻri xabarlar. Batafsil —",
+        "uz_cyrillic": "Платформада ишлайди: буюртмалар ва автоматик танлаш, харита ва гео-қидирув, шарҳлар, арбитраж, Telegram-бот ва обуналар, станок ва асбоб-ускуна бозорчаси, иш ўринлари ва резюмелар, хомашё ва материаллар бозори, «Конструктор» роли, фойдаланувчилар орасидаги тўғридан-тўғри хабарлар. Батафсил —",
+        "en": "The platform supports: orders with auto-matching, map and geo-search, reviews, arbitration, Telegram bot and subscriptions, equipment marketplace, jobs and resumes, raw materials market, the Designer role, and direct messaging between users. More details in the",
+    },
+    "home.status_note_link": {
+        "ru": "техническом задании", "uz_latin": "texnik topshiriqda", "uz_cyrillic": "техник топшириқда",
+        "en": "spec document",
+    },
+    "common.close": {
+        "ru": "Закрыть", "uz_latin": "Yopish", "uz_cyrillic": "Ёпиш", "en": "Close",
+    },
+    "auth.password2": {
+        "ru": "Повторите пароль", "uz_latin": "Parolni takrorlang", "uz_cyrillic": "Паролни такрорланг",
+        "en": "Repeat password",
+    },
+    "auth.language": {
+        "ru": "Язык интерфейса", "uz_latin": "Interfeys tili", "uz_cyrillic": "Интерфейс тили",
+        "en": "Interface language",
+    },
     "profile.incomplete_banner": {
         "ru": "Профиль не заполнен — заполните его, чтобы получать заказы и быть видимым в каталоге.",
         "uz_latin": "Profil toʻldirilmagan — buyurtmalar olish uchun uni toʻldiring.",
         "uz_cyrillic": "Профиль тўлдирилмаган — буюртмалар олиш учун уни тўлдиринг.",
         "en": "Profile is incomplete — fill it in to receive orders and appear in the catalog.",
     },
+    "error.403_heading": {
+        "ru": "Доступ запрещён", "uz_latin": "Kirish taqiqlangan", "uz_cyrillic": "Кириш тақиқланган",
+        "en": "Access denied",
+    },
+    "error.403_message": {
+        "ru": "У вас нет прав на просмотр этой страницы — возможно, она относится к другой роли или другому пользователю.",
+        "uz_latin": "Sizda bu sahifani koʻrish huquqi yoʻq — ehtimol, u boshqa rolga yoki boshqa foydalanuvchiga tegishli.",
+        "uz_cyrillic": "Сизда бу саҳифани кўриш ҳуқуқи йўқ — эҳтимол, у бошқа рольга ёки бошқа фойдаланувчига тегишли.",
+        "en": "You don't have permission to view this page — it may belong to a different role or another user.",
+    },
+    "error.404_heading": {
+        "ru": "Страница не найдена", "uz_latin": "Sahifa topilmadi", "uz_cyrillic": "Саҳифа топилмади",
+        "en": "Page not found",
+    },
+    "error.404_message": {
+        "ru": "Такой страницы не существует, либо она была удалена.",
+        "uz_latin": "Bunday sahifa mavjud emas yoki u oʻchirilgan.",
+        "uz_cyrillic": "Бундай саҳифа мавжуд эмас ёки у ўчирилган.",
+        "en": "This page doesn't exist, or it has been removed.",
+    },
+    "error.500_heading": {
+        "ru": "Ошибка сервера", "uz_latin": "Server xatosi", "uz_cyrillic": "Сервер хатоси", "en": "Server error",
+    },
+    "error.500_message": {
+        "ru": "Что-то пошло не так на нашей стороне. Мы уже знаем об этом — попробуйте обновить страницу чуть позже.",
+        "uz_latin": "Bizning tomondan xatolik yuz berdi. Biz bundan xabardormiz — sahifani biroz keyinroq yangilab koʻring.",
+        "uz_cyrillic": "Бизнинг томондан хатолик юз берди. Биз бундан хабардормиз — саҳифани бироз кейинроқ янгилаб кўринг.",
+        "en": "Something went wrong on our end. We're already aware — try refreshing the page in a moment.",
+    },
+    "error.back_home": {
+        "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
+    },
 }
+
+
+def translate(key, **kwargs):
+    lang = get_current_lang()
+    entry = STRINGS.get(key)
+    if not entry:
+        return key
+    text = entry.get(lang, entry["ru"])
+    return text.format(**kwargs) if kwargs else text
 
 
 def register_i18n(app):
@@ -203,14 +306,7 @@ def register_i18n(app):
             "language_labels": LANGUAGE_LABELS,
         }
 
-    @app.template_global("t")
-    def t(key, **kwargs):
-        lang = get_current_lang()
-        entry = STRINGS.get(key)
-        if not entry:
-            return key
-        text = entry.get(lang, entry["ru"])
-        return text.format(**kwargs) if kwargs else text
+    app.jinja_env.globals["t"] = translate
 
 
 def get_current_lang():
