@@ -1157,3 +1157,21 @@ class PortfolioMedia(db.Model):
 
     def __repr__(self):
         return f"<PortfolioMedia user_id={self.user_id} type={self.media_type!r}>"
+
+
+class PageView(db.Model):
+    """Простой счётчик посещений — одна строка на каждую отдачу HTML-страницы
+    (см. регистрацию in _count_page_view в app/__init__.py). Не хранит IP и
+    прочие персональные данные, только путь и (если пользователь вошёл)
+    его user_id — этого достаточно, чтобы администратор видел «сколько
+    людей заходит на сайт», не превращая это в трекинг конкретных людей."""
+
+    __tablename__ = "page_views"
+
+    id = db.Column(db.Integer, primary_key=True)
+    path = db.Column(db.String(255), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    def __repr__(self):
+        return f"<PageView path={self.path!r} created_at={self.created_at}>"

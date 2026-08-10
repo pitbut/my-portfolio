@@ -135,3 +135,22 @@ def test_home_page_shows_ad_image_when_file_uploaded(client):
         assert b"home-banner__ad-text" not in resp.data
     finally:
         os.remove(banner_path)
+
+
+def test_page_view_counter_counts_html_pages_and_ignores_static(client):
+    from app.models import PageView
+
+    with client.application.app_context():
+        before = PageView.query.count()
+
+    client.get("/")
+
+    with client.application.app_context():
+        after_html = PageView.query.count()
+        assert after_html == before + 1
+
+    client.get("/static/css/style.css")
+
+    with client.application.app_context():
+        after_static = PageView.query.count()
+        assert after_static == after_html

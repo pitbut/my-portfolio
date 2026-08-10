@@ -2243,6 +2243,9 @@ STRINGS = {
     "admin.th_email": {
         "ru": "Email", "uz_latin": "Email", "uz_cyrillic": "Email", "en": "Email",
     },
+    "admin.th_customer": {
+        "ru": "Заказчик", "uz_latin": "Mijoz", "uz_cyrillic": "Мижоз", "en": "Customer",
+    },
     "admin.th_role": {
         "ru": "Роль", "uz_latin": "Rol", "uz_cyrillic": "Роль", "en": "Role",
     },
@@ -2402,6 +2405,35 @@ STRINGS = {
         "uz_latin": "Siz bu yozuvni administrator nomidan tahrirlayapsiz — faqat aniq xatolarni tuzating, mazmunini emas.",
         "uz_cyrillic": "Сиз бу ёзувни администратор номидан таҳрирляпсиз — фақат аниқ хатоларни тузатинг, мазмунини эмас.",
         "en": "You're editing this record as an admin — fix only obvious errors, not the content itself.",
+    },
+    "admin.stats_heading": {
+        "ru": "Статистика посещений", "uz_latin": "Tashriflar statistikasi", "uz_cyrillic": "Ташрифлар статистикаси",
+        "en": "Visitor statistics",
+    },
+    "admin.stats_total_views": {
+        "ru": "Просмотров страниц всего", "uz_latin": "Jami sahifa ko‘rishlar", "uz_cyrillic": "Жами саҳифа кўришлар",
+        "en": "Total page views",
+    },
+    "admin.stats_today_views": {
+        "ru": "Просмотров сегодня", "uz_latin": "Bugungi ko‘rishlar", "uz_cyrillic": "Бугунги кўришлар",
+        "en": "Views today",
+    },
+    "admin.stats_known_visitors": {
+        "ru": "Уникальных зарегистрированных посетителей", "uz_latin": "Noyob ro‘yxatdan o‘tgan tashrif buyuruvchilar",
+        "uz_cyrillic": "Ноёб рўйхатдан ўтган ташриф буюрувчилар", "en": "Unique registered visitors",
+    },
+    "admin.stats_daily_heading": {
+        "ru": "По дням (последние 14 дней)", "uz_latin": "Kunlar bo‘yicha (oxirgi 14 kun)",
+        "uz_cyrillic": "Кунлар бўйича (охирги 14 кун)", "en": "By day (last 14 days)",
+    },
+    "admin.stats_note": {
+        "ru": "Считаются просмотры страниц (не уникальные посетители по IP — IP-адреса не сохраняются). Визиты незалогиненных гостей входят в «Просмотров страниц», но не в «Уникальных посетителей».",
+        "uz_latin": "Sahifa ko‘rishlar hisoblanadi (IP bo‘yicha noyob tashrif buyuruvchilar emas — IP-manzillar saqlanmaydi). Tizimga kirmagan mehmonlarning tashriflari «Jami ko‘rishlar»ga kiradi, lekin «Noyob tashrif buyuruvchilar»ga kirmaydi.",
+        "uz_cyrillic": "Саҳифа кўришлар ҳисобланади (IP бўйича ноёб ташриф буюрувчилар эмас — IP-манзиллар сақланмайди). Тизимга кирмаган меҳмонларнинг ташрифлари «Жами кўришлар»га киради, лекин «Ноёб ташриф буюрувчилар»га кирмайди.",
+        "en": "Counts page views (not unique visitors by IP — IP addresses aren't stored). Visits from non-logged-in guests count toward \"Total views\" but not \"Unique visitors\".",
+    },
+    "nav.admin_stats": {
+        "ru": "Статистика", "uz_latin": "Statistika", "uz_cyrillic": "Статистика", "en": "Statistics",
     },
     "home.video_banner_title": {
         "ru": "Как пользоваться платформой", "uz_latin": "Platformadan qanday foydalanish kerak",

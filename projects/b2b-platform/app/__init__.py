@@ -3,7 +3,7 @@ import os
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -152,6 +152,27 @@ def create_app(config_name=None):
                 app.config.get("TELEGRAM_BOT_TOKEN") and app.config.get("TELEGRAM_BOT_USERNAME")
             )
         }
+
+    @app.after_request
+    def _count_page_view(response):
+        """Счётчик посещений для админ-панели — считаем только реальные
+        отдачи HTML-страниц (не статику, не JSON-эндпоинты вроде
+        /profile/cities/<id>.json или вебхука Telegram, у которых
+        response.mimetype не text/html), и только успешные GET-запросы."""
+        if (
+            request.method == "GET"
+            and response.status_code < 400
+            and (response.mimetype or "").startswith("text/html")
+            and not request.path.startswith("/static/")
+        ):
+            from flask_login import current_user
+
+            db.session.add(models.PageView(
+                path=request.path[:255],
+                user_id=current_user.id if current_user.is_authenticated else None,
+            ))
+            db.session.commit()
+        return response
 
     from app.i18n import translate as _t
 

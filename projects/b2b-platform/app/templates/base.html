@@ -54,7 +54,7 @@
             <a href="{{ url_for('materials_market.index') }}">{{ t('nav.materials') }}</a>
             <a href="{{ url_for('profile.constructor_edit') }}">{{ t('nav.profile') }}</a>
           {% elif current_user.role == 'admin' %}
-            <a href="{{ url_for('orders.my_orders') }}">{{ t('nav.orders') }}</a>
+            <a href="{{ url_for('admin.orders_list') }}">{{ t('nav.orders') }}</a>
             <a href="{{ url_for('orders.new_order') }}">{{ t('nav.new_order') }}</a>
             <a href="{{ url_for('map.index') }}">{{ t('nav.map') }}</a>
             <a href="{{ url_for('constructors.index') }}">{{ t('nav.constructors') }}</a>
@@ -64,6 +64,7 @@
             <a href="{{ url_for('admin.disputes_list') }}">{{ t('nav.admin_disputes') }}</a>
             <a href="{{ url_for('admin.subscriptions_list') }}">{{ t('nav.admin_subscriptions') }}</a>
             <a href="{{ url_for('admin.users_list') }}">{{ t('nav.admin_users') }}</a>
+            <a href="{{ url_for('admin.stats') }}">{{ t('nav.admin_stats') }}</a>
           {% endif %}
           {% if current_user.role in ('customer', 'executor', 'constructor') %}
             <a href="{{ url_for('settings.index') }}" title="{{ t('nav.settings') }}">⚙️</a>

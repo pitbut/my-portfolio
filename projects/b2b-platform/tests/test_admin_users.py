@@ -428,3 +428,49 @@ def test_admin_can_edit_material_listing(client):
         updated_listing = db.session.get(MaterialListing, listing_id)
         assert updated_listing.title == "Лист металла (испр.)"
         assert updated_listing.description == "Исправленное описание"
+
+
+def test_admin_own_orders_page_is_always_empty(client):
+    """Регресс-документация бага: у админа нет CustomerProfile, поэтому
+    orders.my_orders («мои заявки») всегда пуст — админ должен видеть
+    ленту через отдельную admin.orders_list, а не эту страницу."""
+    _setup_customer_with_order(client, "notforadmin@example.com", "Заявка не для ленты админа")
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get("/orders")
+    assert resp.status_code == 200
+    assert "Заявка не для ленты админа".encode() not in resp.data
+
+
+def test_admin_orders_feed_shows_all_platform_orders(client):
+    _setup_customer_with_order(client, "feedcustomer@example.com", "Токарная деталь для ленты")
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get("/admin/orders")
+    assert resp.status_code == 200
+    assert "Токарная деталь для ленты".encode() in resp.data
+    assert "feedcustomer@example.com".encode() in resp.data
+
+
+def test_admin_stats_page_shows_page_view_counts(client):
+    from app.models import PageView
+
+    with client.application.app_context():
+        before = PageView.query.count()
+
+    client.get("/")
+    client.get("/")
+
+    with client.application.app_context():
+        assert PageView.query.count() >= before + 2
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get("/admin/stats")
+    assert resp.status_code == 200
+    assert "Статистика посещений".encode() in resp.data

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.orders') }} {{ t('admin.panel_suffix') }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <div class="page-head">
+    <h1>{{ t('nav.orders') }}</h1>
+  </div>
+
+  <form method="get" class="map-filters">
+    <label>{{ t('admin.th_status') }}
+      <select name="status" onchange="this.form.submit()">
+        <option value="">{{ t('listing.filter_all') }}</option>
+        {% for s in order_statuses %}
+        <option value="{{ s }}" {{ 'selected' if status_filter == s }}>{{ order_status_label(s) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+
+  {% if orders %}
+  <table class="data-table">
+    <thead>
+      <tr><th>{{ t('admin.th_title') }}</th><th>{{ t('admin.th_customer') }}</th><th>{{ t('admin.th_status') }}</th><th>{{ t('admin.th_created') }}</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>{{ o.title }}</td>
+        <td>{{ o.customer.user.email if o.customer and o.customer.user else '—' }}</td>
+        <td>{{ order_status_label(o.status) }}</td>
+        <td>{{ o.created_at.strftime('%d.%m.%Y') }}</td>
+        <td><a href="{{ url_for('orders.order_detail', order_id=o.id) }}" target="_blank">{{ t('notif.open_link') }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-hint">{{ t('admin.no_orders') }}</p>
+  {% endif %}
+</section>
+{% endblock %}
