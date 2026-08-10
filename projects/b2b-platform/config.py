@@ -75,6 +75,23 @@ class Config:
         else os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
     )
 
+    # ИИ (для будущего умного подбора/поиска — «нестандартная» заявка вроде
+    # «почините колбасное оборудование» может не попадать под жёсткие
+    # категории, а ИИ способен прочитать вольные описания в портфолио и
+    # объявлениях). Провайдер выбирается переменной AI_PROVIDER, а не
+    # захардкожен, чтобы сменить его на более дешёвый можно было одной
+    # правкой .env, без изменений в коде — см. app/ai.py.
+    #   anthropic         — родной Messages API Anthropic.
+    #   openai_compatible — формат Chat Completions, которого держится
+    #                       OpenAI и большинство дешёвых/открытых
+    #                       провайдеров (DeepSeek, Groq, Together, Mistral,
+    #                       локальный Ollama и т.п.) — для них меняется
+    #                       только AI_BASE_URL/AI_MODEL/AI_API_KEY.
+    AI_PROVIDER = os.environ.get("AI_PROVIDER", "anthropic")
+    AI_API_KEY = os.environ.get("AI_API_KEY")
+    AI_MODEL = os.environ.get("AI_MODEL")  # напр. claude-haiku-4-5-20251001 или gpt-4o-mini
+    AI_BASE_URL = os.environ.get("AI_BASE_URL")  # только для openai_compatible с нестандартным адресом
+
     WTF_CSRF_TIME_LIMIT = None  # токен не должен протухать раньше сессии
 
 
