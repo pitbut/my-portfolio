@@ -20,7 +20,7 @@ a{color:var(--accent2);}
 .lang-switch{display:flex;gap:4px;font-size:.82em;}
 .lang-switch__item{color:rgba(255,255,255,.65);text-decoration:none;padding:4px 8px;border-radius:14px;}
 .lang-switch__item.is-active{background:rgba(255,215,0,.18);color:var(--gold);font-weight:700;}
-.account-nav{display:flex;align-items:center;gap:14px;font-size:.92em;}
+.account-nav{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;font-size:.92em;}
 .account-nav a{color:#fff;text-decoration:none;}
 .account-nav a:hover{color:var(--gold);}
 .account-nav__email{color:rgba(255,255,255,.7);font-size:.9em;}
