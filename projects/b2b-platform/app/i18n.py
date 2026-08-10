@@ -795,6 +795,405 @@ STRINGS = {
         "uz_cyrillic": "Телефон ва манзил бу буюртмачининг буюртмаси бўйича битим тузганингиздан кейин очилади.",
         "en": "Phone and address are revealed once you make a deal on this customer's order.",
     },
+    "order.new_title": {
+        "ru": "Новая заявка на изготовление или ремонт", "uz_latin": "Ishlab chiqarish yoki taʼmirlash uchun yangi buyurtma",
+        "uz_cyrillic": "Ишлаб чиқариш ёки таъмирлаш учун янги буюртма", "en": "New manufacturing or repair order",
+    },
+    "order.new_hint": {
+        "ru": "Опишите задачу в любом удобном формате — текстом, фото, чертежами, видео. Сразу после публикации мы подберём подходящих исполнителей.",
+        "uz_latin": "Vazifani qulay formatda tasvirlang — matn, foto, chizma, video. Eʼlon qilingandan keyin darhol mos ijrochilarni tanlaymiz.",
+        "uz_cyrillic": "Вазифани қулай форматда тасвирланг — матн, фото, чизма, видео. Эълон қилингандан кейин дарҳол мос ижрочиларни танлаймиз.",
+        "en": "Describe the task in any convenient format — text, photos, drawings, video. Right after publishing we'll match suitable executors.",
+    },
+    "order.type": {
+        "ru": "Тип заявки *", "uz_latin": "Buyurtma turi *", "uz_cyrillic": "Буюртма тури *", "en": "Order type *",
+    },
+    "order.manufacturing": {
+        "ru": "Изготовление", "uz_latin": "Ishlab chiqarish", "uz_cyrillic": "Ишлаб чиқариш",
+        "en": "Manufacturing",
+    },
+    "order.repair": {
+        "ru": "Ремонт", "uz_latin": "Taʼmirlash", "uz_cyrillic": "Таъмирлаш", "en": "Repair",
+    },
+    "order.title_label": {
+        "ru": "Название заявки *", "uz_latin": "Buyurtma nomi *", "uz_cyrillic": "Буюртма номи *",
+        "en": "Order title *",
+    },
+    "order.title_placeholder": {
+        "ru": "напр. Токарная обточка вала, 5 шт.", "uz_latin": "masalan, Valni tokarlik bilan ishlash, 5 dona",
+        "uz_cyrillic": "масалан, Вални токарлик билан ишлаш, 5 дона", "en": "e.g. Turning a shaft, 5 pcs.",
+    },
+    "order.description_label": {
+        "ru": "Описание *", "uz_latin": "Tavsif *", "uz_cyrillic": "Тавсиф *", "en": "Description *",
+    },
+    "order.description_placeholder": {
+        "ru": "Что нужно сделать, какие требования, есть ли чертёж",
+        "uz_latin": "Nima qilish kerak, qanday talablar, chizma bormi",
+        "uz_cyrillic": "Нима қилиш керак, қандай талаблар, чизма борми",
+        "en": "What needs to be done, requirements, is there a drawing",
+    },
+    "order.service_category": {
+        "ru": "Категория работ *", "uz_latin": "Ish toifasi *", "uz_cyrillic": "Иш тоифаси *",
+        "en": "Work category *",
+    },
+    "order.material": {
+        "ru": "Материал", "uz_latin": "Material", "uz_cyrillic": "Материал", "en": "Material",
+    },
+    "order.material_any": {
+        "ru": "— не важно / не знаю —", "uz_latin": "— muhim emas / bilmayman —",
+        "uz_cyrillic": "— муҳим эмас / билмайман —", "en": "— doesn't matter / don't know —",
+    },
+    "order.dimensions_title": {
+        "ru": "Параметры детали (необязательно, но повышают точность подбора)",
+        "uz_latin": "Detal parametrlari (ixtiyoriy, lekin tanlash aniqligini oshiradi)",
+        "uz_cyrillic": "Детал параметрлари (ихтиёрий, лекин танлаш аниқлигини оширади)",
+        "en": "Part parameters (optional, but improves matching accuracy)",
+    },
+    "order.length_mm": {
+        "ru": "Длина, мм", "uz_latin": "Uzunlik, mm", "uz_cyrillic": "Узунлик, мм", "en": "Length, mm",
+    },
+    "order.diameter_mm": {
+        "ru": "Диаметр, мм", "uz_latin": "Diametr, mm", "uz_cyrillic": "Диаметр, мм", "en": "Diameter, mm",
+    },
+    "order.width_mm": {
+        "ru": "Ширина, мм", "uz_latin": "Kenglik, mm", "uz_cyrillic": "Кенглик, мм", "en": "Width, mm",
+    },
+    "order.height_mm": {
+        "ru": "Высота, мм", "uz_latin": "Balandlik, mm", "uz_cyrillic": "Баландлик, мм", "en": "Height, mm",
+    },
+    "order.weight_kg": {
+        "ru": "Вес заготовки, кг", "uz_latin": "Zagotovka og‘irligi, kg", "uz_cyrillic": "Заготовка оғирлиги, кг",
+        "en": "Workpiece weight, kg",
+    },
+    "order.media_title": {
+        "ru": "Медиа", "uz_latin": "Media", "uz_cyrillic": "Медиа", "en": "Media",
+    },
+    "order.photos_label": {
+        "ru": "Фото (можно несколько)", "uz_latin": "Foto (bir nechta boʻlishi mumkin)",
+        "uz_cyrillic": "Фото (бир нечта бўлиши мумкин)", "en": "Photos (multiple allowed)",
+    },
+    "order.drawing_label": {
+        "ru": "Чертёж (изображение)", "uz_latin": "Chizma (rasm)", "uz_cyrillic": "Чизма (расм)",
+        "en": "Drawing (image)",
+    },
+    "order.video_url_label": {
+        "ru": "Ссылка на видео (YouTube, Google Диск и т.п.)",
+        "uz_latin": "Video havolasi (YouTube, Google Disk va h.k.)",
+        "uz_cyrillic": "Видео ҳаволаси (YouTube, Google Disk ва ҳ.к.)",
+        "en": "Video link (YouTube, Google Drive, etc.)",
+    },
+    "order.document_url_label": {
+        "ru": "Ссылка на документ (PDF-чертёж и т.п.)",
+        "uz_latin": "Hujjat havolasi (PDF-chizma va h.k.)",
+        "uz_cyrillic": "Ҳужжат ҳаволаси (PDF-чизма ва ҳ.к.)",
+        "en": "Document link (PDF drawing, etc.)",
+    },
+    "order.location_title": {
+        "ru": "Локация и условия", "uz_latin": "Joylashuv va shartlar", "uz_cyrillic": "Жойлашув ва шартлар",
+        "en": "Location and terms",
+    },
+    "order.site_address": {
+        "ru": "Адрес объекта", "uz_latin": "Obyekt manzili", "uz_cyrillic": "Объект манзили", "en": "Site address",
+    },
+    "order.site_address_placeholder": {
+        "ru": "для ремонта на месте", "uz_latin": "joyida taʼmirlash uchun", "uz_cyrillic": "жойида таъмирлаш учун",
+        "en": "for on-site repair",
+    },
+    "order.map_hint": {
+        "ru": "Уточните точку на карте", "uz_latin": "Xaritada nuqtani aniqlashtiring",
+        "uz_cyrillic": "Харитада нуқтани аниқлаштиринг", "en": "Refine the point on the map",
+    },
+    "order.payment_methods_legend": {
+        "ru": "Способ оплаты (необязательно)", "uz_latin": "Toʻlov usuli (ixtiyoriy)",
+        "uz_cyrillic": "Тўлов усули (ихтиёрий)", "en": "Payment method (optional)",
+    },
+    "order.budget_min": {
+        "ru": "Бюджет от, UZS", "uz_latin": "Byudjet dan, UZS", "uz_cyrillic": "Бюджет дан, UZS",
+        "en": "Budget from, UZS",
+    },
+    "order.budget_max": {
+        "ru": "Бюджет до, UZS", "uz_latin": "Byudjet gacha, UZS", "uz_cyrillic": "Бюджет гача, UZS",
+        "en": "Budget to, UZS",
+    },
+    "order.deadline_date": {
+        "ru": "Желаемый срок", "uz_latin": "Xohlagan muddat", "uz_cyrillic": "Хоҳлаган муддат",
+        "en": "Desired deadline",
+    },
+    "order.auction_duration": {
+        "ru": "Длительность аукциона", "uz_latin": "Auksion davomiyligi", "uz_cyrillic": "Аукцион давомийлиги",
+        "en": "Auction duration",
+    },
+    "order.24h": {
+        "ru": "24 часа", "uz_latin": "24 soat", "uz_cyrillic": "24 соат", "en": "24 hours",
+    },
+    "order.48h": {
+        "ru": "48 часов", "uz_latin": "48 soat", "uz_cyrillic": "48 соат", "en": "48 hours",
+    },
+    "order.72h": {
+        "ru": "72 часа", "uz_latin": "72 soat", "uz_cyrillic": "72 соат", "en": "72 hours",
+    },
+    "order.publish": {
+        "ru": "Опубликовать заявку", "uz_latin": "Buyurtmani eʼlon qilish", "uz_cyrillic": "Буюртмани эълон қилиш",
+        "en": "Publish order",
+    },
+    "order.status_published": {
+        "ru": "опубликован", "uz_latin": "eʼlon qilingan", "uz_cyrillic": "эълон қилинган", "en": "published",
+    },
+    "order.status_assigned": {
+        "ru": "исполнитель выбран", "uz_latin": "ijrochi tanlandi", "uz_cyrillic": "ижрочи танланди",
+        "en": "executor selected",
+    },
+    "order.status_in_progress": {
+        "ru": "в работе", "uz_latin": "bajarilmoqda", "uz_cyrillic": "бажарилмоқда", "en": "in progress",
+    },
+    "order.status_completed": {
+        "ru": "завершён", "uz_latin": "yakunlandi", "uz_cyrillic": "якунланди", "en": "completed",
+    },
+    "order.status_disputed": {
+        "ru": "спор", "uz_latin": "nizo", "uz_cyrillic": "низо", "en": "disputed",
+    },
+    "order.my_orders_title": {
+        "ru": "Мои заказы", "uz_latin": "Mening buyurtmalarim", "uz_cyrillic": "Менинг буюртмаларим",
+        "en": "My orders",
+    },
+    "order.table_number": {
+        "ru": "№", "uz_latin": "№", "uz_cyrillic": "№", "en": "No.",
+    },
+    "order.table_order": {
+        "ru": "Заявка", "uz_latin": "Buyurtma", "uz_cyrillic": "Буюртма", "en": "Order",
+    },
+    "order.table_category": {
+        "ru": "Категория", "uz_latin": "Toifa", "uz_cyrillic": "Тоифа", "en": "Category",
+    },
+    "order.table_status": {
+        "ru": "Статус", "uz_latin": "Holat", "uz_cyrillic": "Ҳолат", "en": "Status",
+    },
+    "order.table_bids": {
+        "ru": "Ставок", "uz_latin": "Takliflar", "uz_cyrillic": "Таклифлар", "en": "Bids",
+    },
+    "order.table_created": {
+        "ru": "Создан", "uz_latin": "Yaratilgan", "uz_cyrillic": "Яратилган", "en": "Created",
+    },
+    "common.open": {
+        "ru": "Открыть", "uz_latin": "Ochish", "uz_cyrillic": "Очиш", "en": "Open",
+    },
+    "order.no_orders_yet": {
+        "ru": "Заявок пока нет.", "uz_latin": "Hozircha buyurtmalar yoʻq.", "uz_cyrillic": "Ҳозирча буюртмалар йўқ.",
+        "en": "No orders yet.",
+    },
+    "order.post_first": {
+        "ru": "Разместить первую", "uz_latin": "Birinchisini joylashtirish", "uz_cyrillic": "Биринчисини жойлаштириш",
+        "en": "Post the first one",
+    },
+    "order.status_cancelled": {
+        "ru": "отменён", "uz_latin": "bekor qilindi", "uz_cyrillic": "бекор қилинди", "en": "cancelled",
+    },
+    "bid.status_active": {
+        "ru": "активна", "uz_latin": "faol", "uz_cyrillic": "фаол", "en": "active",
+    },
+    "bid.status_accepted": {
+        "ru": "принята", "uz_latin": "qabul qilindi", "uz_cyrillic": "қабул қилинди", "en": "accepted",
+    },
+    "bid.status_rejected": {
+        "ru": "отклонена", "uz_latin": "rad etildi", "uz_cyrillic": "рад этилди", "en": "rejected",
+    },
+    "bid.status_withdrawn": {
+        "ru": "отозвана", "uz_latin": "qaytarib olindi", "uz_cyrillic": "қайтариб олинди", "en": "withdrawn",
+    },
+    "order.dashboard_title": {
+        "ru": "Лента заказов", "uz_latin": "Buyurtmalar lentasi", "uz_cyrillic": "Буюртмалар ленталари",
+        "en": "Orders feed",
+    },
+    "order.dashboard_hint": {
+        "ru": "Все открытые заявки. Отмеченные «Рекомендуем» лучше всего подходят под ваш профиль (станочный парк, габариты, регион).",
+        "uz_latin": "Barcha ochiq buyurtmalar. «Tavsiya etamiz» belgisi profilingizga (stanoklar parki, oʻlchamlar, viloyat) eng mos kelganini bildiradi.",
+        "uz_cyrillic": "Барча очиқ буюртмалар. «Тавсия этамиз» белгиси профилингизга (станоклар парки, ўлчамлар, вилоят) энг мос келганини билдиради.",
+        "en": "All open orders. Those marked \"Recommended\" best match your profile (machine fleet, dimensions, region).",
+    },
+    "order.recommended_badge": {
+        "ru": "Рекомендуем", "uz_latin": "Tavsiya etamiz", "uz_cyrillic": "Тавсия этамиз", "en": "Recommended",
+    },
+    "order.table_distance": {
+        "ru": "Расстояние", "uz_latin": "Masofa", "uz_cyrillic": "Масофа", "en": "Distance",
+    },
+    "order.table_my_bid": {
+        "ru": "Моя ставка", "uz_latin": "Mening taklifim", "uz_cyrillic": "Менинг таклифим", "en": "My bid",
+    },
+    "order.km_short": {
+        "ru": "{value} км", "uz_latin": "{value} km", "uz_cyrillic": "{value} км", "en": "{value} km",
+    },
+    "order.days_short": {
+        "ru": "дн.", "uz_latin": "kun", "uz_cyrillic": "кун", "en": "days",
+    },
+    "order.no_open_orders": {
+        "ru": "Пока нет открытых заявок — как только заказчик опубликует новую, вы увидите её здесь.",
+        "uz_latin": "Hozircha ochiq buyurtmalar yoʻq — buyurtmachi yangisini eʼlon qilishi bilan uni shu yerda koʻrasiz.",
+        "uz_cyrillic": "Ҳозирча очиқ буюртмалар йўқ — буюртмачи янгисини эълон қилиши билан уни шу ерда кўрасиз.",
+        "en": "No open orders yet — as soon as a customer posts a new one, you'll see it here.",
+    },
+    "order.number_title": {
+        "ru": "Заявка №{id}: {title}", "uz_latin": "Buyurtma №{id}: {title}", "uz_cyrillic": "Буюртма №{id}: {title}",
+        "en": "Order #{id}: {title}",
+    },
+    "order.material_label": {
+        "ru": "Материал:", "uz_latin": "Material:", "uz_cyrillic": "Материал:", "en": "Material:",
+    },
+    "order.deadline_label": {
+        "ru": "Срок: до {date}", "uz_latin": "Muddat: {date} gacha", "uz_cyrillic": "Муддат: {date} гача",
+        "en": "Deadline: by {date}",
+    },
+    "order.budget_label": {
+        "ru": "Бюджет: {min}–{max} UZS", "uz_latin": "Byudjet: {min}–{max} UZS", "uz_cyrillic": "Бюджет: {min}–{max} UZS",
+        "en": "Budget: {min}–{max} UZS",
+    },
+    "order.payment_label": {
+        "ru": "Оплата: {methods}", "uz_latin": "Toʻlov: {methods}", "uz_cyrillic": "Тўлов: {methods}",
+        "en": "Payment: {methods}",
+    },
+    "order.customer_profile_link": {
+        "ru": "Профиль и портфолио заказчика ↗", "uz_latin": "Buyurtmachi profili va portfolio ↗",
+        "uz_cyrillic": "Буюртмачи профили ва портфолио ↗", "en": "Customer profile and portfolio ↗",
+    },
+    "order.write_chat": {
+        "ru": "Написать 💬", "uz_latin": "Yozish 💬", "uz_cyrillic": "Ёзиш 💬", "en": "Message 💬",
+    },
+    "review.leave": {
+        "ru": "Оставить отзыв", "uz_latin": "Sharh qoldirish", "uz_cyrillic": "Шарҳ қолдириш",
+        "en": "Leave a review",
+    },
+    "dispute.for_order": {
+        "ru": "Спор по заказу ({status})", "uz_latin": "Buyurtma boʻyicha nizo ({status})",
+        "uz_cyrillic": "Буюртма бўйича низо ({status})", "en": "Order dispute ({status})",
+    },
+    "dispute.open": {
+        "ru": "Открыть спор", "uz_latin": "Nizo ochish", "uz_cyrillic": "Низо очиш", "en": "Open dispute",
+    },
+    "order.dimensions_label": {
+        "ru": "Габариты:", "uz_latin": "Oʻlchamlar:", "uz_cyrillic": "Ўлчамлар:", "en": "Dimensions:",
+    },
+    "order.length_short": {
+        "ru": "длина {value} мм", "uz_latin": "uzunlik {value} mm", "uz_cyrillic": "узунлик {value} мм",
+        "en": "length {value} mm",
+    },
+    "order.diameter_short": {
+        "ru": ", диаметр {value} мм", "uz_latin": ", diametr {value} mm", "uz_cyrillic": ", диаметр {value} мм",
+        "en": ", diameter {value} mm",
+    },
+    "order.weight_short": {
+        "ru": ", вес {value} кг", "uz_latin": ", og‘irligi {value} kg", "uz_cyrillic": ", оғирлиги {value} кг",
+        "en": ", weight {value} kg",
+    },
+    "order.video_link_text": {
+        "ru": "Видео ↗", "uz_latin": "Video ↗", "uz_cyrillic": "Видео ↗", "en": "Video ↗",
+    },
+    "order.document_link_text": {
+        "ru": "Документ ↗", "uz_latin": "Hujjat ↗", "uz_cyrillic": "Ҳужжат ↗", "en": "Document ↗",
+    },
+    "order.executor_section": {
+        "ru": "Исполнитель", "uz_latin": "Ijrochi", "uz_cyrillic": "Ижрочи", "en": "Executor",
+    },
+    "order.deadline_until": {
+        "ru": "срок до {date}", "uz_latin": "muddat {date} gacha", "uz_cyrillic": "муддат {date} гача",
+        "en": "deadline by {date}",
+    },
+    "order.confirm_completion": {
+        "ru": "Подтвердить приёмку заказа", "uz_latin": "Buyurtma qabulini tasdiqlash",
+        "uz_cyrillic": "Буюртма қабулини тасдиқлаш", "en": "Confirm order acceptance",
+    },
+    "order.cancel_selection_confirm": {
+        "ru": "Отменить выбор исполнителя? Заявка снова откроется для ставок.",
+        "uz_latin": "Ijrochi tanlovini bekor qilasizmi? Buyurtma yana takliflar uchun ochiladi.",
+        "uz_cyrillic": "Ижрочи танловини бекор қиласизми? Буюртма яна таклифлар учун очилади.",
+        "en": "Cancel the executor selection? The order will reopen for bids.",
+    },
+    "order.cancel_selection": {
+        "ru": "Отменить выбор", "uz_latin": "Tanlovni bekor qilish", "uz_cyrillic": "Танловни бекор қилиш",
+        "en": "Cancel selection",
+    },
+    "order.bids_section": {
+        "ru": "Ставки исполнителей ({count})", "uz_latin": "Ijrochilar takliflari ({count})",
+        "uz_cyrillic": "Ижрочилар таклифлари ({count})", "en": "Executor bids ({count})",
+    },
+    "order.table_executor": {
+        "ru": "Исполнитель", "uz_latin": "Ijrochi", "uz_cyrillic": "Ижрочи", "en": "Executor",
+    },
+    "order.table_price": {
+        "ru": "Цена", "uz_latin": "Narx", "uz_cyrillic": "Нарх", "en": "Price",
+    },
+    "order.table_deadline": {
+        "ru": "Срок", "uz_latin": "Muddat", "uz_cyrillic": "Муддат", "en": "Deadline",
+    },
+    "order.table_comment": {
+        "ru": "Комментарий", "uz_latin": "Izoh", "uz_cyrillic": "Изоҳ", "en": "Comment",
+    },
+    "order.no_rating": {
+        "ru": "нет рейтинга", "uz_latin": "reyting yoʻq", "uz_cyrillic": "рейтинг йўқ", "en": "no rating",
+    },
+    "order.select_bid": {
+        "ru": "Выбрать", "uz_latin": "Tanlash", "uz_cyrillic": "Танлаш", "en": "Select",
+    },
+    "order.no_bids_yet": {
+        "ru": "Ставок пока нет", "uz_latin": "Hozircha takliflar yoʻq", "uz_cyrillic": "Ҳозирча таклифлар йўқ",
+        "en": "No bids yet",
+    },
+    "order.auction_open_until": {
+        "ru": " — аукцион открыт до {date}", "uz_latin": " — auksion {date} gacha ochiq",
+        "uz_cyrillic": " — аукцион {date} гача очиқ", "en": " — auction open until {date}",
+    },
+    "order.your_order_section": {
+        "ru": "Ваш заказ", "uz_latin": "Sizning buyurtmangiz", "uz_cyrillic": "Сизнинг буюртмангиз",
+        "en": "Your order",
+    },
+    "order.agreed_price_label": {
+        "ru": "Согласованная цена: {price} {currency}", "uz_latin": "Kelishilgan narx: {price} {currency}",
+        "uz_cyrillic": "Келишилган нарх: {price} {currency}", "en": "Agreed price: {price} {currency}",
+    },
+    "order.start_work": {
+        "ru": "Начать работу", "uz_latin": "Ishni boshlash", "uz_cyrillic": "Ишни бошлаш", "en": "Start work",
+    },
+    "order.your_bid_section": {
+        "ru": "Ваша ставка", "uz_latin": "Sizning taklifingiz", "uz_cyrillic": "Сизнинг таклифингиз",
+        "en": "Your bid",
+    },
+    "order.submit_bid_section": {
+        "ru": "Подать ставку", "uz_latin": "Taklif berish", "uz_cyrillic": "Таклиф бериш", "en": "Submit a bid",
+    },
+    "order.price_field": {
+        "ru": "Цена", "uz_latin": "Narx", "uz_cyrillic": "Нарх", "en": "Price",
+    },
+    "order.currency_field": {
+        "ru": "Валюта", "uz_latin": "Valyuta", "uz_cyrillic": "Валюта", "en": "Currency",
+    },
+    "order.lead_time_field": {
+        "ru": "Срок выполнения, дней", "uz_latin": "Bajarish muddati, kun", "uz_cyrillic": "Бажариш муддати, кун",
+        "en": "Completion time, days",
+    },
+    "order.comment_field": {
+        "ru": "Комментарий (условия, гарантия)", "uz_latin": "Izoh (shartlar, kafolat)",
+        "uz_cyrillic": "Изоҳ (шартлар, кафолат)", "en": "Comment (terms, warranty)",
+    },
+    "order.update_bid": {
+        "ru": "Обновить ставку", "uz_latin": "Taklifni yangilash", "uz_cyrillic": "Таклифни янгилаш",
+        "en": "Update bid",
+    },
+    "order.submit_bid_btn": {
+        "ru": "Отправить ставку", "uz_latin": "Taklifni yuborish", "uz_cyrillic": "Таклифни юбориш",
+        "en": "Submit bid",
+    },
+    "order.complete_profile_before": {
+        "ru": "Чтобы делать ставки, сначала", "uz_latin": "Taklif berish uchun avval",
+        "uz_cyrillic": "Таклиф бериш учун аввал", "en": "To place bids, first",
+    },
+    "order.complete_profile_link": {
+        "ru": "полностью заполните профиль", "uz_latin": "profilni toʻliq toʻldiring",
+        "uz_cyrillic": "профилни тўлиқ тўлдиринг", "en": "complete your profile fully",
+    },
+    "order.your_bid_closed": {
+        "ru": "Ваша ставка: {price} {currency} ({status}). Аукцион закрыт.",
+        "uz_latin": "Sizning taklifingiz: {price} {currency} ({status}). Auksion yopiq.",
+        "uz_cyrillic": "Сизнинг таклифингиз: {price} {currency} ({status}). Аукцион ёпиқ.",
+        "en": "Your bid: {price} {currency} ({status}). The auction is closed.",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },
@@ -810,6 +1209,18 @@ def translate(key, **kwargs):
     return text.format(**kwargs) if kwargs else text
 
 
+def order_status_label(status):
+    if not status:
+        return status
+    return translate(f"order.status_{status}")
+
+
+def bid_status_label(status):
+    if not status:
+        return status
+    return translate(f"bid.status_{status}")
+
+
 def register_i18n(app):
     @app.context_processor
     def inject_i18n():
@@ -820,6 +1231,8 @@ def register_i18n(app):
         }
 
     app.jinja_env.globals["t"] = translate
+    app.jinja_env.globals["order_status_label"] = order_status_label
+    app.jinja_env.globals["bid_status_label"] = bid_status_label
 
 
 def get_current_lang():
