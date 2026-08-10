@@ -72,6 +72,50 @@ def test_telegram_deep_link_and_webhook_binding(client, monkeypatch):
         assert link.telegram_username == "ivanov"
 
 
+def test_telegram_relinking_same_chat_to_different_user_does_not_crash(client, monkeypatch):
+    """Регресс: тот же баг, что и с TelegramLinkCode (см. ниже), но для
+    telegram_links.telegram_chat_id — если чат уже привязан к аккаунту A и
+    тот же Telegram-чат привязывают к аккаунту B, старую запись удаляли и
+    сразу создавали новую с тем же chat_id в одном flush(), что падало по
+    unique-constraint из-за порядка INSERT/DELETE в SQLAlchemy."""
+    client.application.config["TELEGRAM_BOT_USERNAME"] = "TestPlatformBot"
+    client.application.config["TELEGRAM_WEBHOOK_SECRET"] = "test-secret"
+
+    register(client, email="firstowner@example.com", role="customer")
+    client.get("/auth/logout")
+    register(client, email="secondowner@example.com", role="customer")
+    client.get("/auth/logout")
+
+    with client.application.app_context():
+        from app.telegram_bot import link_token_for
+
+        first_token = link_token_for(User.query.filter_by(email="firstowner@example.com").first())
+        second_user = User.query.filter_by(email="secondowner@example.com").first()
+        second_token = link_token_for(second_user)
+        second_user_id = second_user.id
+
+    monkeypatch.setattr("app.telegram_bot.send_message", lambda chat_id, text: True)
+
+    resp = client.post(
+        "/telegram/webhook/test-secret",
+        data=json.dumps({"message": {"chat": {"id": 999888, "username": "shared"}, "text": f"/start {first_token}"}}),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+
+    resp = client.post(
+        "/telegram/webhook/test-secret",
+        data=json.dumps({"message": {"chat": {"id": 999888, "username": "shared"}, "text": f"/start {second_token}"}}),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+
+    with client.application.app_context():
+        link = TelegramLink.query.filter_by(telegram_chat_id=999888).first()
+        assert link is not None
+        assert link.user_id == second_user_id
+
+
 def test_telegram_link_code_fallback_when_start_payload_dropped(client, monkeypatch):
     """Если пользователь уже писал боту раньше, Telegram при переходе по
     deep-link'у иногда шлёт голый «/start» без токена (сам клиент обрезает
@@ -295,3 +339,37 @@ def test_subscription_request_and_admin_approval_flow(client):
         assert sub.expires_at > datetime.utcnow()
         assert sub.payments[0].status == "succeeded"
         assert sub.payments[0].provider_transaction_id == "TXN123"
+
+
+def test_link_code_regenerates_without_crash_after_expiry(client):
+    """Регресс: link_code_for() удалял устаревший TelegramLinkCode и сразу
+    создавал новый в том же flush() — SQLAlchemy по умолчанию шлёт INSERT
+    раньше DELETE, так что вставка падала по unique-constraint на user_id
+    и роняла всю страницу профиля/настроек 500-й ошибкой (см. прод-инцидент:
+    пользователь заходит в «Настройки»/профиль спустя 30+ минут после
+    первого показа кода — он должен молча обновиться, а не сломать сессию."""
+    client.application.config["TELEGRAM_BOT_USERNAME"] = "TestPlatformBot"
+
+    register(client, email="stalecode@example.com", role="customer")
+    client.get("/settings")  # первый заход генерирует код
+
+    with client.application.app_context():
+        from app.models import TelegramLinkCode
+
+        user_id = User.query.filter_by(email="stalecode@example.com").first().id
+        stale_row = TelegramLinkCode.query.filter_by(user_id=user_id).first()
+        assert stale_row is not None
+        first_code = stale_row.code
+        # «состариваем» код искусственно, как если бы прошло больше 30 минут
+        stale_row.created_at = datetime.utcnow() - timedelta(minutes=40)
+        db.session.commit()
+
+    resp = client.get("/settings")
+    assert resp.status_code == 200
+
+    with client.application.app_context():
+        from app.models import TelegramLinkCode
+
+        refreshed = TelegramLinkCode.query.filter_by(user_id=user_id).first()
+        assert refreshed is not None
+        assert refreshed.code != first_code
