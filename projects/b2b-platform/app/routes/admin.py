@@ -2,7 +2,7 @@
 
 Роль admin не выдаётся через самостоятельную регистрацию — только через
 CLI-команду `flask create-admin <email> <password>` (см. README)."""
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -18,11 +18,15 @@ from app.models import (
     Dispute,
     ExecutorProfile,
     Listing,
+    ListingCategory,
     ListingResponse,
+    Material,
+    MaterialForm,
     MaterialListing,
     MaterialListingResponse,
     Order,
     Region,
+    ServiceCategory,
     Subscription,
     User,
     record_status_change,
@@ -229,6 +233,139 @@ def edit_user_profile(user_id):
     return render_template(
         "admin/edit_profile.html", target_user=user, profile=profile,
         regions=Region.query.order_by(Region.name_ru).all(),
+    )
+
+
+@bp.route("/users/<int:user_id>/orders/<int:order_id>/edit", methods=["GET", "POST"])
+@role_required("admin")
+def edit_user_order(user_id, order_id):
+    order = db.session.get(Order, order_id)
+    if order is None or order.customer is None or order.customer.user_id != user_id:
+        abort(404)
+
+    if request.method == "POST":
+        order.title = (request.form.get("title") or "").strip() or order.title
+        order.description = (request.form.get("description") or "").strip() or order.description
+        order_type = request.form.get("order_type")
+        if order_type in ("manufacturing", "repair"):
+            order.order_type = order_type
+        service_category_id = _to_int(request.form.get("service_category_id"))
+        if service_category_id:
+            order.service_category_id = service_category_id
+        order.material_id = _to_int(request.form.get("material_id"))
+        order.dimensions_length_mm = _to_int(request.form.get("dimensions_length_mm"))
+        order.dimensions_diameter_mm = _to_int(request.form.get("dimensions_diameter_mm"))
+        order.dimensions_width_mm = _to_int(request.form.get("dimensions_width_mm"))
+        order.dimensions_height_mm = _to_int(request.form.get("dimensions_height_mm"))
+        order.weight_kg = _to_float(request.form.get("weight_kg"))
+        order.budget_min = _to_float(request.form.get("budget_min"))
+        order.budget_max = _to_float(request.form.get("budget_max"))
+        region_id = _to_int(request.form.get("region_id"))
+        if region_id:
+            order.region_id = region_id
+        order.city_id = _to_int(request.form.get("city_id"))
+        order.address_text = (request.form.get("address_text") or "").strip() or None
+        order.payment_methods = ",".join(request.form.getlist("payment_methods")) or None
+
+        if order.city_id and order.region_id:
+            city = db.session.get(City, order.city_id)
+            if city is None or city.region_id != order.region_id:
+                order.city_id = None
+
+        deadline_raw = (request.form.get("deadline_date") or "").strip()
+        if deadline_raw:
+            try:
+                order.deadline_date = date.fromisoformat(deadline_raw)
+            except ValueError:
+                pass
+        else:
+            order.deadline_date = None
+
+        db.session.commit()
+        flash(f"Заявка «{order.title}» обновлена.", "success")
+        return redirect(url_for("admin.user_detail", user_id=user_id))
+
+    return render_template(
+        "admin/edit_order.html", target_user=order.customer.user, order=order,
+        regions=Region.query.order_by(Region.name_ru).all(),
+        service_categories=ServiceCategory.query.order_by(ServiceCategory.name_ru).all(),
+        materials=Material.query.order_by(Material.name_ru).all(),
+    )
+
+
+@bp.route("/users/<int:user_id>/listings/<int:listing_id>/edit", methods=["GET", "POST"])
+@role_required("admin")
+def edit_user_listing(user_id, listing_id):
+    listing = Listing.query.filter_by(id=listing_id, author_id=user_id).first()
+    if listing is None:
+        abort(404)
+
+    if request.method == "POST":
+        listing.title = (request.form.get("title") or "").strip() or listing.title
+        listing.description = (request.form.get("description") or "").strip() or listing.description
+        listing_intent = request.form.get("listing_intent")
+        if listing_intent in ("sell", "buy"):
+            listing.listing_intent = listing_intent
+        category_id = _to_int(request.form.get("category_id"))
+        if category_id:
+            listing.category_id = category_id
+        listing.condition = request.form.get("condition") if listing.listing_intent == "sell" else None
+        listing.price = _to_float(request.form.get("price"))
+        listing.currency = request.form.get("currency") or "UZS"
+        listing.price_negotiable = request.form.get("price_negotiable") == "1"
+        region_id = _to_int(request.form.get("region_id"))
+        if region_id:
+            listing.region_id = region_id
+        listing.payment_methods = ",".join(request.form.getlist("payment_methods")) or None
+        delivery = request.form.get("delivery")
+        listing.delivery = delivery if delivery in ("none", "own", "yandex") else None
+
+        db.session.commit()
+        flash(f"Объявление «{listing.title}» обновлено.", "success")
+        return redirect(url_for("admin.user_detail", user_id=user_id))
+
+    return render_template(
+        "admin/edit_listing.html", target_user=listing.author, listing=listing,
+        regions=Region.query.order_by(Region.name_ru).all(),
+        categories=ListingCategory.query.order_by(ListingCategory.name_ru).all(),
+    )
+
+
+@bp.route("/users/<int:user_id>/material-listings/<int:listing_id>/edit", methods=["GET", "POST"])
+@role_required("admin")
+def edit_user_material_listing(user_id, listing_id):
+    listing = MaterialListing.query.filter_by(id=listing_id, author_id=user_id).first()
+    if listing is None:
+        abort(404)
+
+    if request.method == "POST":
+        listing.title = (request.form.get("title") or "").strip() or listing.title
+        listing.description = (request.form.get("description") or "").strip() or listing.description
+        listing_intent = request.form.get("listing_intent")
+        if listing_intent in ("sell", "buy"):
+            listing.listing_intent = listing_intent
+        material_id = _to_int(request.form.get("material_id"))
+        if material_id:
+            listing.material_id = material_id
+        listing.form_id = _to_int(request.form.get("form_id"))
+        listing.quantity = _to_float(request.form.get("quantity"))
+        listing.unit = request.form.get("unit") or None
+        listing.price = _to_float(request.form.get("price"))
+        listing.currency = request.form.get("currency") or "UZS"
+        listing.price_negotiable = request.form.get("price_negotiable") == "1"
+        region_id = _to_int(request.form.get("region_id"))
+        if region_id:
+            listing.region_id = region_id
+
+        db.session.commit()
+        flash(f"Объявление «{listing.title}» обновлено.", "success")
+        return redirect(url_for("admin.user_detail", user_id=user_id))
+
+    return render_template(
+        "admin/edit_material_listing.html", target_user=listing.author, listing=listing,
+        regions=Region.query.order_by(Region.name_ru).all(),
+        materials=Material.query.order_by(Material.name_ru).all(),
+        forms=MaterialForm.query.order_by(MaterialForm.name_ru).all(),
     )
 
 

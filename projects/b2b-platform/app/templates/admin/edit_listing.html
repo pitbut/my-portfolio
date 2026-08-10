@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} {{ t('admin.panel_suffix') }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <p><a href="{{ url_for('admin.user_detail', user_id=target_user.id) }}">{{ t('admin.user_detail_back') }}</a></p>
+  <h1>{{ t('admin.edit') }} — {{ listing.title }}</h1>
+  <p class="empty-hint">{{ t('admin.editing_item_notice') }}</p>
+
+  <form method="post" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="role-fieldset">
+      <legend>{{ t('listing.type_label') }}</legend>
+      <label><input type="radio" name="listing_intent" value="sell" {{ 'checked' if listing.listing_intent == 'sell' }}> {{ t('listing.sell') }}</label>
+      <label><input type="radio" name="listing_intent" value="buy" {{ 'checked' if listing.listing_intent == 'buy' }}> {{ t('listing.looking_to_buy') }}</label>
+    </fieldset>
+
+    <label>{{ t('listing.category_label') }}
+      <select name="category_id" required>
+        {% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if listing.category_id == c.id }}>{{ c.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+
+    <label>{{ t('listing.title_label') }}
+      <input type="text" name="title" value="{{ listing.title }}" required>
+    </label>
+    <label>{{ t('listing.description_label') }}
+      <textarea name="description" rows="4" required>{{ listing.description }}</textarea>
+    </label>
+
+    <fieldset class="role-fieldset">
+      <legend>{{ t('listing.condition_legend') }}</legend>
+      <label><input type="radio" name="condition" value="new" {{ 'checked' if listing.condition == 'new' }}> {{ t('listing.condition_new') }}</label>
+      <label><input type="radio" name="condition" value="used" {{ 'checked' if listing.condition == 'used' }}> {{ t('listing.condition_used') }}</label>
+      <label><input type="radio" name="condition" value="for_parts" {{ 'checked' if listing.condition == 'for_parts' }}> {{ t('listing.condition_parts') }}</label>
+    </fieldset>
+
+    <div class="form-row">
+      <label>{{ t('listing.price_label') }} <input type="number" name="price" min="0" value="{{ listing.price or '' }}"></label>
+      <label>{{ t('listing.currency_label') }}
+        <select name="currency">
+          <option value="UZS" {{ 'selected' if listing.currency == 'UZS' }}>UZS</option>
+          <option value="USD" {{ 'selected' if listing.currency == 'USD' }}>USD</option>
+        </select>
+      </label>
+    </div>
+    <label class="checkbox-label"><input type="checkbox" name="price_negotiable" value="1" {{ 'checked' if listing.price_negotiable }}> {{ t('listing.negotiable_checkbox') }}</label>
+
+    <label>{{ t('listing.region_required') }}
+      <select name="region_id" required>
+        {% for r in regions %}<option value="{{ r.id }}" {{ 'selected' if listing.region_id == r.id }}>{{ r.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+
+    <fieldset class="checkbox-fieldset">
+      <legend>{{ t('listing.payment_methods_legend') }}</legend>
+      {% set selected_payment = csv_to_codes(listing.payment_methods) %}
+      {% for code, label in payment_method_choices %}
+        <label class="checkbox-label"><input type="checkbox" name="payment_methods" value="{{ code }}" {{ 'checked' if code in selected_payment }}> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <fieldset class="role-fieldset">
+      <legend>{{ t('listing.delivery_legend') }}</legend>
+      {% for code, label in delivery_choices %}
+        <label><input type="radio" name="delivery" value="{{ code }}" {{ 'checked' if listing.delivery == code }}> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <button type="submit" class="btn btn--primary">{{ t('admin.save_changes') }}</button>
+  </form>
+</section>
+{% endblock %}

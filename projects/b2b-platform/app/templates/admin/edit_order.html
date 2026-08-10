@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ order.title }} {{ t('admin.panel_suffix') }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <p><a href="{{ url_for('admin.user_detail', user_id=target_user.id) }}">{{ t('admin.user_detail_back') }}</a></p>
+  <h1>{{ t('admin.edit') }} — {{ order.title }}</h1>
+  <p class="empty-hint">{{ t('admin.editing_item_notice') }}</p>
+
+  <form method="post" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="role-fieldset">
+      <legend>{{ t('order.type') }}</legend>
+      <label><input type="radio" name="order_type" value="manufacturing" {{ 'checked' if order.order_type == 'manufacturing' }}> {{ t('order.manufacturing') }}</label>
+      <label><input type="radio" name="order_type" value="repair" {{ 'checked' if order.order_type == 'repair' }}> {{ t('order.repair') }}</label>
+    </fieldset>
+
+    <label>{{ t('order.title_label') }}
+      <input type="text" name="title" value="{{ order.title }}" required>
+    </label>
+
+    <label>{{ t('order.description_label') }}
+      <textarea name="description" rows="5" required>{{ order.description }}</textarea>
+    </label>
+
+    <div class="form-row">
+      <label>{{ t('order.service_category') }}
+        <select name="service_category_id" required>
+          {% for sc in service_categories %}
+            <option value="{{ sc.id }}" {{ 'selected' if order.service_category_id == sc.id }}>{{ sc.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>{{ t('order.material') }}
+        <select name="material_id">
+          <option value="">{{ t('order.material_any') }}</option>
+          {% for m in materials %}
+            <option value="{{ m.id }}" {{ 'selected' if order.material_id == m.id }}>{{ m.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <h2 class="profile-section-title">{{ t('order.dimensions_title') }}</h2>
+    <div class="form-row form-row--4">
+      <label>{{ t('order.length_mm') }} <input type="number" name="dimensions_length_mm" min="0" value="{{ order.dimensions_length_mm or '' }}"></label>
+      <label>{{ t('order.diameter_mm') }} <input type="number" name="dimensions_diameter_mm" min="0" value="{{ order.dimensions_diameter_mm or '' }}"></label>
+      <label>{{ t('order.width_mm') }} <input type="number" name="dimensions_width_mm" min="0" value="{{ order.dimensions_width_mm or '' }}"></label>
+      <label>{{ t('order.height_mm') }} <input type="number" name="dimensions_height_mm" min="0" value="{{ order.dimensions_height_mm or '' }}"></label>
+    </div>
+    <label>{{ t('order.weight_kg') }} <input type="number" name="weight_kg" min="0" step="0.1" value="{{ order.weight_kg or '' }}"></label>
+
+    <h2 class="profile-section-title">{{ t('order.location_title') }}</h2>
+    <div class="form-row">
+      <label>{{ t('profile.region') }}
+        <select name="region_id" id="region_id" required>
+          {% for region in regions %}
+            <option value="{{ region.id }}" {{ 'selected' if order.region_id == region.id }}>{{ region.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>{{ t('profile.city') }}
+        <select name="city_id" id="city_id" data-selected="{{ order.city_id or '' }}">
+          <option value="">{{ t('profile.city_placeholder') }}</option>
+        </select>
+      </label>
+    </div>
+    <label>{{ t('order.site_address') }} <input type="text" name="address_text" value="{{ order.address_text or '' }}"></label>
+
+    <fieldset class="checkbox-fieldset">
+      <legend>{{ t('order.payment_methods_legend') }}</legend>
+      {% set selected_payment = csv_to_codes(order.payment_methods) %}
+      {% for code, label in payment_method_choices %}
+        <label class="checkbox-label"><input type="checkbox" name="payment_methods" value="{{ code }}" {{ 'checked' if code in selected_payment }}> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <div class="form-row">
+      <label>{{ t('order.budget_min') }} <input type="number" name="budget_min" min="0" value="{{ order.budget_min or '' }}"></label>
+      <label>{{ t('order.budget_max') }} <input type="number" name="budget_max" min="0" value="{{ order.budget_max or '' }}"></label>
+    </div>
+    <label>{{ t('order.deadline_date') }} <input type="date" name="deadline_date" value="{{ order.deadline_date.isoformat() if order.deadline_date else '' }}"></label>
+
+    <button type="submit" class="btn btn--primary">{{ t('admin.save_changes') }}</button>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  initRegionCityCascade('region_id', 'city_id');
+});
+</script>
+{% endblock %}

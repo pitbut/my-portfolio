@@ -5,6 +5,8 @@ from app.models import (
     CustomerProfile,
     Listing,
     ListingCategory,
+    Material,
+    MaterialListing,
     Order,
     OrderStatusHistory,
     Region,
@@ -318,3 +320,111 @@ def test_admin_can_view_and_fix_user_contacts(client):
         updated = db.session.get(User, target_id)
         assert updated.phone == "+998901234567"
         assert updated.customer_profile.address_text == "Новый адрес"
+
+
+def test_admin_can_edit_order(client):
+    """Заявку тоже можно поправить, а не только удалить — например, если
+    заказчик опечатался в названии или описании."""
+    _setup_customer_with_order(client, "orderfix@example.com", "Токарная обточка вала")
+    with client.application.app_context():
+        orderer_id = User.query.filter_by(email="orderfix@example.com").first().id
+        order_id = Order.query.filter_by(title="Токарная обточка вала").first().id
+        region_id = Region.query.first().id
+        service_id = ServiceCategory.query.first().id
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get(f"/admin/users/{orderer_id}/orders/{order_id}/edit")
+    assert resp.status_code == 200
+    assert "Токарная обточка вала".encode() in resp.data
+
+    resp = client.post(
+        f"/admin/users/{orderer_id}/orders/{order_id}/edit",
+        data={
+            "title": "Токарная обточка вала (испр.)", "description": "Исправленное описание",
+            "order_type": "manufacturing", "service_category_id": str(service_id),
+            "region_id": str(region_id),
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with client.application.app_context():
+        updated_order = db.session.get(Order, order_id)
+        assert updated_order.title == "Токарная обточка вала (испр.)"
+        assert updated_order.description == "Исправленное описание"
+
+
+def test_admin_can_edit_listing(client):
+    register(client, email="sellerfix@example.com", role="customer")
+    _post_listing(client, title="Токарный станок для правки")
+    with client.application.app_context():
+        seller_id = User.query.filter_by(email="sellerfix@example.com").first().id
+        listing_id = Listing.query.filter_by(author_id=seller_id).first().id
+        category_id = ListingCategory.query.first().id
+        region_id = Region.query.first().id
+    client.get("/auth/logout")
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get(f"/admin/users/{seller_id}/listings/{listing_id}/edit")
+    assert resp.status_code == 200
+    assert "Токарный станок для правки".encode() in resp.data
+
+    resp = client.post(
+        f"/admin/users/{seller_id}/listings/{listing_id}/edit",
+        data={
+            "listing_intent": "sell", "category_id": str(category_id),
+            "title": "Токарный станок (испр.)", "description": "Исправленное описание",
+            "condition": "used", "price": "16000000", "currency": "UZS", "region_id": str(region_id),
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with client.application.app_context():
+        updated_listing = db.session.get(Listing, listing_id)
+        assert updated_listing.title == "Токарный станок (испр.)"
+        assert updated_listing.description == "Исправленное описание"
+
+
+def test_admin_can_edit_material_listing(client):
+    register(client, email="materialseller@example.com", role="customer")
+    with client.application.app_context():
+        material_id = Material.query.first().id
+        region_id = Region.query.first().id
+    client.post(
+        "/materials/new",
+        data={
+            "listing_intent": "sell", "material_id": str(material_id), "title": "Лист металла",
+            "description": "Остатки со склада", "quantity": "500", "unit": "kg",
+            "price": "9000000", "currency": "UZS", "region_id": str(region_id),
+        },
+        follow_redirects=True,
+    )
+    with client.application.app_context():
+        seller_id = User.query.filter_by(email="materialseller@example.com").first().id
+        listing_id = MaterialListing.query.filter_by(author_id=seller_id).first().id
+    client.get("/auth/logout")
+
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get(f"/admin/users/{seller_id}/material-listings/{listing_id}/edit")
+    assert resp.status_code == 200
+    assert "Лист металла".encode() in resp.data
+
+    resp = client.post(
+        f"/admin/users/{seller_id}/material-listings/{listing_id}/edit",
+        data={
+            "listing_intent": "sell", "material_id": str(material_id),
+            "title": "Лист металла (испр.)", "description": "Исправленное описание",
+            "quantity": "500", "unit": "kg", "price": "9000000", "currency": "UZS", "region_id": str(region_id),
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with client.application.app_context():
+        updated_listing = db.session.get(MaterialListing, listing_id)
+        assert updated_listing.title == "Лист металла (испр.)"
+        assert updated_listing.description == "Исправленное описание"
