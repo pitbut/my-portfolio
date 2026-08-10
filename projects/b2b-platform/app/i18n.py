@@ -1591,6 +1591,152 @@ STRINGS = {
     "resume.invite_btn": {
         "ru": "Пригласить", "uz_latin": "Taklif qilish", "uz_cyrillic": "Таклиф қилиш", "en": "Invite",
     },
+    "chat.messages_title": {
+        "ru": "Сообщения", "uz_latin": "Xabarlar", "uz_cyrillic": "Хабарлар", "en": "Messages",
+    },
+    "chat.you_prefix": {
+        "ru": "Вы:", "uz_latin": "Siz:", "uz_cyrillic": "Сиз:", "en": "You:",
+    },
+    "chat.no_conversations": {
+        "ru": "Пока нет ни одного диалога. Написать можно любому пользователю — например, автору объявления или исполнителю с карты.",
+        "uz_latin": "Hozircha birorta ham suhbat yoʻq. Har qanday foydalanuvchiga yozishingiz mumkin — masalan, eʼlon muallifiga yoki xaritadagi ijrochiga.",
+        "uz_cyrillic": "Ҳозирча бирорта ҳам суҳбат йўқ. Ҳар қандай фойдаланувчига ёзишингиз мумкин — масалан, эълон муаллифига ёки харитадаги ижрочига.",
+        "en": "No conversations yet. You can message any user — e.g. a listing author or an executor from the map.",
+    },
+    "chat.dialog_with": {
+        "ru": "Диалог с {email}", "uz_latin": "{email} bilan suhbat", "uz_cyrillic": "{email} билан суҳбат",
+        "en": "Chat with {email}",
+    },
+    "chat.all_messages": {
+        "ru": "← Все сообщения", "uz_latin": "← Barcha xabarlar", "uz_cyrillic": "← Барча хабарлар",
+        "en": "← All messages",
+    },
+    "chat.discussing_order": {
+        "ru": "Обсуждаете заявку", "uz_latin": "Muhokama qilinayotgan buyurtma", "uz_cyrillic": "Муҳокама қилинаётган буюртма",
+        "en": "Discussing order",
+    },
+    "chat.no_messages_yet": {
+        "ru": "Сообщений пока нет — напишите первым.", "uz_latin": "Hozircha xabarlar yoʻq — birinchi boʻlib yozing.",
+        "uz_cyrillic": "Ҳозирча хабарлар йўқ — биринчи бўлиб ёзинг.", "en": "No messages yet — be the first to write.",
+    },
+    "chat.message_field": {
+        "ru": "Сообщение", "uz_latin": "Xabar", "uz_cyrillic": "Хабар", "en": "Message",
+    },
+    "chat.message_order_prefix": {
+        "ru": "По заявке №{id}: ", "uz_latin": "№{id} buyurtma boʻyicha: ", "uz_cyrillic": "№{id} буюртма бўйича: ",
+        "en": "Regarding order #{id}: ",
+    },
+    "chat.send": {
+        "ru": "Отправить", "uz_latin": "Yuborish", "uz_cyrillic": "Юбориш", "en": "Send",
+    },
+    "search.title": {
+        "ru": "Поиск по сайту", "uz_latin": "Sayt boʻyicha qidiruv", "uz_cyrillic": "Сайт бўйича қидирув",
+        "en": "Site search",
+    },
+    "search.hint": {
+        "ru": "Ищет среди исполнителей, конструкторов, барахолки станков, материалов и вакансий.",
+        "uz_latin": "Ijrochilar, konstruktorlar, stanoklar bozorchasi, materiallar va ish oʻrinlari orasida qidiradi.",
+        "uz_cyrillic": "Ижрочилар, конструкторлар, станоклар бозорчаси, материаллар ва иш ўринлари орасида қидиради.",
+        "en": "Searches among executors, designers, equipment marketplace, materials and jobs.",
+    },
+    "search.query_label": {
+        "ru": "Запрос", "uz_latin": "Soʻrov", "uz_cyrillic": "Сўров", "en": "Query",
+    },
+    "search.query_placeholder": {
+        "ru": "например, токарный станок", "uz_latin": "masalan, tokarlik stanogi", "uz_cyrillic": "масалан, токарлик станоги",
+        "en": "e.g. lathe",
+    },
+    "search.match_mode": {
+        "ru": "Совпадение", "uz_latin": "Moslik", "uz_cyrillic": "Мослик", "en": "Match",
+    },
+    "search.match_partial": {
+        "ru": "Частичное (содержит)", "uz_latin": "Qisman (ichida bor)", "uz_cyrillic": "Қисман (ичида бор)",
+        "en": "Partial (contains)",
+    },
+    "search.match_exact": {
+        "ru": "Точное (полное совпадение)", "uz_latin": "Aniq (toʻliq moslik)", "uz_cyrillic": "Аниқ (тўлиқ мослик)",
+        "en": "Exact (full match)",
+    },
+    "search.search_btn": {
+        "ru": "Искать", "uz_latin": "Qidirish", "uz_cyrillic": "Қидириш", "en": "Search",
+    },
+    "search.no_results": {
+        "ru": "По запросу «{q}» ({mode}) ничего не найдено.", "uz_latin": "«{q}» soʻrovi ({mode}) boʻyicha hech narsa topilmadi.",
+        "uz_cyrillic": "«{q}» сўрови ({mode}) бўйича ҳеч нарса топилмади.", "en": "No results for \"{q}\" ({mode}).",
+    },
+    "search.mode_exact_label": {
+        "ru": "точное совпадение", "uz_latin": "aniq mos kelish", "uz_cyrillic": "аниқ мос келиш",
+        "en": "exact match",
+    },
+    "search.mode_partial_label": {
+        "ru": "частичное совпадение", "uz_latin": "qisman mos kelish", "uz_cyrillic": "қисман мос келиш",
+        "en": "partial match",
+    },
+    "search.section_executors": {
+        "ru": "Исполнители", "uz_latin": "Ijrochilar", "uz_cyrillic": "Ижрочилар", "en": "Executors",
+    },
+    "search.section_constructors": {
+        "ru": "Конструкторы", "uz_latin": "Konstruktorlar", "uz_cyrillic": "Конструкторлар", "en": "Designers",
+    },
+    "search.section_listings": {
+        "ru": "Барахолка станков и инструмента", "uz_latin": "Stanoklar va asboblar bozorchasi",
+        "uz_cyrillic": "Станоклар ва асбоблар бозорчаси", "en": "Machines and tools marketplace",
+    },
+    "search.section_materials": {
+        "ru": "Материалы и сырьё", "uz_latin": "Materiallar va xomashyo", "uz_cyrillic": "Материаллар ва хомашё",
+        "en": "Materials and raw stock",
+    },
+    "search.section_vacancies": {
+        "ru": "Вакансии", "uz_latin": "Ish oʻrinlari", "uz_cyrillic": "Иш ўринлари", "en": "Jobs",
+    },
+    "map.title": {
+        "ru": "Карта изготовителей, продавцов и конструкторов",
+        "uz_latin": "Ishlab chiqaruvchilar, sotuvchilar va konstruktorlar xaritasi",
+        "uz_cyrillic": "Ишлаб чиқарувчилар, сотувчилар ва конструкторлар харитаси",
+        "en": "Map of manufacturers, sellers and designers",
+    },
+    "map.who_to_show": {
+        "ru": "Кого показать", "uz_latin": "Kimni koʻrsatish", "uz_cyrillic": "Кимни кўрсатиш", "en": "Who to show",
+    },
+    "map.sellers": {
+        "ru": "Продавцы (барахолка)", "uz_latin": "Sotuvchilar (bozorcha)", "uz_cyrillic": "Сотувчилар (бозорча)",
+        "en": "Sellers (marketplace)",
+    },
+    "map.executors": {
+        "ru": "Исполнители", "uz_latin": "Ijrochilar", "uz_cyrillic": "Ижрочилар", "en": "Executors",
+    },
+    "map.constructors": {
+        "ru": "Конструкторы", "uz_latin": "Konstruktorlar", "uz_cyrillic": "Конструкторлар", "en": "Designers",
+    },
+    "map.service_category_filter": {
+        "ru": "Категория услуг (для исполнителей)", "uz_latin": "Xizmat toifasi (ijrochilar uchun)",
+        "uz_cyrillic": "Хизмат тоифаси (ижрочилар учун)", "en": "Service category (for executors)",
+    },
+    "map.org_type_filter": {
+        "ru": "Тип организации (для исполнителей)", "uz_latin": "Tashkilot turi (ijrochilar uchun)",
+        "uz_cyrillic": "Ташкилот тури (ижрочилар учун)", "en": "Organization type (for executors)",
+    },
+    "map.has_designer_filter": {
+        "ru": "Есть конструктор в штате (для исполнителей)", "uz_latin": "Shtatda konstruktor bor (ijrochilar uchun)",
+        "uz_cyrillic": "Штатда конструктор бор (ижрочилар учун)", "en": "Has in-house designer (for executors)",
+    },
+    "map.show_nearby": {
+        "ru": "📍 Показать рядом со мной", "uz_latin": "📍 Mening atrofimda koʻrsatish", "uz_cyrillic": "📍 Менинг атрофимда кўрсатиш",
+        "en": "📍 Show near me",
+    },
+    "map.manual_pin": {
+        "ru": "✋ Указать себя на карте", "uz_latin": "✋ Xaritada oʻzimni belgilash", "uz_cyrillic": "✋ Харитада ўзимни белгилаш",
+        "en": "✋ Place my pin on the map",
+    },
+    "map.manual_pin_hint": {
+        "ru": "Кликните на карту, чтобы отметить, где вы находитесь.",
+        "uz_latin": "Qayerda ekanligingizni belgilash uchun xaritani bosing.",
+        "uz_cyrillic": "Қаерда эканлигингизни белгилаш учун харитани босинг.",
+        "en": "Click the map to mark where you are.",
+    },
+    "map.nearby_section": {
+        "ru": "Ближайшие", "uz_latin": "Eng yaqinlar", "uz_cyrillic": "Энг яқинлар", "en": "Nearby",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },

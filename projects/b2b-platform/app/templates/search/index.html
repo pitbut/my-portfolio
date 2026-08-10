@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% block title %}Поиск{% endblock %}
+{% block title %}{{ t('search.title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
   <div class="page-head">
-    <h1>Поиск по сайту</h1>
+    <h1>{{ t('search.title') }}</h1>
   </div>
-  <p class="empty-hint">Ищет среди исполнителей, конструкторов, барахолки станков, материалов и вакансий.</p>
+  <p class="empty-hint">{{ t('search.hint') }}</p>
 
   <form method="get" class="map-filters">
-    <label>Запрос
-      <input type="text" name="q" value="{{ q }}" placeholder="например, токарный станок" autofocus>
+    <label>{{ t('search.query_label') }}
+      <input type="text" name="q" value="{{ q }}" placeholder="{{ t('search.query_placeholder') }}" autofocus>
     </label>
-    <label>Совпадение
+    <label>{{ t('search.match_mode') }}
       <select name="mode">
-        <option value="partial" {{ 'selected' if mode == 'partial' }}>Частичное (содержит)</option>
-        <option value="exact" {{ 'selected' if mode == 'exact' }}>Точное (полное совпадение)</option>
+        <option value="partial" {{ 'selected' if mode == 'partial' }}>{{ t('search.match_partial') }}</option>
+        <option value="exact" {{ 'selected' if mode == 'exact' }}>{{ t('search.match_exact') }}</option>
       </select>
     </label>
-    <button type="submit" class="btn btn--primary">Искать</button>
+    <button type="submit" class="btn btn--primary">{{ t('search.search_btn') }}</button>
   </form>
 
   {% if q %}
     {% if total == 0 %}
-    <p class="empty-hint">По запросу «{{ q }}» ({{ 'точное совпадение' if mode == 'exact' else 'частичное совпадение' }}) ничего не найдено.</p>
+    <p class="empty-hint">{{ t('search.no_results', q=q, mode=t('search.mode_exact_label') if mode == 'exact' else t('search.mode_partial_label')) }}</p>
     {% endif %}
 
     {% if results.executors %}
-    <h2 class="profile-section-title">Исполнители</h2>
+    <h2 class="profile-section-title">{{ t('search.section_executors') }}</h2>
     <div class="listing-grid">
       {% for e in results.executors %}
       <a class="listing-card" href="{{ url_for('profile.executor_public_profile', user_id=e.user_id) }}">
@@ -40,7 +40,7 @@
     {% endif %}
 
     {% if results.constructors %}
-    <h2 class="profile-section-title">Конструкторы</h2>
+    <h2 class="profile-section-title">{{ t('search.section_constructors') }}</h2>
     <div class="listing-grid">
       {% for c in results.constructors %}
       <a class="listing-card" href="{{ url_for('constructors.detail', constructor_id=c.id) }}">
@@ -53,7 +53,7 @@
     {% endif %}
 
     {% if results.listings %}
-    <h2 class="profile-section-title">Барахолка станков и инструмента</h2>
+    <h2 class="profile-section-title">{{ t('search.section_listings') }}</h2>
     <div class="listing-grid">
       {% for l in results.listings %}
       <a class="listing-card" href="{{ url_for('marketplace.detail', listing_id=l.id) }}">
@@ -66,7 +66,7 @@
     {% endif %}
 
     {% if results.materials %}
-    <h2 class="profile-section-title">Материалы и сырьё</h2>
+    <h2 class="profile-section-title">{{ t('search.section_materials') }}</h2>
     <div class="listing-grid">
       {% for m in results.materials %}
       <a class="listing-card" href="{{ url_for('materials_market.detail', listing_id=m.id) }}">
@@ -79,7 +79,7 @@
     {% endif %}
 
     {% if results.vacancies %}
-    <h2 class="profile-section-title">Вакансии</h2>
+    <h2 class="profile-section-title">{{ t('search.section_vacancies') }}</h2>
     <div class="listing-grid">
       {% for v in results.vacancies %}
       <a class="listing-card" href="{{ url_for('jobs.vacancy_detail', vacancy_id=v.id) }}">
