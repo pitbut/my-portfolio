@@ -55,11 +55,16 @@ def link_code_for(user):
     if existing is not None and datetime.utcnow() - existing.created_at < LINK_CODE_MAX_AGE:
         return existing.code
 
-    if existing is not None:
-        db.session.delete(existing)
-
     code = secrets.token_hex(4).upper()
-    db.session.add(TelegramLinkCode(user_id=user.id, code=code))
+    if existing is not None:
+        # Обновляем ту же строку, а не удаляем и создаём новую: в одном
+        # flush() SQLAlchemy по умолчанию выполняет INSERT раньше DELETE,
+        # так что «удалить и вставить с тем же user_id» падает по
+        # unique-constraint (telegram_link_codes_user_id_key).
+        existing.code = code
+        existing.created_at = datetime.utcnow()
+    else:
+        db.session.add(TelegramLinkCode(user_id=user.id, code=code))
     db.session.commit()
     return code
 

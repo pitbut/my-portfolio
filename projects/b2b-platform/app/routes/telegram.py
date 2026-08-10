@@ -28,6 +28,11 @@ def _link_account(chat_id, username, user):
     existing_for_chat = TelegramLink.query.filter_by(telegram_chat_id=chat_id).first()
     if existing_for_chat is not None and existing_for_chat.user_id != user.id:
         db.session.delete(existing_for_chat)
+        # flush() сразу — иначе при том же flush() ниже INSERT/UPDATE с тем
+        # же telegram_chat_id уйдёт раньше этого DELETE (SQLAlchemy по
+        # умолчанию шлёт insert/update перед delete) и упадёт по
+        # unique-constraint telegram_links_telegram_chat_id_key.
+        db.session.flush()
 
     link = TelegramLink.query.filter_by(user_id=user.id).first()
     if link is None:
