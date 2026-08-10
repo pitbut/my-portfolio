@@ -1737,6 +1737,207 @@ STRINGS = {
     "map.nearby_section": {
         "ru": "Ближайшие", "uz_latin": "Eng yaqinlar", "uz_cyrillic": "Энг яқинлар", "en": "Nearby",
     },
+    "review.leave_title": {
+        "ru": "Оставить отзыв", "uz_latin": "Sharh qoldirish", "uz_cyrillic": "Шарҳ қолдириш",
+        "en": "Leave a review",
+    },
+    "review.about_order": {
+        "ru": "Отзыв о заказе «{title}»", "uz_latin": "«{title}» buyurtmasi haqida sharh",
+        "uz_cyrillic": "«{title}» буюртмаси ҳақида шарҳ", "en": "Review for order \"{title}\"",
+    },
+    "review.rating_field": {
+        "ru": "Оценка (1–5) *", "uz_latin": "Baho (1–5) *", "uz_cyrillic": "Баҳо (1–5) *", "en": "Rating (1–5) *",
+    },
+    "review.comment_field": {
+        "ru": "Комментарий", "uz_latin": "Izoh", "uz_cyrillic": "Изоҳ", "en": "Comment",
+    },
+    "review.update": {
+        "ru": "Обновить отзыв", "uz_latin": "Sharhni yangilash", "uz_cyrillic": "Шарҳни янгилаш",
+        "en": "Update review",
+    },
+    "review.submit": {
+        "ru": "Отправить отзыв", "uz_latin": "Sharhni yuborish", "uz_cyrillic": "Шарҳни юбориш",
+        "en": "Submit review",
+    },
+    "review.pending_publish": {
+        "ru": "Ваш отзыв сохранён и будет опубликован, как только своё мнение оставит другая сторона.",
+        "uz_latin": "Sharhingiz saqlandi va boshqa tomon fikrini bildirishi bilan eʼlon qilinadi.",
+        "uz_cyrillic": "Шарҳингиз сақланди ва бошқа томон фикрини билдириши билан эълон қилинади.",
+        "en": "Your review is saved and will be published once the other side leaves theirs.",
+    },
+    "review.title": {
+        "ru": "Отзывы", "uz_latin": "Sharhlar", "uz_cyrillic": "Шарҳлар", "en": "Reviews",
+    },
+    "review.received": {
+        "ru": "Полученные", "uz_latin": "Olingan", "uz_cyrillic": "Олинган", "en": "Received",
+    },
+    "review.no_received": {
+        "ru": "Пока нет опубликованных отзывов о вас.", "uz_latin": "Sizga hali eʼlon qilingan sharhlar yoʻq.",
+        "uz_cyrillic": "Сизга ҳали эълон қилинган шарҳлар йўқ.", "en": "No published reviews about you yet.",
+    },
+    "review.given": {
+        "ru": "Оставленные вами", "uz_latin": "Siz qoldirgan", "uz_cyrillic": "Сиз қолдирган",
+        "en": "Left by you",
+    },
+    "review.no_given": {
+        "ru": "Вы ещё не оставляли отзывов.", "uz_latin": "Siz hali sharh qoldirmagansiz.",
+        "uz_cyrillic": "Сиз ҳали шарҳ қолдирмагансиз.", "en": "You haven't left any reviews yet.",
+    },
+    "review.pending_badge": {
+        "ru": "(ожидает публикации)", "uz_latin": "(eʼlon qilinishini kutmoqda)", "uz_cyrillic": "(эълон қилинишини кутмоқда)",
+        "en": "(awaiting publication)",
+    },
+    "review.order_meta": {
+        "ru": "заказ «{title}»", "uz_latin": "«{title}» buyurtmasi", "uz_cyrillic": "«{title}» буюртмаси",
+        "en": "order \"{title}\"",
+    },
+    "dispute.status_open": {
+        "ru": "открыт", "uz_latin": "ochiq", "uz_cyrillic": "очиқ", "en": "open",
+    },
+    "dispute.status_evidence_collection": {
+        "ru": "сбор доказательств", "uz_latin": "dalillar yigʻilmoqda", "uz_cyrillic": "далиллар йиғилмоқда",
+        "en": "collecting evidence",
+    },
+    "dispute.status_in_review": {
+        "ru": "на рассмотрении", "uz_latin": "koʻrib chiqilmoqda", "uz_cyrillic": "кўриб чиқилмоқда",
+        "en": "under review",
+    },
+    "dispute.status_resolved_customer": {
+        "ru": "решено в пользу заказчика", "uz_latin": "buyurtmachi foydasiga hal qilindi",
+        "uz_cyrillic": "буюртмачи фойдасига ҳал қилинди", "en": "resolved for customer",
+    },
+    "dispute.status_resolved_executor": {
+        "ru": "решено в пользу исполнителя", "uz_latin": "ijrochi foydasiga hal qilindi",
+        "uz_cyrillic": "ижрочи фойдасига ҳал қилинди", "en": "resolved for executor",
+    },
+    "dispute.status_resolved_partial": {
+        "ru": "частичное решение", "uz_latin": "qisman hal qilindi", "uz_cyrillic": "қисман ҳал қилинди",
+        "en": "partially resolved",
+    },
+    "dispute.reason_defect": {
+        "ru": "Брак", "uz_latin": "Nuqson", "uz_cyrillic": "Нуқсон", "en": "Defect",
+    },
+    "dispute.reason_delay": {
+        "ru": "Задержка сроков", "uz_latin": "Muddat kechikishi", "uz_cyrillic": "Муддат кечикиши",
+        "en": "Delay",
+    },
+    "dispute.reason_quality": {
+        "ru": "Претензия по качеству", "uz_latin": "Sifat boʻyicha da’vo", "uz_cyrillic": "Сифат бўйича даъво",
+        "en": "Quality complaint",
+    },
+    "dispute.reason_price_dispute": {
+        "ru": "Расхождение по цене", "uz_latin": "Narx boʻyicha kelishmovchilik", "uz_cyrillic": "Нарх бўйича келишмовчилик",
+        "en": "Price disagreement",
+    },
+    "dispute.reason_other": {
+        "ru": "Другое", "uz_latin": "Boshqa", "uz_cyrillic": "Бошқа", "en": "Other",
+    },
+    "dispute.open_title": {
+        "ru": "Открыть спор", "uz_latin": "Nizo ochish", "uz_cyrillic": "Низо очиш", "en": "Open dispute",
+    },
+    "dispute.about_order": {
+        "ru": "Спор по заказу «{title}»", "uz_latin": "«{title}» buyurtmasi boʻyicha nizo",
+        "uz_cyrillic": "«{title}» буюртмаси бўйича низо", "en": "Dispute for order \"{title}\"",
+    },
+    "dispute.describe_hint": {
+        "ru": "Опишите проблему и после отправки приложите фото/видео-доказательства — это поможет администратору объективно разобраться.",
+        "uz_latin": "Muammoni tasvirlang va yuborgandan keyin foto/video-dalillarni ilova qiling — bu administratorga adolatli hal qilishga yordam beradi.",
+        "uz_cyrillic": "Муаммони тасвирланг ва юборгандан кейин фото/видео-далилларни илова қилинг — бу администраторга адолатли ҳал қилишга ёрдам беради.",
+        "en": "Describe the problem, and after submitting attach photo/video evidence — this helps the admin resolve it fairly.",
+    },
+    "dispute.reason_field": {
+        "ru": "Причина *", "uz_latin": "Sabab *", "uz_cyrillic": "Сабаб *", "en": "Reason *",
+    },
+    "dispute.describe_situation": {
+        "ru": "Опишите ситуацию *", "uz_latin": "Vaziyatni tasvirlang *", "uz_cyrillic": "Вазиятни тасвирланг *",
+        "en": "Describe the situation *",
+    },
+    "dispute.short_title": {
+        "ru": "Спор: «{title}»", "uz_latin": "Nizo: «{title}»", "uz_cyrillic": "Низо: «{title}»",
+        "en": "Dispute: \"{title}\"",
+    },
+    "dispute.reason_meta": {
+        "ru": "Причина: {value}", "uz_latin": "Sabab: {value}", "uz_cyrillic": "Сабаб: {value}",
+        "en": "Reason: {value}",
+    },
+    "dispute.opened_meta": {
+        "ru": "Открыт: {email}, {date}", "uz_latin": "Ochilgan: {email}, {date}", "uz_cyrillic": "Очилган: {email}, {date}",
+        "en": "Opened: {email}, {date}",
+    },
+    "dispute.admin_resolution": {
+        "ru": "Решение администратора ({status}):", "uz_latin": "Administrator qarori ({status}):",
+        "uz_cyrillic": "Администратор қарори ({status}):", "en": "Admin resolution ({status}):",
+    },
+    "dispute.evidence_title": {
+        "ru": "Доказательства", "uz_latin": "Dalillar", "uz_cyrillic": "Далиллар", "en": "Evidence",
+    },
+    "dispute.evidence_alt": {
+        "ru": "доказательство", "uz_latin": "dalil", "uz_cyrillic": "далил", "en": "evidence",
+    },
+    "dispute.no_evidence": {
+        "ru": "Доказательств пока нет.", "uz_latin": "Hozircha dalillar yoʻq.", "uz_cyrillic": "Ҳозирча далиллар йўқ.",
+        "en": "No evidence yet.",
+    },
+    "dispute.evidence_file_label": {
+        "ru": "Фото/видео (изображение)", "uz_latin": "Foto/video (rasm)", "uz_cyrillic": "Фото/видео (расм)",
+        "en": "Photo/video (image)",
+    },
+    "dispute.comment_field": {
+        "ru": "Комментарий", "uz_latin": "Izoh", "uz_cyrillic": "Изоҳ", "en": "Comment",
+    },
+    "dispute.add_evidence": {
+        "ru": "Добавить доказательство", "uz_latin": "Dalil qoʻshish", "uz_cyrillic": "Далил қўшиш",
+        "en": "Add evidence",
+    },
+    "dispute.ready_for_review": {
+        "ru": "Готово к рассмотрению →", "uz_latin": "Koʻrib chiqishga tayyor →", "uz_cyrillic": "Кўриб чиқишга тайёр →",
+        "en": "Ready for review →",
+    },
+    "dispute.conversation_title": {
+        "ru": "Переписка", "uz_latin": "Yozishmalar", "uz_cyrillic": "Ёзишмалар", "en": "Conversation",
+    },
+    "dispute.internal_note_badge": {
+        "ru": "(внутренняя заметка)", "uz_latin": "(ichki eslatma)", "uz_cyrillic": "(ички эслатма)",
+        "en": "(internal note)",
+    },
+    "dispute.message_field": {
+        "ru": "Сообщение", "uz_latin": "Xabar", "uz_cyrillic": "Хабар", "en": "Message",
+    },
+    "dispute.internal_note_checkbox": {
+        "ru": "Внутренняя заметка (не видна сторонам)", "uz_latin": "Ichki eslatma (tomonlarga koʻrinmaydi)",
+        "uz_cyrillic": "Ички эслатма (томонларга кўринмайди)", "en": "Internal note (not visible to parties)",
+    },
+    "dispute.admin_resolution_title": {
+        "ru": "Решение администратора", "uz_latin": "Administrator qarori", "uz_cyrillic": "Администратор қарори",
+        "en": "Admin resolution",
+    },
+    "dispute.resolution_favor": {
+        "ru": "В чью пользу решение *", "uz_latin": "Kim foydasiga qaror *", "uz_cyrillic": "Ким фойдасига қарор *",
+        "en": "In whose favor *",
+    },
+    "dispute.favor_customer": {
+        "ru": "В пользу заказчика", "uz_latin": "Buyurtmachi foydasiga", "uz_cyrillic": "Буюртмачи фойдасига",
+        "en": "In favor of customer",
+    },
+    "dispute.favor_executor": {
+        "ru": "В пользу исполнителя", "uz_latin": "Ijrochi foydasiga", "uz_cyrillic": "Ижрочи фойдасига",
+        "en": "In favor of executor",
+    },
+    "dispute.favor_partial": {
+        "ru": "Частично / компромисс", "uz_latin": "Qisman / kelishuv", "uz_cyrillic": "Қисман / келишув",
+        "en": "Partial / compromise",
+    },
+    "dispute.resolution_justification": {
+        "ru": "Обоснование *", "uz_latin": "Asoslash *", "uz_cyrillic": "Асослаш *", "en": "Justification *",
+    },
+    "dispute.final_order_status": {
+        "ru": "Итоговый статус заказа *", "uz_latin": "Buyurtmaning yakuniy holati *",
+        "uz_cyrillic": "Буюртманинг якуний ҳолати *", "en": "Final order status *",
+    },
+    "dispute.make_resolution": {
+        "ru": "Вынести решение", "uz_latin": "Qaror chiqarish", "uz_cyrillic": "Қарор чиқариш",
+        "en": "Issue resolution",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },
@@ -1772,6 +1973,18 @@ def listing_status_label(status):
     return translate(key) if key else status
 
 
+def dispute_status_label(status):
+    if not status:
+        return status
+    return translate(f"dispute.status_{status}")
+
+
+def dispute_reason_label(reason):
+    if not reason:
+        return reason
+    return translate(f"dispute.reason_{reason}")
+
+
 def register_i18n(app):
     @app.context_processor
     def inject_i18n():
@@ -1785,6 +1998,8 @@ def register_i18n(app):
     app.jinja_env.globals["order_status_label"] = order_status_label
     app.jinja_env.globals["bid_status_label"] = bid_status_label
     app.jinja_env.globals["listing_status_label"] = listing_status_label
+    app.jinja_env.globals["dispute_status_label"] = dispute_status_label
+    app.jinja_env.globals["dispute_reason_label"] = dispute_reason_label
 
 
 def get_current_lang():
