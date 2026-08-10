@@ -1,21 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Резюме — {{ resume.profession_category.name_ru }}{% endblock %}
+{% block title %}{{ t('resume.title') }} — {{ resume.profession_category.name_ru }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
   <h1>{{ resume.profession_category.name_ru }}</h1>
   {% if not is_owner %}
-  <p><a href="{{ url_for('chat.thread', user_id=resume.candidate_id) }}" class="btn-link">✉ Написать кандидату</a></p>
+  <p><a href="{{ url_for('chat.thread', user_id=resume.candidate_id) }}" class="btn-link">{{ t('resume.write_to_candidate') }}</a></p>
   {% endif %}
   <p class="order-meta">
-    <span>Опыт: {{ resume.experience_years or '—' }} лет</span>
+    <span>{{ t('resume.experience_label', value=resume.experience_years) if resume.experience_years else t('resume.experience_label', value='—') }}</span>
     <span>{{ resume.region.name_ru }}</span>
-    {% if resume.expected_salary %}<span>Ожидания: {{ resume.expected_salary }}</span>{% endif %}
+    {% if resume.expected_salary %}<span>{{ t('resume.expectations_label', value=resume.expected_salary) }}</span>{% endif %}
   </p>
   <p class="order-description">{{ resume.about }}</p>
 
   {% if is_owner %}
-    <h2 class="profile-section-title">Приглашения от работодателей ({{ invites|length }})</h2>
+    <h2 class="profile-section-title">{{ t('resume.invites_section', count=invites|length) }}</h2>
     {% if invites %}
     <div class="notif-list">
       {% for i in invites %}
@@ -27,16 +27,16 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="empty-hint">Приглашений пока нет.</p>
+    <p class="empty-hint">{{ t('resume.no_invites') }}</p>
     {% endif %}
   {% elif my_invite %}
-    <p class="empty-hint">Вы уже приглашали этого кандидата.</p>
+    <p class="empty-hint">{{ t('resume.already_invited') }}</p>
   {% else %}
-    <h2 class="profile-section-title">Пригласить</h2>
+    <h2 class="profile-section-title">{{ t('resume.invite_section') }}</h2>
     <form method="post" action="{{ url_for('jobs.resume_invite', resume_id=resume.id) }}" class="profile-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label>Сообщение <textarea name="message" rows="3" placeholder="Расскажите о вакансии"></textarea></label>
-      <button type="submit" class="btn btn--primary">Пригласить</button>
+      <label>{{ t('listing.message_label') }} <textarea name="message" rows="3" placeholder="{{ t('resume.invite_message_placeholder') }}"></textarea></label>
+      <button type="submit" class="btn btn--primary">{{ t('resume.invite_btn') }}</button>
     </form>
   {% endif %}
 </section>

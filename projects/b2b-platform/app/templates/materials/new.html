@@ -1,71 +1,71 @@
 {% extends "base.html" %}
-{% block title %}Новое объявление о материале{% endblock %}
+{% block title %}{{ t('material.new_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Новое объявление: материал/сырьё</h1>
+  <h1>{{ t('material.new_heading') }}</h1>
   <form method="post" action="{{ url_for('materials_market.new_listing') }}" enctype="multipart/form-data" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <fieldset class="role-fieldset">
-      <legend>Тип объявления *</legend>
-      <label><input type="radio" name="listing_intent" value="sell" required> Продаю</label>
-      <label><input type="radio" name="listing_intent" value="buy"> Ищу купить</label>
+      <legend>{{ t('listing.type_label') }}</legend>
+      <label><input type="radio" name="listing_intent" value="sell" required> {{ t('listing.sell') }}</label>
+      <label><input type="radio" name="listing_intent" value="buy"> {{ t('listing.looking_to_buy') }}</label>
     </fieldset>
 
     <div class="form-row">
-      <label>Материал *
+      <label>{{ t('material.material_required') }}
         <select name="material_id" required>
-          <option value="">— выберите —</option>
+          <option value="">{{ t('profile.select_placeholder') }}</option>
           {% for m in materials %}<option value="{{ m.id }}">{{ m.name_ru }}</option>{% endfor %}
         </select>
       </label>
-      <label>Вид/форма
+      <label>{{ t('material.form_field') }}
         <select name="form_id">
-          <option value="">— не важно —</option>
+          <option value="">{{ t('material.form_any') }}</option>
           {% for f in forms %}<option value="{{ f.id }}">{{ f.name_ru }}</option>{% endfor %}
         </select>
       </label>
     </div>
 
-    <label>Название *
-      <input type="text" name="title" placeholder="напр. Лист нержавейки AISI 304, 2 мм" required>
+    <label>{{ t('listing.title_label') }}
+      <input type="text" name="title" placeholder="{{ t('material.title_placeholder') }}" required>
     </label>
-    <label>Описание *
+    <label>{{ t('listing.description_label') }}
       <textarea name="description" rows="4" required></textarea>
     </label>
 
     <div class="form-row">
-      <label>Количество <input type="number" name="quantity" min="0" step="0.01"></label>
-      <label>Единица
+      <label>{{ t('material.quantity_label') }} <input type="number" name="quantity" min="0" step="0.01"></label>
+      <label>{{ t('material.unit_label') }}
         <select name="unit">
-          <option value="kg">кг</option>
-          <option value="t">тонны</option>
-          <option value="m">метры</option>
-          <option value="m2">м²</option>
-          <option value="pcs">шт</option>
+          <option value="kg">{{ t('material.unit_kg') }}</option>
+          <option value="t">{{ t('material.unit_t') }}</option>
+          <option value="m">{{ t('material.unit_m') }}</option>
+          <option value="m2">{{ t('material.unit_m2') }}</option>
+          <option value="pcs">{{ t('material.unit_pcs') }}</option>
         </select>
       </label>
     </div>
 
     <div class="form-row">
-      <label>Цена <input type="number" name="price" min="0"></label>
-      <label>Валюта
+      <label>{{ t('listing.price_label') }} <input type="number" name="price" min="0"></label>
+      <label>{{ t('listing.currency_label') }}
         <select name="currency"><option value="UZS">UZS</option><option value="USD">USD</option></select>
       </label>
     </div>
-    <label class="checkbox-label"><input type="checkbox" name="price_negotiable" value="1"> Торг уместен</label>
+    <label class="checkbox-label"><input type="checkbox" name="price_negotiable" value="1"> {{ t('listing.negotiable_checkbox') }}</label>
 
-    <label>Регион *
+    <label>{{ t('listing.region_required') }}
       <select name="region_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for r in regions %}<option value="{{ r.id }}">{{ r.name_ru }}</option>{% endfor %}
       </select>
     </label>
 
-    <label>Фото (можно несколько) <input type="file" name="photos" accept="image/*" multiple></label>
+    <label>{{ t('listing.photos_label') }} <input type="file" name="photos" accept="image/*" multiple></label>
 
-    <button type="submit" class="btn btn--primary">Опубликовать</button>
+    <button type="submit" class="btn btn--primary">{{ t('listing.publish') }}</button>
   </form>
 </section>
 {% endblock %}

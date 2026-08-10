@@ -1,57 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Спор по заказу «{{ dispute.order.title }}»{% endblock %}
+{% block title %}{{ t('dispute.short_title', title=dispute.order.title) }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
   <div class="page-head">
-    <h1>Спор: «{{ dispute.order.title }}»</h1>
-    <span class="status-chip status-chip--disputed">{{ dispute.status }}</span>
+    <h1>{{ t('dispute.short_title', title=dispute.order.title) }}</h1>
+    <span class="status-chip status-chip--disputed">{{ dispute_status_label(dispute.status) }}</span>
   </div>
   <p class="order-meta">
-    <span>Причина: {{ dispute.reason_category }}</span>
-    <span>Открыт: {{ dispute.opened_by.email }}, {{ dispute.created_at.strftime('%d.%m.%Y') }}</span>
+    <span>{{ t('dispute.reason_meta', value=dispute_reason_label(dispute.reason_category)) }}</span>
+    <span>{{ t('dispute.opened_meta', email=dispute.opened_by.email, date=dispute.created_at.strftime('%d.%m.%Y')) }}</span>
   </p>
   <p class="order-description">{{ dispute.description }}</p>
 
   {% if dispute.resolution_text %}
   <div class="callout-resolution">
-    <strong>Решение администратора ({{ dispute.status }}):</strong>
+    <strong>{{ t('dispute.admin_resolution', status=dispute_status_label(dispute.status)) }}</strong>
     <p>{{ dispute.resolution_text }}</p>
   </div>
   {% endif %}
 
-  <h2 class="profile-section-title">Доказательства</h2>
+  <h2 class="profile-section-title">{{ t('dispute.evidence_title') }}</h2>
   {% if dispute.evidence %}
   <div class="order-media">
     {% for e in dispute.evidence %}
     <div>
-      <a href="{{ e.file_url }}" target="_blank" rel="noopener"><img src="{{ e.file_url }}" class="order-media__thumb" alt="доказательство"></a>
+      <a href="{{ e.file_url }}" target="_blank" rel="noopener"><img src="{{ e.file_url }}" class="order-media__thumb" alt="{{ t('dispute.evidence_alt') }}"></a>
       <div class="notif-item__meta">{{ e.uploaded_by.email }}{% if e.comment %} — {{ e.comment }}{% endif %}</div>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <p class="empty-hint">Доказательств пока нет.</p>
+  <p class="empty-hint">{{ t('dispute.no_evidence') }}</p>
   {% endif %}
 
   {% if not is_admin and dispute.status in ('open', 'evidence_collection') %}
   <form method="post" action="{{ url_for('disputes.add_evidence', dispute_id=dispute.id) }}" enctype="multipart/form-data" class="profile-form profile-form--inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Фото/видео (изображение) <input type="file" name="file" accept="image/*" required></label>
-    <label>Комментарий <input type="text" name="comment"></label>
-    <button type="submit" class="btn btn--secondary">Добавить доказательство</button>
+    <label>{{ t('dispute.evidence_file_label') }} <input type="file" name="file" accept="image/*" required></label>
+    <label>{{ t('dispute.comment_field') }} <input type="text" name="comment"></label>
+    <button type="submit" class="btn btn--secondary">{{ t('dispute.add_evidence') }}</button>
   </form>
   <form method="post" action="{{ url_for('disputes.mark_ready', dispute_id=dispute.id) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="btn-link">Готово к рассмотрению →</button>
+    <button type="submit" class="btn-link">{{ t('dispute.ready_for_review') }}</button>
   </form>
   {% endif %}
 
-  <h2 class="profile-section-title">Переписка</h2>
+  <h2 class="profile-section-title">{{ t('dispute.conversation_title') }}</h2>
   <div class="notif-list">
     {% for m in visible_messages %}
     <div class="notif-item{% if m.is_internal_admin_note %} notif-item--internal{% endif %}">
-      <div class="notif-item__title">{{ m.sender.email }}{% if m.is_internal_admin_note %} (внутренняя заметка){% endif %}</div>
+      <div class="notif-item__title">{{ m.sender.email }}{% if m.is_internal_admin_note %} {{ t('dispute.internal_note_badge') }}{% endif %}</div>
       <div class="notif-item__body">{{ m.text }}</div>
       <div class="notif-item__meta">{{ m.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
     </div>
@@ -59,32 +59,32 @@
   </div>
   <form method="post" action="{{ url_for('disputes.add_message', dispute_id=dispute.id) }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Сообщение <textarea name="text" rows="3" required></textarea></label>
+    <label>{{ t('dispute.message_field') }} <textarea name="text" rows="3" required></textarea></label>
     {% if is_admin %}
-    <label class="checkbox-label"><input type="checkbox" name="internal" value="1"> Внутренняя заметка (не видна сторонам)</label>
+    <label class="checkbox-label"><input type="checkbox" name="internal" value="1"> {{ t('dispute.internal_note_checkbox') }}</label>
     {% endif %}
-    <button type="submit" class="btn btn--secondary">Отправить</button>
+    <button type="submit" class="btn btn--secondary">{{ t('chat.send') }}</button>
   </form>
 
   {% if is_admin and dispute.status in ('open', 'evidence_collection', 'in_review') %}
-  <h2 class="profile-section-title">Решение администратора</h2>
+  <h2 class="profile-section-title">{{ t('dispute.admin_resolution_title') }}</h2>
   <form method="post" action="{{ url_for('admin.resolve_dispute', dispute_id=dispute.id) }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>В чью пользу решение *
+    <label>{{ t('dispute.resolution_favor') }}
       <select name="resolution" required>
-        <option value="resolved_customer">В пользу заказчика</option>
-        <option value="resolved_executor">В пользу исполнителя</option>
-        <option value="resolved_partial">Частично / компромисс</option>
+        <option value="resolved_customer">{{ t('dispute.favor_customer') }}</option>
+        <option value="resolved_executor">{{ t('dispute.favor_executor') }}</option>
+        <option value="resolved_partial">{{ t('dispute.favor_partial') }}</option>
       </select>
     </label>
-    <label>Обоснование *<textarea name="resolution_text" rows="4" required></textarea></label>
-    <label>Итоговый статус заказа *
+    <label>{{ t('dispute.resolution_justification') }}<textarea name="resolution_text" rows="4" required></textarea></label>
+    <label>{{ t('dispute.final_order_status') }}
       <select name="order_final_status" required>
-        <option value="completed">Завершён</option>
-        <option value="cancelled">Отменён</option>
+        <option value="completed">{{ order_status_label('completed') }}</option>
+        <option value="cancelled">{{ order_status_label('cancelled') }}</option>
       </select>
     </label>
-    <button type="submit" class="btn btn--primary">Вынести решение</button>
+    <button type="submit" class="btn btn--primary">{{ t('dispute.make_resolution') }}</button>
   </form>
   {% endif %}
 </section>

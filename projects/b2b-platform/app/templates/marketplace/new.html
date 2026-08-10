@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Новое объявление{% endblock %}
+{% block title %}{{ t('listing.post_listing') }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
@@ -7,74 +7,74 @@
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Новое объявление</h1>
+  <h1>{{ t('listing.post_listing') }}</h1>
   <form method="post" action="{{ url_for('marketplace.new_listing') }}" enctype="multipart/form-data" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <fieldset class="role-fieldset">
-      <legend>Тип объявления *</legend>
-      <label><input type="radio" name="listing_intent" value="sell" required> Продаю</label>
-      <label><input type="radio" name="listing_intent" value="buy"> Ищу купить</label>
+      <legend>{{ t('listing.type_label') }}</legend>
+      <label><input type="radio" name="listing_intent" value="sell" required> {{ t('listing.sell') }}</label>
+      <label><input type="radio" name="listing_intent" value="buy"> {{ t('listing.looking_to_buy') }}</label>
     </fieldset>
 
-    <label>Категория *
+    <label>{{ t('listing.category_label') }}
       <select name="category_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for c in categories %}<option value="{{ c.id }}">{{ c.name_ru }}</option>{% endfor %}
       </select>
     </label>
 
-    <label>Название *
-      <input type="text" name="title" placeholder="напр. Токарный станок 1К62, б/у" required>
+    <label>{{ t('listing.title_label') }}
+      <input type="text" name="title" placeholder="{{ t('listing.title_placeholder_marketplace') }}" required>
     </label>
-    <label>Описание *
+    <label>{{ t('listing.description_label') }}
       <textarea name="description" rows="4" required></textarea>
     </label>
 
     <fieldset class="role-fieldset">
-      <legend>Состояние (для «Продаю»)</legend>
-      <label><input type="radio" name="condition" value="new"> Новое</label>
-      <label><input type="radio" name="condition" value="used"> Б/у</label>
-      <label><input type="radio" name="condition" value="for_parts"> На запчасти</label>
+      <legend>{{ t('listing.condition_legend') }}</legend>
+      <label><input type="radio" name="condition" value="new"> {{ t('listing.condition_new') }}</label>
+      <label><input type="radio" name="condition" value="used"> {{ t('listing.condition_used') }}</label>
+      <label><input type="radio" name="condition" value="for_parts"> {{ t('listing.condition_parts') }}</label>
     </fieldset>
 
     <div class="form-row">
-      <label>Цена <input type="number" name="price" min="0"></label>
-      <label>Валюта
+      <label>{{ t('listing.price_label') }} <input type="number" name="price" min="0"></label>
+      <label>{{ t('listing.currency_label') }}
         <select name="currency"><option value="UZS">UZS</option><option value="USD">USD</option></select>
       </label>
     </div>
-    <label class="checkbox-label"><input type="checkbox" name="price_negotiable" value="1"> Торг уместен</label>
+    <label class="checkbox-label"><input type="checkbox" name="price_negotiable" value="1"> {{ t('listing.negotiable_checkbox') }}</label>
 
-    <label>Регион *
+    <label>{{ t('listing.region_required') }}
       <select name="region_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for r in regions %}<option value="{{ r.id }}">{{ r.name_ru }}</option>{% endfor %}
       </select>
     </label>
 
     <fieldset class="checkbox-fieldset">
-      <legend>Способ оплаты (необязательно)</legend>
+      <legend>{{ t('listing.payment_methods_legend') }}</legend>
       {% for code, label in payment_method_choices %}
         <label class="checkbox-label"><input type="checkbox" name="payment_methods" value="{{ code }}"> {{ label }}</label>
       {% endfor %}
     </fieldset>
 
     <fieldset class="role-fieldset">
-      <legend>Доставка (необязательно)</legend>
+      <legend>{{ t('listing.delivery_legend') }}</legend>
       {% for code, label in delivery_choices %}
         <label><input type="radio" name="delivery" value="{{ code }}"> {{ label }}</label>
       {% endfor %}
     </fieldset>
 
-    <label>Фото (можно несколько) <input type="file" name="photos" accept="image/*" multiple></label>
+    <label>{{ t('listing.photos_label') }} <input type="file" name="photos" accept="image/*" multiple></label>
 
-    <label>Отметьте на карте, где вас найти (необязательно — чтобы объявление было видно на «Карте»)</label>
+    <label>{{ t('listing.map_hint') }}</label>
     <div id="locationMap" class="location-map"></div>
     <input type="hidden" name="latitude" id="latitude">
     <input type="hidden" name="longitude" id="longitude">
 
-    <button type="submit" class="btn btn--primary">Опубликовать</button>
+    <button type="submit" class="btn btn--primary">{{ t('listing.publish') }}</button>
   </form>
 </section>
 {% endblock %}

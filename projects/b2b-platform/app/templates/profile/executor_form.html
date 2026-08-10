@@ -138,7 +138,7 @@
         {% endfor %}
       </select>
     </label>
-    <label>{{ t('profile.model_placeholder') }} <input type="text" name="model_name" placeholder="напр. DMG MORI NLX 2500"></label>
+    <label>{{ t('profile.model_placeholder') }} <input type="text" name="model_name" placeholder="{{ t('profile.model_name_example') }}"></label>
     <label>{{ t('profile.qty_placeholder') }} <input type="number" name="quantity" min="1" value="1"></label>
     <label>{{ t('profile.notes_placeholder') }} <input type="text" name="notes"></label>
     <button type="submit" class="btn btn--secondary">{{ t('profile.add_equipment') }}</button>

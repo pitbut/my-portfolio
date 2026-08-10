@@ -1,54 +1,52 @@
 {% extends "base.html" %}
-{% block title %}Настройки{% endblock %}
+{% block title %}{{ t('settings.title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Настройки</h1>
+  <h1>{{ t('settings.title') }}</h1>
 
-  <h2 class="profile-section-title">Telegram</h2>
+  <h2 class="profile-section-title">{{ t('settings.telegram_heading') }}</h2>
   {% if telegram_link %}
-  <p>Привязан аккаунт {{ '@' + telegram_link.telegram_username if telegram_link.telegram_username else telegram_link.telegram_chat_id }}.
-     Уведомления: {{ 'включены' if telegram_link.notifications_enabled else 'выключены' }}.</p>
+  <p>{{ t('settings.telegram_linked', account=('@' + telegram_link.telegram_username if telegram_link.telegram_username else telegram_link.telegram_chat_id)) }}
+     {{ t('settings.notifications_status', status=(t('settings.notifications_on') if telegram_link.notifications_enabled else t('settings.notifications_off'))) }}</p>
   <form method="post" action="{{ url_for('settings.toggle_telegram') }}" style="display:inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="btn btn--secondary">{{ 'Выключить' if telegram_link.notifications_enabled else 'Включить' }} уведомления</button>
+    <button type="submit" class="btn btn--secondary">{{ t('settings.toggle_notifications_btn', action=(t('settings.toggle_disable') if telegram_link.notifications_enabled else t('settings.toggle_enable'))) }}</button>
   </form>
   <form method="post" action="{{ url_for('settings.unlink_telegram') }}" style="display:inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="btn-link btn-link--danger">Отвязать</button>
+    <button type="submit" class="btn-link btn-link--danger">{{ t('settings.unlink') }}</button>
   </form>
   {% elif deep_link %}
-  <p class="empty-hint">Telegram не привязан. Нажмите кнопку и в открывшемся боте нажмите Start — уведомления о заказах, откликах и спорах начнут приходить туда же.</p>
-  <a class="btn btn--primary" href="{{ deep_link }}" target="_blank" rel="noopener">Подключить Telegram</a>
+  <p class="empty-hint">{{ t('settings.telegram_not_linked_hint') }}</p>
+  <a class="btn btn--primary" href="{{ deep_link }}" target="_blank" rel="noopener">{{ t('settings.connect_telegram') }}</a>
   {% if link_code %}
-  <p class="hint">Если вы уже писали этому боту раньше, кнопка выше может открыть чат без автоматической привязки —
-     Telegram в этом случае не передаёт ссылку. В таком случае просто отправьте боту сообщением этот код:
-     <strong>{{ link_code }}</strong> (действует 30 минут).</p>
+  <p class="hint">{{ t('settings.link_code_before') }}
+     <strong>{{ link_code }}</strong> {{ t('settings.link_code_after') }}</p>
   {% endif %}
   {% if not bot_configured %}
-  <p class="hint">Бот ещё не отправляет сообщения — администратор платформы не задал TELEGRAM_BOT_TOKEN. Привязка аккаунта уже работает и сохранится, отправка уведомлений включится автоматически, как только токен будет добавлен.</p>
+  <p class="hint">{{ t('settings.bot_not_configured_hint') }}</p>
   {% endif %}
   {% else %}
-  <p class="empty-hint">Telegram-бот пока не подключён администратором платформы (не задан TELEGRAM_BOT_USERNAME) — уведомления приходят только в личном кабинете, в разделе «Уведомления».</p>
+  <p class="empty-hint">{{ t('settings.bot_not_connected_hint') }}</p>
   {% endif %}
 
   {% if switchable_roles %}
-  <h2 class="profile-section-title">Роль на платформе</h2>
+  <h2 class="profile-section-title">{{ t('settings.role_heading') }}</h2>
   <p class="empty-hint">
-    Сейчас вы — {{ {'customer': 'заказчик', 'executor': 'исполнитель', 'constructor': 'конструктор'}[current_user.role] }}.
-    Можно переключиться на другую роль в любой момент — старая анкета и данные не удаляются,
-    просто становятся неактивны, пока вы не вернётесь обратно.
+    {{ t('settings.current_role', role=t('role.' + current_user.role)) }}
+    {{ t('settings.role_switch_hint') }}
   </p>
   <form method="post" action="{{ url_for('settings.switch_role') }}" class="profile-form profile-form--inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Стать
+    <label>{{ t('settings.become_label') }}
       <select name="role">
         {% for r in switchable_roles %}
-        <option value="{{ r }}">{{ {'customer': 'заказчиком', 'executor': 'исполнителем', 'constructor': 'конструктором'}[r] }}</option>
+        <option value="{{ r }}">{{ t('role.become_' + r) }}</option>
         {% endfor %}
       </select>
     </label>
-    <button type="submit" class="btn btn--secondary">Сменить роль</button>
+    <button type="submit" class="btn btn--secondary">{{ t('settings.switch_role_btn') }}</button>
   </form>
   {% endif %}
 </section>

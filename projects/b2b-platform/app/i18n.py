@@ -1194,8 +1194,1176 @@ STRINGS = {
         "uz_cyrillic": "Сизнинг таклифингиз: {price} {currency} ({status}). Аукцион ёпиқ.",
         "en": "Your bid: {price} {currency} ({status}). The auction is closed.",
     },
+    "listing.sell": {
+        "ru": "Продаю", "uz_latin": "Sotaman", "uz_cyrillic": "Сотаман", "en": "Selling",
+    },
+    "listing.buy": {
+        "ru": "Куплю", "uz_latin": "Sotib olaman", "uz_cyrillic": "Сотиб оламан", "en": "Buying",
+    },
+    "listing.looking_to_buy": {
+        "ru": "Ищу купить", "uz_latin": "Sotib olmoqchiman", "uz_cyrillic": "Сотиб олмоқчиман", "en": "Looking to buy",
+    },
+    "listing.price_not_set": {
+        "ru": "Цена не указана", "uz_latin": "Narx koʻrsatilmagan", "uz_cyrillic": "Нарх кўрсатилмаган",
+        "en": "Price not specified",
+    },
+    "listing.negotiable": {
+        "ru": "торг", "uz_latin": "kelishiladi", "uz_cyrillic": "келишилади", "en": "negotiable",
+    },
+    "listing.negotiable_checkbox": {
+        "ru": "Торг уместен", "uz_latin": "Kelishish mumkin", "uz_cyrillic": "Келишиш мумкин",
+        "en": "Price negotiable",
+    },
+    "listing.no_listings": {
+        "ru": "Пока нет объявлений по этим фильтрам.", "uz_latin": "Bu filtrlar boʻyicha eʼlonlar hozircha yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича эълонлар ҳозирча йўқ.", "en": "No listings match these filters yet.",
+    },
+    "listing.post_listing": {
+        "ru": "Разместить объявление", "uz_latin": "Eʼlon joylashtirish", "uz_cyrillic": "Эълон жойлаштириш",
+        "en": "Post a listing",
+    },
+    "listing.filter_type": {
+        "ru": "Тип", "uz_latin": "Turi", "uz_cyrillic": "Тури", "en": "Type",
+    },
+    "listing.filter_all": {
+        "ru": "Все", "uz_latin": "Barchasi", "uz_cyrillic": "Барчаси", "en": "All",
+    },
+    "listing.filter_region": {
+        "ru": "Регион", "uz_latin": "Viloyat", "uz_cyrillic": "Вилоят", "en": "Region",
+    },
+    "listing.filter_category": {
+        "ru": "Категория", "uz_latin": "Toifa", "uz_cyrillic": "Тоифа", "en": "Category",
+    },
+    "listing.marketplace_title": {
+        "ru": "Барахолка: станки и инструмент", "uz_latin": "Bozorcha: stanoklar va asboblar",
+        "uz_cyrillic": "Бозорча: станоклар ва асбоблар", "en": "Marketplace: machines and tools",
+    },
+    "listing.type_label": {
+        "ru": "Тип объявления *", "uz_latin": "Eʼlon turi *", "uz_cyrillic": "Эълон тури *",
+        "en": "Listing type *",
+    },
+    "listing.category_label": {
+        "ru": "Категория *", "uz_latin": "Toifa *", "uz_cyrillic": "Тоифа *", "en": "Category *",
+    },
+    "listing.title_label": {
+        "ru": "Название *", "uz_latin": "Nomi *", "uz_cyrillic": "Номи *", "en": "Title *",
+    },
+    "listing.title_placeholder_marketplace": {
+        "ru": "напр. Токарный станок 1К62, б/у", "uz_latin": "masalan, Tokarlik stanogi 1K62, ishlatilgan",
+        "uz_cyrillic": "масалан, Токарлик станоги 1К62, ишлатилган", "en": "e.g. Lathe 1K62, used",
+    },
+    "listing.description_label": {
+        "ru": "Описание *", "uz_latin": "Tavsif *", "uz_cyrillic": "Тавсиф *", "en": "Description *",
+    },
+    "listing.condition_legend": {
+        "ru": "Состояние (для «Продаю»)", "uz_latin": "Holati («Sotaman» uchun)",
+        "uz_cyrillic": "Ҳолати («Сотаман» учун)", "en": "Condition (for \"Selling\")",
+    },
+    "listing.condition_new": {
+        "ru": "Новое", "uz_latin": "Yangi", "uz_cyrillic": "Янги", "en": "New",
+    },
+    "listing.condition_used": {
+        "ru": "Б/у", "uz_latin": "Ishlatilgan", "uz_cyrillic": "Ишлатилган", "en": "Used",
+    },
+    "listing.condition_parts": {
+        "ru": "На запчасти", "uz_latin": "Ehtiyot qismlarga", "uz_cyrillic": "Эҳтиёт қисмларга",
+        "en": "For parts",
+    },
+    "listing.price_label": {
+        "ru": "Цена", "uz_latin": "Narx", "uz_cyrillic": "Нарх", "en": "Price",
+    },
+    "listing.currency_label": {
+        "ru": "Валюта", "uz_latin": "Valyuta", "uz_cyrillic": "Валюта", "en": "Currency",
+    },
+    "listing.region_required": {
+        "ru": "Регион *", "uz_latin": "Viloyat *", "uz_cyrillic": "Вилоят *", "en": "Region *",
+    },
+    "listing.payment_methods_legend": {
+        "ru": "Способ оплаты (необязательно)", "uz_latin": "Toʻlov usuli (ixtiyoriy)",
+        "uz_cyrillic": "Тўлов усули (ихтиёрий)", "en": "Payment method (optional)",
+    },
+    "listing.delivery_legend": {
+        "ru": "Доставка (необязательно)", "uz_latin": "Yetkazib berish (ixtiyoriy)",
+        "uz_cyrillic": "Етказиб бериш (ихтиёрий)", "en": "Delivery (optional)",
+    },
+    "listing.photos_label": {
+        "ru": "Фото (можно несколько)", "uz_latin": "Foto (bir nechta boʻlishi mumkin)",
+        "uz_cyrillic": "Фото (бир нечта бўлиши мумкин)", "en": "Photos (multiple allowed)",
+    },
+    "listing.map_hint": {
+        "ru": "Отметьте на карте, где вас найти (необязательно — чтобы объявление было видно на «Карте»)",
+        "uz_latin": "Sizni qayerdan topish mumkinligini xaritada belgilang (ixtiyoriy — eʼlon «Xarita»da koʻrinishi uchun)",
+        "uz_cyrillic": "Сизни қаердан топиш мумкинлигини харитада белгиланг (ихтиёрий — эълон «Харита»да кўриниши учун)",
+        "en": "Mark on the map where to find you (optional — so the listing appears on the \"Map\")",
+    },
+    "listing.publish": {
+        "ru": "Опубликовать", "uz_latin": "Eʼlon qilish", "uz_cyrillic": "Эълон қилиш", "en": "Publish",
+    },
+    "listing.write_to_author": {
+        "ru": "✉ Написать автору", "uz_latin": "✉ Muallifga yozish", "uz_cyrillic": "✉ Муаллифга ёзиш",
+        "en": "✉ Message the author",
+    },
+    "listing.condition_state": {
+        "ru": "Состояние: {value}", "uz_latin": "Holati: {value}", "uz_cyrillic": "Ҳолати: {value}",
+        "en": "Condition: {value}",
+    },
+    "listing.delivery_state": {
+        "ru": "Доставка: {value}", "uz_latin": "Yetkazib berish: {value}", "uz_cyrillic": "Етказиб бериш: {value}",
+        "en": "Delivery: {value}",
+    },
+    "listing.payment_state": {
+        "ru": "Оплата: {value}", "uz_latin": "Toʻlov: {value}", "uz_cyrillic": "Тўлов: {value}",
+        "en": "Payment: {value}",
+    },
+    "listing.photo_alt": {
+        "ru": "фото", "uz_latin": "foto", "uz_cyrillic": "фото", "en": "photo",
+    },
+    "listing.responses_section": {
+        "ru": "Отклики ({count})", "uz_latin": "Takliflar ({count})", "uz_cyrillic": "Таклифлар ({count})",
+        "en": "Responses ({count})",
+    },
+    "listing.offered_price": {
+        "ru": " — предложено {value}", "uz_latin": " — taklif qilingan {value}", "uz_cyrillic": " — таклиф қилинган {value}",
+        "en": " — offered {value}",
+    },
+    "listing.no_responses": {
+        "ru": "Откликов пока нет.", "uz_latin": "Hozircha takliflar yoʻq.", "uz_cyrillic": "Ҳозирча таклифлар йўқ.",
+        "en": "No responses yet.",
+    },
+    "listing.status_label": {
+        "ru": "Статус", "uz_latin": "Holat", "uz_cyrillic": "Ҳолат", "en": "Status",
+    },
+    "listing.status_active": {
+        "ru": "Активно", "uz_latin": "Faol", "uz_cyrillic": "Фаол", "en": "Active",
+    },
+    "listing.status_reserved": {
+        "ru": "Зарезервировано", "uz_latin": "Zaxiralangan", "uz_cyrillic": "Захираланган", "en": "Reserved",
+    },
+    "listing.status_closed": {
+        "ru": "Сделка состоялась", "uz_latin": "Bitim tuzildi", "uz_cyrillic": "Битим тузилди",
+        "en": "Deal closed",
+    },
+    "common.update": {
+        "ru": "Обновить", "uz_latin": "Yangilash", "uz_cyrillic": "Янгилаш", "en": "Update",
+    },
+    "listing.respond_section": {
+        "ru": "Откликнуться", "uz_latin": "Taklif berish", "uz_cyrillic": "Таклиф бериш", "en": "Respond",
+    },
+    "listing.message_label": {
+        "ru": "Сообщение", "uz_latin": "Xabar", "uz_cyrillic": "Хабар", "en": "Message",
+    },
+    "listing.message_placeholder": {
+        "ru": "Интересует, уточните...", "uz_latin": "Qiziqaman, aniqlashtiring...", "uz_cyrillic": "Қизиқаман, аниқлаштиринг...",
+        "en": "Interested, please clarify...",
+    },
+    "listing.offered_price_label": {
+        "ru": "Ваша цена (если торг)", "uz_latin": "Sizning narxingiz (agar kelishiladigan boʻlsa)",
+        "uz_cyrillic": "Сизнинг нархингиз (агар келишиладиган бўлса)", "en": "Your price (if negotiable)",
+    },
+    "listing.send_response": {
+        "ru": "Отправить отклик", "uz_latin": "Taklifni yuborish", "uz_cyrillic": "Таклифни юбориш",
+        "en": "Send response",
+    },
+    "listing.not_active": {
+        "ru": "Объявление больше не активно.", "uz_latin": "Eʼlon endi faol emas.", "uz_cyrillic": "Эълон энди фаол эмас.",
+        "en": "This listing is no longer active.",
+    },
+    "material.market_title": {
+        "ru": "Материалы и сырьё", "uz_latin": "Materiallar va xomashyo", "uz_cyrillic": "Материаллар ва хомашё",
+        "en": "Materials and raw stock",
+    },
+    "material.filter_material": {
+        "ru": "Материал", "uz_latin": "Material", "uz_cyrillic": "Материал", "en": "Material",
+    },
+    "material.filter_form": {
+        "ru": "Вид/форма", "uz_latin": "Turi/shakli", "uz_cyrillic": "Тури/шакли", "en": "Kind/form",
+    },
+    "material.new_title": {
+        "ru": "Новое объявление о материале", "uz_latin": "Material haqida yangi eʼlon",
+        "uz_cyrillic": "Материал ҳақида янги эълон", "en": "New material listing",
+    },
+    "material.new_heading": {
+        "ru": "Новое объявление: материал/сырьё", "uz_latin": "Yangi eʼlon: material/xomashyo",
+        "uz_cyrillic": "Янги эълон: материал/хомашё", "en": "New listing: material/raw stock",
+    },
+    "material.material_required": {
+        "ru": "Материал *", "uz_latin": "Material *", "uz_cyrillic": "Материал *", "en": "Material *",
+    },
+    "material.form_field": {
+        "ru": "Вид/форма", "uz_latin": "Turi/shakli", "uz_cyrillic": "Тури/шакли", "en": "Kind/form",
+    },
+    "material.form_any": {
+        "ru": "— не важно —", "uz_latin": "— muhim emas —", "uz_cyrillic": "— муҳим эмас —", "en": "— any —",
+    },
+    "material.title_placeholder": {
+        "ru": "напр. Лист нержавейки AISI 304, 2 мм", "uz_latin": "masalan, AISI 304 zanglamas list, 2 mm",
+        "uz_cyrillic": "масалан, AISI 304 зангламас лист, 2 мм", "en": "e.g. AISI 304 stainless sheet, 2 mm",
+    },
+    "material.quantity_label": {
+        "ru": "Количество", "uz_latin": "Miqdori", "uz_cyrillic": "Миқдори", "en": "Quantity",
+    },
+    "material.unit_label": {
+        "ru": "Единица", "uz_latin": "Birlik", "uz_cyrillic": "Бирлик", "en": "Unit",
+    },
+    "material.unit_kg": {
+        "ru": "кг", "uz_latin": "kg", "uz_cyrillic": "кг", "en": "kg",
+    },
+    "material.unit_t": {
+        "ru": "тонны", "uz_latin": "tonna", "uz_cyrillic": "тонна", "en": "tons",
+    },
+    "material.unit_m": {
+        "ru": "метры", "uz_latin": "metr", "uz_cyrillic": "метр", "en": "meters",
+    },
+    "material.unit_m2": {
+        "ru": "м²", "uz_latin": "m²", "uz_cyrillic": "м²", "en": "m²",
+    },
+    "material.unit_pcs": {
+        "ru": "шт", "uz_latin": "dona", "uz_cyrillic": "дона", "en": "pcs",
+    },
+    "job.vacancies_title": {
+        "ru": "Вакансии", "uz_latin": "Ish oʻrinlari", "uz_cyrillic": "Иш ўринлари", "en": "Jobs",
+    },
+    "job.post_vacancy": {
+        "ru": "Разместить вакансию", "uz_latin": "Ish oʻrni joylashtirish", "uz_cyrillic": "Иш ўрни жойлаштириш",
+        "en": "Post a job",
+    },
+    "job.filter_profession": {
+        "ru": "Профессия", "uz_latin": "Kasb", "uz_cyrillic": "Касб", "en": "Profession",
+    },
+    "job.table_vacancy": {
+        "ru": "Вакансия", "uz_latin": "Ish oʻrni", "uz_cyrillic": "Иш ўрни", "en": "Job",
+    },
+    "job.table_profession": {
+        "ru": "Профессия", "uz_latin": "Kasb", "uz_cyrillic": "Касб", "en": "Profession",
+    },
+    "job.table_salary": {
+        "ru": "Зарплата", "uz_latin": "Ish haqi", "uz_cyrillic": "Иш ҳақи", "en": "Salary",
+    },
+    "job.no_vacancies": {
+        "ru": "Пока нет вакансий по этим фильтрам.", "uz_latin": "Bu filtrlar boʻyicha ish oʻrinlari hozircha yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича иш ўринлари ҳозирча йўқ.", "en": "No jobs match these filters yet.",
+    },
+    "job.new_vacancy_title": {
+        "ru": "Новая вакансия", "uz_latin": "Yangi ish oʻrni", "uz_cyrillic": "Янги иш ўрни", "en": "New job",
+    },
+    "job.title_field": {
+        "ru": "Название *", "uz_latin": "Nomi *", "uz_cyrillic": "Номи *", "en": "Title *",
+    },
+    "job.title_placeholder": {
+        "ru": "напр. Токарь 5 разряда", "uz_latin": "masalan, 5-toifali tokar", "uz_cyrillic": "масалан, 5-тоифали токар",
+        "en": "e.g. Lathe operator, grade 5",
+    },
+    "job.profession_required": {
+        "ru": "Профессия *", "uz_latin": "Kasb *", "uz_cyrillic": "Касб *", "en": "Profession *",
+    },
+    "job.description_field": {
+        "ru": "Описание, требования, условия *", "uz_latin": "Tavsif, talablar, shartlar *",
+        "uz_cyrillic": "Тавсиф, талаблар, шартлар *", "en": "Description, requirements, terms *",
+    },
+    "job.employment_type": {
+        "ru": "Тип занятости *", "uz_latin": "Bandlik turi *", "uz_cyrillic": "Бандлик тури *",
+        "en": "Employment type *",
+    },
+    "job.full_time": {
+        "ru": "Полная занятость", "uz_latin": "Toʻliq bandlik", "uz_cyrillic": "Тўлиқ бандлик",
+        "en": "Full time",
+    },
+    "job.part_time": {
+        "ru": "Частичная занятость", "uz_latin": "Qisman bandlik", "uz_cyrillic": "Қисман бандлик",
+        "en": "Part time",
+    },
+    "job.shift": {
+        "ru": "Вахта/смена", "uz_latin": "Vaxta/smena", "uz_cyrillic": "Вахта/смена", "en": "Shift work",
+    },
+    "job.contract": {
+        "ru": "Контракт/подряд", "uz_latin": "Shartnoma/pudrat", "uz_cyrillic": "Шартнома/пудрат",
+        "en": "Contract",
+    },
+    "job.salary_from": {
+        "ru": "Зарплата от", "uz_latin": "Ish haqi dan", "uz_cyrillic": "Иш ҳақи дан", "en": "Salary from",
+    },
+    "job.salary_to": {
+        "ru": "Зарплата до", "uz_latin": "Ish haqi gacha", "uz_cyrillic": "Иш ҳақи гача", "en": "Salary to",
+    },
+    "job.publish_vacancy": {
+        "ru": "Опубликовать вакансию", "uz_latin": "Ish oʻrnini eʼlon qilish", "uz_cyrillic": "Иш ўрнини эълон қилиш",
+        "en": "Publish job",
+    },
+    "job.write_to_employer": {
+        "ru": "✉ Написать работодателю", "uz_latin": "✉ Ish beruvchiga yozish", "uz_cyrillic": "✉ Иш берувчига ёзиш",
+        "en": "✉ Message the employer",
+    },
+    "job.responses_section": {
+        "ru": "Отклики ({count})", "uz_latin": "Takliflar ({count})", "uz_cyrillic": "Таклифлар ({count})",
+        "en": "Responses ({count})",
+    },
+    "job.no_responses": {
+        "ru": "Откликов пока нет.", "uz_latin": "Hozircha takliflar yoʻq.", "uz_cyrillic": "Ҳозирча таклифлар йўқ.",
+        "en": "No responses yet.",
+    },
+    "job.already_applied": {
+        "ru": "Вы уже откликнулись на эту вакансию.", "uz_latin": "Siz bu ish oʻrniga allaqachon murojaat qilgansiz.",
+        "uz_cyrillic": "Сиз бу иш ўрнига аллақачон мурожаат қилгансиз.", "en": "You've already applied to this job.",
+    },
+    "job.respond_section": {
+        "ru": "Откликнуться", "uz_latin": "Murojaat qilish", "uz_cyrillic": "Мурожаат қилиш", "en": "Apply",
+    },
+    "job.cover_message": {
+        "ru": "Сопроводительное сообщение", "uz_latin": "Qoʻshimcha xabar", "uz_cyrillic": "Қўшимча хабар",
+        "en": "Cover message",
+    },
+    "job.apply_btn": {
+        "ru": "Откликнуться", "uz_latin": "Murojaat qilish", "uz_cyrillic": "Мурожаат қилиш", "en": "Apply",
+    },
+    "resume.title": {
+        "ru": "Резюме", "uz_latin": "Rezyume", "uz_cyrillic": "Резюме", "en": "Resumes",
+    },
+    "resume.candidates_title": {
+        "ru": "Резюме соискателей", "uz_latin": "Nomzodlar rezyumelari", "uz_cyrillic": "Номзодлар резюмелари",
+        "en": "Candidate resumes",
+    },
+    "resume.my_resume": {
+        "ru": "Моё резюме", "uz_latin": "Mening rezyumem", "uz_cyrillic": "Менинг резюмем", "en": "My resume",
+    },
+    "resume.table_experience": {
+        "ru": "Опыт", "uz_latin": "Tajriba", "uz_cyrillic": "Тажриба", "en": "Experience",
+    },
+    "resume.table_salary_expectation": {
+        "ru": "Ожидания по зарплате", "uz_latin": "Ish haqi kutilmalari", "uz_cyrillic": "Иш ҳақи кутилмалари",
+        "en": "Salary expectation",
+    },
+    "resume.years_short": {
+        "ru": "{value} лет", "uz_latin": "{value} yil", "uz_cyrillic": "{value} йил", "en": "{value} years",
+    },
+    "resume.no_resumes": {
+        "ru": "Пока нет резюме по этим фильтрам.", "uz_latin": "Bu filtrlar boʻyicha rezyumelar hozircha yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича резюмелар ҳозирча йўқ.", "en": "No resumes match these filters yet.",
+    },
+    "resume.about_skills": {
+        "ru": "О себе, навыки, с каким оборудованием умеете работать *",
+        "uz_latin": "O‘zingiz haqingizda, koʻnikmalar, qanday uskunalarda ishlay olasiz *",
+        "uz_cyrillic": "Ўзингиз ҳақингизда, кўникмалар, қандай ускуналарда ишлай оласиз *",
+        "en": "About you, skills, what equipment you can operate *",
+    },
+    "resume.expected_salary": {
+        "ru": "Ожидаемая зарплата", "uz_latin": "Kutilayotgan ish haqi", "uz_cyrillic": "Кутилаётган иш ҳақи",
+        "en": "Expected salary",
+    },
+    "resume.update": {
+        "ru": "Обновить резюме", "uz_latin": "Rezyumeni yangilash", "uz_cyrillic": "Резюмени янгилаш",
+        "en": "Update resume",
+    },
+    "resume.publish": {
+        "ru": "Опубликовать резюме", "uz_latin": "Rezyumeni eʼlon qilish", "uz_cyrillic": "Резюмени эълон қилиш",
+        "en": "Publish resume",
+    },
+    "resume.write_to_candidate": {
+        "ru": "✉ Написать кандидату", "uz_latin": "✉ Nomzodga yozish", "uz_cyrillic": "✉ Номзодга ёзиш",
+        "en": "✉ Message the candidate",
+    },
+    "resume.experience_label": {
+        "ru": "Опыт: {value} лет", "uz_latin": "Tajriba: {value} yil", "uz_cyrillic": "Тажриба: {value} йил",
+        "en": "Experience: {value} years",
+    },
+    "resume.expectations_label": {
+        "ru": "Ожидания: {value}", "uz_latin": "Kutilmalar: {value}", "uz_cyrillic": "Кутилмалар: {value}",
+        "en": "Expects: {value}",
+    },
+    "resume.invites_section": {
+        "ru": "Приглашения от работодателей ({count})", "uz_latin": "Ish beruvchilardan takliflar ({count})",
+        "uz_cyrillic": "Иш берувчилардан таклифлар ({count})", "en": "Invitations from employers ({count})",
+    },
+    "resume.no_invites": {
+        "ru": "Приглашений пока нет.", "uz_latin": "Hozircha takliflar yoʻq.", "uz_cyrillic": "Ҳозирча таклифлар йўқ.",
+        "en": "No invitations yet.",
+    },
+    "resume.already_invited": {
+        "ru": "Вы уже приглашали этого кандидата.", "uz_latin": "Siz bu nomzodni allaqachon taklif qilgansiz.",
+        "uz_cyrillic": "Сиз бу номзодни аллақачон таклиф қилгансиз.", "en": "You've already invited this candidate.",
+    },
+    "resume.invite_section": {
+        "ru": "Пригласить", "uz_latin": "Taklif qilish", "uz_cyrillic": "Таклиф қилиш", "en": "Invite",
+    },
+    "resume.invite_message_placeholder": {
+        "ru": "Расскажите о вакансии", "uz_latin": "Ish oʻrni haqida gapirib bering", "uz_cyrillic": "Иш ўрни ҳақида гапириб беринг",
+        "en": "Tell them about the job",
+    },
+    "resume.invite_btn": {
+        "ru": "Пригласить", "uz_latin": "Taklif qilish", "uz_cyrillic": "Таклиф қилиш", "en": "Invite",
+    },
+    "chat.messages_title": {
+        "ru": "Сообщения", "uz_latin": "Xabarlar", "uz_cyrillic": "Хабарлар", "en": "Messages",
+    },
+    "chat.you_prefix": {
+        "ru": "Вы:", "uz_latin": "Siz:", "uz_cyrillic": "Сиз:", "en": "You:",
+    },
+    "chat.no_conversations": {
+        "ru": "Пока нет ни одного диалога. Написать можно любому пользователю — например, автору объявления или исполнителю с карты.",
+        "uz_latin": "Hozircha birorta ham suhbat yoʻq. Har qanday foydalanuvchiga yozishingiz mumkin — masalan, eʼlon muallifiga yoki xaritadagi ijrochiga.",
+        "uz_cyrillic": "Ҳозирча бирорта ҳам суҳбат йўқ. Ҳар қандай фойдаланувчига ёзишингиз мумкин — масалан, эълон муаллифига ёки харитадаги ижрочига.",
+        "en": "No conversations yet. You can message any user — e.g. a listing author or an executor from the map.",
+    },
+    "chat.dialog_with": {
+        "ru": "Диалог с {email}", "uz_latin": "{email} bilan suhbat", "uz_cyrillic": "{email} билан суҳбат",
+        "en": "Chat with {email}",
+    },
+    "chat.all_messages": {
+        "ru": "← Все сообщения", "uz_latin": "← Barcha xabarlar", "uz_cyrillic": "← Барча хабарлар",
+        "en": "← All messages",
+    },
+    "chat.discussing_order": {
+        "ru": "Обсуждаете заявку", "uz_latin": "Muhokama qilinayotgan buyurtma", "uz_cyrillic": "Муҳокама қилинаётган буюртма",
+        "en": "Discussing order",
+    },
+    "chat.no_messages_yet": {
+        "ru": "Сообщений пока нет — напишите первым.", "uz_latin": "Hozircha xabarlar yoʻq — birinchi boʻlib yozing.",
+        "uz_cyrillic": "Ҳозирча хабарлар йўқ — биринчи бўлиб ёзинг.", "en": "No messages yet — be the first to write.",
+    },
+    "chat.message_field": {
+        "ru": "Сообщение", "uz_latin": "Xabar", "uz_cyrillic": "Хабар", "en": "Message",
+    },
+    "chat.message_order_prefix": {
+        "ru": "По заявке №{id}: ", "uz_latin": "№{id} buyurtma boʻyicha: ", "uz_cyrillic": "№{id} буюртма бўйича: ",
+        "en": "Regarding order #{id}: ",
+    },
+    "chat.send": {
+        "ru": "Отправить", "uz_latin": "Yuborish", "uz_cyrillic": "Юбориш", "en": "Send",
+    },
+    "search.title": {
+        "ru": "Поиск по сайту", "uz_latin": "Sayt boʻyicha qidiruv", "uz_cyrillic": "Сайт бўйича қидирув",
+        "en": "Site search",
+    },
+    "search.hint": {
+        "ru": "Ищет среди исполнителей, конструкторов, барахолки станков, материалов и вакансий.",
+        "uz_latin": "Ijrochilar, konstruktorlar, stanoklar bozorchasi, materiallar va ish oʻrinlari orasida qidiradi.",
+        "uz_cyrillic": "Ижрочилар, конструкторлар, станоклар бозорчаси, материаллар ва иш ўринлари орасида қидиради.",
+        "en": "Searches among executors, designers, equipment marketplace, materials and jobs.",
+    },
+    "search.query_label": {
+        "ru": "Запрос", "uz_latin": "Soʻrov", "uz_cyrillic": "Сўров", "en": "Query",
+    },
+    "search.query_placeholder": {
+        "ru": "например, токарный станок", "uz_latin": "masalan, tokarlik stanogi", "uz_cyrillic": "масалан, токарлик станоги",
+        "en": "e.g. lathe",
+    },
+    "search.match_mode": {
+        "ru": "Совпадение", "uz_latin": "Moslik", "uz_cyrillic": "Мослик", "en": "Match",
+    },
+    "search.match_partial": {
+        "ru": "Частичное (содержит)", "uz_latin": "Qisman (ichida bor)", "uz_cyrillic": "Қисман (ичида бор)",
+        "en": "Partial (contains)",
+    },
+    "search.match_exact": {
+        "ru": "Точное (полное совпадение)", "uz_latin": "Aniq (toʻliq moslik)", "uz_cyrillic": "Аниқ (тўлиқ мослик)",
+        "en": "Exact (full match)",
+    },
+    "search.search_btn": {
+        "ru": "Искать", "uz_latin": "Qidirish", "uz_cyrillic": "Қидириш", "en": "Search",
+    },
+    "search.no_results": {
+        "ru": "По запросу «{q}» ({mode}) ничего не найдено.", "uz_latin": "«{q}» soʻrovi ({mode}) boʻyicha hech narsa topilmadi.",
+        "uz_cyrillic": "«{q}» сўрови ({mode}) бўйича ҳеч нарса топилмади.", "en": "No results for \"{q}\" ({mode}).",
+    },
+    "search.mode_exact_label": {
+        "ru": "точное совпадение", "uz_latin": "aniq mos kelish", "uz_cyrillic": "аниқ мос келиш",
+        "en": "exact match",
+    },
+    "search.mode_partial_label": {
+        "ru": "частичное совпадение", "uz_latin": "qisman mos kelish", "uz_cyrillic": "қисман мос келиш",
+        "en": "partial match",
+    },
+    "search.section_executors": {
+        "ru": "Исполнители", "uz_latin": "Ijrochilar", "uz_cyrillic": "Ижрочилар", "en": "Executors",
+    },
+    "search.section_constructors": {
+        "ru": "Конструкторы", "uz_latin": "Konstruktorlar", "uz_cyrillic": "Конструкторлар", "en": "Designers",
+    },
+    "search.section_listings": {
+        "ru": "Барахолка станков и инструмента", "uz_latin": "Stanoklar va asboblar bozorchasi",
+        "uz_cyrillic": "Станоклар ва асбоблар бозорчаси", "en": "Machines and tools marketplace",
+    },
+    "search.section_materials": {
+        "ru": "Материалы и сырьё", "uz_latin": "Materiallar va xomashyo", "uz_cyrillic": "Материаллар ва хомашё",
+        "en": "Materials and raw stock",
+    },
+    "search.section_vacancies": {
+        "ru": "Вакансии", "uz_latin": "Ish oʻrinlari", "uz_cyrillic": "Иш ўринлари", "en": "Jobs",
+    },
+    "map.title": {
+        "ru": "Карта изготовителей, продавцов и конструкторов",
+        "uz_latin": "Ishlab chiqaruvchilar, sotuvchilar va konstruktorlar xaritasi",
+        "uz_cyrillic": "Ишлаб чиқарувчилар, сотувчилар ва конструкторлар харитаси",
+        "en": "Map of manufacturers, sellers and designers",
+    },
+    "map.who_to_show": {
+        "ru": "Кого показать", "uz_latin": "Kimni koʻrsatish", "uz_cyrillic": "Кимни кўрсатиш", "en": "Who to show",
+    },
+    "map.sellers": {
+        "ru": "Продавцы (барахолка)", "uz_latin": "Sotuvchilar (bozorcha)", "uz_cyrillic": "Сотувчилар (бозорча)",
+        "en": "Sellers (marketplace)",
+    },
+    "map.executors": {
+        "ru": "Исполнители", "uz_latin": "Ijrochilar", "uz_cyrillic": "Ижрочилар", "en": "Executors",
+    },
+    "map.constructors": {
+        "ru": "Конструкторы", "uz_latin": "Konstruktorlar", "uz_cyrillic": "Конструкторлар", "en": "Designers",
+    },
+    "map.service_category_filter": {
+        "ru": "Категория услуг (для исполнителей)", "uz_latin": "Xizmat toifasi (ijrochilar uchun)",
+        "uz_cyrillic": "Хизмат тоифаси (ижрочилар учун)", "en": "Service category (for executors)",
+    },
+    "map.org_type_filter": {
+        "ru": "Тип организации (для исполнителей)", "uz_latin": "Tashkilot turi (ijrochilar uchun)",
+        "uz_cyrillic": "Ташкилот тури (ижрочилар учун)", "en": "Organization type (for executors)",
+    },
+    "map.has_designer_filter": {
+        "ru": "Есть конструктор в штате (для исполнителей)", "uz_latin": "Shtatda konstruktor bor (ijrochilar uchun)",
+        "uz_cyrillic": "Штатда конструктор бор (ижрочилар учун)", "en": "Has in-house designer (for executors)",
+    },
+    "map.show_nearby": {
+        "ru": "📍 Показать рядом со мной", "uz_latin": "📍 Mening atrofimda koʻrsatish", "uz_cyrillic": "📍 Менинг атрофимда кўрсатиш",
+        "en": "📍 Show near me",
+    },
+    "map.manual_pin": {
+        "ru": "✋ Указать себя на карте", "uz_latin": "✋ Xaritada oʻzimni belgilash", "uz_cyrillic": "✋ Харитада ўзимни белгилаш",
+        "en": "✋ Place my pin on the map",
+    },
+    "map.manual_pin_hint": {
+        "ru": "Кликните на карту, чтобы отметить, где вы находитесь.",
+        "uz_latin": "Qayerda ekanligingizni belgilash uchun xaritani bosing.",
+        "uz_cyrillic": "Қаерда эканлигингизни белгилаш учун харитани босинг.",
+        "en": "Click the map to mark where you are.",
+    },
+    "map.nearby_section": {
+        "ru": "Ближайшие", "uz_latin": "Eng yaqinlar", "uz_cyrillic": "Энг яқинлар", "en": "Nearby",
+    },
+    "review.leave_title": {
+        "ru": "Оставить отзыв", "uz_latin": "Sharh qoldirish", "uz_cyrillic": "Шарҳ қолдириш",
+        "en": "Leave a review",
+    },
+    "review.about_order": {
+        "ru": "Отзыв о заказе «{title}»", "uz_latin": "«{title}» buyurtmasi haqida sharh",
+        "uz_cyrillic": "«{title}» буюртмаси ҳақида шарҳ", "en": "Review for order \"{title}\"",
+    },
+    "review.rating_field": {
+        "ru": "Оценка (1–5) *", "uz_latin": "Baho (1–5) *", "uz_cyrillic": "Баҳо (1–5) *", "en": "Rating (1–5) *",
+    },
+    "review.comment_field": {
+        "ru": "Комментарий", "uz_latin": "Izoh", "uz_cyrillic": "Изоҳ", "en": "Comment",
+    },
+    "review.update": {
+        "ru": "Обновить отзыв", "uz_latin": "Sharhni yangilash", "uz_cyrillic": "Шарҳни янгилаш",
+        "en": "Update review",
+    },
+    "review.submit": {
+        "ru": "Отправить отзыв", "uz_latin": "Sharhni yuborish", "uz_cyrillic": "Шарҳни юбориш",
+        "en": "Submit review",
+    },
+    "review.pending_publish": {
+        "ru": "Ваш отзыв сохранён и будет опубликован, как только своё мнение оставит другая сторона.",
+        "uz_latin": "Sharhingiz saqlandi va boshqa tomon fikrini bildirishi bilan eʼlon qilinadi.",
+        "uz_cyrillic": "Шарҳингиз сақланди ва бошқа томон фикрини билдириши билан эълон қилинади.",
+        "en": "Your review is saved and will be published once the other side leaves theirs.",
+    },
+    "review.title": {
+        "ru": "Отзывы", "uz_latin": "Sharhlar", "uz_cyrillic": "Шарҳлар", "en": "Reviews",
+    },
+    "review.received": {
+        "ru": "Полученные", "uz_latin": "Olingan", "uz_cyrillic": "Олинган", "en": "Received",
+    },
+    "review.no_received": {
+        "ru": "Пока нет опубликованных отзывов о вас.", "uz_latin": "Sizga hali eʼlon qilingan sharhlar yoʻq.",
+        "uz_cyrillic": "Сизга ҳали эълон қилинган шарҳлар йўқ.", "en": "No published reviews about you yet.",
+    },
+    "review.given": {
+        "ru": "Оставленные вами", "uz_latin": "Siz qoldirgan", "uz_cyrillic": "Сиз қолдирган",
+        "en": "Left by you",
+    },
+    "review.no_given": {
+        "ru": "Вы ещё не оставляли отзывов.", "uz_latin": "Siz hali sharh qoldirmagansiz.",
+        "uz_cyrillic": "Сиз ҳали шарҳ қолдирмагансиз.", "en": "You haven't left any reviews yet.",
+    },
+    "review.pending_badge": {
+        "ru": "(ожидает публикации)", "uz_latin": "(eʼlon qilinishini kutmoqda)", "uz_cyrillic": "(эълон қилинишини кутмоқда)",
+        "en": "(awaiting publication)",
+    },
+    "review.order_meta": {
+        "ru": "заказ «{title}»", "uz_latin": "«{title}» buyurtmasi", "uz_cyrillic": "«{title}» буюртмаси",
+        "en": "order \"{title}\"",
+    },
+    "dispute.status_open": {
+        "ru": "открыт", "uz_latin": "ochiq", "uz_cyrillic": "очиқ", "en": "open",
+    },
+    "dispute.status_evidence_collection": {
+        "ru": "сбор доказательств", "uz_latin": "dalillar yigʻilmoqda", "uz_cyrillic": "далиллар йиғилмоқда",
+        "en": "collecting evidence",
+    },
+    "dispute.status_in_review": {
+        "ru": "на рассмотрении", "uz_latin": "koʻrib chiqilmoqda", "uz_cyrillic": "кўриб чиқилмоқда",
+        "en": "under review",
+    },
+    "dispute.status_resolved_customer": {
+        "ru": "решено в пользу заказчика", "uz_latin": "buyurtmachi foydasiga hal qilindi",
+        "uz_cyrillic": "буюртмачи фойдасига ҳал қилинди", "en": "resolved for customer",
+    },
+    "dispute.status_resolved_executor": {
+        "ru": "решено в пользу исполнителя", "uz_latin": "ijrochi foydasiga hal qilindi",
+        "uz_cyrillic": "ижрочи фойдасига ҳал қилинди", "en": "resolved for executor",
+    },
+    "dispute.status_resolved_partial": {
+        "ru": "частичное решение", "uz_latin": "qisman hal qilindi", "uz_cyrillic": "қисман ҳал қилинди",
+        "en": "partially resolved",
+    },
+    "dispute.reason_defect": {
+        "ru": "Брак", "uz_latin": "Nuqson", "uz_cyrillic": "Нуқсон", "en": "Defect",
+    },
+    "dispute.reason_delay": {
+        "ru": "Задержка сроков", "uz_latin": "Muddat kechikishi", "uz_cyrillic": "Муддат кечикиши",
+        "en": "Delay",
+    },
+    "dispute.reason_quality": {
+        "ru": "Претензия по качеству", "uz_latin": "Sifat boʻyicha da’vo", "uz_cyrillic": "Сифат бўйича даъво",
+        "en": "Quality complaint",
+    },
+    "dispute.reason_price_dispute": {
+        "ru": "Расхождение по цене", "uz_latin": "Narx boʻyicha kelishmovchilik", "uz_cyrillic": "Нарх бўйича келишмовчилик",
+        "en": "Price disagreement",
+    },
+    "dispute.reason_other": {
+        "ru": "Другое", "uz_latin": "Boshqa", "uz_cyrillic": "Бошқа", "en": "Other",
+    },
+    "dispute.open_title": {
+        "ru": "Открыть спор", "uz_latin": "Nizo ochish", "uz_cyrillic": "Низо очиш", "en": "Open dispute",
+    },
+    "dispute.about_order": {
+        "ru": "Спор по заказу «{title}»", "uz_latin": "«{title}» buyurtmasi boʻyicha nizo",
+        "uz_cyrillic": "«{title}» буюртмаси бўйича низо", "en": "Dispute for order \"{title}\"",
+    },
+    "dispute.describe_hint": {
+        "ru": "Опишите проблему и после отправки приложите фото/видео-доказательства — это поможет администратору объективно разобраться.",
+        "uz_latin": "Muammoni tasvirlang va yuborgandan keyin foto/video-dalillarni ilova qiling — bu administratorga adolatli hal qilishga yordam beradi.",
+        "uz_cyrillic": "Муаммони тасвирланг ва юборгандан кейин фото/видео-далилларни илова қилинг — бу администраторга адолатли ҳал қилишга ёрдам беради.",
+        "en": "Describe the problem, and after submitting attach photo/video evidence — this helps the admin resolve it fairly.",
+    },
+    "dispute.reason_field": {
+        "ru": "Причина *", "uz_latin": "Sabab *", "uz_cyrillic": "Сабаб *", "en": "Reason *",
+    },
+    "dispute.describe_situation": {
+        "ru": "Опишите ситуацию *", "uz_latin": "Vaziyatni tasvirlang *", "uz_cyrillic": "Вазиятни тасвирланг *",
+        "en": "Describe the situation *",
+    },
+    "dispute.short_title": {
+        "ru": "Спор: «{title}»", "uz_latin": "Nizo: «{title}»", "uz_cyrillic": "Низо: «{title}»",
+        "en": "Dispute: \"{title}\"",
+    },
+    "dispute.reason_meta": {
+        "ru": "Причина: {value}", "uz_latin": "Sabab: {value}", "uz_cyrillic": "Сабаб: {value}",
+        "en": "Reason: {value}",
+    },
+    "dispute.opened_meta": {
+        "ru": "Открыт: {email}, {date}", "uz_latin": "Ochilgan: {email}, {date}", "uz_cyrillic": "Очилган: {email}, {date}",
+        "en": "Opened: {email}, {date}",
+    },
+    "dispute.admin_resolution": {
+        "ru": "Решение администратора ({status}):", "uz_latin": "Administrator qarori ({status}):",
+        "uz_cyrillic": "Администратор қарори ({status}):", "en": "Admin resolution ({status}):",
+    },
+    "dispute.evidence_title": {
+        "ru": "Доказательства", "uz_latin": "Dalillar", "uz_cyrillic": "Далиллар", "en": "Evidence",
+    },
+    "dispute.evidence_alt": {
+        "ru": "доказательство", "uz_latin": "dalil", "uz_cyrillic": "далил", "en": "evidence",
+    },
+    "dispute.no_evidence": {
+        "ru": "Доказательств пока нет.", "uz_latin": "Hozircha dalillar yoʻq.", "uz_cyrillic": "Ҳозирча далиллар йўқ.",
+        "en": "No evidence yet.",
+    },
+    "dispute.evidence_file_label": {
+        "ru": "Фото/видео (изображение)", "uz_latin": "Foto/video (rasm)", "uz_cyrillic": "Фото/видео (расм)",
+        "en": "Photo/video (image)",
+    },
+    "dispute.comment_field": {
+        "ru": "Комментарий", "uz_latin": "Izoh", "uz_cyrillic": "Изоҳ", "en": "Comment",
+    },
+    "dispute.add_evidence": {
+        "ru": "Добавить доказательство", "uz_latin": "Dalil qoʻshish", "uz_cyrillic": "Далил қўшиш",
+        "en": "Add evidence",
+    },
+    "dispute.ready_for_review": {
+        "ru": "Готово к рассмотрению →", "uz_latin": "Koʻrib chiqishga tayyor →", "uz_cyrillic": "Кўриб чиқишга тайёр →",
+        "en": "Ready for review →",
+    },
+    "dispute.conversation_title": {
+        "ru": "Переписка", "uz_latin": "Yozishmalar", "uz_cyrillic": "Ёзишмалар", "en": "Conversation",
+    },
+    "dispute.internal_note_badge": {
+        "ru": "(внутренняя заметка)", "uz_latin": "(ichki eslatma)", "uz_cyrillic": "(ички эслатма)",
+        "en": "(internal note)",
+    },
+    "dispute.message_field": {
+        "ru": "Сообщение", "uz_latin": "Xabar", "uz_cyrillic": "Хабар", "en": "Message",
+    },
+    "dispute.internal_note_checkbox": {
+        "ru": "Внутренняя заметка (не видна сторонам)", "uz_latin": "Ichki eslatma (tomonlarga koʻrinmaydi)",
+        "uz_cyrillic": "Ички эслатма (томонларга кўринмайди)", "en": "Internal note (not visible to parties)",
+    },
+    "dispute.admin_resolution_title": {
+        "ru": "Решение администратора", "uz_latin": "Administrator qarori", "uz_cyrillic": "Администратор қарори",
+        "en": "Admin resolution",
+    },
+    "dispute.resolution_favor": {
+        "ru": "В чью пользу решение *", "uz_latin": "Kim foydasiga qaror *", "uz_cyrillic": "Ким фойдасига қарор *",
+        "en": "In whose favor *",
+    },
+    "dispute.favor_customer": {
+        "ru": "В пользу заказчика", "uz_latin": "Buyurtmachi foydasiga", "uz_cyrillic": "Буюртмачи фойдасига",
+        "en": "In favor of customer",
+    },
+    "dispute.favor_executor": {
+        "ru": "В пользу исполнителя", "uz_latin": "Ijrochi foydasiga", "uz_cyrillic": "Ижрочи фойдасига",
+        "en": "In favor of executor",
+    },
+    "dispute.favor_partial": {
+        "ru": "Частично / компромисс", "uz_latin": "Qisman / kelishuv", "uz_cyrillic": "Қисман / келишув",
+        "en": "Partial / compromise",
+    },
+    "dispute.resolution_justification": {
+        "ru": "Обоснование *", "uz_latin": "Asoslash *", "uz_cyrillic": "Асослаш *", "en": "Justification *",
+    },
+    "dispute.final_order_status": {
+        "ru": "Итоговый статус заказа *", "uz_latin": "Buyurtmaning yakuniy holati *",
+        "uz_cyrillic": "Буюртманинг якуний ҳолати *", "en": "Final order status *",
+    },
+    "dispute.make_resolution": {
+        "ru": "Вынести решение", "uz_latin": "Qaror chiqarish", "uz_cyrillic": "Қарор чиқариш",
+        "en": "Issue resolution",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
+    },
+    "settings.title": {
+        "ru": "Настройки", "uz_latin": "Sozlamalar", "uz_cyrillic": "Созламалар", "en": "Settings",
+    },
+    "settings.telegram_heading": {
+        "ru": "Telegram", "uz_latin": "Telegram", "uz_cyrillic": "Telegram", "en": "Telegram",
+    },
+    "settings.telegram_linked": {
+        "ru": "Привязан аккаунт {account}.", "uz_latin": "{account} hisobi bogʻlangan.",
+        "uz_cyrillic": "{account} ҳисоби боғланган.", "en": "Linked account: {account}.",
+    },
+    "settings.notifications_on": {
+        "ru": "включены", "uz_latin": "yoqilgan", "uz_cyrillic": "ёқилган", "en": "on",
+    },
+    "settings.notifications_off": {
+        "ru": "выключены", "uz_latin": "oʻchirilgan", "uz_cyrillic": "ўчирилган", "en": "off",
+    },
+    "settings.notifications_status": {
+        "ru": "Уведомления: {status}.", "uz_latin": "Bildirishnomalar: {status}.",
+        "uz_cyrillic": "Билдиришномалар: {status}.", "en": "Notifications: {status}.",
+    },
+    "settings.toggle_disable": {
+        "ru": "Выключить", "uz_latin": "Oʻchirish", "uz_cyrillic": "Ўчириш", "en": "Turn off",
+    },
+    "settings.toggle_enable": {
+        "ru": "Включить", "uz_latin": "Yoqish", "uz_cyrillic": "Ёқиш", "en": "Turn on",
+    },
+    "settings.toggle_notifications_btn": {
+        "ru": "{action} уведомления", "uz_latin": "Bildirishnomalarni {action}",
+        "uz_cyrillic": "Билдиришномаларни {action}", "en": "{action} notifications",
+    },
+    "settings.unlink": {
+        "ru": "Отвязать", "uz_latin": "Uzish", "uz_cyrillic": "Узиш", "en": "Unlink",
+    },
+    "settings.telegram_not_linked_hint": {
+        "ru": "Telegram не привязан. Нажмите кнопку и в открывшемся боте нажмите Start — уведомления о заказах, откликах и спорах начнут приходить туда же.",
+        "uz_latin": "Telegram bogʻlanmagan. Tugmani bosing va ochilgan botda Start tugmasini bosing — buyurtmalar, takliflar va nizolar haqidagi bildirishnomalar shu yerga kela boshlaydi.",
+        "uz_cyrillic": "Telegram боғланмаган. Тугмани босинг ва очилган ботда Start тугмасини босинг — буюртмалар, таклифлар ва низолар ҳақидаги билдиришномалар шу ерга кела бошлайди.",
+        "en": "Telegram is not linked. Press the button and tap Start in the bot that opens — notifications about orders, bids and disputes will start arriving there too.",
+    },
+    "settings.connect_telegram": {
+        "ru": "Подключить Telegram", "uz_latin": "Telegramni ulash", "uz_cyrillic": "Telegramни улаш",
+        "en": "Connect Telegram",
+    },
+    "settings.link_code_before": {
+        "ru": "Если вы уже писали этому боту раньше, кнопка выше может открыть чат без автоматической привязки — Telegram в этом случае не передаёт ссылку. В таком случае просто отправьте боту сообщением этот код:",
+        "uz_latin": "Agar bu botga avval yozgan boʻlsangiz, yuqoridagi tugma chatni avtomatik bogʻlanishsiz ochishi mumkin — bu holatda Telegram havolani uzatmaydi. Bunday holda botga xabar sifatida shu kodni yuboring:",
+        "uz_cyrillic": "Агар бу ботга аввал ёзган бўлсангиз, юқоридаги тугма чатни автоматик боғланишсиз очиши мумкин — бу ҳолатда Telegram ҳаволани узатмайди. Бундай ҳолда ботга хабар сифатида шу кодни юборинг:",
+        "en": "If you've already messaged this bot before, the button above may open the chat without linking automatically — Telegram doesn't pass the link in that case. Just send the bot this code as a message:",
+    },
+    "settings.link_code_after": {
+        "ru": "(действует 30 минут).", "uz_latin": "(30 daqiqa amal qiladi).", "uz_cyrillic": "(30 дақиқа амал қилади).",
+        "en": "(valid for 30 minutes).",
+    },
+    "settings.bot_not_configured_hint": {
+        "ru": "Бот ещё не отправляет сообщения — администратор платформы не задал TELEGRAM_BOT_TOKEN. Привязка аккаунта уже работает и сохранится, отправка уведомлений включится автоматически, как только токен будет добавлен.",
+        "uz_latin": "Bot hali xabar yubormaydi — platforma administratori TELEGRAM_BOT_TOKEN ni sozlamagan. Hisobni bogʻlash allaqachon ishlaydi va saqlanadi, bildirishnomalar yuborish token qoʻshilishi bilan avtomatik yoqiladi.",
+        "uz_cyrillic": "Бот ҳали хабар юбормайди — платформа администратори TELEGRAM_BOT_TOKEN ни созламаган. Ҳисобни боғлаш аллақачон ишлайди ва сақланади, билдиришномалар юбориш token қўшилиши билан автоматик ёқилади.",
+        "en": "The bot isn't sending messages yet — the platform admin hasn't set TELEGRAM_BOT_TOKEN. Account linking already works and is saved; notifications will turn on automatically once the token is added.",
+    },
+    "settings.bot_not_connected_hint": {
+        "ru": "Telegram-бот пока не подключён администратором платформы (не задан TELEGRAM_BOT_USERNAME) — уведомления приходят только в личном кабинете, в разделе «Уведомления».",
+        "uz_latin": "Telegram-bot hali platforma administratori tomonidan ulanmagan (TELEGRAM_BOT_USERNAME sozlanmagan) — bildirishnomalar faqat shaxsiy kabinetda, «Bildirishnomalar» boʻlimida keladi.",
+        "uz_cyrillic": "Telegram-бот ҳали платформа администратори томонидан уланмаган (TELEGRAM_BOT_USERNAME созланмаган) — билдиришномалар фақат шахсий кабинетда, «Билдиришномалар» бўлимида келади.",
+        "en": "The Telegram bot hasn't been connected by the platform admin yet (TELEGRAM_BOT_USERNAME not set) — notifications only arrive in your account, in the \"Notifications\" section.",
+    },
+    "settings.role_heading": {
+        "ru": "Роль на платформе", "uz_latin": "Platformadagi rol", "uz_cyrillic": "Платформадаги роль",
+        "en": "Platform role",
+    },
+    "settings.current_role": {
+        "ru": "Сейчас вы — {role}.", "uz_latin": "Hozir siz — {role}.", "uz_cyrillic": "Ҳозир сиз — {role}.",
+        "en": "You are currently — {role}.",
+    },
+    "settings.role_switch_hint": {
+        "ru": "Можно переключиться на другую роль в любой момент — старая анкета и данные не удаляются, просто становятся неактивны, пока вы не вернётесь обратно.",
+        "uz_latin": "Istalgan vaqtda boshqa rolga oʻtishingiz mumkin — eski anketa va maʼlumotlar oʻchirilmaydi, faqat siz qaytmaguningizcha faolsiz boʻladi.",
+        "uz_cyrillic": "Истаган вақтда бошқа ролга ўтишингиз мумкин — эски анкета ва маълумотлар ўчирилмайди, фақат сиз қайтмагунингизча фаолсиз бўлади.",
+        "en": "You can switch to another role at any time — the old profile and data aren't deleted, they just stay inactive until you switch back.",
+    },
+    "settings.become_label": {
+        "ru": "Стать", "uz_latin": "Boʻlish", "uz_cyrillic": "Бўлиш", "en": "Become",
+    },
+    "settings.switch_role_btn": {
+        "ru": "Сменить роль", "uz_latin": "Rolni almashtirish", "uz_cyrillic": "Ролни алмаштириш",
+        "en": "Switch role",
+    },
+    "role.customer": {
+        "ru": "заказчик", "uz_latin": "mijoz", "uz_cyrillic": "мижоз", "en": "customer",
+    },
+    "role.executor": {
+        "ru": "исполнитель", "uz_latin": "ijrochi", "uz_cyrillic": "ижрочи", "en": "executor",
+    },
+    "role.constructor": {
+        "ru": "конструктор", "uz_latin": "konstruktor", "uz_cyrillic": "конструктор", "en": "constructor",
+    },
+    "role.become_customer": {
+        "ru": "заказчиком", "uz_latin": "mijoz sifatida", "uz_cyrillic": "мижоз сифатида", "en": "a customer",
+    },
+    "role.become_executor": {
+        "ru": "исполнителем", "uz_latin": "ijrochi sifatida", "uz_cyrillic": "ижрочи сифатида", "en": "an executor",
+    },
+    "role.become_constructor": {
+        "ru": "конструктором", "uz_latin": "konstruktor sifatida", "uz_cyrillic": "конструктор сифатида",
+        "en": "a constructor",
+    },
+    "subscription.title": {
+        "ru": "Подписка", "uz_latin": "Obuna", "uz_cyrillic": "Обуна", "en": "Subscription",
+    },
+    "subscription.current_plan": {
+        "ru": "Текущий тариф: {title}", "uz_latin": "Joriy tarif: {title}", "uz_cyrillic": "Жорий тариф: {title}",
+        "en": "Current plan: {title}",
+    },
+    "subscription.status_line": {
+        "ru": "Статус: {status}. Действует до: {expires}.", "uz_latin": "Holat: {status}. Muddati: {expires}.",
+        "uz_cyrillic": "Ҳолат: {status}. Муддати: {expires}.", "en": "Status: {status}. Valid until: {expires}.",
+    },
+    "subscription.unlimited": {
+        "ru": "бессрочно", "uz_latin": "muddatsiz", "uz_cyrillic": "муддатсиз", "en": "unlimited",
+    },
+    "subscription.inactive_hint": {
+        "ru": "Подписка не активна — заказы не подбираются. Оформите тариф ниже (или заполните профиль полностью, если ещё не получили бесплатный пробный период).",
+        "uz_latin": "Obuna faol emas — buyurtmalar tanlanmaydi. Quyida tarif rasmiylashtiring (yoki bepul sinov muddatini olmagan boʻlsangiz, anketani toʻliq toʻldiring).",
+        "uz_cyrillic": "Обуна фаол эмас — буюртмалар танланмайди. Қуйида тариф расмийлаштиринг (ёки бепул синов муддатини олмаган бўлсангиз, анкетани тўлиқ тўлдиринг).",
+        "en": "Subscription is not active — orders aren't matched to you. Choose a plan below (or fill out your profile fully, if you haven't received the free trial yet).",
+    },
+    "subscription.pending_hint": {
+        "ru": "Заявка на тариф отправлена и ожидает подтверждения администратором ({provider}, {amount} UZS).",
+        "uz_latin": "Tarif uchun ariza yuborildi va administrator tasdigʻini kutmoqda ({provider}, {amount} UZS).",
+        "uz_cyrillic": "Тариф учун ариза юборилди ва администратор тасдиғини кутмоқда ({provider}, {amount} UZS).",
+        "en": "Your plan request was sent and is awaiting admin confirmation ({provider}, {amount} UZS).",
+    },
+    "subscription.plans_heading": {
+        "ru": "Тарифы", "uz_latin": "Tariflar", "uz_cyrillic": "Тарифлар", "en": "Plans",
+    },
+    "subscription.th_plan": {
+        "ru": "Тариф", "uz_latin": "Tarif", "uz_cyrillic": "Тариф", "en": "Plan",
+    },
+    "subscription.th_price": {
+        "ru": "Цена/мес", "uz_latin": "Narx/oy", "uz_cyrillic": "Нарх/ой", "en": "Price/mo",
+    },
+    "subscription.per_month": {
+        "ru": "мес", "uz_latin": "oy", "uz_cyrillic": "ой", "en": "mo",
+    },
+    "subscription.th_bids": {
+        "ru": "Ставок в месяц", "uz_latin": "Oyiga takliflar", "uz_cyrillic": "Ойига таклифлар",
+        "en": "Bids per month",
+    },
+    "subscription.th_alert_speed": {
+        "ru": "Скорость Telegram-алертов", "uz_latin": "Telegram-ogohlantirish tezligi",
+        "uz_cyrillic": "Telegram-огоҳлантириш тезлиги", "en": "Telegram alert speed",
+    },
+    "subscription.th_priority": {
+        "ru": "Приоритет", "uz_latin": "Ustuvorlik", "uz_cyrillic": "Устуворлик", "en": "Priority",
+    },
+    "subscription.no_limit": {
+        "ru": "без лимита", "uz_latin": "cheklovsiz", "uz_cyrillic": "чекловсиз", "en": "unlimited",
+    },
+    "subscription.delayed_alert": {
+        "ru": "с задержкой ~{hours} ч", "uz_latin": "~{hours} soat kechikish bilan",
+        "uz_cyrillic": "~{hours} соат кечикиш билан", "en": "~{hours}h delay",
+    },
+    "subscription.instant_alert": {
+        "ru": "мгновенно", "uz_latin": "darhol", "uz_cyrillic": "дарҳол", "en": "instant",
+    },
+    "subscription.plan_field": {
+        "ru": "Тариф", "uz_latin": "Tarif", "uz_cyrillic": "Тариф", "en": "Plan",
+    },
+    "subscription.payment_method_field": {
+        "ru": "Способ оплаты", "uz_latin": "Toʻlov usuli", "uz_cyrillic": "Тўлов усули", "en": "Payment method",
+    },
+    "subscription.submit": {
+        "ru": "Оформить", "uz_latin": "Rasmiylashtirish", "uz_cyrillic": "Расмийлаштириш", "en": "Subscribe",
+    },
+    "subscription.manual_hint": {
+        "ru": "Онлайн-оплата подключается по мере получения мерчант-аккаунта — сейчас заявка обрабатывается администратором вручную.",
+        "uz_latin": "Onlayn toʻlov merchant-hisob olingach ulanadi — hozircha ariza administrator tomonidan qoʻlda koʻrib chiqiladi.",
+        "uz_cyrillic": "Онлайн тўлов merchant-ҳисоб олингач уланади — ҳозирча ариза администратор томонидан қўлда кўриб чиқилади.",
+        "en": "Online payment will be enabled once we get a merchant account — for now requests are processed manually by the admin.",
+    },
+    "constructor.title": {
+        "ru": "Конструкторы", "uz_latin": "Konstruktorlar", "uz_cyrillic": "Конструкторлар", "en": "Constructors",
+    },
+    "constructor.description": {
+        "ru": "Специалисты, разрабатывающие чертежи на заказ — обратиться может и заказчик, и исполнитель, у которого нет своего конструктора в штате.",
+        "uz_latin": "Buyurtma asosida chizma tayyorlaydigan mutaxassislar — murojaat qilishi mumkin ham mijoz, ham oʻz shtatida konstruktori boʻlmagan ijrochi.",
+        "uz_cyrillic": "Буюртма асосида чизма тайёрлайдиган мутахассислар — мурожаат қилиши мумкин ҳам мижоз, ҳам ўз штатида конструктори бўлмаган ижрочи.",
+        "en": "Specialists who prepare drawings on request — either a customer or an executor without an in-house designer can reach out.",
+    },
+    "constructor.experience_suffix": {
+        "ru": "· опыт {years} лет", "uz_latin": "· {years} yil tajriba", "uz_cyrillic": "· {years} йил тажриба",
+        "en": "· {years} yrs experience",
+    },
+    "constructor.no_results": {
+        "ru": "Пока нет заполненных анкет конструкторов по этим фильтрам.",
+        "uz_latin": "Bu filtrlar boʻyicha hali toʻldirilgan konstruktor anketalari yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича ҳали тўлдирилган конструктор анкеталари йўқ.",
+        "en": "No filled-out constructor profiles match these filters yet.",
+    },
+    "constructor.title_suffix": {
+        "ru": "— конструктор", "uz_latin": "— konstruktor", "uz_cyrillic": "— конструктор", "en": "— constructor",
+    },
+    "notif.title": {
+        "ru": "Уведомления", "uz_latin": "Bildirishnomalar", "uz_cyrillic": "Билдиришномалар", "en": "Notifications",
+    },
+    "notif.open_link": {
+        "ru": "Открыть", "uz_latin": "Ochish", "uz_cyrillic": "Очиш", "en": "Open",
+    },
+    "notif.sent_to_telegram": {
+        "ru": "отправлено в Telegram", "uz_latin": "Telegramga yuborildi", "uz_cyrillic": "Telegramга юборилди",
+        "en": "sent to Telegram",
+    },
+    "notif.empty": {
+        "ru": "Пока нет уведомлений.", "uz_latin": "Hozircha bildirishnomalar yoʻq.", "uz_cyrillic": "Ҳозирча билдиришномалар йўқ.",
+        "en": "No notifications yet.",
+    },
+    "role.admin": {
+        "ru": "админ", "uz_latin": "admin", "uz_cyrillic": "админ", "en": "admin",
+    },
+    "profile.model_name_example": {
+        "ru": "напр. DMG MORI NLX 2500", "uz_latin": "masalan, DMG MORI NLX 2500",
+        "uz_cyrillic": "масалан, DMG MORI NLX 2500", "en": "e.g. DMG MORI NLX 2500",
+    },
+    "site.default_title": {
+        "ru": "B2B-платформа изготовителей и ремонтников оборудования",
+        "uz_latin": "Uskunalar ishlab chiqaruvchilari va ta’mirlovchilari uchun B2B-platforma",
+        "uz_cyrillic": "Ускуналар ишлаб чиқарувчилари ва таъмирловчилари учун B2B-платформа",
+        "en": "B2B platform for equipment manufacturers and repair specialists",
+    },
+    "admin.panel_suffix": {
+        "ru": "— админ-панель", "uz_latin": "— administrator paneli", "uz_cyrillic": "— администратор панели",
+        "en": "— admin panel",
+    },
+    "admin.disputes_heading": {
+        "ru": "Споры", "uz_latin": "Nizolar", "uz_cyrillic": "Низолар", "en": "Disputes",
+    },
+    "admin.disputes_open_heading": {
+        "ru": "Открытые ({count})", "uz_latin": "Ochiq ({count})", "uz_cyrillic": "Очиқ ({count})",
+        "en": "Open ({count})",
+    },
+    "admin.disputes_resolved_heading": {
+        "ru": "Разрешённые (последние 30)", "uz_latin": "Hal qilingan (oxirgi 30 ta)",
+        "uz_cyrillic": "Ҳал қилинган (охирги 30 та)", "en": "Resolved (last 30)",
+    },
+    "admin.th_order": {
+        "ru": "Заказ", "uz_latin": "Buyurtma", "uz_cyrillic": "Буюртма", "en": "Order",
+    },
+    "admin.th_reason": {
+        "ru": "Причина", "uz_latin": "Sabab", "uz_cyrillic": "Сабаб", "en": "Reason",
+    },
+    "admin.th_status": {
+        "ru": "Статус", "uz_latin": "Holat", "uz_cyrillic": "Ҳолат", "en": "Status",
+    },
+    "admin.th_opened": {
+        "ru": "Открыт", "uz_latin": "Ochilgan", "uz_cyrillic": "Очилган", "en": "Opened",
+    },
+    "admin.th_resolution": {
+        "ru": "Решение", "uz_latin": "Qaror", "uz_cyrillic": "Қарор", "en": "Resolution",
+    },
+    "admin.th_date": {
+        "ru": "Дата", "uz_latin": "Sana", "uz_cyrillic": "Сана", "en": "Date",
+    },
+    "admin.no_open_disputes": {
+        "ru": "Открытых споров нет.", "uz_latin": "Ochiq nizolar yoʻq.", "uz_cyrillic": "Очиқ низолар йўқ.",
+        "en": "No open disputes.",
+    },
+    "admin.no_resolved_disputes": {
+        "ru": "Разрешённых споров пока нет.", "uz_latin": "Hal qilingan nizolar hali yoʻq.",
+        "uz_cyrillic": "Ҳал қилинган низолар ҳали йўқ.", "en": "No resolved disputes yet.",
+    },
+    "admin.subscriptions_heading": {
+        "ru": "Заявки на подписку", "uz_latin": "Obuna arizalari", "uz_cyrillic": "Обуна аризалари",
+        "en": "Subscription requests",
+    },
+    "admin.th_executor": {
+        "ru": "Исполнитель", "uz_latin": "Ijrochi", "uz_cyrillic": "Ижрочи", "en": "Executor",
+    },
+    "admin.th_payment": {
+        "ru": "Оплата", "uz_latin": "Toʻlov", "uz_cyrillic": "Тўлов", "en": "Payment",
+    },
+    "admin.th_request_date": {
+        "ru": "Дата заявки", "uz_latin": "Ariza sanasi", "uz_cyrillic": "Ариза санаси", "en": "Request date",
+    },
+    "admin.reference_placeholder": {
+        "ru": "№ операции", "uz_latin": "Operatsiya №", "uz_cyrillic": "Операция №", "en": "Reference #",
+    },
+    "admin.activate": {
+        "ru": "Активировать", "uz_latin": "Faollashtirish", "uz_cyrillic": "Фаоллаштириш", "en": "Activate",
+    },
+    "admin.reject": {
+        "ru": "Отклонить", "uz_latin": "Rad etish", "uz_cyrillic": "Рад этиш", "en": "Reject",
+    },
+    "admin.no_pending_subscriptions": {
+        "ru": "Заявок на подписку нет.", "uz_latin": "Obuna arizalari yoʻq.", "uz_cyrillic": "Обуна аризалари йўқ.",
+        "en": "No subscription requests.",
+    },
+    "admin.users_heading": {
+        "ru": "Пользователи ({count})", "uz_latin": "Foydalanuvchilar ({count})", "uz_cyrillic": "Фойдаланувчилар ({count})",
+        "en": "Users ({count})",
+    },
+    "admin.th_email": {
+        "ru": "Email", "uz_latin": "Email", "uz_cyrillic": "Email", "en": "Email",
+    },
+    "admin.th_role": {
+        "ru": "Роль", "uz_latin": "Rol", "uz_cyrillic": "Роль", "en": "Role",
+    },
+    "admin.th_email_confirmed": {
+        "ru": "Email подтверждён", "uz_latin": "Email tasdiqlangan", "uz_cyrillic": "Email тасдиқланган",
+        "en": "Email confirmed",
+    },
+    "admin.yes": {
+        "ru": "да", "uz_latin": "ha", "uz_cyrillic": "ҳа", "en": "yes",
+    },
+    "admin.no": {
+        "ru": "нет", "uz_latin": "yoʻq", "uz_cyrillic": "йўқ", "en": "no",
+    },
+    "admin.status_blocked": {
+        "ru": "заблокирован", "uz_latin": "bloklangan", "uz_cyrillic": "блокланган", "en": "blocked",
+    },
+    "admin.status_active": {
+        "ru": "активен", "uz_latin": "faol", "uz_cyrillic": "фаол", "en": "active",
+    },
+    "admin.th_registered": {
+        "ru": "Регистрация", "uz_latin": "Roʻyxatdan oʻtish", "uz_cyrillic": "Рўйхатдан ўтиш", "en": "Registered",
+    },
+    "admin.listings_link": {
+        "ru": "Объявления", "uz_latin": "Eʼlonlar", "uz_cyrillic": "Эълонлар", "en": "Listings",
+    },
+    "admin.unblock": {
+        "ru": "Разблокировать", "uz_latin": "Blokdan chiqarish", "uz_cyrillic": "Блокдан чиқариш", "en": "Unblock",
+    },
+    "admin.block": {
+        "ru": "Заблокировать", "uz_latin": "Bloklash", "uz_cyrillic": "Блоклаш", "en": "Block",
+    },
+    "admin.delete": {
+        "ru": "Удалить", "uz_latin": "Oʻchirish", "uz_cyrillic": "Ўчириш", "en": "Delete",
+    },
+    "admin.delete_user_confirm": {
+        "ru": "Удалить {email} вместе со всеми его объявлениями? Если есть другие связанные данные (заказы, сообщения и т.п.) — сайт откажет и предложит заблокировать вместо удаления.",
+        "uz_latin": "{email} barcha eʼlonlari bilan birga oʻchirilsinmi? Agar boshqa bogʻliq maʼlumotlar boʻlsa (buyurtmalar, xabarlar va h.k.) — sayt rad etadi va oʻchirish oʻrniga bloklashni taklif qiladi.",
+        "uz_cyrillic": "{email} барча эълонлари билан бирга ўчирилсинми? Агар бошқа боғлиқ маълумотлар бўлса (буюртмалар, хабарлар ва ҳ.к.) — сайт рад этади ва ўчириш ўрнига блоклашни таклиф қилади.",
+        "en": "Delete {email} along with all their listings? If other related data exists (orders, messages, etc.) — the site will refuse and suggest blocking instead of deleting.",
+    },
+    "admin.no_users": {
+        "ru": "Пользователей пока нет.", "uz_latin": "Hozircha foydalanuvchilar yoʻq.", "uz_cyrillic": "Ҳозирча фойдаланувчилар йўқ.",
+        "en": "No users yet.",
+    },
+    "admin.user_detail_back": {
+        "ru": "← Все пользователи", "uz_latin": "← Barcha foydalanuvchilar", "uz_cyrillic": "← Барча фойдаланувчилар",
+        "en": "← All users",
+    },
+    "admin.user_detail_meta": {
+        "ru": "Роль: {role} · Email подтверждён: {confirmed} · Статус: {status} · Регистрация: {date}",
+        "uz_latin": "Rol: {role} · Email tasdiqlangan: {confirmed} · Holat: {status} · Roʻyxatdan oʻtish: {date}",
+        "uz_cyrillic": "Роль: {role} · Email тасдиқланган: {confirmed} · Ҳолат: {status} · Рўйхатдан ўтиш: {date}",
+        "en": "Role: {role} · Email confirmed: {confirmed} · Status: {status} · Registered: {date}",
+    },
+    "admin.orders_heading": {
+        "ru": "Заявки (заказы) ({count})", "uz_latin": "Arizalar (buyurtmalar) ({count})",
+        "uz_cyrillic": "Аризалар (буюртмалар) ({count})", "en": "Requests (orders) ({count})",
+    },
+    "admin.th_title": {
+        "ru": "Название", "uz_latin": "Nomi", "uz_cyrillic": "Номи", "en": "Title",
+    },
+    "admin.th_created": {
+        "ru": "Создано", "uz_latin": "Yaratilgan", "uz_cyrillic": "Яратилган", "en": "Created",
+    },
+    "admin.delete_order_confirm": {
+        "ru": "Удалить заявку «{title}»? Если по ней уже есть ставки/отзывы/спор — удаление честно откажет.",
+        "uz_latin": "«{title}» arizasi oʻchirilsinmi? Agar unga takliflar/sharhlar/nizo boʻlsa — oʻchirish rad etadi.",
+        "uz_cyrillic": "«{title}» аризаси ўчирилсинми? Агар унга таклифлар/шарҳлар/низо бўлса — ўчириш рад этади.",
+        "en": "Delete request \"{title}\"? If it already has bids/reviews/a dispute — deletion will honestly refuse.",
+    },
+    "admin.no_orders": {
+        "ru": "Заявок нет.", "uz_latin": "Arizalar yoʻq.", "uz_cyrillic": "Аризалар йўқ.", "en": "No requests.",
+    },
+    "admin.marketplace_listings_heading": {
+        "ru": "Объявления в барахолке ({count})", "uz_latin": "Bozorchadagi eʼlonlar ({count})",
+        "uz_cyrillic": "Бозорчадаги эълонлар ({count})", "en": "Marketplace listings ({count})",
+    },
+    "admin.th_type": {
+        "ru": "Тип", "uz_latin": "Turi", "uz_cyrillic": "Тури", "en": "Type",
+    },
+    "admin.intent_sell": {
+        "ru": "продаю", "uz_latin": "sotaman", "uz_cyrillic": "сотаман", "en": "selling",
+    },
+    "admin.intent_buy": {
+        "ru": "куплю", "uz_latin": "sotib olaman", "uz_cyrillic": "сотиб оламан", "en": "buying",
+    },
+    "admin.delete_listing_confirm": {
+        "ru": "Удалить объявление «{title}»?", "uz_latin": "«{title}» eʼloni oʻchirilsinmi?",
+        "uz_cyrillic": "«{title}» эълони ўчирилсинми?", "en": "Delete listing \"{title}\"?",
+    },
+    "admin.no_marketplace_listings": {
+        "ru": "Объявлений в барахолке нет.", "uz_latin": "Bozorchada eʼlonlar yoʻq.",
+        "uz_cyrillic": "Бозорчада эълонлар йўқ.", "en": "No marketplace listings.",
+    },
+    "admin.material_listings_heading": {
+        "ru": "Объявления о материалах ({count})", "uz_latin": "Materiallar haqidagi eʼlonlar ({count})",
+        "uz_cyrillic": "Материаллар ҳақидаги эълонлар ({count})", "en": "Material listings ({count})",
+    },
+    "admin.no_material_listings": {
+        "ru": "Объявлений о материалах нет.", "uz_latin": "Materiallar haqida eʼlonlar yoʻq.",
+        "uz_cyrillic": "Материаллар ҳақида эълонлар йўқ.", "en": "No material listings.",
+    },
+    "admin.delete_account_heading": {
+        "ru": "Удалить аккаунт", "uz_latin": "Hisobni oʻchirish", "uz_cyrillic": "Ҳисобни ўчириш",
+        "en": "Delete account",
+    },
+    "admin.delete_account_hint": {
+        "ru": "Удаляет пользователя вместе со всеми его объявлениями (барахолка и материалы) и его откликами на чужие объявления. Если у аккаунта есть другие связанные данные (заказы, сообщения, отзывы, споры) — удаление честно откажет, тогда используйте блокировку.",
+        "uz_latin": "Foydalanuvchini barcha eʼlonlari (bozorcha va materiallar) va boshqa eʼlonlarga bergan javoblari bilan birga oʻchiradi. Agar hisobda boshqa bogʻliq maʼlumotlar boʻlsa (buyurtmalar, xabarlar, sharhlar, nizolar) — oʻchirish rad etadi, bunday holda blokdan foydalaning.",
+        "uz_cyrillic": "Фойдаланувчини барча эълонлари (бозорча ва материаллар) ва бошқа эълонларга берган жавоблари билан бирга ўчиради. Агар ҳисобда бошқа боғлиқ маълумотлар бўлса (буюртмалар, хабарлар, шарҳлар, низолар) — ўчириш рад этади, бундай ҳолда блокдан фойдаланинг.",
+        "en": "Deletes the user along with all their listings (marketplace and materials) and their responses to other listings. If the account has other related data (orders, messages, reviews, disputes) — deletion will honestly refuse; use blocking instead.",
+    },
+    "admin.delete_user_btn": {
+        "ru": "Удалить пользователя", "uz_latin": "Foydalanuvchini oʻchirish", "uz_cyrillic": "Фойдаланувчини ўчириш",
+        "en": "Delete user",
+    },
+    "admin.delete_user_final_confirm": {
+        "ru": "Удалить {email} вместе со всеми его объявлениями?",
+        "uz_latin": "{email} barcha eʼlonlari bilan birga oʻchirilsinmi?",
+        "uz_cyrillic": "{email} барча эълонлари билан бирга ўчирилсинми?",
+        "en": "Delete {email} along with all their listings?",
     },
 }
 
@@ -1221,6 +2389,26 @@ def bid_status_label(status):
     return translate(f"bid.status_{status}")
 
 
+LISTING_STATUS_KEYS = {"active": "listing.status_active", "reserved": "listing.status_reserved", "closed": "listing.status_closed"}
+
+
+def listing_status_label(status):
+    key = LISTING_STATUS_KEYS.get(status)
+    return translate(key) if key else status
+
+
+def dispute_status_label(status):
+    if not status:
+        return status
+    return translate(f"dispute.status_{status}")
+
+
+def dispute_reason_label(reason):
+    if not reason:
+        return reason
+    return translate(f"dispute.reason_{reason}")
+
+
 def register_i18n(app):
     @app.context_processor
     def inject_i18n():
@@ -1233,6 +2421,9 @@ def register_i18n(app):
     app.jinja_env.globals["t"] = translate
     app.jinja_env.globals["order_status_label"] = order_status_label
     app.jinja_env.globals["bid_status_label"] = bid_status_label
+    app.jinja_env.globals["listing_status_label"] = listing_status_label
+    app.jinja_env.globals["dispute_status_label"] = dispute_status_label
+    app.jinja_env.globals["dispute_reason_label"] = dispute_reason_label
 
 
 def get_current_lang():

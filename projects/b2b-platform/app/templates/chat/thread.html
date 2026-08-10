@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Диалог с {{ other.email }}{% endblock %}
+{% block title %}{{ t('chat.dialog_with', email=other.email) }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
   <div class="page-head">
     <h1>{{ other.email }}</h1>
-    <a href="{{ url_for('chat.inbox') }}" class="btn-link">← Все сообщения</a>
+    <a href="{{ url_for('chat.inbox') }}" class="btn-link">{{ t('chat.all_messages') }}</a>
   </div>
 
   {% if order %}
   <p class="flash flash--info">
-    Обсуждаете заявку <a href="{{ url_for('orders.order_detail', order_id=order.id) }}">№{{ order.id }}: {{ order.title }}</a>
+    {{ t('chat.discussing_order') }} <a href="{{ url_for('orders.order_detail', order_id=order.id) }}">№{{ order.id }}: {{ order.title }}</a>
   </p>
   {% endif %}
 
@@ -23,14 +23,14 @@
       </div>
       {% endfor %}
     {% else %}
-      <p class="empty-hint" id="chatEmptyHint">Сообщений пока нет — напишите первым.</p>
+      <p class="empty-hint" id="chatEmptyHint">{{ t('chat.no_messages_yet') }}</p>
     {% endif %}
   </div>
 
   <form method="post" action="{{ url_for('chat.thread', user_id=other.id, order_id=order.id if order else None) }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Сообщение <textarea name="body" rows="3" required>{{ 'По заявке №%d: '|format(order.id) if order }}</textarea></label>
-    <button type="submit" class="btn btn--primary">Отправить</button>
+    <label>{{ t('chat.message_field') }} <textarea name="body" rows="3" required>{{ t('chat.message_order_prefix', id=order.id) if order }}</textarea></label>
+    <button type="submit" class="btn btn--primary">{{ t('chat.send') }}</button>
   </form>
 </section>
 

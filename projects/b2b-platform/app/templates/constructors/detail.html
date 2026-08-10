@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ profile.display_name }} — конструктор{% endblock %}
+{% block title %}{{ profile.display_name }} {{ t('constructor.title_suffix') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
@@ -8,12 +8,12 @@
   </div>
 
   {% if current_user.id != profile.user_id %}
-  <p><a href="{{ url_for('chat.thread', user_id=profile.user_id) }}" class="btn-link">✉ Написать</a></p>
+  <p><a href="{{ url_for('chat.thread', user_id=profile.user_id) }}" class="btn-link">{{ t('common.write_message') }}</a></p>
   {% endif %}
 
   <p class="order-meta">
     <span>{{ profile.region.name_ru }}{% if profile.city %} · {{ profile.city.name_ru }}{% endif %}</span>
-    {% if profile.experience_years %}<span>Опыт: {{ profile.experience_years }} лет</span>{% endif %}
+    {% if profile.experience_years %}<span>{{ t('resume.experience_label', value=profile.experience_years) }}</span>{% endif %}
     {% if profile.price_note %}<span>{{ profile.price_note }}</span>{% endif %}
   </p>
   <p class="order-description">{{ profile.description }}</p>
@@ -21,20 +21,20 @@
   {% if profile.workload %}
   <p class="workload-indicator">
     <span class="workload-indicator__dot" style="background:{{ workload_color(profile.workload) }}"></span>
-    Загруженность: {{ profile.workload }}/10
+    {{ t('profile.workload_display', value=profile.workload) }}
   </p>
   {% endif %}
 
   {% if profile.payment_methods %}
-  <p>Принимает оплату: {{ payment_method_labels(profile.payment_methods)|join(', ') }}</p>
+  <p>{{ t('profile.accepts_payment') }} {{ payment_method_labels(profile.payment_methods)|join(', ') }}</p>
   {% endif %}
 
   {% if profile.portfolio_url %}
-  <p><a href="{{ profile.portfolio_url }}" target="_blank" rel="noopener">Портфолио →</a></p>
+  <p><a href="{{ profile.portfolio_url }}" target="_blank" rel="noopener">{{ t('profile.portfolio_link') }} →</a></p>
   {% endif %}
 
   {% if profile.user.phone %}
-  <p class="order-meta"><span>Телефон: {{ profile.user.phone }}</span></p>
+  <p class="order-meta"><span>{{ t('profile.phone_colon') }} {{ profile.user.phone }}</span></p>
   {% endif %}
 </section>
 {% endblock %}

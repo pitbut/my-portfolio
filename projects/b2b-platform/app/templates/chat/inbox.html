@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Сообщения{% endblock %}
+{% block title %}{{ t('chat.messages_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Сообщения</h1>
+  <h1>{{ t('chat.messages_title') }}</h1>
   {% if items %}
   <div class="notif-list">
     {% for item in items %}
@@ -14,7 +14,7 @@
       </div>
       {% if item.last_message %}
       <div class="notif-item__body">
-        {% if item.last_message.sender_id == current_user.id %}Вы: {% endif %}{{ item.last_message.body[:140] }}
+        {% if item.last_message.sender_id == current_user.id %}{{ t('chat.you_prefix') }} {% endif %}{{ item.last_message.body[:140] }}
       </div>
       {% endif %}
       <div class="notif-item__meta">{{ item.conversation.last_message_at.strftime('%d.%m.%Y %H:%M') }}</div>
@@ -22,7 +22,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <p class="empty-hint">Пока нет ни одного диалога. Написать можно любому пользователю — например, автору объявления или исполнителю с карты.</p>
+  <p class="empty-hint">{{ t('chat.no_conversations') }}</p>
   {% endif %}
 </section>
 {% endblock %}

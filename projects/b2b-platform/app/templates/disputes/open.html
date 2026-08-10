@@ -1,27 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Открыть спор{% endblock %}
+{% block title %}{{ t('dispute.open_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap auth-page">
   <div class="auth-card">
-    <h1>Спор по заказу «{{ order.title }}»</h1>
-    <p class="profile-page__hint">Опишите проблему и после отправки приложите фото/видео-доказательства — это поможет администратору объективно разобраться.</p>
+    <h1>{{ t('dispute.about_order', title=order.title) }}</h1>
+    <p class="profile-page__hint">{{ t('dispute.describe_hint') }}</p>
     <form method="post" action="{{ url_for('disputes.open_dispute', order_id=order.id) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label>Причина *
+      <label>{{ t('dispute.reason_field') }}
         <select name="reason_category" required>
-          <option value="">— выберите —</option>
-          <option value="defect">Брак</option>
-          <option value="delay">Задержка сроков</option>
-          <option value="quality">Претензия по качеству</option>
-          <option value="price_dispute">Расхождение по цене</option>
-          <option value="other">Другое</option>
+          <option value="">{{ t('profile.select_placeholder') }}</option>
+          <option value="defect">{{ t('dispute.reason_defect') }}</option>
+          <option value="delay">{{ t('dispute.reason_delay') }}</option>
+          <option value="quality">{{ t('dispute.reason_quality') }}</option>
+          <option value="price_dispute">{{ t('dispute.reason_price_dispute') }}</option>
+          <option value="other">{{ t('dispute.reason_other') }}</option>
         </select>
       </label>
-      <label>Опишите ситуацию *
+      <label>{{ t('dispute.describe_situation') }}
         <textarea name="description" rows="5" required></textarea>
       </label>
-      <button type="submit" class="btn btn--primary btn--block">Открыть спор</button>
+      <button type="submit" class="btn btn--primary btn--block">{{ t('dispute.open_title') }}</button>
     </form>
   </div>
 </section>

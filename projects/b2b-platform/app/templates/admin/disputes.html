@@ -1,47 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Споры — админ-панель{% endblock %}
+{% block title %}{{ t('admin.disputes_heading') }} {{ t('admin.panel_suffix') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Споры</h1>
+  <h1>{{ t('admin.disputes_heading') }}</h1>
 
-  <h2 class="profile-section-title">Открытые ({{ open_disputes|length }})</h2>
+  <h2 class="profile-section-title">{{ t('admin.disputes_open_heading', count=open_disputes|length) }}</h2>
   {% if open_disputes %}
   <table class="data-table">
-    <thead><tr><th>Заказ</th><th>Причина</th><th>Статус</th><th>Открыт</th><th></th></tr></thead>
+    <thead><tr><th>{{ t('admin.th_order') }}</th><th>{{ t('admin.th_reason') }}</th><th>{{ t('admin.th_status') }}</th><th>{{ t('admin.th_opened') }}</th><th></th></tr></thead>
     <tbody>
       {% for d in open_disputes %}
       <tr>
         <td>{{ d.order.title }}</td>
-        <td>{{ d.reason_category }}</td>
-        <td><span class="status-chip status-chip--disputed">{{ d.status }}</span></td>
+        <td>{{ dispute_reason_label(d.reason_category) }}</td>
+        <td><span class="status-chip status-chip--disputed">{{ dispute_status_label(d.status) }}</span></td>
         <td>{{ d.created_at.strftime('%d.%m.%Y') }}</td>
-        <td><a href="{{ url_for('disputes.dispute_detail', dispute_id=d.id) }}">Открыть</a></td>
+        <td><a href="{{ url_for('disputes.dispute_detail', dispute_id=d.id) }}">{{ t('notif.open_link') }}</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Открытых споров нет.</p>
+  <p class="empty-hint">{{ t('admin.no_open_disputes') }}</p>
   {% endif %}
 
-  <h2 class="profile-section-title">Разрешённые (последние 30)</h2>
+  <h2 class="profile-section-title">{{ t('admin.disputes_resolved_heading') }}</h2>
   {% if resolved_disputes %}
   <table class="data-table">
-    <thead><tr><th>Заказ</th><th>Решение</th><th>Дата</th><th></th></tr></thead>
+    <thead><tr><th>{{ t('admin.th_order') }}</th><th>{{ t('admin.th_resolution') }}</th><th>{{ t('admin.th_date') }}</th><th></th></tr></thead>
     <tbody>
       {% for d in resolved_disputes %}
       <tr>
         <td>{{ d.order.title }}</td>
-        <td>{{ d.status }}</td>
+        <td>{{ dispute_status_label(d.status) }}</td>
         <td>{{ d.resolved_at.strftime('%d.%m.%Y') if d.resolved_at else '—' }}</td>
-        <td><a href="{{ url_for('disputes.dispute_detail', dispute_id=d.id) }}">Открыть</a></td>
+        <td><a href="{{ url_for('disputes.dispute_detail', dispute_id=d.id) }}">{{ t('notif.open_link') }}</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Разрешённых споров пока нет.</p>
+  <p class="empty-hint">{{ t('admin.no_resolved_disputes') }}</p>
   {% endif %}
 </section>
 {% endblock %}
