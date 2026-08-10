@@ -1,3 +1,7 @@
+import os
+
+from werkzeug.security import generate_password_hash
+
 from app import db
 from app.models import TelegramLink, User
 
@@ -65,3 +69,42 @@ def test_no_reminder_for_password_signup_user(client):
     finally:
         client.application.config["TELEGRAM_BOT_TOKEN"] = None
         client.application.config["TELEGRAM_BOT_USERNAME"] = None
+
+
+def test_home_page_shows_video_placeholder_and_ad_banner(client):
+    """Пока администратор не залил intro.mp4 на сервер — вместо плеера
+    показываем заглушку, а не сломанное видео; техническую подсказку,
+    куда загружать файл, видит только сам администратор."""
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert "Здесь может быть ваша реклама".encode() in resp.data
+    assert "Скоро здесь появится короткое видео".encode() in resp.data
+    assert "Загрузите файл intro.mp4".encode() not in resp.data
+    assert b"<video" not in resp.data
+
+
+def test_home_page_shows_admin_hint_for_video_upload(client):
+    admin = User(
+        email="admin2@example.com", password_hash=generate_password_hash("adminpass123"),
+        role="admin", email_confirmed=True,
+    )
+    db.session.add(admin)
+    db.session.commit()
+    _login_via_session(client, admin.id)
+
+    resp = client.get("/")
+    assert "Загрузите файл intro.mp4".encode() in resp.data
+
+
+def test_home_page_shows_video_player_when_file_uploaded(client):
+    video_dir = os.path.join(client.application.static_folder, "video")
+    os.makedirs(video_dir, exist_ok=True)
+    video_path = os.path.join(video_dir, "intro.mp4")
+    with open(video_path, "wb") as f:
+        f.write(b"fake video bytes")
+    try:
+        resp = client.get("/")
+        assert b"<video" in resp.data
+        assert "Скоро здесь появится короткое видео".encode() not in resp.data
+    finally:
+        os.remove(video_path)
