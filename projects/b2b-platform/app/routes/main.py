@@ -1,11 +1,15 @@
 """Главная страница (открыта всем) и переключение языка интерфейса."""
-from flask import Blueprint, redirect, render_template, request, session, url_for
+import os
+
+from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
 from flask_login import current_user
 
 from app.decorators import paywall_required
 from app.i18n import SUPPORTED_LANGUAGES
 
 bp = Blueprint("main", __name__)
+
+INTRO_VIDEO_FILENAME = "video/intro.mp4"
 
 
 @bp.route("/")
@@ -25,7 +29,15 @@ def index():
     }
     stats["total"] = stats["customer"] + stats["executor"] + stats["constructor"]
 
-    return render_template("main/index.html", auth_required=auth_required, next_url=next_url, stats=stats)
+    # Видео на главной — «честная деградация»: пока администратор не залил
+    # файл на сервер (через FTP, без правок кода), вместо баннера с видео
+    # показываем заглушку с подсказкой, а не сломанный плеер.
+    intro_video_available = os.path.isfile(os.path.join(current_app.static_folder, INTRO_VIDEO_FILENAME))
+
+    return render_template(
+        "main/index.html", auth_required=auth_required, next_url=next_url, stats=stats,
+        intro_video_available=intro_video_available,
+    )
 
 
 @bp.route("/lang/<lang>")

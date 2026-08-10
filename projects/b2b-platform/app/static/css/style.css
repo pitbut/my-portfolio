@@ -59,6 +59,16 @@ a{color:var(--accent2);}
 .status-note{padding-bottom:40px;color:var(--sub);font-size:.92em;}
 @media (max-width:760px){.how-it-works{grid-template-columns:1fr;}}
 
+/* --- баннеры на главной: видео-объяснение и рекламное место --- */
+.home-banners{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:30px 20px 0;}
+.home-banner{background:#fff;border-radius:14px;padding:22px;box-shadow:0 6px 20px rgba(0,0,0,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:220px;}
+.home-banner__video{width:100%;max-height:280px;border-radius:10px;background:#000;}
+.home-banner__placeholder{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--sub);}
+.home-banner__icon{font-size:2.2em;}
+.home-banner--ad{border:2px dashed var(--line);background:#fafafa;color:var(--sub);box-shadow:none;}
+.home-banner__ad-text{font-weight:700;font-size:1.15em;margin:0;}
+@media (max-width:760px){.home-banners{grid-template-columns:1fr;}}
+
 /* --- auth / profile pages --- */
 .auth-page{padding:50px 20px;display:flex;justify-content:center;}
 .auth-card{background:#fff;border-radius:16px;padding:36px;max-width:420px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.08);}

@@ -2403,6 +2403,26 @@ STRINGS = {
         "uz_cyrillic": "Сиз бу ёзувни администратор номидан таҳрирляпсиз — фақат аниқ хатоларни тузатинг, мазмунини эмас.",
         "en": "You're editing this record as an admin — fix only obvious errors, not the content itself.",
     },
+    "home.video_banner_title": {
+        "ru": "Как пользоваться платформой", "uz_latin": "Platformadan qanday foydalanish kerak",
+        "uz_cyrillic": "Платформадан қандай фойдаланиш керак", "en": "How to use the platform",
+    },
+    "home.video_banner_placeholder": {
+        "ru": "Скоро здесь появится короткое видео о том, как пользоваться платформой и какие у неё преимущества.",
+        "uz_latin": "Tez orada bu yerda platformadan qanday foydalanish va uning afzalliklari haqida qisqa video paydo bo‘ladi.",
+        "uz_cyrillic": "Тез орада бу ерда платформадан қандай фойдаланиш ва унинг афзалликлари ҳақида қисқа видео пайдо бўлади.",
+        "en": "A short video about how to use the platform and its advantages will appear here soon.",
+    },
+    "home.video_banner_admin_hint": {
+        "ru": "(видно только вам как администратору) Загрузите файл intro.mp4 в папку static/video/ на сервере — видео появится здесь автоматически.",
+        "uz_latin": "(faqat administrator sifatida sizga koʻrinadi) intro.mp4 faylini serverdagi static/video/ papkasiga yuklang — video shu yerda avtomatik paydo boʻladi.",
+        "uz_cyrillic": "(фақат администратор сифатида сизга кўринади) intro.mp4 файлини сервердаги static/video/ папкасига юкланг — видео шу ерда автоматик пайдо бўлади.",
+        "en": "(visible only to you as admin) Upload the intro.mp4 file to the static/video/ folder on the server — the video will appear here automatically.",
+    },
+    "home.ad_banner_text": {
+        "ru": "Здесь может быть ваша реклама", "uz_latin": "Bu yerda sizning reklamangiz boʻlishi mumkin",
+        "uz_cyrillic": "Бу ерда сизнинг рекламангиз бўлиши мумкин", "en": "Your ad could be here",
+    },
 }
 
 

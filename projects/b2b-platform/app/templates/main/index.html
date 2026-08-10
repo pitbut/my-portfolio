@@ -21,6 +21,30 @@
   </div>
 </section>
 
+<section class="wrap home-banners">
+  <div class="home-banner home-banner--video">
+    <h2 class="profile-section-title">{{ t('home.video_banner_title') }}</h2>
+    {% if intro_video_available %}
+    <video controls class="home-banner__video">
+      <source src="{{ url_for('static', filename='video/intro.mp4') }}" type="video/mp4">
+    </video>
+    {% else %}
+    <div class="home-banner__placeholder">
+      <span class="home-banner__icon">🎬</span>
+      <p>{{ t('home.video_banner_placeholder') }}</p>
+      {% if current_user.is_authenticated and current_user.role == 'admin' %}
+      <p class="hint">{{ t('home.video_banner_admin_hint') }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="home-banner home-banner--ad">
+    <span class="home-banner__icon">📣</span>
+    <p class="home-banner__ad-text">{{ t('home.ad_banner_text') }}</p>
+  </div>
+</section>
+
 <section class="how-it-works wrap">
   <div class="how-card">
     <span class="how-card__num">1</span>
