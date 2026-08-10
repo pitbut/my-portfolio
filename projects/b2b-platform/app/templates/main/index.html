@@ -40,7 +40,11 @@
   </div>
 
   <div class="home-banner home-banner--ad">
-    {% if ad_banner_filename %}
+    {% if ad_banner_kind == 'video' %}
+    <video autoplay muted loop playsinline class="home-banner__ad-video">
+      <source src="{{ url_for('static', filename=ad_banner_filename) }}" type="video/mp4">
+    </video>
+    {% elif ad_banner_kind == 'image' %}
     <img src="{{ url_for('static', filename=ad_banner_filename) }}" alt="{{ t('home.ad_banner_text') }}" class="home-banner__ad-img">
     {% else %}
     <span class="home-banner__icon">📣</span>

@@ -10,14 +10,22 @@ from app.i18n import SUPPORTED_LANGUAGES
 bp = Blueprint("main", __name__)
 
 INTRO_VIDEO_FILENAME = "video/intro.mp4"
-AD_BANNER_FILENAMES = ("ad/banner.jpg", "ad/banner.jpeg", "ad/banner.png", "ad/banner.gif")
+# Универсальный рекламный баннер: подходит и видео, и картинка — что найдётся
+# первым (в этом порядке), то и покажется. Видео проверяется первым, чтобы
+# при наличии обоих файлов сразу после смены рекламы не подхватилась старая
+# картинка, если видео залито тем же именем набора позже.
+AD_BANNER_VIDEO_FILENAMES = ("ad/banner.mp4",)
+AD_BANNER_IMAGE_FILENAMES = ("ad/banner.jpg", "ad/banner.jpeg", "ad/banner.png", "ad/banner.gif")
 
 
-def _find_ad_banner_filename():
-    for filename in AD_BANNER_FILENAMES:
+def _find_ad_banner():
+    for filename in AD_BANNER_VIDEO_FILENAMES:
         if os.path.isfile(os.path.join(current_app.static_folder, filename)):
-            return filename
-    return None
+            return "video", filename
+    for filename in AD_BANNER_IMAGE_FILENAMES:
+        if os.path.isfile(os.path.join(current_app.static_folder, filename)):
+            return "image", filename
+    return None, None
 
 
 @bp.route("/")
@@ -41,11 +49,12 @@ def index():
     # администратор не залил файл на сервер (через FTP, без правок кода),
     # вместо баннера показываем заглушку с подсказкой, а не сломанную ссылку.
     intro_video_available = os.path.isfile(os.path.join(current_app.static_folder, INTRO_VIDEO_FILENAME))
-    ad_banner_filename = _find_ad_banner_filename()
+    ad_banner_kind, ad_banner_filename = _find_ad_banner()
 
     return render_template(
         "main/index.html", auth_required=auth_required, next_url=next_url, stats=stats,
-        intro_video_available=intro_video_available, ad_banner_filename=ad_banner_filename,
+        intro_video_available=intro_video_available,
+        ad_banner_kind=ad_banner_kind, ad_banner_filename=ad_banner_filename,
     )
 
 
