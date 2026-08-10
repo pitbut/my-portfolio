@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} {{ t('admin.panel_suffix') }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <p><a href="{{ url_for('admin.user_detail', user_id=target_user.id) }}">{{ t('admin.user_detail_back') }}</a></p>
+  <h1>{{ t('admin.edit') }} — {{ listing.title }}</h1>
+  <p class="empty-hint">{{ t('admin.editing_item_notice') }}</p>
+
+  <form method="post" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <fieldset class="role-fieldset">
+      <legend>{{ t('listing.type_label') }}</legend>
+      <label><input type="radio" name="listing_intent" value="sell" {{ 'checked' if listing.listing_intent == 'sell' }}> {{ t('listing.sell') }}</label>
+      <label><input type="radio" name="listing_intent" value="buy" {{ 'checked' if listing.listing_intent == 'buy' }}> {{ t('listing.looking_to_buy') }}</label>
+    </fieldset>
+
+    <div class="form-row">
+      <label>{{ t('material.material_required') }}
+        <select name="material_id" required>
+          {% for m in materials %}<option value="{{ m.id }}" {{ 'selected' if listing.material_id == m.id }}>{{ m.name_ru }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>{{ t('material.form_field') }}
+        <select name="form_id">
+          <option value="">{{ t('material.form_any') }}</option>
+          {% for f in forms %}<option value="{{ f.id }}" {{ 'selected' if listing.form_id == f.id }}>{{ f.name_ru }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <label>{{ t('listing.title_label') }}
+      <input type="text" name="title" value="{{ listing.title }}" required>
+    </label>
+    <label>{{ t('listing.description_label') }}
+      <textarea name="description" rows="4" required>{{ listing.description }}</textarea>
+    </label>
+
+    <div class="form-row">
+      <label>{{ t('material.quantity_label') }} <input type="number" name="quantity" min="0" step="0.01" value="{{ listing.quantity or '' }}"></label>
+      <label>{{ t('material.unit_label') }}
+        <select name="unit">
+          <option value="kg" {{ 'selected' if listing.unit == 'kg' }}>{{ t('material.unit_kg') }}</option>
+          <option value="t" {{ 'selected' if listing.unit == 't' }}>{{ t('material.unit_t') }}</option>
+          <option value="m" {{ 'selected' if listing.unit == 'm' }}>{{ t('material.unit_m') }}</option>
+          <option value="m2" {{ 'selected' if listing.unit == 'm2' }}>{{ t('material.unit_m2') }}</option>
+          <option value="pcs" {{ 'selected' if listing.unit == 'pcs' }}>{{ t('material.unit_pcs') }}</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>{{ t('listing.price_label') }} <input type="number" name="price" min="0" value="{{ listing.price or '' }}"></label>
+      <label>{{ t('listing.currency_label') }}
+        <select name="currency">
+          <option value="UZS" {{ 'selected' if listing.currency == 'UZS' }}>UZS</option>
+          <option value="USD" {{ 'selected' if listing.currency == 'USD' }}>USD</option>
+        </select>
+      </label>
+    </div>
+    <label class="checkbox-label"><input type="checkbox" name="price_negotiable" value="1" {{ 'checked' if listing.price_negotiable }}> {{ t('listing.negotiable_checkbox') }}</label>
+
+    <label>{{ t('listing.region_required') }}
+      <select name="region_id" required>
+        {% for r in regions %}<option value="{{ r.id }}" {{ 'selected' if listing.region_id == r.id }}>{{ r.name_ru }}</option>{% endfor %}
+      </select>
+    </label>
+
+    <button type="submit" class="btn btn--primary">{{ t('admin.save_changes') }}</button>
+  </form>
+</section>
+{% endblock %}

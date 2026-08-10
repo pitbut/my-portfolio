@@ -49,7 +49,8 @@
         <td>{{ order_status_label(o.status) }}</td>
         <td>{{ o.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.delete_user_order', user_id=target_user.id, order_id=o.id) }}" onsubmit="return confirm('{{ t('admin.delete_order_confirm', title=o.title) }}');">
+          <a href="{{ url_for('admin.edit_user_order', user_id=target_user.id, order_id=o.id) }}" class="btn-link">{{ t('admin.edit') }}</a>
+          <form method="post" action="{{ url_for('admin.delete_user_order', user_id=target_user.id, order_id=o.id) }}" onsubmit="return confirm('{{ t('admin.delete_order_confirm', title=o.title) }}');" style="display:inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete') }}</button>
           </form>
@@ -76,7 +77,8 @@
         <td>{{ listing_status_label(l.status) }}</td>
         <td>{{ l.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.delete_user_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('{{ t('admin.delete_listing_confirm', title=l.title) }}');">
+          <a href="{{ url_for('admin.edit_user_listing', user_id=target_user.id, listing_id=l.id) }}" class="btn-link">{{ t('admin.edit') }}</a>
+          <form method="post" action="{{ url_for('admin.delete_user_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('{{ t('admin.delete_listing_confirm', title=l.title) }}');" style="display:inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete') }}</button>
           </form>
@@ -103,7 +105,8 @@
         <td>{{ listing_status_label(l.status) }}</td>
         <td>{{ l.created_at.strftime('%d.%m.%Y') }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.delete_user_material_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('{{ t('admin.delete_listing_confirm', title=l.title) }}');">
+          <a href="{{ url_for('admin.edit_user_material_listing', user_id=target_user.id, listing_id=l.id) }}" class="btn-link">{{ t('admin.edit') }}</a>
+          <form method="post" action="{{ url_for('admin.delete_user_material_listing', user_id=target_user.id, listing_id=l.id) }}" onsubmit="return confirm('{{ t('admin.delete_listing_confirm', title=l.title) }}');" style="display:inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link btn-link--danger">{{ t('admin.delete') }}</button>
           </form>

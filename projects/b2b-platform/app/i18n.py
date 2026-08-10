@@ -2394,6 +2394,15 @@ STRINGS = {
         "uz_cyrillic": "Сиз администратор номидан фойдаланувчи анкетасини таҳрирляпсиз — фақат аниқ хатоларни (телефон, манзил, ном хатолари) тузатинг, мазмунини эмас.",
         "en": "You're editing this user's profile as an admin — fix only obvious errors (typos in phone, address, name), not the content itself.",
     },
+    "admin.edit": {
+        "ru": "Редактировать", "uz_latin": "Tahrirlash", "uz_cyrillic": "Таҳрирлаш", "en": "Edit",
+    },
+    "admin.editing_item_notice": {
+        "ru": "Вы редактируете эту запись от имени администратора — исправляйте только явные ошибки, а не содержание.",
+        "uz_latin": "Siz bu yozuvni administrator nomidan tahrirlayapsiz — faqat aniq xatolarni tuzating, mazmunini emas.",
+        "uz_cyrillic": "Сиз бу ёзувни администратор номидан таҳрирляпсиз — фақат аниқ хатоларни тузатинг, мазмунини эмас.",
+        "en": "You're editing this record as an admin — fix only obvious errors, not the content itself.",
+    },
 }
 
 
