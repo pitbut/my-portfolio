@@ -2456,10 +2456,10 @@ STRINGS = {
         "uz_cyrillic": "Бу ерда сизнинг рекламангиз бўлиши мумкин", "en": "Your ad could be here",
     },
     "home.ad_banner_admin_hint": {
-        "ru": "(видно только вам как администратору) Загрузите файл banner.jpg (или .png/.gif) в папку static/ad/ на сервере — картинка появится здесь автоматически.",
-        "uz_latin": "(faqat administrator sifatida sizga koʻrinadi) banner.jpg (yoki .png/.gif) faylini serverdagi static/ad/ papkasiga yuklang — rasm shu yerda avtomatik paydo boʻladi.",
-        "uz_cyrillic": "(фақат администратор сифатида сизга кўринади) banner.jpg (ёки .png/.gif) файлини сервердаги static/ad/ папкасига юкланг — расм шу ерда автоматик пайдо бўлади.",
-        "en": "(visible only to you as admin) Upload banner.jpg (or .png/.gif) to the static/ad/ folder on the server — the image will appear here automatically.",
+        "ru": "(видно только вам как администратору) Загрузите файл banner.mp4 (видео) или banner.jpg/.png/.gif (картинка) в папку static/ad/ на сервере — баннер появится здесь автоматически.",
+        "uz_latin": "(faqat administrator sifatida sizga koʻrinadi) banner.mp4 (video) yoki banner.jpg/.png/.gif (rasm) faylini serverdagi static/ad/ papkasiga yuklang — banner shu yerda avtomatik paydo boʻladi.",
+        "uz_cyrillic": "(фақат администратор сифатида сизга кўринади) banner.mp4 (видео) ёки banner.jpg/.png/.gif (расм) файлини сервердаги static/ad/ папкасига юкланг — баннер шу ерда автоматик пайдо бўлади.",
+        "en": "(visible only to you as admin) Upload banner.mp4 (video) or banner.jpg/.png/.gif (image) to the static/ad/ folder on the server — the banner will appear here automatically.",
     },
 }
 

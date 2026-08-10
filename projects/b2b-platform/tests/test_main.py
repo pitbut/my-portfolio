@@ -120,7 +120,8 @@ def test_home_page_shows_admin_hint_for_ad_banner_upload(client):
     _login_via_session(client, admin.id)
 
     resp = client.get("/")
-    assert "Загрузите файл banner.jpg".encode() in resp.data
+    assert "banner.mp4".encode() in resp.data
+    assert "banner.jpg".encode() in resp.data
 
 
 def test_home_page_shows_ad_image_when_file_uploaded(client):
@@ -135,6 +136,38 @@ def test_home_page_shows_ad_image_when_file_uploaded(client):
         assert b"home-banner__ad-text" not in resp.data
     finally:
         os.remove(banner_path)
+
+
+def test_home_page_shows_ad_video_when_file_uploaded(client):
+    ad_dir = os.path.join(client.application.static_folder, "ad")
+    os.makedirs(ad_dir, exist_ok=True)
+    banner_path = os.path.join(ad_dir, "banner.mp4")
+    with open(banner_path, "wb") as f:
+        f.write(b"fake video bytes")
+    try:
+        resp = client.get("/")
+        assert 'src="/static/ad/banner.mp4"'.encode() in resp.data
+        assert b"home-banner__ad-text" not in resp.data
+    finally:
+        os.remove(banner_path)
+
+
+def test_home_page_ad_video_takes_priority_over_image(client):
+    ad_dir = os.path.join(client.application.static_folder, "ad")
+    os.makedirs(ad_dir, exist_ok=True)
+    video_path = os.path.join(ad_dir, "banner.mp4")
+    image_path = os.path.join(ad_dir, "banner.jpg")
+    with open(video_path, "wb") as f:
+        f.write(b"fake video bytes")
+    with open(image_path, "wb") as f:
+        f.write(b"fake image bytes")
+    try:
+        resp = client.get("/")
+        assert 'src="/static/ad/banner.mp4"'.encode() in resp.data
+        assert 'src="/static/ad/banner.jpg"'.encode() not in resp.data
+    finally:
+        os.remove(video_path)
+        os.remove(image_path)
 
 
 def test_page_view_counter_counts_html_pages_and_ignores_static(client):
