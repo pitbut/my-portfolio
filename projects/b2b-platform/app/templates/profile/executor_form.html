@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Профиль исполнителя{% endblock %}
+{% block title %}{{ t('profile.executor_title') }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
@@ -7,12 +7,12 @@
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Профиль исполнителя</h1>
+  <h1>{{ t('profile.executor_title') }}</h1>
   <p class="profile-page__hint">
     {% if profile.is_complete %}
-      <span class="badge badge--ok">Профиль заполнен — участвует в подборе заказов</span>
+      <span class="badge badge--ok">{{ t('profile.executor_complete_badge') }}</span>
     {% else %}
-      <span class="badge badge--warn">Профиль не заполнен — пока не участвует в подборе заказов</span>
+      <span class="badge badge--warn">{{ t('profile.executor_incomplete_badge') }}</span>
     {% endif %}
   </p>
 
@@ -21,92 +21,92 @@
   {% set has_equipment = profile.equipment %}
   {% set has_services = profile.capability and profile.capability.service_categories %}
   <ul class="profile-checklist">
-    <li class="{{ 'is-done' if has_basic else 'is-missing' }}">{{ '✓' if has_basic else '—' }} 1. Основная информация (тип, название, регион, адрес)</li>
-    <li class="{{ 'is-done' if has_equipment else 'is-missing' }}">{{ '✓' if has_equipment else '—' }} 2. Станочный парк — добавлена хотя бы одна единица оборудования</li>
-    <li class="{{ 'is-done' if has_services else 'is-missing' }}">{{ '✓' if has_services else '—' }} 3. Выбрана хотя бы одна категория услуг ниже</li>
+    <li class="{{ 'is-done' if has_basic else 'is-missing' }}">{{ '✓' if has_basic else '—' }} {{ t('profile.checklist1') }}</li>
+    <li class="{{ 'is-done' if has_equipment else 'is-missing' }}">{{ '✓' if has_equipment else '—' }} {{ t('profile.checklist2') }}</li>
+    <li class="{{ 'is-done' if has_services else 'is-missing' }}">{{ '✓' if has_services else '—' }} {{ t('profile.checklist3') }}</li>
   </ul>
   {% endif %}
 
-  <h2 class="profile-section-title">1. Основная информация</h2>
+  <h2 class="profile-section-title">{{ t('profile.section_basic_info') }}</h2>
   <form method="post" action="{{ url_for('profile.executor_edit') }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <fieldset class="role-fieldset">
-      <legend>Тип организации *</legend>
-      <label><input type="radio" name="org_type" value="master" {{ 'checked' if profile.org_type == 'master' }} required> Мастер (частное лицо/ИП)</label>
-      <label><input type="radio" name="org_type" value="tsekh" {{ 'checked' if profile.org_type == 'tsekh' }}> Цех</label>
-      <label><input type="radio" name="org_type" value="zavod" {{ 'checked' if profile.org_type == 'zavod' }}> Завод</label>
+      <legend>{{ t('profile.org_type') }}</legend>
+      <label><input type="radio" name="org_type" value="master" {{ 'checked' if profile.org_type == 'master' }} required> {{ t('profile.org_master') }}</label>
+      <label><input type="radio" name="org_type" value="tsekh" {{ 'checked' if profile.org_type == 'tsekh' }}> {{ t('profile.org_tsekh') }}</label>
+      <label><input type="radio" name="org_type" value="zavod" {{ 'checked' if profile.org_type == 'zavod' }}> {{ t('profile.org_zavod') }}</label>
     </fieldset>
 
-    <label>Название цеха/завода или ФИО мастера *
+    <label>{{ t('profile.shop_name') }}
       <input type="text" name="display_name" value="{{ profile.display_name or '' }}" required>
     </label>
 
-    <label>Описание
-      <textarea name="description" rows="4" placeholder="Чем занимаетесь, какой опыт, какие работы выполняете">{{ profile.description or '' }}</textarea>
+    <label>{{ t('profile.description') }}
+      <textarea name="description" rows="4" placeholder="{{ t('profile.description_placeholder') }}">{{ profile.description or '' }}</textarea>
     </label>
 
-    <label>Контактный телефон
+    <label>{{ t('profile.phone') }}
       <input type="tel" name="phone" value="{{ current_user.phone or '' }}" placeholder="+998 90 123 45 67">
     </label>
 
-    <label>ИНН / СТИР
+    <label>{{ t('profile.stir_inn_short') }}
       <input type="text" name="stir_inn" value="{{ profile.stir_inn or '' }}">
     </label>
 
     <div class="form-row">
-      <label>Регион *
+      <label>{{ t('profile.region') }}
         <select name="region_id" id="region_id" required>
-          <option value="">— выберите —</option>
+          <option value="">{{ t('profile.select_placeholder') }}</option>
           {% for region in regions %}
             <option value="{{ region.id }}" {{ 'selected' if profile.region_id == region.id }}>{{ region.name_ru }}</option>
           {% endfor %}
         </select>
       </label>
-      <label>Город
+      <label>{{ t('profile.city') }}
         <select name="city_id" id="city_id" data-selected="{{ profile.city_id or '' }}">
-          <option value="">— сначала выберите регион —</option>
+          <option value="">{{ t('profile.city_placeholder') }}</option>
         </select>
       </label>
     </div>
 
-    <label>Адрес цеха/завода *
+    <label>{{ t('profile.shop_address') }}
       <input type="text" name="address_text" id="address_text" value="{{ profile.address_text or '' }}" required>
     </label>
-    <button type="button" id="geocodeAddressBtn" class="btn btn--secondary">Найти на карте по адресу</button>
+    <button type="button" id="geocodeAddressBtn" class="btn btn--secondary">{{ t('profile.find_on_map') }}</button>
 
-    <label>Уточните точку на карте (или поправьте маркер вручную — геокодер по адресу иногда ошибается)</label>
+    <label>{{ t('profile.map_hint_geocode') }}</label>
     <div id="locationMap" class="location-map"
          data-lat="{{ profile.latitude or '' }}" data-lng="{{ profile.longitude or '' }}"></div>
     <input type="hidden" name="latitude" id="latitude" value="{{ profile.latitude or '' }}">
     <input type="hidden" name="longitude" id="longitude" value="{{ profile.longitude or '' }}">
 
-    <label>Готовность выезжать на ремонт в радиусе, км
+    <label>{{ t('profile.service_radius') }}
       <input type="number" name="service_radius_km" min="0" max="1000" value="{{ profile.service_radius_km or 50 }}">
     </label>
 
-    <label class="checkbox-label"><input type="checkbox" name="has_design_engineer" value="1" {{ 'checked' if profile.has_design_engineer }}> Есть конструктор в штате (можем сами разработать чертёж)</label>
+    <label class="checkbox-label"><input type="checkbox" name="has_design_engineer" value="1" {{ 'checked' if profile.has_design_engineer }}> {{ t('profile.has_design_engineer') }}</label>
 
     <fieldset class="checkbox-fieldset">
-      <legend>Способ оплаты, который принимаете (необязательно)</legend>
+      <legend>{{ t('profile.payment_methods_legend') }}</legend>
       {% set selected_payment = csv_to_codes(profile.payment_methods) %}
       {% for code, label in payment_method_choices %}
         <label class="checkbox-label"><input type="checkbox" name="payment_methods" value="{{ code }}" {{ 'checked' if code in selected_payment }}> {{ label }}</label>
       {% endfor %}
     </fieldset>
 
-    <label>Загруженность сейчас, 1–10 (необязательно; 1 — свободен, 10 — полностью занят)
+    <label>{{ t('profile.workload_label') }}
       <input type="number" name="workload" min="1" max="10" value="{{ profile.workload or '' }}">
     </label>
 
-    <button type="submit" class="btn btn--primary">Сохранить основную информацию</button>
+    <button type="submit" class="btn btn--primary">{{ t('profile.save_basic_info') }}</button>
   </form>
 
-  <h2 class="profile-section-title">2. Станочный парк {% if not profile.id %}<span class="hint">(сначала сохраните основную информацию)</span>{% endif %}</h2>
+  <h2 class="profile-section-title">{{ t('profile.section_fleet') }} {% if not profile.id %}<span class="hint">{{ t('profile.save_basic_first') }}</span>{% endif %}</h2>
 
   {% if profile.equipment %}
   <table class="data-table">
-    <thead><tr><th>Оборудование</th><th>Модель</th><th>Кол-во</th><th>Примечания</th><th></th></tr></thead>
+    <thead><tr><th>{{ t('profile.table_equipment') }}</th><th>{{ t('profile.table_model') }}</th><th>{{ t('profile.table_qty') }}</th><th>{{ t('profile.table_notes') }}</th><th></th></tr></thead>
     <tbody>
       {% for item in profile.equipment %}
       <tr>
@@ -117,7 +117,7 @@
         <td>
           <form method="post" action="{{ url_for('profile.executor_equipment_delete', item_id=item.id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn-link btn-link--danger">Удалить</button>
+            <button type="submit" class="btn-link btn-link--danger">{{ t('common.delete') }}</button>
           </form>
         </td>
       </tr>
@@ -125,41 +125,41 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Станочный парк ещё не заполнен — без него профиль не будет участвовать в подборе заказов.</p>
+  <p class="empty-hint">{{ t('profile.fleet_empty') }}</p>
   {% endif %}
 
   <form method="post" action="{{ url_for('profile.executor_equipment_add') }}" class="profile-form profile-form--inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Тип оборудования
+    <label>{{ t('profile.equipment_type') }}
       <select name="equipment_type_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for eq in equipment_types %}
           <option value="{{ eq.id }}">{{ eq.name_ru }}</option>
         {% endfor %}
       </select>
     </label>
-    <label>Модель <input type="text" name="model_name" placeholder="напр. DMG MORI NLX 2500"></label>
-    <label>Кол-во <input type="number" name="quantity" min="1" value="1"></label>
-    <label>Примечания <input type="text" name="notes"></label>
-    <button type="submit" class="btn btn--secondary">Добавить оборудование</button>
+    <label>{{ t('profile.model_placeholder') }} <input type="text" name="model_name" placeholder="напр. DMG MORI NLX 2500"></label>
+    <label>{{ t('profile.qty_placeholder') }} <input type="number" name="quantity" min="1" value="1"></label>
+    <label>{{ t('profile.notes_placeholder') }} <input type="text" name="notes"></label>
+    <button type="submit" class="btn btn--secondary">{{ t('profile.add_equipment') }}</button>
   </form>
 
-  <h2 class="profile-section-title">3. Допустимые габариты, материалы и услуги</h2>
+  <h2 class="profile-section-title">{{ t('profile.section_capabilities') }}</h2>
   <form method="post" action="{{ url_for('profile.executor_capabilities_save') }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="form-row form-row--4">
-      <label>Макс. длина, мм <input type="number" name="max_length_mm" min="0" value="{{ profile.capability.max_length_mm if profile.capability else '' }}"></label>
-      <label>Макс. диаметр, мм <input type="number" name="max_diameter_mm" min="0" value="{{ profile.capability.max_diameter_mm if profile.capability else '' }}"></label>
-      <label>Макс. ширина, мм <input type="number" name="max_width_mm" min="0" value="{{ profile.capability.max_width_mm if profile.capability else '' }}"></label>
-      <label>Макс. высота, мм <input type="number" name="max_height_mm" min="0" value="{{ profile.capability.max_height_mm if profile.capability else '' }}"></label>
+      <label>{{ t('profile.max_length') }} <input type="number" name="max_length_mm" min="0" value="{{ profile.capability.max_length_mm if profile.capability else '' }}"></label>
+      <label>{{ t('profile.max_diameter') }} <input type="number" name="max_diameter_mm" min="0" value="{{ profile.capability.max_diameter_mm if profile.capability else '' }}"></label>
+      <label>{{ t('profile.max_width') }} <input type="number" name="max_width_mm" min="0" value="{{ profile.capability.max_width_mm if profile.capability else '' }}"></label>
+      <label>{{ t('profile.max_height') }} <input type="number" name="max_height_mm" min="0" value="{{ profile.capability.max_height_mm if profile.capability else '' }}"></label>
     </div>
-    <label>Макс. вес заготовки, кг
+    <label>{{ t('profile.max_weight') }}
       <input type="number" name="max_weight_kg" min="0" step="0.1" value="{{ profile.capability.max_weight_kg if profile.capability else '' }}">
     </label>
 
     <fieldset class="checkbox-fieldset">
-      <legend>Категории услуг (по ним идёт подбор заказов)</legend>
+      <legend>{{ t('profile.services_legend') }}</legend>
       {% set selected_services = profile.capability.service_categories|map(attribute='id')|list if profile.capability else [] %}
       {% for sc in service_categories %}
         <label class="checkbox-label">
@@ -170,7 +170,7 @@
     </fieldset>
 
     <fieldset class="checkbox-fieldset">
-      <legend>Материалы, с которыми работаете</legend>
+      <legend>{{ t('profile.materials_legend') }}</legend>
       {% set selected_materials = profile.capability.materials|map(attribute='id')|list if profile.capability else [] %}
       {% for m in materials %}
         <label class="checkbox-label">
@@ -180,7 +180,7 @@
       {% endfor %}
     </fieldset>
 
-    <button type="submit" class="btn btn--primary">Сохранить техвозможности</button>
+    <button type="submit" class="btn btn--primary">{{ t('profile.save_capabilities') }}</button>
   </form>
 
   {% with section_number=4 %}{% include "profile/_portfolio_section.html" %}{% endwith %}

@@ -346,6 +346,267 @@ STRINGS = {
     "auth.reset_password_page_title": {
         "ru": "Новый пароль", "uz_latin": "Yangi parol", "uz_cyrillic": "Янги парол", "en": "New password",
     },
+    "profile.customer_title": {
+        "ru": "Профиль заказчика", "uz_latin": "Buyurtmachi profili", "uz_cyrillic": "Буюртмачи профили",
+        "en": "Customer profile",
+    },
+    "profile.fill_hint": {
+        "ru": "Заполните карточку сами — это займёт пару минут. Обязательные поля отмечены *.",
+        "uz_latin": "Kartochkani oʻzingiz toʻldiring — bu bir necha daqiqa oladi. Majburiy maydonlar * bilan belgilangan.",
+        "uz_cyrillic": "Карточкани ўзингиз тўлдиринг — бу бир неча дақиқа олади. Мажбурий майдонлар * билан белгиланган.",
+        "en": "Fill in the form yourself — it takes a couple of minutes. Required fields are marked *.",
+    },
+    "profile.complete_badge": {
+        "ru": "Профиль заполнен", "uz_latin": "Profil toʻldirilgan", "uz_cyrillic": "Профиль тўлдирилган",
+        "en": "Profile complete",
+    },
+    "profile.incomplete_badge": {
+        "ru": "Профиль не заполнен", "uz_latin": "Profil toʻldirilmagan", "uz_cyrillic": "Профиль тўлдирилмаган",
+        "en": "Profile incomplete",
+    },
+    "profile.who_are_you": {
+        "ru": "Кто вы? *", "uz_latin": "Siz kimsiz? *", "uz_cyrillic": "Сиз кимсиз? *", "en": "Who are you? *",
+    },
+    "profile.individual": {
+        "ru": "Физическое лицо", "uz_latin": "Jismoniy shaxs", "uz_cyrillic": "Жисмоний шахс",
+        "en": "Individual",
+    },
+    "profile.company": {
+        "ru": "Компания (юр. лицо)", "uz_latin": "Kompaniya (yuridik shaxs)", "uz_cyrillic": "Компания (юридик шахс)",
+        "en": "Company (legal entity)",
+    },
+    "profile.company_or_name": {
+        "ru": "Название компании / ФИО *", "uz_latin": "Kompaniya nomi / F.I.Sh. *",
+        "uz_cyrillic": "Компания номи / Ф.И.Ш. *", "en": "Company name / Full name *",
+    },
+    "profile.phone": {
+        "ru": "Контактный телефон", "uz_latin": "Aloqa uchun telefon", "uz_cyrillic": "Алоқа учун телефон",
+        "en": "Contact phone",
+    },
+    "profile.stir_inn": {
+        "ru": "ИНН / СТИР (если компания)", "uz_latin": "STIR (agar kompaniya boʻlsa)",
+        "uz_cyrillic": "СТИР (агар компания бўлса)", "en": "Tax ID (if a company)",
+    },
+    "profile.region": {
+        "ru": "Регион *", "uz_latin": "Viloyat *", "uz_cyrillic": "Вилоят *", "en": "Region *",
+    },
+    "profile.select_placeholder": {
+        "ru": "— выберите —", "uz_latin": "— tanlang —", "uz_cyrillic": "— танланг —", "en": "— select —",
+    },
+    "profile.city": {
+        "ru": "Город", "uz_latin": "Shahar", "uz_cyrillic": "Шаҳар", "en": "City",
+    },
+    "profile.city_placeholder": {
+        "ru": "— сначала выберите регион —", "uz_latin": "— avval viloyatni tanlang —",
+        "uz_cyrillic": "— аввал вилоятни танланг —", "en": "— select region first —",
+    },
+    "profile.object_address": {
+        "ru": "Адрес объекта *", "uz_latin": "Obyekt manzili *", "uz_cyrillic": "Объект манзили *",
+        "en": "Site address *",
+    },
+    "profile.map_hint": {
+        "ru": "Уточните точку на карте (нажмите на карту, чтобы поставить/передвинуть маркер)",
+        "uz_latin": "Xaritada nuqtani aniqlashtiring (belgini qoʻyish/koʻchirish uchun xaritaga bosing)",
+        "uz_cyrillic": "Харитада нуқтани аниқлаштиринг (белгини қўйиш/кўчириш учун харитага босинг)",
+        "en": "Refine the point on the map (click the map to place/move the marker)",
+    },
+    "profile.save": {
+        "ru": "Сохранить профиль", "uz_latin": "Profilni saqlash", "uz_cyrillic": "Профилни сақлаш",
+        "en": "Save profile",
+    },
+    "profile.executor_title": {
+        "ru": "Профиль исполнителя", "uz_latin": "Ijrochi profili", "uz_cyrillic": "Ижрочи профили",
+        "en": "Executor profile",
+    },
+    "profile.executor_complete_badge": {
+        "ru": "Профиль заполнен — участвует в подборе заказов",
+        "uz_latin": "Profil toʻldirilgan — buyurtmalarni tanlashda ishtirok etadi",
+        "uz_cyrillic": "Профиль тўлдирилган — буюртмаларни танлашда иштирок этади",
+        "en": "Profile complete — participates in order matching",
+    },
+    "profile.executor_incomplete_badge": {
+        "ru": "Профиль не заполнен — пока не участвует в подборе заказов",
+        "uz_latin": "Profil toʻldirilmagan — hozircha buyurtmalarni tanlashda ishtirok etmaydi",
+        "uz_cyrillic": "Профиль тўлдирилмаган — ҳозирча буюртмаларни танлашда иштирок этмайди",
+        "en": "Profile incomplete — doesn't participate in order matching yet",
+    },
+    "profile.checklist1": {
+        "ru": "1. Основная информация (тип, название, регион, адрес)",
+        "uz_latin": "1. Asosiy maʼlumot (turi, nomi, viloyat, manzil)",
+        "uz_cyrillic": "1. Асосий маълумот (тури, номи, вилоят, манзил)",
+        "en": "1. Basic information (type, name, region, address)",
+    },
+    "profile.checklist2": {
+        "ru": "2. Станочный парк — добавлена хотя бы одна единица оборудования",
+        "uz_latin": "2. Stanoklar parki — kamida bitta uskuna qoʻshilgan",
+        "uz_cyrillic": "2. Станоклар парки — камида битта ускуна қўшилган",
+        "en": "2. Machine fleet — at least one piece of equipment added",
+    },
+    "profile.checklist3": {
+        "ru": "3. Выбрана хотя бы одна категория услуг ниже",
+        "uz_latin": "3. Quyida kamida bitta xizmat toifasi tanlangan",
+        "uz_cyrillic": "3. Қуйида камида битта хизмат тоифаси танланган",
+        "en": "3. At least one service category selected below",
+    },
+    "profile.section_basic_info": {
+        "ru": "1. Основная информация", "uz_latin": "1. Asosiy maʼlumot", "uz_cyrillic": "1. Асосий маълумот",
+        "en": "1. Basic information",
+    },
+    "profile.org_type": {
+        "ru": "Тип организации *", "uz_latin": "Tashkilot turi *", "uz_cyrillic": "Ташкилот тури *",
+        "en": "Organization type *",
+    },
+    "profile.org_master": {
+        "ru": "Мастер (частное лицо/ИП)", "uz_latin": "Usta (jismoniy shaxs/YaTT)",
+        "uz_cyrillic": "Уста (жисмоний шахс/ЯТТ)", "en": "Craftsman (individual/sole proprietor)",
+    },
+    "profile.org_tsekh": {
+        "ru": "Цех", "uz_latin": "Sex", "uz_cyrillic": "Сех", "en": "Shop",
+    },
+    "profile.org_zavod": {
+        "ru": "Завод", "uz_latin": "Zavod", "uz_cyrillic": "Завод", "en": "Factory",
+    },
+    "profile.shop_name": {
+        "ru": "Название цеха/завода или ФИО мастера *", "uz_latin": "Sex/zavod nomi yoki usta F.I.Sh. *",
+        "uz_cyrillic": "Сех/завод номи ёки уста Ф.И.Ш. *", "en": "Shop/factory name or craftsman's full name *",
+    },
+    "profile.description": {
+        "ru": "Описание", "uz_latin": "Tavsif", "uz_cyrillic": "Тавсиф", "en": "Description",
+    },
+    "profile.description_placeholder": {
+        "ru": "Чем занимаетесь, какой опыт, какие работы выполняете",
+        "uz_latin": "Nima bilan shugʻullanasiz, tajribangiz, qanday ishlarni bajarasiz",
+        "uz_cyrillic": "Нима билан шуғулланасиз, тажрибангиз, қандай ишларни бажарасиз",
+        "en": "What you do, your experience, what work you perform",
+    },
+    "profile.stir_inn_short": {
+        "ru": "ИНН / СТИР", "uz_latin": "STIR", "uz_cyrillic": "СТИР", "en": "Tax ID",
+    },
+    "profile.shop_address": {
+        "ru": "Адрес цеха/завода *", "uz_latin": "Sex/zavod manzili *", "uz_cyrillic": "Сех/завод манзили *",
+        "en": "Shop/factory address *",
+    },
+    "profile.find_on_map": {
+        "ru": "Найти на карте по адресу", "uz_latin": "Manzil boʻyicha xaritadan topish",
+        "uz_cyrillic": "Манзил бўйича харитадан топиш", "en": "Find on map by address",
+    },
+    "profile.map_hint_geocode": {
+        "ru": "Уточните точку на карте (или поправьте маркер вручную — геокодер по адресу иногда ошибается)",
+        "uz_latin": "Xaritada nuqtani aniqlashtiring (yoki belgini qoʻlda toʻgʻrilang — manzil boʻyicha geokoder baʼzan xato qiladi)",
+        "uz_cyrillic": "Харитада нуқтани аниқлаштиринг (ёки белгини қўлда тўғриланг — манзил бўйича геокодер баъзан хато қилади)",
+        "en": "Refine the point on the map (or adjust the marker manually — the address geocoder is sometimes wrong)",
+    },
+    "profile.service_radius": {
+        "ru": "Готовность выезжать на ремонт в радиусе, км", "uz_latin": "Taʼmirlashga borish radiusi, km",
+        "uz_cyrillic": "Таъмирлашга бориш радиуси, км", "en": "Willing to travel for repairs, radius in km",
+    },
+    "profile.has_design_engineer": {
+        "ru": "Есть конструктор в штате (можем сами разработать чертёж)",
+        "uz_latin": "Shtatda konstruktor bor (chizmani oʻzimiz tayyorlay olamiz)",
+        "uz_cyrillic": "Штатда конструктор бор (чизмани ўзимиз тайёрлай оламиз)",
+        "en": "We have an in-house designer (we can prepare drawings ourselves)",
+    },
+    "profile.payment_methods_legend": {
+        "ru": "Способ оплаты, который принимаете (необязательно)",
+        "uz_latin": "Qabul qiladigan toʻlov usuli (ixtiyoriy)",
+        "uz_cyrillic": "Қабул қиладиган тўлов усули (ихтиёрий)",
+        "en": "Payment methods you accept (optional)",
+    },
+    "profile.workload_label": {
+        "ru": "Загруженность сейчас, 1–10 (необязательно; 1 — свободен, 10 — полностью занят)",
+        "uz_latin": "Hozirgi yuklama, 1–10 (ixtiyoriy; 1 — boʻsh, 10 — toʻliq band)",
+        "uz_cyrillic": "Ҳозирги юклама, 1–10 (ихтиёрий; 1 — бўш, 10 — тўлиқ банд)",
+        "en": "Current workload, 1–10 (optional; 1 — free, 10 — fully booked)",
+    },
+    "profile.save_basic_info": {
+        "ru": "Сохранить основную информацию", "uz_latin": "Asosiy maʼlumotni saqlash",
+        "uz_cyrillic": "Асосий маълумотни сақлаш", "en": "Save basic information",
+    },
+    "profile.section_fleet": {
+        "ru": "2. Станочный парк", "uz_latin": "2. Stanoklar parki", "uz_cyrillic": "2. Станоклар парки",
+        "en": "2. Machine fleet",
+    },
+    "profile.save_basic_first": {
+        "ru": "(сначала сохраните основную информацию)", "uz_latin": "(avval asosiy maʼlumotni saqlang)",
+        "uz_cyrillic": "(аввал асосий маълумотни сақланг)", "en": "(save basic information first)",
+    },
+    "profile.table_equipment": {
+        "ru": "Оборудование", "uz_latin": "Uskuna", "uz_cyrillic": "Ускуна", "en": "Equipment",
+    },
+    "profile.table_model": {
+        "ru": "Модель", "uz_latin": "Model", "uz_cyrillic": "Модель", "en": "Model",
+    },
+    "profile.table_qty": {
+        "ru": "Кол-во", "uz_latin": "Soni", "uz_cyrillic": "Сони", "en": "Qty",
+    },
+    "profile.table_notes": {
+        "ru": "Примечания", "uz_latin": "Izohlar", "uz_cyrillic": "Изоҳлар", "en": "Notes",
+    },
+    "common.delete": {
+        "ru": "Удалить", "uz_latin": "Oʻchirish", "uz_cyrillic": "Ўчириш", "en": "Delete",
+    },
+    "profile.fleet_empty": {
+        "ru": "Станочный парк ещё не заполнен — без него профиль не будет участвовать в подборе заказов.",
+        "uz_latin": "Stanoklar parki hali toʻldirilmagan — u boʻlmasa, profil buyurtmalarni tanlashda ishtirok etmaydi.",
+        "uz_cyrillic": "Станоклар парки ҳали тўлдирилмаган — у бўлмаса, профиль буюртмаларни танлашда иштирок этмайди.",
+        "en": "The machine fleet isn't filled in yet — without it the profile won't participate in order matching.",
+    },
+    "profile.equipment_type": {
+        "ru": "Тип оборудования", "uz_latin": "Uskuna turi", "uz_cyrillic": "Ускуна тури", "en": "Equipment type",
+    },
+    "profile.model_placeholder": {
+        "ru": "Модель", "uz_latin": "Model", "uz_cyrillic": "Модель", "en": "Model",
+    },
+    "profile.qty_placeholder": {
+        "ru": "Кол-во", "uz_latin": "Soni", "uz_cyrillic": "Сони", "en": "Qty",
+    },
+    "profile.notes_placeholder": {
+        "ru": "Примечания", "uz_latin": "Izohlar", "uz_cyrillic": "Изоҳлар", "en": "Notes",
+    },
+    "profile.add_equipment": {
+        "ru": "Добавить оборудование", "uz_latin": "Uskuna qoʻshish", "uz_cyrillic": "Ускуна қўшиш",
+        "en": "Add equipment",
+    },
+    "profile.section_capabilities": {
+        "ru": "3. Допустимые габариты, материалы и услуги",
+        "uz_latin": "3. Ruxsat etilgan oʻlchamlar, materiallar va xizmatlar",
+        "uz_cyrillic": "3. Рухсат этилган ўлчамлар, материаллар ва хизматлар",
+        "en": "3. Allowed dimensions, materials and services",
+    },
+    "profile.max_length": {
+        "ru": "Макс. длина, мм", "uz_latin": "Maks. uzunlik, mm", "uz_cyrillic": "Макс. узунлик, мм",
+        "en": "Max length, mm",
+    },
+    "profile.max_diameter": {
+        "ru": "Макс. диаметр, мм", "uz_latin": "Maks. diametr, mm", "uz_cyrillic": "Макс. диаметр, мм",
+        "en": "Max diameter, mm",
+    },
+    "profile.max_width": {
+        "ru": "Макс. ширина, мм", "uz_latin": "Maks. kenglik, mm", "uz_cyrillic": "Макс. кенглик, мм",
+        "en": "Max width, mm",
+    },
+    "profile.max_height": {
+        "ru": "Макс. высота, мм", "uz_latin": "Maks. balandlik, mm", "uz_cyrillic": "Макс. баландлик, мм",
+        "en": "Max height, mm",
+    },
+    "profile.max_weight": {
+        "ru": "Макс. вес заготовки, кг", "uz_latin": "Zagotovkaning maks. og‘irligi, kg",
+        "uz_cyrillic": "Заготовканинг макс. оғирлиги, кг", "en": "Max workpiece weight, kg",
+    },
+    "profile.services_legend": {
+        "ru": "Категории услуг (по ним идёт подбор заказов)",
+        "uz_latin": "Xizmat toifalari (buyurtmalar shular boʻyicha tanlanadi)",
+        "uz_cyrillic": "Хизмат тоифалари (буюртмалар шулар бўйича танланади)",
+        "en": "Service categories (order matching is based on these)",
+    },
+    "profile.materials_legend": {
+        "ru": "Материалы, с которыми работаете", "uz_latin": "Ishlaydigan materiallaringiz",
+        "uz_cyrillic": "Ишлайдиган материалларингиз", "en": "Materials you work with",
+    },
+    "profile.save_capabilities": {
+        "ru": "Сохранить техвозможности", "uz_latin": "Texnik imkoniyatlarni saqlash",
+        "uz_cyrillic": "Техник имкониятларни сақлаш", "en": "Save technical capabilities",
+    },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
     },
