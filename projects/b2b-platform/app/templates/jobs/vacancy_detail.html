@@ -5,7 +5,7 @@
 <section class="wrap profile-page">
   <h1>{{ vacancy.title }}</h1>
   {% if not is_owner %}
-  <p><a href="{{ url_for('chat.thread', user_id=vacancy.employer_id) }}" class="btn-link">✉ Написать работодателю</a></p>
+  <p><a href="{{ url_for('chat.thread', user_id=vacancy.employer_id) }}" class="btn-link">{{ t('job.write_to_employer') }}</a></p>
   {% endif %}
   <p class="order-meta">
     <span>{{ vacancy.profession_category.name_ru }}</span>
@@ -15,7 +15,7 @@
   <p class="order-description">{{ vacancy.description }}</p>
 
   {% if is_owner %}
-    <h2 class="profile-section-title">Отклики ({{ responses|length }})</h2>
+    <h2 class="profile-section-title">{{ t('job.responses_section', count=responses|length) }}</h2>
     {% if responses %}
     <div class="notif-list">
       {% for r in responses %}
@@ -27,16 +27,16 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="empty-hint">Откликов пока нет.</p>
+    <p class="empty-hint">{{ t('job.no_responses') }}</p>
     {% endif %}
   {% elif my_response %}
-    <p class="empty-hint">Вы уже откликнулись на эту вакансию.</p>
+    <p class="empty-hint">{{ t('job.already_applied') }}</p>
   {% else %}
-    <h2 class="profile-section-title">Откликнуться</h2>
+    <h2 class="profile-section-title">{{ t('job.respond_section') }}</h2>
     <form method="post" action="{{ url_for('jobs.vacancy_apply', vacancy_id=vacancy.id) }}" class="profile-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label>Сопроводительное сообщение <textarea name="message" rows="3"></textarea></label>
-      <button type="submit" class="btn btn--primary">Откликнуться</button>
+      <label>{{ t('job.cover_message') }} <textarea name="message" rows="3"></textarea></label>
+      <button type="submit" class="btn btn--primary">{{ t('job.apply_btn') }}</button>
     </form>
   {% endif %}
 </section>

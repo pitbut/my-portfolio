@@ -1,37 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Новая вакансия{% endblock %}
+{% block title %}{{ t('job.new_vacancy_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Новая вакансия</h1>
+  <h1>{{ t('job.new_vacancy_title') }}</h1>
   <form method="post" action="{{ url_for('jobs.vacancy_new') }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Название *<input type="text" name="title" placeholder="напр. Токарь 5 разряда" required></label>
-    <label>Профессия *
+    <label>{{ t('job.title_field') }}<input type="text" name="title" placeholder="{{ t('job.title_placeholder') }}" required></label>
+    <label>{{ t('job.profession_required') }}
       <select name="profession_category_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for p in professions %}<option value="{{ p.id }}">{{ p.name_ru }}</option>{% endfor %}
       </select>
     </label>
-    <label>Описание, требования, условия *<textarea name="description" rows="4" required></textarea></label>
+    <label>{{ t('job.description_field') }}<textarea name="description" rows="4" required></textarea></label>
     <fieldset class="role-fieldset">
-      <legend>Тип занятости *</legend>
-      <label><input type="radio" name="employment_type" value="full_time" required> Полная занятость</label>
-      <label><input type="radio" name="employment_type" value="part_time"> Частичная занятость</label>
-      <label><input type="radio" name="employment_type" value="shift"> Вахта/смена</label>
-      <label><input type="radio" name="employment_type" value="contract"> Контракт/подряд</label>
+      <legend>{{ t('job.employment_type') }}</legend>
+      <label><input type="radio" name="employment_type" value="full_time" required> {{ t('job.full_time') }}</label>
+      <label><input type="radio" name="employment_type" value="part_time"> {{ t('job.part_time') }}</label>
+      <label><input type="radio" name="employment_type" value="shift"> {{ t('job.shift') }}</label>
+      <label><input type="radio" name="employment_type" value="contract"> {{ t('job.contract') }}</label>
     </fieldset>
     <div class="form-row">
-      <label>Зарплата от <input type="number" name="salary_min" min="0"></label>
-      <label>Зарплата до <input type="number" name="salary_max" min="0"></label>
+      <label>{{ t('job.salary_from') }} <input type="number" name="salary_min" min="0"></label>
+      <label>{{ t('job.salary_to') }} <input type="number" name="salary_max" min="0"></label>
     </div>
-    <label>Регион *
+    <label>{{ t('listing.region_required') }}
       <select name="region_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for r in regions %}<option value="{{ r.id }}">{{ r.name_ru }}</option>{% endfor %}
       </select>
     </label>
-    <button type="submit" class="btn btn--primary">Опубликовать вакансию</button>
+    <button type="submit" class="btn btn--primary">{{ t('job.publish_vacancy') }}</button>
   </form>
 </section>
 {% endblock %}

@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% block title %}Моё резюме{% endblock %}
+{% block title %}{{ t('resume.my_resume') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
-  <h1>Моё резюме</h1>
+  <h1>{{ t('resume.my_resume') }}</h1>
   <form method="post" action="{{ url_for('jobs.resume_edit') }}" class="profile-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Профессия *
+    <label>{{ t('job.profession_required') }}
       <select name="profession_category_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for p in professions %}
           <option value="{{ p.id }}" {{ 'selected' if resume and resume.profession_category_id == p.id }}>{{ p.name_ru }}</option>
         {% endfor %}
       </select>
     </label>
-    <label>Опыт работы, лет <input type="number" name="experience_years" min="0" value="{{ resume.experience_years if resume else '' }}"></label>
-    <label>О себе, навыки, с каким оборудованием умеете работать *
+    <label>{{ t('profile.experience_years') }} <input type="number" name="experience_years" min="0" value="{{ resume.experience_years if resume else '' }}"></label>
+    <label>{{ t('resume.about_skills') }}
       <textarea name="about" rows="5" required>{{ resume.about if resume else '' }}</textarea>
     </label>
-    <label>Ожидаемая зарплата <input type="number" name="expected_salary" min="0" value="{{ resume.expected_salary if resume else '' }}"></label>
-    <label>Регион *
+    <label>{{ t('resume.expected_salary') }} <input type="number" name="expected_salary" min="0" value="{{ resume.expected_salary if resume else '' }}"></label>
+    <label>{{ t('listing.region_required') }}
       <select name="region_id" required>
-        <option value="">— выберите —</option>
+        <option value="">{{ t('profile.select_placeholder') }}</option>
         {% for r in regions %}
           <option value="{{ r.id }}" {{ 'selected' if resume and resume.region_id == r.id }}>{{ r.name_ru }}</option>
         {% endfor %}
       </select>
     </label>
-    <button type="submit" class="btn btn--primary">{{ 'Обновить резюме' if resume else 'Опубликовать резюме' }}</button>
+    <button type="submit" class="btn btn--primary">{{ t('resume.update') if resume else t('resume.publish') }}</button>
   </form>
 </section>
 {% endblock %}

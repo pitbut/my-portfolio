@@ -1,23 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Вакансии{% endblock %}
+{% block title %}{{ t('job.vacancies_title') }}{% endblock %}
 
 {% block content %}
 <section class="wrap profile-page">
   <div class="page-head">
-    <h1>Вакансии</h1>
-    <a class="btn btn--primary" href="{{ url_for('jobs.vacancy_new') }}">+ Разместить вакансию</a>
+    <h1>{{ t('job.vacancies_title') }}</h1>
+    <a class="btn btn--primary" href="{{ url_for('jobs.vacancy_new') }}">+ {{ t('job.post_vacancy') }}</a>
   </div>
 
   <form method="get" class="map-filters">
-    <label>Профессия
+    <label>{{ t('job.filter_profession') }}
       <select name="profession_id" onchange="this.form.submit()">
-        <option value="">Все</option>
+        <option value="">{{ t('listing.filter_all') }}</option>
         {% for p in professions %}<option value="{{ p.id }}" {{ 'selected' if request.args.get('profession_id')|string == p.id|string }}>{{ p.name_ru }}</option>{% endfor %}
       </select>
     </label>
-    <label>Регион
+    <label>{{ t('listing.filter_region') }}
       <select name="region_id" onchange="this.form.submit()">
-        <option value="">Все</option>
+        <option value="">{{ t('listing.filter_all') }}</option>
         {% for r in regions %}<option value="{{ r.id }}" {{ 'selected' if request.args.get('region_id')|string == r.id|string }}>{{ r.name_ru }}</option>{% endfor %}
       </select>
     </label>
@@ -25,7 +25,7 @@
 
   {% if vacancies %}
   <table class="data-table">
-    <thead><tr><th>Вакансия</th><th>Профессия</th><th>Зарплата</th><th>Регион</th><th></th></tr></thead>
+    <thead><tr><th>{{ t('job.table_vacancy') }}</th><th>{{ t('job.table_profession') }}</th><th>{{ t('job.table_salary') }}</th><th>{{ t('listing.filter_region') }}</th><th></th></tr></thead>
     <tbody>
       {% for v in vacancies %}
       <tr>
@@ -33,13 +33,13 @@
         <td>{{ v.profession_category.name_ru }}</td>
         <td>{% if v.salary_min or v.salary_max %}{{ v.salary_min or '?' }}–{{ v.salary_max or '?' }} {{ v.currency }}{% else %}—{% endif %}</td>
         <td>{{ v.region.name_ru }}</td>
-        <td><a href="{{ url_for('jobs.vacancy_detail', vacancy_id=v.id) }}">Открыть</a></td>
+        <td><a href="{{ url_for('jobs.vacancy_detail', vacancy_id=v.id) }}">{{ t('common.open') }}</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p class="empty-hint">Пока нет вакансий по этим фильтрам.</p>
+  <p class="empty-hint">{{ t('job.no_vacancies') }}</p>
   {% endif %}
 </section>
 {% endblock %}

@@ -1228,6 +1228,9 @@ STRINGS = {
     "listing.filter_all": {
         "ru": "Все", "uz_latin": "Barchasi", "uz_cyrillic": "Барчаси", "en": "All",
     },
+    "listing.filter_region": {
+        "ru": "Регион", "uz_latin": "Viloyat", "uz_cyrillic": "Вилоят", "en": "Region",
+    },
     "listing.filter_category": {
         "ru": "Категория", "uz_latin": "Toifa", "uz_cyrillic": "Тоифа", "en": "Category",
     },
@@ -1416,6 +1419,177 @@ STRINGS = {
     },
     "material.unit_pcs": {
         "ru": "шт", "uz_latin": "dona", "uz_cyrillic": "дона", "en": "pcs",
+    },
+    "job.vacancies_title": {
+        "ru": "Вакансии", "uz_latin": "Ish oʻrinlari", "uz_cyrillic": "Иш ўринлари", "en": "Jobs",
+    },
+    "job.post_vacancy": {
+        "ru": "Разместить вакансию", "uz_latin": "Ish oʻrni joylashtirish", "uz_cyrillic": "Иш ўрни жойлаштириш",
+        "en": "Post a job",
+    },
+    "job.filter_profession": {
+        "ru": "Профессия", "uz_latin": "Kasb", "uz_cyrillic": "Касб", "en": "Profession",
+    },
+    "job.table_vacancy": {
+        "ru": "Вакансия", "uz_latin": "Ish oʻrni", "uz_cyrillic": "Иш ўрни", "en": "Job",
+    },
+    "job.table_profession": {
+        "ru": "Профессия", "uz_latin": "Kasb", "uz_cyrillic": "Касб", "en": "Profession",
+    },
+    "job.table_salary": {
+        "ru": "Зарплата", "uz_latin": "Ish haqi", "uz_cyrillic": "Иш ҳақи", "en": "Salary",
+    },
+    "job.no_vacancies": {
+        "ru": "Пока нет вакансий по этим фильтрам.", "uz_latin": "Bu filtrlar boʻyicha ish oʻrinlari hozircha yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича иш ўринлари ҳозирча йўқ.", "en": "No jobs match these filters yet.",
+    },
+    "job.new_vacancy_title": {
+        "ru": "Новая вакансия", "uz_latin": "Yangi ish oʻrni", "uz_cyrillic": "Янги иш ўрни", "en": "New job",
+    },
+    "job.title_field": {
+        "ru": "Название *", "uz_latin": "Nomi *", "uz_cyrillic": "Номи *", "en": "Title *",
+    },
+    "job.title_placeholder": {
+        "ru": "напр. Токарь 5 разряда", "uz_latin": "masalan, 5-toifali tokar", "uz_cyrillic": "масалан, 5-тоифали токар",
+        "en": "e.g. Lathe operator, grade 5",
+    },
+    "job.profession_required": {
+        "ru": "Профессия *", "uz_latin": "Kasb *", "uz_cyrillic": "Касб *", "en": "Profession *",
+    },
+    "job.description_field": {
+        "ru": "Описание, требования, условия *", "uz_latin": "Tavsif, talablar, shartlar *",
+        "uz_cyrillic": "Тавсиф, талаблар, шартлар *", "en": "Description, requirements, terms *",
+    },
+    "job.employment_type": {
+        "ru": "Тип занятости *", "uz_latin": "Bandlik turi *", "uz_cyrillic": "Бандлик тури *",
+        "en": "Employment type *",
+    },
+    "job.full_time": {
+        "ru": "Полная занятость", "uz_latin": "Toʻliq bandlik", "uz_cyrillic": "Тўлиқ бандлик",
+        "en": "Full time",
+    },
+    "job.part_time": {
+        "ru": "Частичная занятость", "uz_latin": "Qisman bandlik", "uz_cyrillic": "Қисман бандлик",
+        "en": "Part time",
+    },
+    "job.shift": {
+        "ru": "Вахта/смена", "uz_latin": "Vaxta/smena", "uz_cyrillic": "Вахта/смена", "en": "Shift work",
+    },
+    "job.contract": {
+        "ru": "Контракт/подряд", "uz_latin": "Shartnoma/pudrat", "uz_cyrillic": "Шартнома/пудрат",
+        "en": "Contract",
+    },
+    "job.salary_from": {
+        "ru": "Зарплата от", "uz_latin": "Ish haqi dan", "uz_cyrillic": "Иш ҳақи дан", "en": "Salary from",
+    },
+    "job.salary_to": {
+        "ru": "Зарплата до", "uz_latin": "Ish haqi gacha", "uz_cyrillic": "Иш ҳақи гача", "en": "Salary to",
+    },
+    "job.publish_vacancy": {
+        "ru": "Опубликовать вакансию", "uz_latin": "Ish oʻrnini eʼlon qilish", "uz_cyrillic": "Иш ўрнини эълон қилиш",
+        "en": "Publish job",
+    },
+    "job.write_to_employer": {
+        "ru": "✉ Написать работодателю", "uz_latin": "✉ Ish beruvchiga yozish", "uz_cyrillic": "✉ Иш берувчига ёзиш",
+        "en": "✉ Message the employer",
+    },
+    "job.responses_section": {
+        "ru": "Отклики ({count})", "uz_latin": "Takliflar ({count})", "uz_cyrillic": "Таклифлар ({count})",
+        "en": "Responses ({count})",
+    },
+    "job.no_responses": {
+        "ru": "Откликов пока нет.", "uz_latin": "Hozircha takliflar yoʻq.", "uz_cyrillic": "Ҳозирча таклифлар йўқ.",
+        "en": "No responses yet.",
+    },
+    "job.already_applied": {
+        "ru": "Вы уже откликнулись на эту вакансию.", "uz_latin": "Siz bu ish oʻrniga allaqachon murojaat qilgansiz.",
+        "uz_cyrillic": "Сиз бу иш ўрнига аллақачон мурожаат қилгансиз.", "en": "You've already applied to this job.",
+    },
+    "job.respond_section": {
+        "ru": "Откликнуться", "uz_latin": "Murojaat qilish", "uz_cyrillic": "Мурожаат қилиш", "en": "Apply",
+    },
+    "job.cover_message": {
+        "ru": "Сопроводительное сообщение", "uz_latin": "Qoʻshimcha xabar", "uz_cyrillic": "Қўшимча хабар",
+        "en": "Cover message",
+    },
+    "job.apply_btn": {
+        "ru": "Откликнуться", "uz_latin": "Murojaat qilish", "uz_cyrillic": "Мурожаат қилиш", "en": "Apply",
+    },
+    "resume.title": {
+        "ru": "Резюме", "uz_latin": "Rezyume", "uz_cyrillic": "Резюме", "en": "Resumes",
+    },
+    "resume.candidates_title": {
+        "ru": "Резюме соискателей", "uz_latin": "Nomzodlar rezyumelari", "uz_cyrillic": "Номзодлар резюмелари",
+        "en": "Candidate resumes",
+    },
+    "resume.my_resume": {
+        "ru": "Моё резюме", "uz_latin": "Mening rezyumem", "uz_cyrillic": "Менинг резюмем", "en": "My resume",
+    },
+    "resume.table_experience": {
+        "ru": "Опыт", "uz_latin": "Tajriba", "uz_cyrillic": "Тажриба", "en": "Experience",
+    },
+    "resume.table_salary_expectation": {
+        "ru": "Ожидания по зарплате", "uz_latin": "Ish haqi kutilmalari", "uz_cyrillic": "Иш ҳақи кутилмалари",
+        "en": "Salary expectation",
+    },
+    "resume.years_short": {
+        "ru": "{value} лет", "uz_latin": "{value} yil", "uz_cyrillic": "{value} йил", "en": "{value} years",
+    },
+    "resume.no_resumes": {
+        "ru": "Пока нет резюме по этим фильтрам.", "uz_latin": "Bu filtrlar boʻyicha rezyumelar hozircha yoʻq.",
+        "uz_cyrillic": "Бу фильтрлар бўйича резюмелар ҳозирча йўқ.", "en": "No resumes match these filters yet.",
+    },
+    "resume.about_skills": {
+        "ru": "О себе, навыки, с каким оборудованием умеете работать *",
+        "uz_latin": "O‘zingiz haqingizda, koʻnikmalar, qanday uskunalarda ishlay olasiz *",
+        "uz_cyrillic": "Ўзингиз ҳақингизда, кўникмалар, қандай ускуналарда ишлай оласиз *",
+        "en": "About you, skills, what equipment you can operate *",
+    },
+    "resume.expected_salary": {
+        "ru": "Ожидаемая зарплата", "uz_latin": "Kutilayotgan ish haqi", "uz_cyrillic": "Кутилаётган иш ҳақи",
+        "en": "Expected salary",
+    },
+    "resume.update": {
+        "ru": "Обновить резюме", "uz_latin": "Rezyumeni yangilash", "uz_cyrillic": "Резюмени янгилаш",
+        "en": "Update resume",
+    },
+    "resume.publish": {
+        "ru": "Опубликовать резюме", "uz_latin": "Rezyumeni eʼlon qilish", "uz_cyrillic": "Резюмени эълон қилиш",
+        "en": "Publish resume",
+    },
+    "resume.write_to_candidate": {
+        "ru": "✉ Написать кандидату", "uz_latin": "✉ Nomzodga yozish", "uz_cyrillic": "✉ Номзодга ёзиш",
+        "en": "✉ Message the candidate",
+    },
+    "resume.experience_label": {
+        "ru": "Опыт: {value} лет", "uz_latin": "Tajriba: {value} yil", "uz_cyrillic": "Тажриба: {value} йил",
+        "en": "Experience: {value} years",
+    },
+    "resume.expectations_label": {
+        "ru": "Ожидания: {value}", "uz_latin": "Kutilmalar: {value}", "uz_cyrillic": "Кутилмалар: {value}",
+        "en": "Expects: {value}",
+    },
+    "resume.invites_section": {
+        "ru": "Приглашения от работодателей ({count})", "uz_latin": "Ish beruvchilardan takliflar ({count})",
+        "uz_cyrillic": "Иш берувчилардан таклифлар ({count})", "en": "Invitations from employers ({count})",
+    },
+    "resume.no_invites": {
+        "ru": "Приглашений пока нет.", "uz_latin": "Hozircha takliflar yoʻq.", "uz_cyrillic": "Ҳозирча таклифлар йўқ.",
+        "en": "No invitations yet.",
+    },
+    "resume.already_invited": {
+        "ru": "Вы уже приглашали этого кандидата.", "uz_latin": "Siz bu nomzodni allaqachon taklif qilgansiz.",
+        "uz_cyrillic": "Сиз бу номзодни аллақачон таклиф қилгансиз.", "en": "You've already invited this candidate.",
+    },
+    "resume.invite_section": {
+        "ru": "Пригласить", "uz_latin": "Taklif qilish", "uz_cyrillic": "Таклиф қилиш", "en": "Invite",
+    },
+    "resume.invite_message_placeholder": {
+        "ru": "Расскажите о вакансии", "uz_latin": "Ish oʻrni haqida gapirib bering", "uz_cyrillic": "Иш ўрни ҳақида гапириб беринг",
+        "en": "Tell them about the job",
+    },
+    "resume.invite_btn": {
+        "ru": "Пригласить", "uz_latin": "Taklif qilish", "uz_cyrillic": "Таклиф қилиш", "en": "Invite",
     },
     "error.back_home": {
         "ru": "На главную", "uz_latin": "Bosh sahifaga", "uz_cyrillic": "Бош саҳифага", "en": "Back to home",
