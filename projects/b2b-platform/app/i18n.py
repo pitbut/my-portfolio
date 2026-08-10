@@ -2365,6 +2365,35 @@ STRINGS = {
         "uz_cyrillic": "{email} барча эълонлари билан бирга ўчирилсинми?",
         "en": "Delete {email} along with all their listings?",
     },
+    "admin.profile_heading": {
+        "ru": "Профиль и контакты", "uz_latin": "Profil va kontaktlar", "uz_cyrillic": "Профиль ва контактлар",
+        "en": "Profile and contacts",
+    },
+    "admin.no_profile_yet": {
+        "ru": "Пользователь ещё не заполнил анкету.", "uz_latin": "Foydalanuvchi hali anketani toʻldirmagan.",
+        "uz_cyrillic": "Фойдаланувчи ҳали анкетани тўлдирмаган.", "en": "The user hasn't filled out their profile yet.",
+    },
+    "admin.view_public_profile": {
+        "ru": "Открыть публичный профиль", "uz_latin": "Ochiq profilni ochish", "uz_cyrillic": "Очиқ профилни очиш",
+        "en": "Open public profile",
+    },
+    "admin.edit_profile_link": {
+        "ru": "Редактировать профиль", "uz_latin": "Profilni tahrirlash", "uz_cyrillic": "Профилни таҳрирлаш",
+        "en": "Edit profile",
+    },
+    "admin.contact_region_colon": {
+        "ru": "Регион:", "uz_latin": "Viloyat:", "uz_cyrillic": "Вилоят:", "en": "Region:",
+    },
+    "admin.save_changes": {
+        "ru": "Сохранить изменения", "uz_latin": "Oʻzgarishlarni saqlash", "uz_cyrillic": "Ўзгаришларни сақлаш",
+        "en": "Save changes",
+    },
+    "admin.editing_notice": {
+        "ru": "Вы редактируете анкету пользователя от имени администратора — исправляйте только явные ошибки (опечатки в телефоне, адресе, названии), а не содержание.",
+        "uz_latin": "Siz administrator nomidan foydalanuvchi anketasini tahrirlayapsiz — faqat aniq xatolarni (telefon, manzil, nom xatolari) tuzating, mazmunini emas.",
+        "uz_cyrillic": "Сиз администратор номидан фойдаланувчи анкетасини таҳрирляпсиз — фақат аниқ хатоларни (телефон, манзил, ном хатолари) тузатинг, мазмунини эмас.",
+        "en": "You're editing this user's profile as an admin — fix only obvious errors (typos in phone, address, name), not the content itself.",
+    },
 }
 
 

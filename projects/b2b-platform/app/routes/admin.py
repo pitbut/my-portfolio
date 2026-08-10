@@ -12,13 +12,17 @@ from sqlalchemy.exc import IntegrityError
 from app import db
 from app.decorators import role_required
 from app.models import (
+    City,
+    ConstructorProfile,
     CustomerProfile,
     Dispute,
+    ExecutorProfile,
     Listing,
     ListingResponse,
     MaterialListing,
     MaterialListingResponse,
     Order,
+    Region,
     Subscription,
     User,
     record_status_change,
@@ -27,6 +31,19 @@ from app.notify import notify
 from app.routes.disputes import _order_parties
 
 bp = Blueprint("admin", __name__)
+
+
+def _to_int(value):
+    value = (value or "").strip()
+    return int(value) if value.isdigit() else None
+
+
+def _to_float(value):
+    value = (value or "").strip()
+    try:
+        return float(value) if value else None
+    except ValueError:
+        return None
 
 OPEN_STATUSES = ("open", "evidence_collection", "in_review")
 RESOLUTION_STATUSES = ("resolved_customer", "resolved_executor", "resolved_partial")
@@ -143,9 +160,75 @@ def user_detail(user_id):
         Order.query.filter_by(customer_id=customer_profile.id).order_by(Order.created_at.desc()).all()
         if customer_profile else []
     )
+    profile = {
+        "customer": customer_profile,
+        "executor": user.executor_profile,
+        "constructor": user.constructor_profile,
+    }.get(user.role)
     return render_template(
         "admin/user_detail.html", target_user=user, listings=listings,
-        material_listings=material_listings, orders=orders,
+        material_listings=material_listings, orders=orders, profile=profile,
+    )
+
+
+@bp.route("/users/<int:user_id>/profile/edit", methods=["GET", "POST"])
+@role_required("admin")
+def edit_user_profile(user_id):
+    """Позволяет администратору увидеть контакты пользователя и поправить
+    анкету, если тот ввёл что-то неверно (опечатка в телефоне/адресе и т.п.) —
+    сам администратор анкеты не заполняет, только исправляет уже введённые
+    заказчиком/исполнителем/конструктором данные."""
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404)
+    if user.role not in ("customer", "executor", "constructor"):
+        abort(404)
+
+    if user.role == "customer":
+        profile = user.customer_profile or CustomerProfile(user_id=user.id)
+    elif user.role == "executor":
+        profile = user.executor_profile or ExecutorProfile(user_id=user.id)
+    else:
+        profile = user.constructor_profile or ConstructorProfile(user_id=user.id)
+
+    if request.method == "POST":
+        if profile.id is None:
+            db.session.add(profile)
+
+        user.phone = (request.form.get("phone") or "").strip() or None
+        profile.display_name = (request.form.get("display_name") or "").strip() or None
+        profile.region_id = _to_int(request.form.get("region_id"))
+        profile.city_id = _to_int(request.form.get("city_id"))
+        profile.latitude = _to_float(request.form.get("latitude"))
+        profile.longitude = _to_float(request.form.get("longitude"))
+
+        if profile.city_id and profile.region_id:
+            city = db.session.get(City, profile.city_id)
+            if city is None or city.region_id != profile.region_id:
+                profile.city_id = None
+
+        if user.role == "customer":
+            profile.kind = request.form.get("kind") if request.form.get("kind") in ("individual", "company") else None
+            profile.stir_inn = (request.form.get("stir_inn") or "").strip() or None
+            profile.address_text = (request.form.get("address_text") or "").strip() or None
+        elif user.role == "executor":
+            profile.org_type = request.form.get("org_type") if request.form.get("org_type") in ("master", "tsekh", "zavod") else None
+            profile.description = (request.form.get("description") or "").strip() or None
+            profile.stir_inn = (request.form.get("stir_inn") or "").strip() or None
+            profile.address_text = (request.form.get("address_text") or "").strip() or None
+        else:
+            profile.description = (request.form.get("description") or "").strip() or None
+            profile.experience_years = _to_int(request.form.get("experience_years"))
+            profile.portfolio_url = (request.form.get("portfolio_url") or "").strip() or None
+            profile.price_note = (request.form.get("price_note") or "").strip() or None
+
+        db.session.commit()
+        flash(f"Профиль {user.email} обновлён.", "success")
+        return redirect(url_for("admin.user_detail", user_id=user.id))
+
+    return render_template(
+        "admin/edit_profile.html", target_user=user, profile=profile,
+        regions=Region.query.order_by(Region.name_ru).all(),
     )
 
 
