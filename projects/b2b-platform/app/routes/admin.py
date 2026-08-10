@@ -25,6 +25,7 @@ from app.models import (
     MaterialListing,
     MaterialListingResponse,
     Order,
+    PageView,
     Region,
     ServiceCategory,
     Subscription,
@@ -96,6 +97,55 @@ def resolve_dispute(dispute_id):
 
     flash("Решение вынесено, стороны уведомлены.", "success")
     return redirect(url_for("admin.disputes_list"))
+
+
+ORDER_STATUSES = ("published", "assigned", "in_progress", "completed", "disputed", "cancelled")
+
+
+@bp.route("/orders")
+@role_required("admin")
+def orders_list():
+    """Лента всех заявок платформы — в отличие от orders.my_orders (только
+    свои заявки заказчика), администратору нужен обзор всего рынка, а не
+    пустой список (у админа нет своего CustomerProfile)."""
+    status_filter = request.args.get("status")
+    query = Order.query
+    if status_filter in ORDER_STATUSES:
+        query = query.filter_by(status=status_filter)
+    orders = query.order_by(Order.created_at.desc()).limit(200).all()
+    return render_template("admin/orders.html", orders=orders, status_filter=status_filter, order_statuses=ORDER_STATUSES)
+
+
+@bp.route("/stats")
+@role_required("admin")
+def stats():
+    """Счётчик посещений — считается по PageView (см. _count_page_view в
+    app/__init__.py). Разбивку по дням считаем в Python, а не SQL-группировкой
+    по дате: date()/DATE_TRUNC — по-разному работают в SQLite и PostgreSQL
+    (тот же урок, что и с поиском — см. app/routes/search.py)."""
+    from collections import Counter
+
+    today = date.today()
+    today_start = datetime(today.year, today.month, today.day)
+    total_views = PageView.query.count()
+    today_views = PageView.query.filter(PageView.created_at >= today_start).count()
+    known_visitors = db.session.query(PageView.user_id).filter(PageView.user_id.isnot(None)).distinct().count()
+
+    range_start_date = today - timedelta(days=13)
+    range_start = datetime(range_start_date.year, range_start_date.month, range_start_date.day)
+    recent_created_at = [
+        row[0] for row in db.session.query(PageView.created_at).filter(PageView.created_at >= range_start).all()
+    ]
+    counts_by_date = Counter(ts.date() for ts in recent_created_at)
+    daily = [
+        {"date": range_start_date + timedelta(days=i), "count": counts_by_date.get(range_start_date + timedelta(days=i), 0)}
+        for i in range(14)
+    ]
+
+    return render_template(
+        "admin/stats.html", total_views=total_views, today_views=today_views,
+        known_visitors=known_visitors, daily=daily,
+    )
 
 
 @bp.route("/subscriptions")
@@ -461,6 +511,9 @@ def delete_user(user_id):
         db.session.delete(listing)
     ListingResponse.query.filter_by(from_user_id=user.id).delete(synchronize_session=False)
     MaterialListingResponse.query.filter_by(from_user_id=user.id).delete(synchronize_session=False)
+    # PageView — просто лог посещений для статистики, не история сделки ни
+    # с кем, поэтому тоже чистим вместе с пользователем, а не отказываем.
+    PageView.query.filter_by(user_id=user.id).delete(synchronize_session=False)
 
     db.session.delete(user)
     try:

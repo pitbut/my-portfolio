@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin.stats_heading') }} {{ t('admin.panel_suffix') }}{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <h1>{{ t('admin.stats_heading') }}</h1>
+
+  <div class="hero__stats" style="justify-content:flex-start;margin-top:0;">
+    <div class="hero__stat" style="color:var(--ink);">
+      <span class="hero__stat-num" style="color:var(--accent2);">{{ total_views }}</span>
+      <span class="hero__stat-label" style="color:var(--sub);">{{ t('admin.stats_total_views') }}</span>
+    </div>
+    <div class="hero__stat" style="color:var(--ink);">
+      <span class="hero__stat-num" style="color:var(--accent2);">{{ today_views }}</span>
+      <span class="hero__stat-label" style="color:var(--sub);">{{ t('admin.stats_today_views') }}</span>
+    </div>
+    <div class="hero__stat" style="color:var(--ink);">
+      <span class="hero__stat-num" style="color:var(--accent2);">{{ known_visitors }}</span>
+      <span class="hero__stat-label" style="color:var(--sub);">{{ t('admin.stats_known_visitors') }}</span>
+    </div>
+  </div>
+
+  <h2 class="profile-section-title">{{ t('admin.stats_daily_heading') }}</h2>
+  <table class="data-table">
+    <thead><tr><th>{{ t('admin.th_date') }}</th><th>{{ t('admin.stats_total_views') }}</th></tr></thead>
+    <tbody>
+      {% for row in daily|reverse %}
+      <tr>
+        <td>{{ row.date.strftime('%d.%m.%Y') }}</td>
+        <td>{{ row.count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="empty-hint">{{ t('admin.stats_note') }}</p>
+</section>
+{% endblock %}
