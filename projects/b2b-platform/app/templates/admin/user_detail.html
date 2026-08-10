@@ -13,6 +13,29 @@
          date=target_user.created_at.strftime('%d.%m.%Y')) }}
   </p>
 
+  {% if target_user.role in ('customer', 'executor', 'constructor') %}
+  <h2 class="profile-section-title">{{ t('admin.profile_heading') }}</h2>
+  {% if profile %}
+  <p class="order-meta">
+    <span>{{ t('profile.phone_colon') }} {{ target_user.phone or '—' }}</span>
+    {% if profile.region %}<span>{{ t('admin.contact_region_colon') }} {{ profile.region.name_ru }}{% if profile.city %}, {{ profile.city.name_ru }}{% endif %}</span>{% endif %}
+    {% if target_user.role in ('customer', 'executor') %}<span>{{ t('profile.address_colon') }} {{ profile.address_text or '—' }}</span>{% endif %}
+  </p>
+  {% else %}
+  <p class="empty-hint">{{ t('admin.no_profile_yet') }}</p>
+  {% endif %}
+  <p>
+    {% if profile and target_user.role == 'customer' %}
+    <a href="{{ url_for('profile.customer_public_profile', user_id=target_user.id) }}" class="btn-link">{{ t('admin.view_public_profile') }}</a>
+    {% elif profile and target_user.role == 'executor' %}
+    <a href="{{ url_for('profile.executor_public_profile', user_id=target_user.id) }}" class="btn-link">{{ t('admin.view_public_profile') }}</a>
+    {% elif profile and target_user.role == 'constructor' and profile.is_complete %}
+    <a href="{{ url_for('constructors.detail', constructor_id=profile.id) }}" class="btn-link">{{ t('admin.view_public_profile') }}</a>
+    {% endif %}
+    <a href="{{ url_for('admin.edit_user_profile', user_id=target_user.id) }}" class="btn-link">{{ t('admin.edit_profile_link') }}</a>
+  </p>
+  {% endif %}
+
   <h2>{{ t('admin.orders_heading', count=orders|length) }}</h2>
   {% if orders %}
   <table class="data-table">

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ target_user.email }} {{ t('admin.panel_suffix') }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block content %}
+<section class="wrap profile-page">
+  <p><a href="{{ url_for('admin.user_detail', user_id=target_user.id) }}">{{ t('admin.user_detail_back') }}</a></p>
+  <h1>{{ t('admin.edit_profile_link') }} — {{ target_user.email }}</h1>
+  <p class="empty-hint">{{ t('admin.editing_notice') }}</p>
+
+  <form method="post" class="profile-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {% if target_user.role == 'customer' %}
+    <fieldset class="role-fieldset">
+      <legend>{{ t('profile.who_are_you') }}</legend>
+      <label><input type="radio" name="kind" value="individual" {{ 'checked' if profile.kind == 'individual' }}> {{ t('profile.individual') }}</label>
+      <label><input type="radio" name="kind" value="company" {{ 'checked' if profile.kind == 'company' }}> {{ t('profile.company') }}</label>
+    </fieldset>
+    <label>{{ t('profile.company_or_name') }}
+      <input type="text" name="display_name" value="{{ profile.display_name or '' }}">
+    </label>
+    {% elif target_user.role == 'executor' %}
+    <fieldset class="role-fieldset">
+      <legend>{{ t('profile.org_type') }}</legend>
+      <label><input type="radio" name="org_type" value="master" {{ 'checked' if profile.org_type == 'master' }}> {{ t('profile.org_master') }}</label>
+      <label><input type="radio" name="org_type" value="tsekh" {{ 'checked' if profile.org_type == 'tsekh' }}> {{ t('profile.org_tsekh') }}</label>
+      <label><input type="radio" name="org_type" value="zavod" {{ 'checked' if profile.org_type == 'zavod' }}> {{ t('profile.org_zavod') }}</label>
+    </fieldset>
+    <label>{{ t('profile.shop_name') }}
+      <input type="text" name="display_name" value="{{ profile.display_name or '' }}">
+    </label>
+    <label>{{ t('profile.description') }}
+      <textarea name="description" rows="4">{{ profile.description or '' }}</textarea>
+    </label>
+    {% else %}
+    <label>{{ t('profile.studio_name') }}
+      <input type="text" name="display_name" value="{{ profile.display_name or '' }}">
+    </label>
+    <label>{{ t('profile.about_specialization') }}
+      <textarea name="description" rows="4">{{ profile.description or '' }}</textarea>
+    </label>
+    <label>{{ t('profile.experience_years') }}
+      <input type="number" name="experience_years" min="0" max="60" value="{{ profile.experience_years or '' }}">
+    </label>
+    <label>{{ t('profile.portfolio_link') }}
+      <input type="url" name="portfolio_url" value="{{ profile.portfolio_url or '' }}" placeholder="https://...">
+    </label>
+    <label>{{ t('profile.price_note') }}
+      <input type="text" name="price_note" value="{{ profile.price_note or '' }}" placeholder="{{ t('profile.price_note_placeholder') }}">
+    </label>
+    {% endif %}
+
+    <label>{{ t('profile.phone') }}
+      <input type="tel" name="phone" value="{{ target_user.phone or '' }}" placeholder="+998 90 123 45 67">
+    </label>
+
+    {% if target_user.role in ('customer', 'executor') %}
+    <label>{{ t('profile.stir_inn') }}
+      <input type="text" name="stir_inn" value="{{ profile.stir_inn or '' }}">
+    </label>
+    {% endif %}
+
+    <div class="form-row">
+      <label>{{ t('profile.region') }}
+        <select name="region_id" id="region_id">
+          <option value="">{{ t('profile.select_placeholder') }}</option>
+          {% for region in regions %}
+            <option value="{{ region.id }}" {{ 'selected' if profile.region_id == region.id }}>{{ region.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>{{ t('profile.city') }}
+        <select name="city_id" id="city_id" data-selected="{{ profile.city_id or '' }}">
+          <option value="">{{ t('profile.city_placeholder') }}</option>
+        </select>
+      </label>
+    </div>
+
+    {% if target_user.role in ('customer', 'executor') %}
+    <label>{{ t('profile.object_address') }}
+      <input type="text" name="address_text" id="address_text" value="{{ profile.address_text or '' }}">
+    </label>
+    {% endif %}
+
+    <label>{{ t('profile.map_hint_optional') }}</label>
+    <div id="locationMap" class="location-map"
+         data-lat="{{ profile.latitude or '' }}" data-lng="{{ profile.longitude or '' }}"></div>
+    <input type="hidden" name="latitude" id="latitude" value="{{ profile.latitude or '' }}">
+    <input type="hidden" name="longitude" id="longitude" value="{{ profile.longitude or '' }}">
+
+    <button type="submit" class="btn btn--primary">{{ t('admin.save_changes') }}</button>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  initRegionCityCascade('region_id', 'city_id');
+  initLocationMap('locationMap', 'latitude', 'longitude');
+});
+</script>
+{% endblock %}

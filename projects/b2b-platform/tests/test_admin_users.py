@@ -272,3 +272,49 @@ def test_delete_user_with_messages_fails_gracefully(client):
     assert "не удалось удалить".encode() in resp.data
     with client.application.app_context():
         assert db.session.get(User, chatty_id) is not None
+
+
+def test_admin_can_view_and_fix_user_contacts(client):
+    """Админ должен видеть телефон/адрес зарегистрировавшегося пользователя
+    прямо в карточке и иметь возможность поправить анкету, если данные
+    введены неверно (см. жалобу пользователя — контактов не было видно и
+    нечем было их исправить)."""
+    register(client, email="fixme@example.com", role="customer")
+    with client.application.app_context():
+        region_id = Region.query.first().id
+    client.post(
+        "/profile/customer",
+        data={
+            "kind": "individual", "display_name": "Иван", "region_id": str(region_id),
+            "address_text": "Старый адрес", "phone": "+998900000000",
+        },
+        follow_redirects=True,
+    )
+    client.get("/auth/logout")
+    with client.application.app_context():
+        target_id = User.query.filter_by(email="fixme@example.com").first().id
+    _make_admin(client)
+    _login(client, "admin@example.com", "adminpass123")
+
+    resp = client.get(f"/admin/users/{target_id}")
+    assert resp.status_code == 200
+    assert "+998900000000".encode() in resp.data
+    assert "Старый адрес".encode() in resp.data
+
+    resp = client.get(f"/admin/users/{target_id}/profile/edit")
+    assert resp.status_code == 200
+    assert "Старый адрес".encode() in resp.data
+
+    resp = client.post(
+        f"/admin/users/{target_id}/profile/edit",
+        data={
+            "display_name": "Иван", "phone": "+998901234567", "region_id": str(region_id),
+            "address_text": "Новый адрес",
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with client.application.app_context():
+        updated = db.session.get(User, target_id)
+        assert updated.phone == "+998901234567"
+        assert updated.customer_profile.address_text == "Новый адрес"
