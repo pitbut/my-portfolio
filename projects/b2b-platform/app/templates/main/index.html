@@ -40,8 +40,15 @@
   </div>
 
   <div class="home-banner home-banner--ad">
+    {% if ad_banner_filename %}
+    <img src="{{ url_for('static', filename=ad_banner_filename) }}" alt="{{ t('home.ad_banner_text') }}" class="home-banner__ad-img">
+    {% else %}
     <span class="home-banner__icon">📣</span>
     <p class="home-banner__ad-text">{{ t('home.ad_banner_text') }}</p>
+    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+    <p class="hint">{{ t('home.ad_banner_admin_hint') }}</p>
+    {% endif %}
+    {% endif %}
   </div>
 </section>
 

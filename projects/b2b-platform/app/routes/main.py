@@ -10,6 +10,14 @@ from app.i18n import SUPPORTED_LANGUAGES
 bp = Blueprint("main", __name__)
 
 INTRO_VIDEO_FILENAME = "video/intro.mp4"
+AD_BANNER_FILENAMES = ("ad/banner.jpg", "ad/banner.jpeg", "ad/banner.png", "ad/banner.gif")
+
+
+def _find_ad_banner_filename():
+    for filename in AD_BANNER_FILENAMES:
+        if os.path.isfile(os.path.join(current_app.static_folder, filename)):
+            return filename
+    return None
 
 
 @bp.route("/")
@@ -29,14 +37,15 @@ def index():
     }
     stats["total"] = stats["customer"] + stats["executor"] + stats["constructor"]
 
-    # Видео на главной — «честная деградация»: пока администратор не залил
-    # файл на сервер (через FTP, без правок кода), вместо баннера с видео
-    # показываем заглушку с подсказкой, а не сломанный плеер.
+    # Видео и рекламный баннер на главной — «честная деградация»: пока
+    # администратор не залил файл на сервер (через FTP, без правок кода),
+    # вместо баннера показываем заглушку с подсказкой, а не сломанную ссылку.
     intro_video_available = os.path.isfile(os.path.join(current_app.static_folder, INTRO_VIDEO_FILENAME))
+    ad_banner_filename = _find_ad_banner_filename()
 
     return render_template(
         "main/index.html", auth_required=auth_required, next_url=next_url, stats=stats,
-        intro_video_available=intro_video_available,
+        intro_video_available=intro_video_available, ad_banner_filename=ad_banner_filename,
     )
 
 

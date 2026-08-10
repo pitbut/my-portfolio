@@ -108,3 +108,30 @@ def test_home_page_shows_video_player_when_file_uploaded(client):
         assert "Скоро здесь появится короткое видео".encode() not in resp.data
     finally:
         os.remove(video_path)
+
+
+def test_home_page_shows_admin_hint_for_ad_banner_upload(client):
+    admin = User(
+        email="admin3@example.com", password_hash=generate_password_hash("adminpass123"),
+        role="admin", email_confirmed=True,
+    )
+    db.session.add(admin)
+    db.session.commit()
+    _login_via_session(client, admin.id)
+
+    resp = client.get("/")
+    assert "Загрузите файл banner.jpg".encode() in resp.data
+
+
+def test_home_page_shows_ad_image_when_file_uploaded(client):
+    ad_dir = os.path.join(client.application.static_folder, "ad")
+    os.makedirs(ad_dir, exist_ok=True)
+    banner_path = os.path.join(ad_dir, "banner.jpg")
+    with open(banner_path, "wb") as f:
+        f.write(b"fake image bytes")
+    try:
+        resp = client.get("/")
+        assert 'src="/static/ad/banner.jpg"'.encode() in resp.data
+        assert b"home-banner__ad-text" not in resp.data
+    finally:
+        os.remove(banner_path)

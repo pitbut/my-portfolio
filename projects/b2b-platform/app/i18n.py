@@ -2423,6 +2423,12 @@ STRINGS = {
         "ru": "Здесь может быть ваша реклама", "uz_latin": "Bu yerda sizning reklamangiz boʻlishi mumkin",
         "uz_cyrillic": "Бу ерда сизнинг рекламангиз бўлиши мумкин", "en": "Your ad could be here",
     },
+    "home.ad_banner_admin_hint": {
+        "ru": "(видно только вам как администратору) Загрузите файл banner.jpg (или .png/.gif) в папку static/ad/ на сервере — картинка появится здесь автоматически.",
+        "uz_latin": "(faqat administrator sifatida sizga koʻrinadi) banner.jpg (yoki .png/.gif) faylini serverdagi static/ad/ papkasiga yuklang — rasm shu yerda avtomatik paydo boʻladi.",
+        "uz_cyrillic": "(фақат администратор сифатида сизга кўринади) banner.jpg (ёки .png/.gif) файлини сервердаги static/ad/ папкасига юкланг — расм шу ерда автоматик пайдо бўлади.",
+        "en": "(visible only to you as admin) Upload banner.jpg (or .png/.gif) to the static/ad/ folder on the server — the image will appear here automatically.",
+    },
 }
 
 
