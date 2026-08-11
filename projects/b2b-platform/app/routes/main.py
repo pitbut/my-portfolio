@@ -71,6 +71,72 @@ def set_language(lang):
     return redirect(request.referrer or url_for("main.index"))
 
 
+_ROBOTS_TXT = """User-agent: *
+Disallow: /lang/
+Disallow: /auth/logout
+Disallow: /auth/confirm/
+Disallow: /auth/reset-password/
+Disallow: /auth/google/
+Disallow: /auth/choose-role
+Disallow: /profile/
+Disallow: /orders/
+Disallow: /dashboard
+Disallow: /messages/
+Disallow: /settings/
+Disallow: /admin/
+Disallow: /map
+Disallow: /search
+Disallow: /constructors/
+Disallow: /marketplace/
+Disallow: /materials/
+Disallow: /jobs/
+Disallow: /disputes/
+Disallow: /reviews/
+Disallow: /push/
+Disallow: /telegram/
+Disallow: /notifications
+
+Sitemap: {sitemap_url}
+"""
+
+
+def _public_base_url():
+    """Публичный домен для абсолютных ссылок в robots.txt/sitemap.xml — берём
+    из PUBLIC_BASE_URL, если задан (см. config.py), иначе строим из самого
+    запроса (для локальной разработки, где эта переменная не нужна)."""
+    configured = current_app.config.get("PUBLIC_BASE_URL")
+    return (configured or request.url_root).rstrip("/")
+
+
+@bp.route("/robots.txt")
+def robots_txt():
+    """Без этого файла поисковики ползают по всем ссылкам подряд, включая
+    служебные (/lang/..., переключение языка) и закрытые логином разделы
+    (объявления, анкеты, заявки и т.п.) — те всё равно отдают анонимному
+    боту редирект на главную, поэтому индексировать там нечего."""
+    body = _ROBOTS_TXT.format(sitemap_url=f"{_public_base_url()}/sitemap.xml")
+    return current_app.response_class(body, mimetype="text/plain")
+
+
+@bp.route("/sitemap.xml")
+def sitemap_xml():
+    """Реально публичных страниц у сайта немного — из-за «жёсткого paywall»
+    (модуль 1 ТЗ) весь предметный контент открывается только после входа.
+    Список специально короткий и честный, а не список всего подряд."""
+    base = _public_base_url()
+    pages = [
+        (base + "/", "daily", "1.0"),
+        (base + url_for("auth.register"), "monthly", "0.8"),
+        (base + url_for("auth.login"), "monthly", "0.5"),
+    ]
+    entries = "\n".join(
+        f"  <url><loc>{loc}</loc><changefreq>{freq}</changefreq><priority>{priority}</priority></url>"
+        for loc, freq, priority in pages
+    )
+    xml = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{entries}\n</urlset>\n'
+    return current_app.response_class(xml, mimetype="application/xml")
+
+
 @bp.route("/notifications")
 @paywall_required
 def notifications():
