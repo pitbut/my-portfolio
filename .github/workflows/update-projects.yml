@@ -24,17 +24,20 @@ jobs:
       
       - name: Generate projects.json
         run: node .github/scripts/generate-projects.js
-      
+
+      - name: Generate sitemap.xml
+        run: node .github/scripts/generate-sitemap.js
+
       - name: Check for changes
         id: check_changes
         run: |
-          git diff --quiet projects.json || echo "changed=true" >> $GITHUB_OUTPUT
-      
+          git diff --quiet projects.json sitemap.xml || echo "changed=true" >> $GITHUB_OUTPUT
+
       - name: Commit and push changes
         if: steps.check_changes.outputs.changed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add projects.json
-          git commit -m "🚀 Auto-update projects.json [skip ci]"
+          git add projects.json sitemap.xml
+          git commit -m "🚀 Auto-update projects.json and sitemap.xml [skip ci]"
           git push
