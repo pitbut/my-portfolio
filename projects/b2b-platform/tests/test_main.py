@@ -187,3 +187,36 @@ def test_page_view_counter_counts_html_pages_and_ignores_static(client):
     with client.application.app_context():
         after_static = PageView.query.count()
         assert after_static == after_html
+
+
+def test_robots_txt_disallows_private_sections(client):
+    resp = client.get("/robots.txt")
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/plain"
+    body = resp.get_data(as_text=True)
+    assert "Disallow: /lang/" in body
+    assert "Disallow: /profile/" in body
+    assert "Disallow: /admin/" in body
+    assert "Sitemap:" in body
+    assert "/sitemap.xml" in body
+
+
+def test_sitemap_xml_lists_only_genuinely_public_pages(client):
+    resp = client.get("/sitemap.xml")
+    assert resp.status_code == 200
+    assert resp.mimetype == "application/xml"
+    body = resp.get_data(as_text=True)
+    assert "<loc>" in body
+    assert "/auth/register</loc>" in body
+    assert "/auth/login</loc>" in body
+    # закрытые логином разделы в карте сайта быть не должны
+    assert "/marketplace" not in body
+    assert "/profile/" not in body
+
+
+def test_sitemap_uses_configured_public_base_url(client):
+    client.application.config["PUBLIC_BASE_URL"] = "https://b2b.robutpit.com"
+    resp = client.get("/sitemap.xml")
+    body = resp.get_data(as_text=True)
+    assert "https://b2b.robutpit.com/" in body
+    assert "http://localhost" not in body

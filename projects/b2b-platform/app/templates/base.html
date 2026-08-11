@@ -20,7 +20,7 @@
     <div class="header-right">
       <div class="lang-switch">
         {% for code in supported_languages %}
-          <a href="{{ url_for('main.set_language', lang=code) }}"
+          <a href="{{ url_for('main.set_language', lang=code) }}" rel="nofollow"
              class="lang-switch__item {{ 'is-active' if code == current_lang }}">{{ language_labels[code] }}</a>
         {% endfor %}
       </div>
