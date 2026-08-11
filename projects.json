@@ -341,11 +341,11 @@
     ]
   },
   {
-    "id": "kalkulyator proizvodstva",
+    "id": "kalkulyator-proizvodstva",
     "title": "💰 Калькулятор производства",
     "description": "Профессиональный расчет стоимости изготовления деталей. Учет материалов, времени работы, сотрудников и дополнительных расходов.",
-    "image": "projects/kalkulyator proizvodstva/preview.jpg",
-    "link": "projects/kalkulyator proizvodstva/index.html",
+    "image": "projects/kalkulyator-proizvodstva/preview.jpg",
+    "link": "projects/kalkulyator-proizvodstva/index.html",
     "date": "2024-12-10",
     "tags": [
       "Производство",

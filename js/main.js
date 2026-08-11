@@ -74,8 +74,8 @@ function createProjectCard(project, index) {
     
     card.innerHTML = `
         <div class="project-image">
-            <img src="${project.image}" 
-                 alt="${project.title}" 
+            <img src="${encodeURI(project.image)}"
+                 alt="${project.title}"
                  onerror="this.src='https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(project.title)}'">
         </div>
         <div class="project-content">
@@ -83,7 +83,7 @@ function createProjectCard(project, index) {
             ${dateHTML}
             <p>${project.description}</p>
             ${tagsHTML}
-            <a href="${project.link}" class="project-link">Открыть проект →</a>
+            <a href="${encodeURI(project.link)}" class="project-link">Открыть проект →</a>
         </div>
     `;
     
