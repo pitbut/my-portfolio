@@ -24,7 +24,16 @@
  * - `answer` (STATE.awaiting = student_answer/student_confirmation) —
  *   тайм-аут 18 сек. Тишина — один раз переспрашиваем голосом ("не
  *   расслышал, повтори") и ждём ещё 18 сек; вторая тишина — отправляем
- *   модели служебную пометку `NO_ANSWER_MARKER`. */
+ *   модели служебную пометку `NO_ANSWER_MARKER`.
+ *
+ * Если это повторяется несколько раз подряд (см. AWAY_THRESHOLD) — скорее
+ * всего, ученик просто отошёл от компьютера, а не "не расслышал". Слушать
+ * микрофон дальше в этом случае бессмысленно и рискованно (снова поймает
+ * случайный звук и отправит его как ответ). Вместо этого показываем
+ * баннер с кнопкой "Я здесь, продолжай" — рекомендации ученика вернуться
+ * без камеры (её в проекте нет, см. README) взять неоткуда, кроме как по
+ * числу подряд идущих NO_ANSWER_MARKER, поэтому считаем через localStorage
+ * (переживает перезагрузку страницы между ходами занятия). */
 
 document.addEventListener("DOMContentLoaded", () => {
   const avatarEl = document.getElementById("avatar-widget");
@@ -39,6 +48,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const answerMode = awaiting === "student_answer" || awaiting === "student_confirmation";
   const willSpeak = avatarEl.dataset.autoplay === "true";
   const ANSWER_TIMEOUT_MS = 18000;
+  const AWAY_THRESHOLD = 2;
+  const AWAY_PHRASE = "Кажется, тебя нет на месте. Когда вернёшься — нажми кнопку, и я продолжу.";
+
+  const awayKey = `ai-tutor-away-${avatarEl.dataset.lessonId || "0"}`;
+  let awayCount = parseInt(localStorage.getItem(awayKey) || "0", 10) || 0;
+  const awayBannerEl = document.getElementById("away-banner");
+  const resumeBtn = document.getElementById("resume-listening");
 
   const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognitionCtor) {
@@ -63,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
       recognition.onend = null;
       recognition.stop();
     }
+    localStorage.setItem(awayKey, text === NO_ANSWER_MARKER ? String(awayCount + 1) : "0");
     textField.value = text;
     idleInput.value = String(Math.round((Date.now() - window.__lessonTurnShownAt) / 1000));
     form.requestSubmit ? form.requestSubmit() : form.submit();
@@ -133,22 +150,48 @@ document.addEventListener("DOMContentLoaded", () => {
     if (answerMode) armAnswerTimeout();
   }
 
+  function enterAwayState() {
+    if (!active) return;
+    if (window.__tts) window.__tts.setMicStatus("");
+    if (awayBannerEl) awayBannerEl.hidden = false;
+    if (window.__tts) window.__tts.speak(AWAY_PHRASE, () => {});
+  }
+
+  function exitAwayState() {
+    awayCount = 0;
+    localStorage.setItem(awayKey, "0");
+    if (awayBannerEl) awayBannerEl.hidden = true;
+    beginListening();
+  }
+
+  function beginListeningOrAway() {
+    if (answerMode && awayCount >= AWAY_THRESHOLD) {
+      enterAwayState();
+    } else {
+      beginListening();
+    }
+  }
+
+  if (resumeBtn) {
+    resumeBtn.addEventListener("click", exitAwayState);
+  }
+
   if (window.__tts) {
     window.__tts.setOnEnd(() => {
       if (submitted || !active) return;
-      beginListening();
+      beginListeningOrAway();
     });
   }
 
   if (willSpeak) {
     // Аватар вот-вот заговорит (автовоспроизведение реплики) — микрофон
-    // включит beginListening() из колбэка setOnEnd выше, как только он
-    // замолчит. Пока просто показываем, что он говорит.
+    // включит beginListeningOrAway() из колбэка setOnEnd выше, как только
+    // он замолчит. Пока просто показываем, что он говорит.
     if (window.__tts) window.__tts.setMicStatus("🔊 Репетитор говорит…");
   } else {
     // Автовоспроизведения не будет (пустая реплика и т.п.) — слушать можно
     // сразу, колонки всё равно молчат.
-    beginListening();
+    beginListeningOrAway();
   }
 
   window.addEventListener("beforeunload", () => {

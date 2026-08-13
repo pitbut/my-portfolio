@@ -24,6 +24,7 @@
 
   <div class="avatar-widget"
        id="avatar-widget"
+       data-lesson-id="{{ lesson.id }}"
        data-latest-speech="{{ latest_speech or '' }}"
        data-voice-name="{{ current_user.voice_name or '' }}"
        data-autoplay="{{ 'true' if latest_speech and lesson.status == 'active' else 'false' }}"
@@ -63,6 +64,10 @@
     <div class="avatar-widget__name">{{ current_user.avatar.name }}</div>
     <div class="avatar-widget__mic-status" id="mic-status" hidden></div>
     <p class="avatar-widget__subtitle" id="avatar-subtitle" hidden></p>
+    <div class="away-banner" id="away-banner" hidden>
+      <p>Похоже, тебя нет на месте — я подожду и не буду слушать зря. Когда вернёшься, нажми кнопку.</p>
+      <button type="button" class="btn" id="resume-listening">🎤 Я здесь, продолжай</button>
+    </div>
   </div>
 
   <div class="lesson-layout">
