@@ -139,14 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.speechSynthesis.speak(utter);
   }
 
-  function pause() {
-    if ("speechSynthesis" in window && window.speechSynthesis.speaking) {
-      window.speechSynthesis.pause();
-      stopFallbackMouthLoop();
-      setMouth("closed");
-    }
-  }
-
   function stop() {
     window.speechSynthesis.cancel();
     speaking = false;
@@ -177,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Публичный интерфейс для stt.js (barge-in, повторные вопросы при тишине,
   // индикатор "слушаю") — не зависит от порядка подключения скриптов.
-  window.__tts = { speak, pause, stop, isSpeaking, setMicStatus, setOnEnd };
+  window.__tts = { speak, stop, isSpeaking, setMicStatus, setOnEnd };
 
   setMouth("closed");
   scheduleBlink();

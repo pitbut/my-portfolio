@@ -1,21 +1,30 @@
 /* Голосовой ввод — единственный способ ответить/спросить во время занятия
- * (фото решения — исключение, остаётся формой). Одна непрерывная сессия
- * распознавания на всё время, пока страница занятия открыта, с двумя
- * режимами поведения:
+ * (фото решения — исключение, остаётся формой).
  *
- * - `barge-in` (STATE.awaiting = none, аватар просто рассказывает) —
- *   слушаем без тайм-аута; если ученик что-то сказал — отправляем как
- *   обычное сообщение, модель сама решает, вопрос это или нет (раздел 5
- *   промпта). Если ученик молчит — ничего не происходит, это нормально.
- * - `answer` (STATE.awaiting = student_answer/student_confirmation —
- *   контрольный вопрос по ходу объяснения или ответ по существу) — как
- *   только аватар договорил вопрос, включается тайм-аут 18 сек. Тишина —
- *   один раз переспрашиваем голосом ("не расслышал, повтори") и ждём ещё
- *   18 сек; вторая тишина — отправляем модели служебную пометку
- *   `NO_ANSWER_MARKER`, дальше по этому разбирается сам промпт.
+ * Важно: микрофон включается ТОЛЬКО после того, как аватар закончил
+ * говорить, никогда одновременно с воспроизведением его речи. Раньше
+ * распознавание запускалось сразу при загрузке страницы, параллельно с
+ * автовоспроизведением реплики — без наушников и аппаратного эхоподавления
+ * микрофон улавливал звук из колонок (собственную озвучку аватара) и
+ * ошибочно принимал обрывки её за ответ ученика (типичная акустическая
+ * петля обратной связи). Поэтому barge-in в исходном смысле "перебить
+ * прямо на середине фразы" здесь не поддержан — платформенных средств
+ * надёжно отличить "ученик говорит поверх колонок" от "микрофон слышит
+ * сами колонки" у Web Speech API нет. Вместо этого ученик может вставить
+ * реплику сразу, как только аватар делает паузу (после реплики/вопроса) —
+ * поскольку объяснение специально разбито на несколько ходов с
+ * контрольными вопросами по ходу (раздел 3.1 промпта), такие паузы
+ * случаются часто, а не только в самом конце.
  *
- * В обоих режимах любой звук речи ученика немедленно ставит озвучку
- * аватара на паузу (barge-in), пока идёт объяснение/вопрос. */
+ * Два режима после того, как аватар замолчал:
+ * - `barge-in` (STATE.awaiting = none) — слушаем без тайм-аута; если
+ *   ученик что-то сказал — отправляем как обычное сообщение, модель сама
+ *   решает, вопрос это или нет (раздел 5 промпта). Молчание — норма,
+ *   ничего не происходит.
+ * - `answer` (STATE.awaiting = student_answer/student_confirmation) —
+ *   тайм-аут 18 сек. Тишина — один раз переспрашиваем голосом ("не
+ *   расслышал, повтори") и ждём ещё 18 сек; вторая тишина — отправляем
+ *   модели служебную пометку `NO_ANSWER_MARKER`. */
 
 document.addEventListener("DOMContentLoaded", () => {
   const avatarEl = document.getElementById("avatar-widget");
@@ -28,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const NO_ANSWER_MARKER = avatarEl.dataset.noAnswerMarker || "(ученик не ответил)";
   const awaiting = avatarEl.dataset.awaiting || "none";
   const answerMode = awaiting === "student_answer" || awaiting === "student_confirmation";
+  const willSpeak = avatarEl.dataset.autoplay === "true";
   const ANSWER_TIMEOUT_MS = 18000;
 
   const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -65,8 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
     recognition.interimResults = true;
 
     recognition.onresult = (event) => {
-      if (window.__tts && window.__tts.isSpeaking()) window.__tts.pause();
-
       const lastResult = event.results[event.results.length - 1];
       if (!lastResult.isFinal) return;
 
@@ -99,10 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!retryUsed) {
         retryUsed = true;
         if (window.__tts) {
+          // Пока аватар переспрашивает — микрофон должен молчать, тот же
+          // повод, что и в самом начале (не слушаем поверх своих же колонок).
+          if (recognition) { recognition.onend = null; recognition.stop(); }
           window.__tts.setMicStatus("Не расслышал…");
           window.__tts.speak("Не расслышал, повтори, пожалуйста.", () => {
             if (submitted || !active) return;
             window.__tts.setMicStatus("🎤 Слушаю…");
+            startRecognition();
             armAnswerTimeout();
           });
         }
@@ -112,20 +124,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }, ANSWER_TIMEOUT_MS);
   }
 
+  function beginListening() {
+    if (!active) return;
+    if (window.__tts) {
+      window.__tts.setMicStatus(answerMode ? "🎤 Слушаю…" : "🎤 Можно спросить голосом…");
+    }
+    startRecognition();
+    if (answerMode) armAnswerTimeout();
+  }
+
   if (window.__tts) {
     window.__tts.setOnEnd(() => {
       if (submitted || !active) return;
-      if (answerMode) {
-        window.__tts.setMicStatus("🎤 Слушаю…");
-        armAnswerTimeout();
-      } else {
-        window.__tts.setMicStatus("🎤 Можно спросить голосом…");
-      }
+      beginListening();
     });
-    window.__tts.setMicStatus(answerMode ? "🎤" : "🎤 Можно спросить голосом…");
   }
 
-  startRecognition();
+  if (willSpeak) {
+    // Аватар вот-вот заговорит (автовоспроизведение реплики) — микрофон
+    // включит beginListening() из колбэка setOnEnd выше, как только он
+    // замолчит. Пока просто показываем, что он говорит.
+    if (window.__tts) window.__tts.setMicStatus("🔊 Репетитор говорит…");
+  } else {
+    // Автовоспроизведения не будет (пустая реплика и т.п.) — слушать можно
+    // сразу, колонки всё равно молчат.
+    beginListening();
+  }
 
   window.addEventListener("beforeunload", () => {
     active = false;
