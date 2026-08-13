@@ -52,8 +52,8 @@
   {% if pending_confirm_url %}
   <div class="wrap flash-messages">
     <div class="flash flash--info">
-      Почтовый сервер пока не настроен — подтвердите email по ссылке:
-      <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
+      Email ещё не подтверждён — на всякий случай, если письмо не дошло,
+      вот та же ссылка: <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
     </div>
   </div>
   {% endif %}
