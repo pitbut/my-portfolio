@@ -9,6 +9,21 @@
   </p>
   <h1>Ученики</h1>
 
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+    <div class="card" style="min-width:160px;">
+      <div style="font-size:.82rem; color:var(--ink-dim);">Зарегистрировано</div>
+      <div style="font-size:1.6rem; font-weight:700;">{{ stats.registered }}</div>
+    </div>
+    <div class="card" style="min-width:160px;">
+      <div style="font-size:.82rem; color:var(--ink-dim);">Занятий проведено</div>
+      <div style="font-size:1.6rem; font-weight:700;">{{ stats.lessons_total }}</div>
+    </div>
+    <div class="card" style="min-width:160px;">
+      <div style="font-size:.82rem; color:var(--ink-dim);">Сейчас активных</div>
+      <div style="font-size:1.6rem; font-weight:700;">{{ stats.lessons_active }}</div>
+    </div>
+  </div>
+
   <div class="card" style="overflow-x:auto;">
     <table style="width:100%; border-collapse:collapse; font-size:.92rem;">
       <thead>
@@ -17,7 +32,9 @@
           <th style="padding:8px;">Email</th>
           <th style="padding:8px;">Программа</th>
           <th style="padding:8px;">Прогресс</th>
+          <th style="padding:8px;">Токены</th>
           <th style="padding:8px;">Следующее занятие</th>
+          <th style="padding:8px;"></th>
         </tr>
       </thead>
       <tbody>
@@ -30,11 +47,17 @@
           </td>
           <td style="padding:8px;">{{ row.completed }} / {{ row.total }}</td>
           <td style="padding:8px; color:var(--ink-dim);">
+            {{ row.user.tokens_used }}{% if row.user.token_limit %} / {{ row.user.token_limit }}{% endif %}
+          </td>
+          <td style="padding:8px; color:var(--ink-dim);">
             {% if row.next_session %}{{ row.next_session.scheduled_at.strftime('%d.%m.%Y %H:%M') }}{% else %}—{% endif %}
+          </td>
+          <td style="padding:8px;">
+            <a href="{{ url_for('admin.student_detail', user_id=row.user.id) }}">Открыть →</a>
           </td>
         </tr>
         {% else %}
-        <tr><td style="padding:8px;" colspan="5">Пока нет зарегистрированных учеников.</td></tr>
+        <tr><td style="padding:8px;" colspan="7">Пока нет зарегистрированных учеников.</td></tr>
         {% endfor %}
       </tbody>
     </table>
