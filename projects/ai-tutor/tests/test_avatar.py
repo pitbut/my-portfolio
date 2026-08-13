@@ -1,0 +1,50 @@
+from app import db
+from app.avatars import AVATAR_CHOICES
+from app.models import User
+from tests.conftest import login
+
+
+def test_register_redirects_to_avatar_step(client):
+    response = client.post(
+        "/auth/register",
+        data={
+            "name": "Аня",
+            "email": "anya@example.com",
+            "password": "password123",
+            "password2": "password123",
+        },
+    )
+    assert response.status_code == 302
+    assert "/onboarding/avatar" in response.headers["Location"]
+
+
+def test_choose_avatar_sets_avatar_and_voice(app, client, user):
+    with app.app_context():
+        login(client)
+        response = client.post(
+            "/onboarding/avatar",
+            data={"avatar_key": "nova", "voice_name": "Google russian"},
+        )
+        assert response.status_code == 302
+        assert "/onboarding/subject" in response.headers["Location"]
+
+        u = db.session.get(User, user)
+        assert u.avatar_key == "nova"
+        assert u.voice_name == "Google russian"
+        assert u.avatar["name"] == "Нова"
+
+
+def test_choose_avatar_rejects_unknown_key(app, client, user):
+    with app.app_context():
+        login(client)
+        response = client.post("/onboarding/avatar", data={"avatar_key": "not-a-real-avatar"})
+        assert response.status_code == 200
+
+        u = db.session.get(User, user)
+        assert u.avatar_key == "alex"  # не изменился
+
+
+def test_user_without_avatar_key_falls_back_to_default():
+    default = AVATAR_CHOICES[0]
+    u = User(name="Тест", email="t@example.com", password_hash="x")
+    assert u.avatar == default

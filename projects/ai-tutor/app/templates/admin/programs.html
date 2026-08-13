@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Программы — панель управления{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1>Панель управления</h1>
+  <p>
+    <a href="{{ url_for('admin.programs') }}">Программы</a> ·
+    <a href="{{ url_for('admin.students') }}">Ученики</a> ·
+    <a href="{{ url_for('admin.logout') }}">Выйти</a>
+  </p>
+
+  <div class="dashboard-grid">
+    <div class="card">
+      <h3>Программы (предмет + класс)</h3>
+      {% if program_list %}
+      <ul class="topic-list">
+        {% for program in program_list %}
+        <li>
+          <a href="{{ url_for('admin.topics', program_id=program.id) }}">
+            {{ program.subject.name }} · {{ program.grade.name }}
+          </a>
+          <span class="topic-status">{{ program.topics|length }} тем</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>Пока нет ни одной программы.</p>
+      {% endif %}
+
+      <form method="post" style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        <input type="hidden" name="form" value="new_program">
+        <div class="field">
+          <label for="subject_id">Предмет</label>
+          <select id="subject_id" name="subject_id" required>
+            {% for subject in subjects %}
+            <option value="{{ subject.id }}">{{ subject.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="grade_id">Класс</label>
+          <select id="grade_id" name="grade_id" required>
+            {% for grade in grades %}
+            <option value="{{ grade.id }}">{{ grade.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn--small">Создать программу</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Предметы</h3>
+      <ul class="topic-list">
+        {% for subject in subjects %}
+        <li>{{ subject.name }}</li>
+        {% endfor %}
+      </ul>
+      <form method="post" style="display:flex; gap:8px; margin-top:10px;">
+        <input type="hidden" name="form" value="new_subject">
+        <input type="text" name="subject_name" placeholder="Новый предмет" required>
+        <button type="submit" class="btn btn--small btn--secondary">Добавить</button>
+      </form>
+
+      <h3 style="margin-top:24px;">Классы/уровни</h3>
+      <ul class="topic-list">
+        {% for grade in grades %}
+        <li>{{ grade.name }}</li>
+        {% endfor %}
+      </ul>
+      <form method="post" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+        <input type="hidden" name="form" value="new_grade">
+        <input type="text" name="grade_name" placeholder="Название (напр. 6 класс)" required>
+        <input type="number" name="grade_order" placeholder="Порядок" style="width:90px;">
+        <button type="submit" class="btn btn--small btn--secondary">Добавить</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
