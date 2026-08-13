@@ -1,6 +1,6 @@
 {
   "title": "🎓 ИИ-репетитор",
-  "description": "Модуль персонального ИИ-репетитора: программа по предмету и классу, объяснение темы на доске, практические задания и проверка решений по фото через мультимодальный ИИ (Anthropic Claude). Flask + SQLAlchemy + Flask-Migrate.",
+  "description": "Модуль персонального ИИ-репетитора: аватар с TTS-озвучкой, доска с формулами/диаграммами/графиками, практические задания и проверка решений по фото через мультимодальный ИИ (Anthropic Claude). Flask + SQLAlchemy + Flask-Migrate.",
   "date": "2026-08-13",
   "tags": ["Flask", "Python", "SQLAlchemy", "Anthropic Claude", "PostgreSQL"],
   "link": "https://ai-tutor.onrender.com"

@@ -29,6 +29,14 @@ class User(TimestampMixin, db.Model):
     subject_id = db.Column(db.Integer, db.ForeignKey("subjects.id"), nullable=True)
     grade_id = db.Column(db.Integer, db.ForeignKey("grades.id"), nullable=True)
 
+    # Выбор аватара и голоса при первом входе (раздел 4.1 ТЗ, этап 9.2).
+    # avatar_key — ключ из app/avatars.py. voice_name — имя голоса из
+    # SpeechSynthesis браузера ученика (выбор голоса возможен только на
+    # клиенте — список голосов зависит от браузера/ОС), используется как
+    # есть при озвучке через Web Speech API.
+    avatar_key = db.Column(db.String(50), nullable=True)
+    voice_name = db.Column(db.String(255), nullable=True)
+
     subject = db.relationship("Subject")
     grade = db.relationship("Grade")
 
@@ -53,6 +61,12 @@ class User(TimestampMixin, db.Model):
         if self.subject_id is None or self.grade_id is None:
             return None
         return Program.query.filter_by(subject_id=self.subject_id, grade_id=self.grade_id).first()
+
+    @property
+    def avatar(self):
+        from app.avatars import get_avatar
+
+        return get_avatar(self.avatar_key)
 
     def __repr__(self):
         return f"<User {self.email!r}>"

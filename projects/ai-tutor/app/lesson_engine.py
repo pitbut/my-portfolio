@@ -162,8 +162,9 @@ def _history_messages(lesson):
 def _apply_ai_turn(lesson, user, user_content, student_message_speech=None, student_photo_url=None):
     history = _history_messages(lesson)
 
+    avatar_name = user.avatar["name"] if user.avatar_key else current_app.config["DEFAULT_AVATAR_NAME"]
     system_prompt = build_lesson_system_prompt(
-        avatar_name=current_app.config["DEFAULT_AVATAR_NAME"],
+        avatar_name=avatar_name,
         student_name=user.name,
         student_grade=user.grade.name if user.grade else "не указан",
         mode=lesson.mode,

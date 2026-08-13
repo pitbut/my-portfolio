@@ -5,9 +5,30 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app import db
+from app.avatars import AVATAR_CHOICES, AVATARS_BY_KEY
 from app.models import Grade, Program, Subject, UserProgress
 
 bp = Blueprint("onboarding", __name__)
+
+
+@bp.route("/avatar", methods=["GET", "POST"])
+@login_required
+def choose_avatar():
+    """Выбор аватара и голоса — первый шаг после регистрации (раздел 4.1 ТЗ).
+    Голос выбирается на клиенте из голосов SpeechSynthesis браузера, поэтому
+    сервер лишь принимает произвольное имя голоса, присланное формой."""
+    if request.method == "POST":
+        avatar_key = request.form.get("avatar_key")
+        if avatar_key not in AVATARS_BY_KEY:
+            flash("Выберите аватара из списка.", "error")
+            return render_template("onboarding/avatar.html", avatars=AVATAR_CHOICES)
+
+        current_user.avatar_key = avatar_key
+        current_user.voice_name = (request.form.get("voice_name") or "").strip() or None
+        db.session.commit()
+        return redirect(url_for("onboarding.choose_subject"))
+
+    return render_template("onboarding/avatar.html", avatars=AVATAR_CHOICES)
 
 
 @bp.route("/subject", methods=["GET", "POST"])

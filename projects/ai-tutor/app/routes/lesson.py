@@ -70,6 +70,11 @@ def chat(lesson_id):
         (m for m in reversed(lesson.messages) if m.sender == "tutor" and m.board_content), None
     )
     visible_messages = [m for m in lesson.messages if m.speech != "Начни занятие."]
+    latest_speech = (
+        visible_messages[-1].speech
+        if visible_messages and visible_messages[-1].sender == "tutor"
+        else None
+    )
     min_offset_hours = current_app.config["NEXT_LESSON_MIN_OFFSET_HOURS"]
     min_datetime = (datetime.utcnow() + timedelta(hours=min_offset_hours)).strftime("%Y-%m-%dT%H:%M")
     return render_template(
@@ -77,6 +82,7 @@ def chat(lesson_id):
         lesson=lesson,
         messages=visible_messages,
         board_message=board_message,
+        latest_speech=latest_speech,
         min_offset_hours=min_offset_hours,
         min_datetime=min_datetime,
     )

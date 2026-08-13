@@ -14,9 +14,23 @@
   </div>
   {% endif %}
 
+  <div class="avatar-widget"
+       data-latest-speech="{{ latest_speech or '' }}"
+       data-voice-name="{{ current_user.voice_name or '' }}"
+       data-autoplay="{{ 'true' if latest_speech and lesson.status == 'active' else 'false' }}"
+       style="--avatar-color: {{ current_user.avatar.color }};">
+    <div class="avatar-widget__face">{{ current_user.avatar.emoji }}</div>
+    <div class="avatar-widget__name">{{ current_user.avatar.name }}</div>
+    <button type="button" class="avatar-widget__toggle" title="Озвучить/остановить">🔊</button>
+  </div>
+
   <div class="lesson-layout">
     <div class="board">
-      {% if board_message %}
+      {% if board_message and board_message.board_type in ('diagram', 'graph') %}
+      <div class="board__type">{{ board_message.board_type }}</div>
+      <div class="board__content board__content--rich" data-board-type="{{ board_message.board_type }}"></div>
+      <script>window.__boardData = {{ board_message.board_content | tojson }};</script>
+      {% elif board_message %}
       <div class="board__type">{{ board_message.board_type }}</div>
       <div class="board__content">{{ board_message.board_content }}</div>
       {% else %}
@@ -72,4 +86,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/board.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tts.js') }}"></script>
 {% endblock %}

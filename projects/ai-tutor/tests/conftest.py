@@ -63,6 +63,7 @@ def user(app):
             email_confirmed=True,
             subject_id=subject.id,
             grade_id=grade.id,
+            avatar_key="alex",
         )
         db.session.add(u)
         db.session.commit()

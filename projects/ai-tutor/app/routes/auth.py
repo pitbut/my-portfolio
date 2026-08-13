@@ -81,7 +81,7 @@ def register():
                 f"подтвердите email по этой ссылке: {confirm_url}",
                 "info",
             )
-        return redirect(url_for("onboarding.choose_subject"))
+        return redirect(url_for("onboarding.choose_avatar"))
 
     return render_template("auth/register.html", name="", email="")
 

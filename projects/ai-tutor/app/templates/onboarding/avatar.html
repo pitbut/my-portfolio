@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Выбор аватара и голоса — ИИ-репетитор{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="text-align:center; margin-top:30px;">Выберите аватара и голос</h1>
+  <p style="text-align:center; max-width:520px; margin:0 auto;">
+    Аватар и голос сохранятся в профиле и будут использоваться на каждом занятии.
+    Голос можно прослушать перед выбором.
+  </p>
+
+  <form method="post" class="card" style="max-width:640px; margin:20px auto;" id="avatar-form">
+    <div class="subject-grid">
+      {% for avatar in avatars %}
+      <label class="subject-card" style="text-align:center;">
+        <input type="radio" name="avatar_key" value="{{ avatar.key }}" {{ 'checked' if loop.first }} required>
+        <div style="font-size:2.4rem; line-height:1;">{{ avatar.emoji }}</div>
+        <h3 style="margin-top:8px;">{{ avatar.name }}</h3>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="field" style="margin-top:10px;">
+      <label>Голос</label>
+      <div id="voice-list" class="voice-list">
+        <p class="form-note" id="voice-loading">Загружаю доступные голоса браузера…</p>
+      </div>
+      <input type="hidden" name="voice_name" id="voice_name-input">
+    </div>
+
+    <button type="submit" class="btn">Продолжить</button>
+    <p class="form-note" id="no-tts-note" hidden>
+      Ваш браузер не поддерживает синтез речи — репетитор будет работать без озвучки, только текстом.
+    </p>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const list = document.getElementById("voice-list");
+  const loading = document.getElementById("voice-loading");
+  const hiddenInput = document.getElementById("voice_name-input");
+  const noTtsNote = document.getElementById("no-tts-note");
+
+  if (!("speechSynthesis" in window)) {
+    loading.remove();
+    noTtsNote.hidden = false;
+    return;
+  }
+
+  function renderVoices() {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return;
+
+    loading.remove();
+    list.innerHTML = "";
+
+    // Русские голоса — в начало списка, остальные — following.
+    const sorted = [...voices].sort((a, b) => {
+      const aRu = a.lang.toLowerCase().startsWith("ru") ? 0 : 1;
+      const bRu = b.lang.toLowerCase().startsWith("ru") ? 0 : 1;
+      return aRu - bRu;
+    });
+
+    sorted.slice(0, 12).forEach((voice, i) => {
+      const row = document.createElement("div");
+      row.className = "voice-option";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "voice_choice";
+      radio.value = voice.name;
+      radio.id = `voice-${i}`;
+      if (i === 0) {
+        radio.checked = true;
+        hiddenInput.value = voice.name;
+      }
+      radio.addEventListener("change", () => { hiddenInput.value = voice.name; });
+
+      const label = document.createElement("label");
+      label.htmlFor = `voice-${i}`;
+      label.textContent = `${voice.name} (${voice.lang})`;
+
+      const preview = document.createElement("button");
+      preview.type = "button";
+      preview.className = "btn btn--small btn--secondary";
+      preview.textContent = "🔊 Прослушать";
+      preview.addEventListener("click", () => {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance("Привет! Я буду твоим репетитором.");
+        utter.voice = voice;
+        window.speechSynthesis.speak(utter);
+      });
+
+      row.append(radio, label, preview);
+      list.appendChild(row);
+    });
+  }
+
+  renderVoices();
+  window.speechSynthesis.onvoiceschanged = renderVoices;
+});
+</script>
+{% endblock %}

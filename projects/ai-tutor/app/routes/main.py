@@ -12,6 +12,8 @@ bp = Blueprint("main", __name__)
 def index():
     if not current_user.is_authenticated:
         return render_template("main/landing.html")
+    if current_user.avatar_key is None:
+        return redirect(url_for("onboarding.choose_avatar"))
     if current_user.subject_id is None or current_user.grade_id is None:
         return redirect(url_for("onboarding.choose_subject"))
     return redirect(url_for("main.dashboard"))
@@ -20,6 +22,8 @@ def index():
 @bp.route("/dashboard")
 @login_required
 def dashboard():
+    if current_user.avatar_key is None:
+        return redirect(url_for("onboarding.choose_avatar"))
     if current_user.subject_id is None or current_user.grade_id is None:
         return redirect(url_for("onboarding.choose_subject"))
 

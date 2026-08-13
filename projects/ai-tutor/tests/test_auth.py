@@ -12,7 +12,7 @@ def test_register_creates_user_and_redirects_to_onboarding(client):
         },
     )
     assert response.status_code == 302
-    assert "/onboarding/subject" in response.headers["Location"]
+    assert "/onboarding/avatar" in response.headers["Location"]
     assert User.query.filter_by(email="anya@example.com").first() is not None
 
 
