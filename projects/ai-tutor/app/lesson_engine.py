@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from flask import current_app
 
 from app import db
-from app.ai_client import build_photo_content, send_lesson_turn
+from app.ai_client import AIClientError, build_photo_content, send_lesson_turn
 from app.emotion import infer_emotion_state
 from app.lesson_parser import parse_lesson_turn
 from app.models import Lesson, LessonMessage, Task, TaskSubmission, UserProgress
@@ -173,6 +173,12 @@ def _history_messages(lesson):
 def _apply_ai_turn(
     lesson, user, user_content, student_message_speech=None, student_photo_url=None, emotion_state=None
 ):
+    if user.token_limit is not None and (user.tokens_used or 0) >= user.token_limit:
+        raise AIClientError(
+            "Лимит использования ИИ-репетитора для этого аккаунта исчерпан. "
+            "Обратитесь к администратору, чтобы продолжить занятия."
+        )
+
     history = _history_messages(lesson)
 
     avatar_name = user.avatar["name"] if user.avatar_key else current_app.config["DEFAULT_AVATAR_NAME"]
@@ -189,8 +195,10 @@ def _apply_ai_turn(
         emotion_state=emotion_state,
     )
 
-    raw_response = send_lesson_turn(system_prompt, history, user_content)
+    raw_response, usage = send_lesson_turn(system_prompt, history, user_content)
     parsed = parse_lesson_turn(raw_response)
+
+    user.tokens_used = (user.tokens_used or 0) + usage["input_tokens"] + usage["output_tokens"]
 
     db.session.add(
         LessonMessage(

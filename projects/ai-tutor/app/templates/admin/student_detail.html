@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ student.name }} — панель управления{% endblock %}
+{% block content %}
+<div class="wrap">
+  <p>
+    <a href="{{ url_for('admin.programs') }}">Программы</a> ·
+    <a href="{{ url_for('admin.students') }}">Ученики</a> ·
+    <a href="{{ url_for('admin.logout') }}">Выйти</a>
+  </p>
+  <p><a href="{{ url_for('admin.students') }}">← Все ученики</a></p>
+  <h1>{{ student.name }}</h1>
+  <p style="color:var(--ink-dim); margin-top:-8px;">{{ student.email }}</p>
+
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+    <div class="card" style="min-width:160px;">
+      <div style="font-size:.82rem; color:var(--ink-dim);">Программа</div>
+      <div style="font-weight:600;">
+        {% if program %}{{ program.subject.name }} · {{ program.grade.name }}{% else %}не выбрана{% endif %}
+      </div>
+    </div>
+    <div class="card" style="min-width:160px;">
+      <div style="font-size:.82rem; color:var(--ink-dim);">Тем пройдено</div>
+      <div style="font-size:1.4rem; font-weight:700;">{{ completed }} / {{ total }}</div>
+    </div>
+    <div class="card" style="min-width:160px;">
+      <div style="font-size:.82rem; color:var(--ink-dim);">Токенов потрачено</div>
+      <div style="font-size:1.4rem; font-weight:700;">
+        {{ student.tokens_used }}{% if student.token_limit %} / {{ student.token_limit }}{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="overflow-x:auto; margin-bottom:18px;">
+    <h3 style="margin-top:0;">Занятия</h3>
+    <table style="width:100%; border-collapse:collapse; font-size:.92rem;">
+      <thead>
+        <tr style="text-align:left; border-bottom:1px solid var(--border);">
+          <th style="padding:8px;">Тема</th>
+          <th style="padding:8px;">Статус</th>
+          <th style="padding:8px;">Начато</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lesson in lessons %}
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px;">{{ lesson.subject_name }} · {{ lesson.topic_title }}</td>
+          <td style="padding:8px; color:var(--ink-dim);">{{ lesson.status }}</td>
+          <td style="padding:8px; color:var(--ink-dim);">{{ lesson.started_at.strftime('%d.%m.%Y %H:%M') }}</td>
+        </tr>
+        {% else %}
+        <tr><td style="padding:8px;" colspan="3">Занятий ещё не было.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="overflow-x:auto; margin-bottom:18px;">
+    <h3 style="margin-top:0;">Запланированные занятия</h3>
+    <table style="width:100%; border-collapse:collapse; font-size:.92rem;">
+      <thead>
+        <tr style="text-align:left; border-bottom:1px solid var(--border);">
+          <th style="padding:8px;">Дата и время</th>
+          <th style="padding:8px;">Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in sessions %}
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px;">{{ s.scheduled_at.strftime('%d.%m.%Y %H:%M') }}</td>
+          <td style="padding:8px; color:var(--ink-dim);">{{ s.status }}</td>
+        </tr>
+        {% else %}
+        <tr><td style="padding:8px;" colspan="2">Ничего не запланировано.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <form method="post" action="{{ url_for('admin.student_set_limit', user_id=student.id) }}" class="form-card card" style="margin-bottom:18px;">
+    <h3 style="margin-top:0;">Лимит токенов</h3>
+    <div class="field">
+      <label for="token_limit">Максимум токенов на этого ученика (пусто — без ограничения)</label>
+      <input type="number" id="token_limit" name="token_limit" min="0" value="{{ student.token_limit if student.token_limit is not none else '' }}">
+    </div>
+    <button type="submit" class="btn">Сохранить лимит</button>
+  </form>
+
+  <form method="post" action="{{ url_for('admin.student_email', user_id=student.id) }}" class="form-card card" style="margin-bottom:18px;">
+    <h3 style="margin-top:0;">Написать ученику на почту</h3>
+    <div class="field">
+      <label for="subject">Тема письма</label>
+      <input type="text" id="subject" name="subject" required>
+    </div>
+    <div class="field">
+      <label for="body">Текст письма</label>
+      <textarea id="body" name="body" rows="4" required></textarea>
+    </div>
+    <button type="submit" class="btn">Отправить письмо на {{ student.email }}</button>
+  </form>
+
+  <form method="post" action="{{ url_for('admin.student_delete', user_id=student.id) }}" class="card"
+        onsubmit="return confirm('Удалить ученика {{ student.name }} и все его данные (занятия, прогресс, задания)? Это необратимо.');">
+    <h3 style="margin-top:0;">Удалить ученика</h3>
+    <p style="color:var(--ink-dim);">Удалит аккаунт и все связанные данные безвозвратно — занятия, сообщения, задания, прогресс, запланированные сессии.</p>
+    <button type="submit" class="btn btn--secondary">Удалить ученика</button>
+  </form>
+</div>
+{% endblock %}

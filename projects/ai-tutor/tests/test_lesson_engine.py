@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import pytest
 
 from app import db
+from app.ai_client import AIClientError
 from app.lesson_engine import (
     SchedulingError,
     handle_student_photo,
+    handle_student_text,
     next_topic_for_user,
     schedule_next_lesson,
     start_program_lesson,
@@ -44,11 +46,11 @@ next_lesson_min_offset_hours: 3
 """
 
 
-def _fake_send(responses):
+def _fake_send(responses, input_tokens=10, output_tokens=20):
     it = iter(responses)
 
     def _send(system_prompt, history, user_content):
-        return next(it)
+        return next(it), {"input_tokens": input_tokens, "output_tokens": output_tokens}
 
     return _send
 
@@ -135,3 +137,35 @@ def test_schedule_next_lesson_accepts_valid_time(app, user, monkeypatch):
 
         assert session.scheduled_at == scheduled_at
         assert lesson.status == "completed"
+
+
+def test_tokens_used_accumulates_across_turns(app, user, monkeypatch):
+    with app.app_context():
+        u = db.session.get(User, user)
+        monkeypatch.setattr(
+            "app.lesson_engine.send_lesson_turn",
+            _fake_send([KICKOFF_REPLY, TASK_GIVEN_REPLY], input_tokens=100, output_tokens=50),
+        )
+
+        lesson = start_program_lesson(u)
+        assert u.tokens_used == 150
+
+        handle_student_text(lesson, u, "Понятно, что дальше?")
+        assert u.tokens_used == 300
+
+
+def test_token_limit_blocks_further_turns(app, user, monkeypatch):
+    with app.app_context():
+        u = db.session.get(User, user)
+        u.token_limit = 100
+        db.session.commit()
+        monkeypatch.setattr(
+            "app.lesson_engine.send_lesson_turn",
+            _fake_send([KICKOFF_REPLY, TASK_GIVEN_REPLY], input_tokens=100, output_tokens=50),
+        )
+
+        lesson = start_program_lesson(u)
+        assert u.tokens_used == 150  # уже выше лимита после первого же хода
+
+        with pytest.raises(AIClientError):
+            handle_student_text(lesson, u, "Понятно, что дальше?")

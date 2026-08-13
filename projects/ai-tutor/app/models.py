@@ -37,6 +37,13 @@ class User(TimestampMixin, db.Model):
     avatar_key = db.Column(db.String(50), nullable=True)
     voice_name = db.Column(db.String(255), nullable=True)
 
+    # Суммарные токены ИИ-API (вход+выход), потраченные на занятия этого
+    # ученика — копится в lesson_engine.py после каждого вызова модели.
+    # token_limit — необязательный потолок, который админ может задать
+    # (см. app/routes/admin.py); null — без ограничения.
+    tokens_used = db.Column(db.Integer, nullable=False, default=0)
+    token_limit = db.Column(db.Integer, nullable=True)
+
     subject = db.relationship("Subject")
     grade = db.relationship("Grade")
 

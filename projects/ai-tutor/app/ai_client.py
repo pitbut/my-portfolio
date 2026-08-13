@@ -37,8 +37,11 @@ def send_lesson_turn(system_prompt, history_messages, user_content):
     user_content — content нового сообщения ученика (текст или список
     блоков text+image для фото решения).
 
-    Возвращает сырой текст ответа модели (три блока SPEECH/BOARD/STATE),
-    который затем разбирает app/lesson_parser.py."""
+    Возвращает (text, usage) — сырой текст ответа модели (три блока
+    SPEECH/BOARD/STATE, который затем разбирает app/lesson_parser.py) и
+    словарь {"input_tokens", "output_tokens"} — lesson_engine.py копит его
+    на User.tokens_used для учёта расхода по каждому ученику (раздел 5 ТЗ,
+    админ-панель)."""
     client = _client()
     messages = list(history_messages) + [{"role": "user", "content": user_content}]
 
@@ -48,7 +51,12 @@ def send_lesson_turn(system_prompt, history_messages, user_content):
         system=system_prompt,
         messages=messages,
     )
-    return "".join(block.text for block in response.content if block.type == "text")
+    text = "".join(block.text for block in response.content if block.type == "text")
+    usage = {
+        "input_tokens": response.usage.input_tokens,
+        "output_tokens": response.usage.output_tokens,
+    }
+    return text, usage
 
 
 def build_photo_content(text, image_bytes, mime_type):
