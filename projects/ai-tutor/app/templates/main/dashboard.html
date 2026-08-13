@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Кабинет — ИИ-репетитор{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1>Привет, {{ current_user.name }}!</h1>
+  <p>{{ program.subject.name }} · {{ program.grade.name }}</p>
+
+  <div class="dashboard-grid">
+    <div class="card">
+      <h3>Прогресс по программе</h3>
+      {% set total = topics_progress|length %}
+      <div class="progress-bar">
+        <div class="progress-bar__fill" style="width: {{ (completed_count / total * 100) if total else 0 }}%;"></div>
+      </div>
+      <p style="margin-bottom: 4px;">{{ completed_count }} из {{ total }} тем пройдено</p>
+      <ul class="topic-list">
+        {% for topic, progress in topics_progress %}
+        <li class="{{ 'is-completed' if progress and progress.status == 'completed' }}">
+          <span>{{ topic.order }}. {{ topic.title }}</span>
+          <span class="topic-status topic-status--{{ progress.status if progress else 'not_started' }}">
+            {{ {'completed': 'пройдено', 'in_progress': 'в процессе', 'not_started': 'не начато'}[progress.status if progress else 'not_started'] }}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Занятие</h3>
+      {% if active_lesson %}
+        <p>У вас есть незавершённое занятие: <strong>{{ active_lesson.topic_title }}</strong>.</p>
+        <a class="btn" href="{{ url_for('lesson.chat', lesson_id=active_lesson.id) }}">Продолжить занятие</a>
+      {% elif next_topic %}
+        <p>Следующая тема по программе: <strong>{{ next_topic.title }}</strong>.</p>
+        <form method="post" action="{{ url_for('lesson.start') }}">
+          <button type="submit" class="btn">Начать занятие</button>
+        </form>
+      {% else %}
+        <p>Вся программа по этому предмету и классу пройдена — отличная работа! 🎉</p>
+      {% endif %}
+
+      <hr style="border-color: var(--border); margin: 18px 0;">
+
+      <p>Есть непонятная тема вне программы?</p>
+      <a class="btn btn--secondary" href="{{ url_for('lesson.free') }}">Свободный режим</a>
+
+      {% if next_session %}
+      <hr style="border-color: var(--border); margin: 18px 0;">
+      <p>📅 Следующее занятие запланировано:<br><strong>{{ next_session.scheduled_at.strftime('%d.%m.%Y %H:%M') }}</strong></p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -68,3 +68,39 @@ services:
         sync: false
       - key: PUBLIC_BASE_URL
         sync: false
+
+  - type: web
+    name: ai-tutor
+    env: python
+    rootDir: projects/ai-tutor
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask db upgrade && python seed.py && gunicorn run:app --bind 0.0.0.0:$PORT --timeout 120
+    envVars:
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_CONFIG
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-4-5
+      - key: NEXT_LESSON_MIN_OFFSET_HOURS
+        value: "3"
+      - key: MIN_TASKS_PER_LESSON
+        value: "3"
+      - key: DEFAULT_AVATAR_NAME
+        value: "Алекс"
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+      - key: IMGBB_API_KEY
+        sync: false

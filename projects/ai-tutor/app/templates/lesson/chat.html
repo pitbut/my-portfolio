@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set katex = true %}
+{% block title %}{{ lesson.topic_title }} — ИИ-репетитор{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="margin-bottom:2px;">{{ lesson.subject_name }}</h1>
+  <p style="margin-top:0;">{{ lesson.topic_title }}</p>
+
+  {% if lesson.tasks %}
+  <div class="task-list">
+    {% for task in lesson.tasks %}
+    <span class="task-pill task-pill--{{ task.status }}">Задание {{ task.order }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="lesson-layout">
+    <div class="board">
+      {% if board_message %}
+      <div class="board__type">{{ board_message.board_type }}</div>
+      <div class="board__content">{{ board_message.board_content }}</div>
+      {% else %}
+      <p class="board__empty">Доска пока пуста — репетитор напишет здесь объяснение.</p>
+      {% endif %}
+    </div>
+
+    <div class="chat-panel">
+      <div class="chat-history">
+        {% for message in messages %}
+        <div class="chat-bubble chat-bubble--{{ message.sender }}">
+          <div class="chat-bubble__meta">{{ 'Вы' if message.sender == 'student' else 'Репетитор' }}</div>
+          {% if message.speech %}{{ message.speech }}{% endif %}
+          {% if message.photo_url %}<img src="{{ message.photo_url }}" alt="Фото решения">{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="chat-input-area">
+        {% if lesson.status == 'completed' %}
+          <p>✅ Занятие завершено.</p>
+          <a class="btn btn--secondary" href="{{ url_for('main.dashboard') }}">В кабинет</a>
+
+        {% elif lesson.stage == 'scheduling_next' %}
+          <p class="awaiting-hint">Репетитор предлагает назначить следующее занятие — выберите время (не раньше чем через {{ min_offset_hours }} ч).</p>
+          <form method="post" action="{{ url_for('lesson.schedule', lesson_id=lesson.id) }}" class="schedule-form">
+            <div class="field">
+              <label for="scheduled_at">Дата и время</label>
+              <input type="datetime-local" id="scheduled_at" name="scheduled_at" min="{{ min_datetime }}" value="{{ min_datetime }}" required>
+            </div>
+            <button type="submit" class="btn">Запланировать</button>
+          </form>
+
+        {% elif lesson.awaiting == 'student_photo' %}
+          <p class="awaiting-hint">📸 Пришлите фото решения задания.</p>
+          <form method="post" action="{{ url_for('lesson.send_photo', lesson_id=lesson.id) }}" enctype="multipart/form-data">
+            <input type="file" id="photo-input" name="photo" accept="image/*" capture="environment" required>
+            <img id="photo-preview" alt="Предпросмотр" hidden style="max-width:200px; border-radius:10px; margin-top:8px; display:block;">
+            <div class="chat-input-row">
+              <button type="submit" class="btn">Отправить фото</button>
+            </div>
+          </form>
+
+        {% else %}
+          <form method="post" action="{{ url_for('lesson.send_message', lesson_id=lesson.id) }}">
+            <textarea name="text" placeholder="Напишите ответ или вопрос…" required autofocus></textarea>
+            <div class="chat-input-row">
+              <button type="submit" class="btn">Отправить</button>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Свободный режим — ИИ-репетитор{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="text-align:center; margin-top:30px;">Свободный режим</h1>
+  <p style="text-align:center; max-width:480px; margin:0 auto;">
+    Опишите тему или вопрос, который вам непонятен — репетитор разберёт его по той же
+    схеме: объяснение → проверка понимания → задания → проверка решений.
+  </p>
+  <form method="post" class="form-card card">
+    <div class="field">
+      <label for="topic_text">Тема или вопрос</label>
+      <textarea id="topic_text" name="topic_text" rows="4" required autofocus placeholder="Например: не понимаю, как решать квадратные уравнения через дискриминант"></textarea>
+    </div>
+    <button type="submit" class="btn">Начать разбор</button>
+  </form>
+</div>
+{% endblock %}

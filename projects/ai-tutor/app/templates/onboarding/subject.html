@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Выбор предмета — ИИ-репетитор{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="text-align:center; margin-top:30px;">Выберите предмет и класс</h1>
+  {% if programs %}
+  <form method="post" class="card" style="max-width:640px; margin:20px auto;">
+    <div class="subject-grid">
+      {% for program in programs %}
+      <label class="subject-card">
+        <input type="radio" name="program_id" value="{{ program.id }}" {{ 'checked' if loop.first }} required>
+        <h3>{{ program.subject.name }}</h3>
+        <span>{{ program.grade.name }} · {{ program.topics|length }} тем</span>
+      </label>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn">Продолжить</button>
+  </form>
+  {% else %}
+  <p style="text-align:center;">Пока нет ни одной готовой программы — обратитесь к администратору сайта.</p>
+  {% endif %}
+</div>
+{% endblock %}
