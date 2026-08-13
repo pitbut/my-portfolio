@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Вход в панель управления — ИИ-репетитор{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="text-align:center; margin-top:30px;">Панель управления</h1>
+  <form method="post" class="form-card card">
+    <div class="field">
+      <label for="password">Пароль администратора</label>
+      <input type="password" id="password" name="password" required autofocus>
+    </div>
+    <button type="submit" class="btn">Войти</button>
+  </form>
+</div>
+{% endblock %}

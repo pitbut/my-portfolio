@@ -32,6 +32,7 @@ def create_app(config_name=None):
     login_manager.login_message = "Войдите, чтобы продолжить."
     login_manager.login_message_category = "info"
 
+    from app.routes.admin import bp as admin_bp
     from app.routes.auth import bp as auth_bp
     from app.routes.main import bp as main_bp
     from app.routes.onboarding import bp as onboarding_bp
@@ -41,6 +42,7 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(onboarding_bp, url_prefix="/onboarding")
     app.register_blueprint(lesson_bp, url_prefix="/lesson")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 

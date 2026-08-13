@@ -48,9 +48,15 @@ class Config:
     # Минимум практических заданий за занятие (раздел 4.2 ТЗ).
     MIN_TASKS_PER_LESSON = int(os.environ.get("MIN_TASKS_PER_LESSON", 3))
 
-    # Имя и описание единственного дефолтного аватара в MVP (без выбора
-    # аватара/голоса — см. этап 9.1 ТЗ).
+    # Имя дефолтного аватара — используется, пока ученик не выбрал свой
+    # аватар на онбординге (см. app/avatars.py).
     DEFAULT_AVATAR_NAME = os.environ.get("DEFAULT_AVATAR_NAME", "Алекс")
+
+    # Пароль для входа в /admin — панель управления предметами/классами/
+    # программами и просмотра прогресса учеников (раздел 9.3 ТЗ). Тот же
+    # паттерн, что в istok/b2b-platform: один пароль на сессию, без
+    # отдельной роли в таблице users.
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin-change-me")
 
 
 class DevelopmentConfig(Config):

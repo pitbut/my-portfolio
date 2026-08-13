@@ -101,8 +101,10 @@ def send_message(lesson_id):
         flash("Введите сообщение.", "error")
         return redirect(url_for("lesson.chat", lesson_id=lesson.id))
 
+    idle_seconds = request.form.get("idle_seconds", type=int)
+
     try:
-        handle_student_text(lesson, current_user, text)
+        handle_student_text(lesson, current_user, text, idle_seconds=idle_seconds)
     except AIClientError as exc:
         flash(str(exc), "error")
     return redirect(url_for("lesson.chat", lesson_id=lesson.id))

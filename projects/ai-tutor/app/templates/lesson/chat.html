@@ -22,6 +22,9 @@
     <div class="avatar-widget__face">{{ current_user.avatar.emoji }}</div>
     <div class="avatar-widget__name">{{ current_user.avatar.name }}</div>
     <button type="button" class="avatar-widget__toggle" title="Озвучить/остановить">🔊</button>
+    {% if lesson.status == 'active' and lesson.awaiting != 'student_photo' and lesson.stage != 'scheduling_next' %}
+    <button type="button" class="avatar-widget__mic" id="mic-toggle" title="Включить голосовой режим (можно задать вопрос голосом прямо во время объяснения)">🎤</button>
+    {% endif %}
   </div>
 
   <div class="lesson-layout">
@@ -75,8 +78,10 @@
           </form>
 
         {% else %}
-          <form method="post" action="{{ url_for('lesson.send_message', lesson_id=lesson.id) }}">
-            <textarea name="text" placeholder="Напишите ответ или вопрос…" required autofocus></textarea>
+          <p class="awaiting-hint" id="listening-hint" hidden>🎤 Слушаю… можно спросить прямо сейчас, не дожидаясь конца объяснения.</p>
+          <form method="post" action="{{ url_for('lesson.send_message', lesson_id=lesson.id) }}" id="message-form">
+            <input type="hidden" name="idle_seconds" id="idle-seconds-input" value="0">
+            <textarea name="text" id="message-text" placeholder="Напишите ответ или вопрос…" required autofocus></textarea>
             <div class="chat-input-row">
               <button type="submit" class="btn">Отправить</button>
             </div>
@@ -91,4 +96,21 @@
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/board.js') }}"></script>
 <script src="{{ url_for('static', filename='js/tts.js') }}"></script>
+<script>
+  // Время бездействия (раздел 9.3 ТЗ, поведенческий сигнал для emotion_state) —
+  // считаем от момента, как реплика репетитора появилась на экране.
+  window.__lessonTurnShownAt = Date.now();
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("message-form");
+    const idleInput = document.getElementById("idle-seconds-input");
+    if (form && idleInput) {
+      form.addEventListener("submit", () => {
+        idleInput.value = Math.round((Date.now() - window.__lessonTurnShownAt) / 1000);
+      });
+    }
+  });
+</script>
+{% if lesson.status == 'active' and lesson.awaiting != 'student_photo' and lesson.stage != 'scheduling_next' %}
+<script src="{{ url_for('static', filename='js/stt.js') }}"></script>
+{% endif %}
 {% endblock %}

@@ -14,6 +14,7 @@ from flask import current_app
 
 from app import db
 from app.ai_client import build_photo_content, send_lesson_turn
+from app.emotion import infer_emotion_state
 from app.lesson_parser import parse_lesson_turn
 from app.models import Lesson, LessonMessage, Task, TaskSubmission, UserProgress
 from app.photos import upload_photo_bytes
@@ -103,9 +104,17 @@ def start_free_lesson(user, free_topic_text):
     return lesson
 
 
-def handle_student_text(lesson, user, text):
-    """Ученик прислал текстовое сообщение (ответ, вопрос по ходу, "понятно" и т.п.)."""
-    return _apply_ai_turn(lesson, user, user_content=text, student_message_speech=text)
+def handle_student_text(lesson, user, text, idle_seconds=None):
+    """Ученик прислал текстовое сообщение (ответ, вопрос по ходу, "понятно" и т.п.).
+
+    idle_seconds — необязательное время (в секундах) между тем, как на
+    экране появилась предыдущая реплика репетитора, и отправкой этого
+    сообщения — один из поведенческих сигналов для emotion_state (раздел
+    9.3 ТЗ, app/emotion.py), присылается клиентом вместе с формой."""
+    emotion_state = infer_emotion_state(lesson, message_text=text, idle_seconds=idle_seconds)
+    return _apply_ai_turn(
+        lesson, user, user_content=text, student_message_speech=text, emotion_state=emotion_state
+    )
 
 
 def handle_student_photo(lesson, user, data, filename, mimetype):
@@ -113,8 +122,10 @@ def handle_student_photo(lesson, user, data, filename, mimetype):
     photo_url = upload_photo_bytes(data, filename, mimetype)
     caption = "Вот моё решение."
     content = build_photo_content(caption, data, mimetype)
+    emotion_state = infer_emotion_state(lesson)
     return _apply_ai_turn(
-        lesson, user, user_content=content, student_message_speech=caption, student_photo_url=photo_url
+        lesson, user, user_content=content, student_message_speech=caption,
+        student_photo_url=photo_url, emotion_state=emotion_state,
     )
 
 
@@ -159,7 +170,9 @@ def _history_messages(lesson):
     return messages
 
 
-def _apply_ai_turn(lesson, user, user_content, student_message_speech=None, student_photo_url=None):
+def _apply_ai_turn(
+    lesson, user, user_content, student_message_speech=None, student_photo_url=None, emotion_state=None
+):
     history = _history_messages(lesson)
 
     avatar_name = user.avatar["name"] if user.avatar_key else current_app.config["DEFAULT_AVATAR_NAME"]
@@ -173,6 +186,7 @@ def _apply_ai_turn(lesson, user, user_content, student_message_speech=None, stud
         topic_description=lesson.topic.description if lesson.topic else None,
         free_topic_text=lesson.free_topic_text,
         completed_topics=completed_topic_titles(user),
+        emotion_state=emotion_state,
     )
 
     raw_response = send_lesson_turn(system_prompt, history, user_content)

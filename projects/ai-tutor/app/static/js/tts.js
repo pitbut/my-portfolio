@@ -52,6 +52,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (toggleBtn) toggleBtn.textContent = "🔊";
   }
 
+  function pause() {
+    if ("speechSynthesis" in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      setTalking(false);
+    }
+  }
+
+  function resume() {
+    if ("speechSynthesis" in window && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      setTalking(true);
+    }
+  }
+
+  // Даёт stt.js мгновенно прервать озвучку в момент, когда распознан голос
+  // ученика (barge-in, раздел 4.4/9.3 ТЗ), не завися от порядка подключения
+  // скриптов на странице.
+  window.__tts = { play, stop, pause, resume };
+
   if (toggleBtn) {
     toggleBtn.addEventListener("click", () => {
       if (window.speechSynthesis.speaking) {

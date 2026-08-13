@@ -191,6 +191,23 @@ form.form-card { display: flex; flex-direction: column; gap: 14px; max-width: 42
   font-size: 1rem;
 }
 .avatar-widget__toggle:hover { background: var(--accent-strong); }
+.avatar-widget__mic {
+  border: none;
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.avatar-widget__mic:hover { background: var(--accent-strong); }
+.avatar-widget__mic.is-active { background: var(--bad); animation: mic-pulse 1.2s ease-in-out infinite; }
+.avatar-widget__mic:disabled { opacity: .4; cursor: not-allowed; }
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(248, 113, 113, 0); }
+}
 
 /* --- Диаграммы и графики на доске --- */
 .board__content--rich { color: #1a1a2e; }
