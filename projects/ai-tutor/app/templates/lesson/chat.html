@@ -31,23 +31,34 @@
        data-awaiting="{{ lesson.awaiting or 'none' }}"
        data-lesson-active="{{ 'true' if lesson.status == 'active' else 'false' }}"
        style="--avatar-color: {{ current_user.avatar.color }};">
-    <div class="avatar-face-wrap">
-      <svg class="avatar-face" viewBox="0 0 200 200" width="150" height="150" aria-hidden="true">
-        <circle class="avatar-face__head" cx="100" cy="100" r="88"/>
-        <g class="avatar-face__eye">
-          <ellipse cx="68" cy="88" rx="15" ry="17" class="avatar-face__eye-white"/>
-          <circle cx="68" cy="88" r="7" class="avatar-face__pupil"/>
-          <rect class="avatar-face__eyelid" x="52" y="70" width="32" height="18" rx="4"/>
-        </g>
-        <g class="avatar-face__eye">
-          <ellipse cx="132" cy="88" rx="15" ry="17" class="avatar-face__eye-white"/>
-          <circle cx="132" cy="88" r="7" class="avatar-face__pupil"/>
-          <rect class="avatar-face__eyelid" x="116" y="70" width="32" height="18" rx="4"/>
-        </g>
-        <path class="avatar-face__mouth avatar-face__mouth--closed" d="M 72 142 Q 100 148 128 142"/>
-        <path class="avatar-face__mouth avatar-face__mouth--mid" d="M 76 140 Q 100 158 124 140 Q 100 150 76 140 Z"/>
-        <path class="avatar-face__mouth avatar-face__mouth--open" d="M 70 136 Q 100 174 130 136 Q 100 152 70 136 Z"/>
-      </svg>
+    <div class="avatar-stage">
+      <div class="avatar-figure" id="avatar-figure">
+        <div class="avatar-sway-wrap">
+        <div class="avatar-face-wrap">
+          <svg class="avatar-face" viewBox="0 0 200 320" width="150" height="240" aria-hidden="true">
+            <path class="avatar-body__arm avatar-body__arm--left" d="M 58 195 Q 32 218 28 258"/>
+            <path class="avatar-body__arm avatar-body__arm--right" d="M 142 195 Q 168 218 172 258"/>
+            <path class="avatar-body__leg avatar-body__leg--left" d="M 80 258 L 70 328"/>
+            <path class="avatar-body__leg avatar-body__leg--right" d="M 120 258 L 130 328"/>
+            <rect class="avatar-body__torso" x="55" y="178" width="90" height="88" rx="28"/>
+            <circle class="avatar-face__head" cx="100" cy="100" r="88"/>
+            <g class="avatar-face__eye">
+              <ellipse cx="68" cy="88" rx="15" ry="17" class="avatar-face__eye-white"/>
+              <circle cx="68" cy="88" r="7" class="avatar-face__pupil"/>
+              <rect class="avatar-face__eyelid" x="52" y="70" width="32" height="18" rx="4"/>
+            </g>
+            <g class="avatar-face__eye">
+              <ellipse cx="132" cy="88" rx="15" ry="17" class="avatar-face__eye-white"/>
+              <circle cx="132" cy="88" r="7" class="avatar-face__pupil"/>
+              <rect class="avatar-face__eyelid" x="116" y="70" width="32" height="18" rx="4"/>
+            </g>
+            <path class="avatar-face__mouth avatar-face__mouth--closed" d="M 72 142 Q 100 148 128 142"/>
+            <path class="avatar-face__mouth avatar-face__mouth--mid" d="M 76 140 Q 100 158 124 140 Q 100 150 76 140 Z"/>
+            <path class="avatar-face__mouth avatar-face__mouth--open" d="M 70 136 Q 100 174 130 136 Q 100 152 70 136 Z"/>
+          </svg>
+        </div>
+        </div>
+      </div>
     </div>
     <div class="avatar-widget__name">{{ current_user.avatar.name }}</div>
     <div class="avatar-widget__mic-status" id="mic-status" hidden></div>
