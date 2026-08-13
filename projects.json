@@ -4,7 +4,7 @@
     "title": "🎓 ИИ-репетитор",
     "description": "Модуль персонального ИИ-репетитора: аватар с TTS-озвучкой и голосовым barge-in, доска с формулами/диаграммами/графиками, эмоциональная адаптация, проверка решений по фото и админ-панель — через мультимодальный ИИ (Anthropic Claude). Flask + SQLAlchemy + Flask-Migrate.",
     "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=%F0%9F%8E%93%20%D0%98%D0%98-%D1%80%D0%B5%D0%BF%D0%B5%D1%82%D0%B8%D1%82%D0%BE%D1%80",
-    "link": "https://ai-tutor.onrender.com",
+    "link": "https://ai-tutor.robutpit.com",
     "date": "2026-08-13",
     "tags": [
       "Flask",
