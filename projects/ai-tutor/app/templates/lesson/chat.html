@@ -62,6 +62,11 @@
       </div>
     </div>
     <div class="avatar-widget__name">{{ current_user.avatar.name }}</div>
+    <div class="presence-preview" id="presence-preview" hidden>
+      <video id="presence-video" autoplay muted playsinline></video>
+    </div>
+    <canvas id="presence-canvas" hidden></canvas>
+    <div class="avatar-widget__mic-status" id="presence-status" hidden></div>
     <div class="avatar-widget__mic-status" id="mic-status" hidden></div>
     <p class="avatar-widget__subtitle" id="avatar-subtitle" hidden></p>
     <div class="away-banner" id="away-banner" hidden>
@@ -177,6 +182,7 @@
   });
 </script>
 {% if lesson.status == 'active' and lesson.awaiting != 'student_photo' and lesson.stage != 'scheduling_next' %}
+<script src="{{ url_for('static', filename='js/presence.js') }}"></script>
 <script src="{{ url_for('static', filename='js/stt.js') }}"></script>
 {% endif %}
 {% endblock %}
