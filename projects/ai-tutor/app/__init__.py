@@ -52,16 +52,16 @@ def create_app(config_name=None):
 
     @app.context_processor
     def inject_pending_confirmation():
-        """Пока на сервере не настроена реальная отправка почты (RESEND_API_KEY),
-        показываем ссылку подтверждения прямо на сайте, а не только один раз
-        во flash-сообщении, — иначе её легко потерять."""
+        """Показываем ссылку подтверждения прямо на сайте, пока email не
+        подтверждён — не только один раз во flash-сообщении (иначе легко
+        потерять), и не только когда RESEND_API_KEY не настроен: письмо
+        может не дойти и при настроенном ключе (например, Resend отклонит
+        отправителя onboarding@resend.dev на чужой адрес, пока не привязан
+        свой домен, — см. app/email.py), а ученику всё равно нужен способ
+        подтвердить email."""
         from flask_login import current_user
 
-        if (
-            current_user.is_authenticated
-            and not current_user.email_confirmed
-            and not app.config.get("RESEND_API_KEY")
-        ):
+        if current_user.is_authenticated and not current_user.email_confirmed:
             from app.routes.auth import confirm_url_for
 
             return {"pending_confirm_url": confirm_url_for(current_user)}
