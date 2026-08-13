@@ -16,6 +16,7 @@ from app.lesson_engine import (
 )
 from app.models import Lesson
 from app.photos import MAX_PHOTO_SIZE
+from app.prompts import NO_ANSWER_MARKER
 
 bp = Blueprint("lesson", __name__)
 
@@ -85,6 +86,7 @@ def chat(lesson_id):
         latest_speech=latest_speech,
         min_offset_hours=min_offset_hours,
         min_datetime=min_datetime,
+        no_answer_marker=NO_ANSWER_MARKER,
     )
 
 

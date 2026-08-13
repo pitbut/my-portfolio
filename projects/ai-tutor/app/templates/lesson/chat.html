@@ -3,8 +3,16 @@
 {% block title %}{{ lesson.topic_title }} — ИИ-репетитор{% endblock %}
 {% block content %}
 <div class="wrap">
-  <h1 style="margin-bottom:2px;">{{ lesson.subject_name }}</h1>
-  <p style="margin-top:0;">{{ lesson.topic_title }}</p>
+  <div class="lesson-header">
+    <div>
+      <h1 style="margin-bottom:2px;">{{ lesson.subject_name }}</h1>
+      <p style="margin-top:0;">{{ lesson.topic_title }}</p>
+    </div>
+    <div class="debug-toggles">
+      <button type="button" class="debug-toggle" id="toggle-subtitles" aria-pressed="false">💬 Субтитры</button>
+      <button type="button" class="debug-toggle" id="toggle-transcript" aria-pressed="false">📝 Текст лекции (отладка)</button>
+    </div>
+  </div>
 
   {% if lesson.tasks %}
   <div class="task-list">
@@ -15,16 +23,35 @@
   {% endif %}
 
   <div class="avatar-widget"
+       id="avatar-widget"
        data-latest-speech="{{ latest_speech or '' }}"
        data-voice-name="{{ current_user.voice_name or '' }}"
        data-autoplay="{{ 'true' if latest_speech and lesson.status == 'active' else 'false' }}"
+       data-no-answer-marker="{{ no_answer_marker }}"
+       data-awaiting="{{ lesson.awaiting or 'none' }}"
+       data-lesson-active="{{ 'true' if lesson.status == 'active' else 'false' }}"
        style="--avatar-color: {{ current_user.avatar.color }};">
-    <div class="avatar-widget__face">{{ current_user.avatar.emoji }}</div>
+    <div class="avatar-face-wrap">
+      <svg class="avatar-face" viewBox="0 0 200 200" width="150" height="150" aria-hidden="true">
+        <circle class="avatar-face__head" cx="100" cy="100" r="88"/>
+        <g class="avatar-face__eye">
+          <ellipse cx="68" cy="88" rx="15" ry="17" class="avatar-face__eye-white"/>
+          <circle cx="68" cy="88" r="7" class="avatar-face__pupil"/>
+          <rect class="avatar-face__eyelid" x="52" y="70" width="32" height="18" rx="4"/>
+        </g>
+        <g class="avatar-face__eye">
+          <ellipse cx="132" cy="88" rx="15" ry="17" class="avatar-face__eye-white"/>
+          <circle cx="132" cy="88" r="7" class="avatar-face__pupil"/>
+          <rect class="avatar-face__eyelid" x="116" y="70" width="32" height="18" rx="4"/>
+        </g>
+        <path class="avatar-face__mouth avatar-face__mouth--closed" d="M 72 142 Q 100 148 128 142"/>
+        <path class="avatar-face__mouth avatar-face__mouth--mid" d="M 76 140 Q 100 158 124 140 Q 100 150 76 140 Z"/>
+        <path class="avatar-face__mouth avatar-face__mouth--open" d="M 70 136 Q 100 174 130 136 Q 100 152 70 136 Z"/>
+      </svg>
+    </div>
     <div class="avatar-widget__name">{{ current_user.avatar.name }}</div>
-    <button type="button" class="avatar-widget__toggle" title="Озвучить/остановить">🔊</button>
-    {% if lesson.status == 'active' and lesson.awaiting != 'student_photo' and lesson.stage != 'scheduling_next' %}
-    <button type="button" class="avatar-widget__mic" id="mic-toggle" title="Включить голосовой режим (можно задать вопрос голосом прямо во время объяснения)">🎤</button>
-    {% endif %}
+    <div class="avatar-widget__mic-status" id="mic-status" hidden></div>
+    <p class="avatar-widget__subtitle" id="avatar-subtitle" hidden></p>
   </div>
 
   <div class="lesson-layout">
@@ -42,7 +69,7 @@
     </div>
 
     <div class="chat-panel">
-      <div class="chat-history">
+      <div class="chat-history" id="transcript-panel" hidden>
         {% for message in messages %}
         <div class="chat-bubble chat-bubble--{{ message.sender }}">
           <div class="chat-bubble__meta">{{ 'Вы' if message.sender == 'student' else 'Репетитор' }}</div>
@@ -78,13 +105,10 @@
           </form>
 
         {% else %}
-          <p class="awaiting-hint" id="listening-hint" hidden>🎤 Слушаю… можно спросить прямо сейчас, не дожидаясь конца объяснения.</p>
-          <form method="post" action="{{ url_for('lesson.send_message', lesson_id=lesson.id) }}" id="message-form">
+          <p class="awaiting-hint">🎙️ Занятие идёт голосом — просто говори, отвечай и задавай вопросы вслух.</p>
+          <form method="post" action="{{ url_for('lesson.send_message', lesson_id=lesson.id) }}" id="message-form" hidden>
             <input type="hidden" name="idle_seconds" id="idle-seconds-input" value="0">
-            <textarea name="text" id="message-text" placeholder="Напишите ответ или вопрос…" required autofocus></textarea>
-            <div class="chat-input-row">
-              <button type="submit" class="btn">Отправить</button>
-            </div>
+            <input type="hidden" name="text" id="message-text">
           </form>
         {% endif %}
       </div>
@@ -106,6 +130,32 @@
     if (form && idleInput) {
       form.addEventListener("submit", () => {
         idleInput.value = Math.round((Date.now() - window.__lessonTurnShownAt) / 1000);
+      });
+    }
+
+    // Отладочные тумблеры — оба выключены по умолчанию, состояние не сохраняется
+    // между занятиями специально (это инструмент разработчика, не настройка ученика).
+    const subtitleBtn = document.getElementById("toggle-subtitles");
+    const subtitleEl = document.getElementById("avatar-subtitle");
+    if (subtitleBtn && subtitleEl) {
+      subtitleBtn.addEventListener("click", () => {
+        const enabled = subtitleBtn.getAttribute("aria-pressed") !== "true";
+        subtitleBtn.setAttribute("aria-pressed", String(enabled));
+        subtitleBtn.classList.toggle("is-active", enabled);
+        window.__subtitlesEnabled = enabled;
+        if (!enabled) subtitleEl.hidden = true;
+      });
+    }
+
+    const transcriptBtn = document.getElementById("toggle-transcript");
+    const transcriptPanel = document.getElementById("transcript-panel");
+    if (transcriptBtn && transcriptPanel) {
+      transcriptBtn.addEventListener("click", () => {
+        const shown = transcriptPanel.hidden;
+        transcriptPanel.hidden = !shown;
+        transcriptBtn.setAttribute("aria-pressed", String(shown));
+        transcriptBtn.classList.toggle("is-active", shown);
+        if (shown) transcriptPanel.scrollTop = transcriptPanel.scrollHeight;
       });
     }
   });
