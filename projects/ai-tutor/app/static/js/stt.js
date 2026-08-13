@@ -30,10 +30,16 @@
  * всего, ученик просто отошёл от компьютера, а не "не расслышал". Слушать
  * микрофон дальше в этом случае бессмысленно и рискованно (снова поймает
  * случайный звук и отправит его как ответ). Вместо этого показываем
- * баннер с кнопкой "Я здесь, продолжай" — рекомендации ученика вернуться
- * без камеры (её в проекте нет, см. README) взять неоткуда, кроме как по
- * числу подряд идущих NO_ANSWER_MARKER, поэтому считаем через localStorage
- * (переживает перезагрузку страницы между ходами занятия). */
+ * баннер с кнопкой "Я здесь, продолжай" — количество подряд идущих
+ * NO_ANSWER_MARKER считаем через localStorage (переживает перезагрузку
+ * страницы между ходами занятия).
+ *
+ * Если ученик разрешил камеру (presence.js, простое сравнение соседних
+ * кадров на движение, без распознавания лиц/эмоций и без отправки видео
+ * куда-либо) — используем её как дополнительное подтверждение: если в
+ * кадре давно нет движения, хватает одного пропущенного хода вместо двух
+ * (AWAY_THRESHOLD_WITH_CAMERA). Без камеры (не дали доступ/не поддержана)
+ * ничего не меняется — работает только счётчик по тишине. */
 
 document.addEventListener("DOMContentLoaded", () => {
   const avatarEl = document.getElementById("avatar-widget");
@@ -49,6 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const willSpeak = avatarEl.dataset.autoplay === "true";
   const ANSWER_TIMEOUT_MS = 18000;
   const AWAY_THRESHOLD = 2;
+  const AWAY_THRESHOLD_WITH_CAMERA = 1;
+  const PRESENCE_WINDOW_MS = 30000;
   const AWAY_PHRASE = "Кажется, тебя нет на месте. Когда вернёшься — нажми кнопку, и я продолжу.";
 
   const awayKey = `ai-tutor-away-${avatarEl.dataset.lessonId || "0"}`;
@@ -164,8 +172,17 @@ document.addEventListener("DOMContentLoaded", () => {
     beginListening();
   }
 
+  function shouldEnterAway() {
+    if (!answerMode || awayCount < AWAY_THRESHOLD_WITH_CAMERA) return false;
+    if (awayCount >= AWAY_THRESHOLD) return true;
+    // Камера подтверждает отсутствие движения в кадре — не ждём второго
+    // пропущенного хода, довольно и одного (см. presence.js).
+    const presence = window.__presence;
+    return !!(presence && presence.hasCamera && !presence.recentMotion(PRESENCE_WINDOW_MS));
+  }
+
   function beginListeningOrAway() {
-    if (answerMode && awayCount >= AWAY_THRESHOLD) {
+    if (shouldEnterAway()) {
       enterAwayState();
     } else {
       beginListening();

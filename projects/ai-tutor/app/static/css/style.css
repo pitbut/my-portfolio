@@ -261,6 +261,24 @@ form.form-card { display: flex; flex-direction: column; gap: 14px; max-width: 42
 
 .avatar-widget__name { font-weight: 600; color: var(--ink); margin-top: 2px; }
 .avatar-widget__mic-status { font-size: .82rem; color: var(--gold); min-height: 1.2em; }
+
+/* Маленькое превью с камеры (presence.js) — видно только когда доступ
+   реально дали, чтобы было прозрачно, что камера включена, а не скрыто
+   в фоне. Само видео нигде не сохраняется и никуда не отправляется. */
+.presence-preview {
+  width: 56px;
+  height: 42px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--gold);
+  margin-top: 2px;
+}
+.presence-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
 .avatar-widget__subtitle {
   max-width: 420px;
   font-size: .92rem;
