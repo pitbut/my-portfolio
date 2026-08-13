@@ -10,6 +10,32 @@ SECTION_RE = re.compile(
 
 STATE_KEYS = ("stage", "topic_status", "awaiting", "next_lesson_min_offset_hours")
 
+# Модель иногда нарушает инструкцию "без markdown-разметки" в SPEECH (раздел 8
+# промпта) — чаще всего звёздочками-разделителями между смысловыми частями
+# реплики. Раз текст SPEECH идёт прямиком в speechSynthesis, такой символ
+# озвучивается вслух буквально ("звёздочка"), поэтому подчищаем на разборе
+# ответа, а не полагаемся только на соблюдение модели.
+_MD_HR_RE = re.compile(r"^[ \t]*([*_-])(?:[ \t]*\1){2,}[ \t]*$", re.MULTILINE)
+_MD_BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
+_MD_UNDERSCORE_BOLD_RE = re.compile(r"__(.+?)__")
+_MD_BACKTICK_RE = re.compile(r"`([^`]*)`")
+_MD_HEADER_RE = re.compile(r"^[ \t]*#{1,6}[ \t]*", re.MULTILINE)
+
+
+def _strip_markdown(text):
+    """Убирает распространённую markdown-разметку из устной реплики (в первую
+    очередь **жирный** как псевдо-заголовки между смысловыми частями — ученик
+    слышит буквальное "звёздочка звёздочка", если это не убрать). Одиночную
+    "*" намеренно не трогаем — в SPEECH попадаются знаки умножения."""
+    if not text:
+        return text
+    text = _MD_HR_RE.sub("", text)
+    text = _MD_BOLD_RE.sub(r"\1", text)
+    text = _MD_UNDERSCORE_BOLD_RE.sub(r"\1", text)
+    text = _MD_BACKTICK_RE.sub(r"\1", text)
+    text = _MD_HEADER_RE.sub("", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
 
 class ParsedLessonTurn:
     """Результат разбора одного ответа модели."""
@@ -84,9 +110,11 @@ def parse_lesson_turn(raw_text):
         sections[match.group(1)] = match.group(2)
 
     if not sections:
-        return ParsedLessonTurn(speech=(raw_text or "").strip(), board_type=None, board_content=None, state={})
+        return ParsedLessonTurn(
+            speech=_strip_markdown((raw_text or "").strip()), board_type=None, board_content=None, state={}
+        )
 
-    speech = sections.get("SPEECH", "").strip()
+    speech = _strip_markdown(sections.get("SPEECH", "").strip())
     board_type, board_content = _parse_board(sections.get("BOARD", ""))
     state = _parse_state(sections.get("STATE", ""))
 

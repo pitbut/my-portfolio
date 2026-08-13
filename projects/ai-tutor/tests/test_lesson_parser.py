@@ -24,6 +24,25 @@ next_lesson_min_offset_hours: 3
 
 MALFORMED_RESPONSE = "Просто обычный текст без меток."
 
+MARKDOWN_SPEECH_RESPONSE = """SPEECH: Разобрали сложение дробей.
+
+**Вычитание дробей**
+
+Теперь поговорим про `вычитание`. Смотри на доску.
+
+---
+
+# Итог
+
+Молодец!
+BOARD: none
+STATE:
+stage: explanation
+topic_status: in_progress
+awaiting: none
+next_lesson_min_offset_hours: 3
+"""
+
 
 def test_parses_speech_board_state():
     parsed = parse_lesson_turn(SAMPLE_RESPONSE)
@@ -53,3 +72,19 @@ def test_malformed_response_falls_back_to_raw_speech():
     assert parsed.speech == MALFORMED_RESPONSE
     assert parsed.board_type is None
     assert parsed.stage is None
+
+
+def test_speech_strips_markdown_so_tts_does_not_read_it_aloud():
+    parsed = parse_lesson_turn(MARKDOWN_SPEECH_RESPONSE)
+
+    assert "*" not in parsed.speech
+    assert "#" not in parsed.speech
+    assert "`" not in parsed.speech
+    assert "---" not in parsed.speech
+    assert parsed.speech == (
+        "Разобрали сложение дробей.\n\n"
+        "Вычитание дробей\n\n"
+        "Теперь поговорим про вычитание. Смотри на доску.\n\n"
+        "Итог\n\n"
+        "Молодец!"
+    )
