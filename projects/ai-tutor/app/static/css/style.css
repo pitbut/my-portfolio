@@ -168,7 +168,23 @@ form.form-card { display: flex; flex-direction: column; gap: 14px; max-width: 42
   width: fit-content;
   text-align: center;
 }
-.avatar-face-wrap {
+.avatar-stage {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  height: 240px;
+  margin: 0 auto;
+}
+.avatar-figure {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 150px;
+  margin-left: -75px;
+  transform: translateX(var(--walk-x, 0px));
+  transition: transform 2.1s ease-in-out;
+}
+.avatar-sway-wrap {
   animation: avatar-sway 4.5s ease-in-out infinite;
   transform-origin: 50% 100%;
 }
@@ -184,6 +200,46 @@ form.form-card { display: flex; flex-direction: column; gap: 14px; max-width: 42
   30% { transform: translateY(-5px) rotate(-2deg); }
   60% { transform: translateY(2px) rotate(1.5deg); }
   100% { transform: translateY(0) rotate(0); }
+}
+
+/* Ходьба: JS (tts.js) двигает фигуру влево/вправо/в центр между репликами,
+   выставляя --walk-x на #avatar-figure и на время шага добавляя is-walking —
+   ноги и противоположные руки качаются, пока фигура едет по transition. */
+.avatar-body__leg, .avatar-body__arm {
+  fill: none;
+  stroke: var(--avatar-color, var(--accent));
+  stroke-width: 16;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+.avatar-body__arm { stroke-width: 15; }
+.avatar-body__torso { fill: var(--avatar-color, var(--accent)); }
+
+.avatar-figure.is-walking .avatar-body__leg--left,
+.avatar-figure.is-walking .avatar-body__arm--right {
+  animation: avatar-limb-swing-a .5s ease-in-out infinite;
+}
+.avatar-figure.is-walking .avatar-body__leg--right,
+.avatar-figure.is-walking .avatar-body__arm--left {
+  animation: avatar-limb-swing-b .5s ease-in-out infinite;
+}
+@keyframes avatar-limb-swing-a {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(16deg); }
+}
+@keyframes avatar-limb-swing-b {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-16deg); }
+}
+
+/* Жестикуляция во время речи — переключается tts.js на каждой реплике. */
+.avatar-widget.is-gesturing .avatar-body__arm--right {
+  animation: avatar-gesture 1.1s ease-in-out infinite;
+}
+@keyframes avatar-gesture {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-20deg); }
 }
 
 .avatar-face__head { fill: var(--avatar-color, var(--accent)); }

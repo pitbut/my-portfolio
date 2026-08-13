@@ -20,6 +20,10 @@ const BLINK_DURATION_MS = 120;
 const BOUNDARY_WATCHDOG_MS = 700;
 const FALLBACK_MOUTH_MIN_MS = 90;
 const FALLBACK_MOUTH_MAX_MS = 200;
+const WALK_MIN_MS = 9000;
+const WALK_MAX_MS = 18000;
+const WALK_STEP_MS = 2300;
+const WALK_POSITIONS_PX = [-70, 0, 70];
 
 function findVoiceByName(name) {
   if (!name) return null;
@@ -36,12 +40,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const autoplay = avatarEl.dataset.autoplay === "true";
   const subtitleEl = document.getElementById("avatar-subtitle");
   const micStatusEl = document.getElementById("mic-status");
+  const figureEl = document.getElementById("avatar-figure");
 
   let speaking = false;
   let mouthTimer = null;
   let fallbackTimer = null;
   let watchdogTimer = null;
   let blinkTimer = null;
+  let walkTimer = null;
+  let currentWalkX = 0;
   // Срабатывает один раз, когда договаривает именно автовоспроизводимая при
   // загрузке страницы реплика (см. autoplay ниже) — stt.js использует это,
   // чтобы понять, когда включать тайм-аут ожидания ответа. Отдельные вызовы
@@ -84,6 +91,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }, delay);
   }
 
+  // Аватар изредка переступает влево/центр/вправо в паузах между репликами
+  // (не во время самой речи, чтобы не отвлекать) — чисто декоративное
+  // оживление сцены, к логике урока не привязано.
+  function scheduleWalk() {
+    clearTimeout(walkTimer);
+    const delay = WALK_MIN_MS + Math.random() * (WALK_MAX_MS - WALK_MIN_MS);
+    walkTimer = setTimeout(doWalk, delay);
+  }
+
+  function doWalk() {
+    if (speaking || !figureEl) {
+      scheduleWalk();
+      return;
+    }
+    const options = WALK_POSITIONS_PX.filter((x) => x !== currentWalkX);
+    currentWalkX = options[Math.floor(Math.random() * options.length)];
+    figureEl.style.setProperty("--walk-x", `${currentWalkX}px`);
+    figureEl.classList.add("is-walking");
+    setTimeout(() => figureEl.classList.remove("is-walking"), WALK_STEP_MS);
+    scheduleWalk();
+  }
+
   function nod() {
     avatarEl.classList.remove("is-nodding");
     // reflow, чтобы анимацию можно было перезапустить на следующей же реплике
@@ -108,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
       speaking = true;
       nod();
       setMouth("mid");
+      avatarEl.classList.add("is-gesturing");
       if (window.__subtitlesEnabled && subtitleEl) {
         subtitleEl.textContent = text;
         subtitleEl.hidden = false;
@@ -130,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearTimeout(mouthTimer);
       stopFallbackMouthLoop();
       setMouth("closed");
+      avatarEl.classList.remove("is-gesturing");
       if (subtitleEl) subtitleEl.hidden = true;
       if (onEnd) onEnd();
     };
@@ -146,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearTimeout(mouthTimer);
     stopFallbackMouthLoop();
     setMouth("closed");
+    avatarEl.classList.remove("is-gesturing");
     if (subtitleEl) subtitleEl.hidden = true;
   }
 
@@ -173,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setMouth("closed");
   scheduleBlink();
+  scheduleWalk();
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stop();
