@@ -236,6 +236,67 @@ STRINGS = {
         "ru": "техническом задании", "uz_latin": "texnik topshiriqda", "uz_cyrillic": "техник топшириқда",
         "en": "spec document",
     },
+    "home.seo_heading": {
+        "ru": "Ремонт и изготовление оборудования в Узбекистане",
+        "uz_latin": "Oʻzbekistonda uskunalarni taʼmirlash va ishlab chiqarish",
+        "uz_cyrillic": "Ўзбекистонда ускуналарни таъмирлаш ва ишлаб чиқариш",
+        "en": "Equipment repair and manufacturing in Uzbekistan",
+    },
+    "home.seo_text": {
+        "ru": (
+            "B2B Platform UZ — это площадка, где заказчики и производственные предприятия "
+            "Узбекистана находят друг друга напрямую, без посредников. Здесь размещают заявки "
+            "на ремонт оборудования, изготовление металлоконструкций и деталей на заказ, "
+            "токарные, фрезерные, сварочные и слесарные работы, гибку и резку листового металла, "
+            "ЧПУ-обработку — и получают ставки от проверенных исполнителей из Ташкента, Андижана, "
+            "Ферганы, Самарканда, Бухары и других регионов страны. На платформе также работает "
+            "барахолка станков и инструмента (продажа и покупка б/у оборудования), рынок сырья и "
+            "материалов от поставщиков, вакансии и резюме для токарей, фрезеровщиков, сварщиков и "
+            "инженеров-конструкторов, а также раздел «Конструкторы» — для тех, кому нужно "
+            "спроектировать оборудование или деталь с нуля. Регистрация бесплатна для заказчика "
+            "и исполнителя."
+        ),
+        "uz_latin": (
+            "B2B Platform UZ — Oʻzbekiston buyurtmachilari va ishlab chiqarish korxonalarini "
+            "vositachisiz, toʻgʻridan-toʻgʻri bir-biri bilan bogʻlaydigan platforma. Bu yerda "
+            "uskunalarni taʼmirlash, metall konstruksiyalar va detallarni buyurtma asosida "
+            "tayyorlash, tokarlik, frezerlik, payvandlash va chilangarlik ishlari, list metallni "
+            "bukish va kesish, CHPU (CNC) qayta ishlash boʻyicha eʼlonlar joylashtiriladi — va "
+            "Toshkent, Andijon, Fargʻona, Samarqand, Buxoro hamda boshqa viloyatlardagi "
+            "tekshirilgan ijrochilardan takliflar olinadi. Platformada shuningdek stanok va "
+            "asbob-uskuna bozorchasi (b/u uskunalarni sotish va sotib olish), yetkazib "
+            "beruvchilardan xomashyo va materiallar bozori, tokar, frezerchi, payvandchi va "
+            "konstruktor-muhandislar uchun ish oʻrinlari va rezyumelar, shuningdek uskuna yoki "
+            "detalni noldan loyihalashtirish kerak boʻlganlar uchun «Konstruktorlar» boʻlimi "
+            "ishlaydi. Buyurtmachi va ijrochi uchun roʻyxatdan oʻtish bepul."
+        ),
+        "uz_cyrillic": (
+            "B2B Platform UZ — Ўзбекистон буюртмачилари ва ишлаб чиқариш корхоналарини "
+            "воситачисиз, тўғридан-тўғри бир-бири билан боғлайдиган платформа. Бу ерда "
+            "ускуналарни таъмирлаш, метал конструкциялар ва деталларни буюртма асосида "
+            "тайёрлаш, токарлик, фрезерлик, пайвандлаш ва чилангарлик ишлари, лист металлни "
+            "букиш ва кесиш, ЧПУ (CNC) қайта ишлаш бўйича эълонлар жойлаштирилади — ва "
+            "Тошкент, Андижон, Фарғона, Самарқанд, Бухоро ҳамда бошқа вилоятлардаги "
+            "текширилган ижрочилардан таклифлар олинади. Платформада шунингдек станок ва "
+            "асбоб-ускуна бозорчаси (б/у ускуналарни сотиш ва сотиб олиш), етказиб "
+            "берувчилардан хомашё ва материаллар бозори, токар, фрезерчи, пайвандчи ва "
+            "конструктор-муҳандислар учун иш ўринлари ва резюмелар, шунингдек ускуна ёки "
+            "деталь нолдан лойиҳалаштириш керак бўлганлар учун «Конструкторлар» бўлими "
+            "ишлайди. Буюртмачи ва ижрочи учун рўйхатдан ўтиш бепул."
+        ),
+        "en": (
+            "B2B Platform UZ connects customers and manufacturing businesses across Uzbekistan "
+            "directly, with no middlemen. Post requests for equipment repair, custom metal "
+            "fabrication and parts manufacturing, turning, milling, welding and locksmith work, "
+            "sheet-metal bending and cutting, or CNC machining — and get bids from vetted "
+            "contractors in Tashkent, Andijan, Fergana, Samarkand, Bukhara and other regions. "
+            "The platform also runs a marketplace for used machines and tools, a market for raw "
+            "materials and supplies, job listings and resumes for turners, millers, welders and "
+            "design engineers, and a \"Designers\" section for anyone who needs equipment or a "
+            "part engineered from scratch. Registration is free for both customers and "
+            "contractors."
+        ),
+    },
     "common.close": {
         "ru": "Закрыть", "uz_latin": "Yopish", "uz_cyrillic": "Ёпиш", "en": "Close",
     },

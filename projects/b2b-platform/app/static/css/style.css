@@ -57,6 +57,9 @@ a{color:var(--accent2);}
 .how-card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 6px 20px rgba(0,0,0,.06);}
 .how-card__num{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gold),var(--orange));border-radius:8px;font-weight:800;margin-bottom:10px;}
 .status-note{padding-bottom:40px;color:var(--sub);font-size:.92em;}
+.seo-text{padding:24px 20px 48px;border-top:1px solid var(--line);}
+.seo-text h2{font-size:1.05em;color:var(--bg2);margin:0 0 10px;}
+.seo-text p{color:var(--sub);font-size:.92em;line-height:1.6;max-width:880px;}
 @media (max-width:760px){.how-it-works{grid-template-columns:1fr;}}
 
 /* --- баннеры на главной: видео-объяснение и рекламное место --- */
