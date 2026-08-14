@@ -243,6 +243,7 @@ form.form-card { display: flex; flex-direction: column; gap: 14px; max-width: 42
 }
 
 .avatar-face__head { fill: var(--avatar-color, var(--accent)); }
+.avatar-face__beard { fill: #d6d3d1; }
 .avatar-face__eye-white { fill: #fff; }
 .avatar-face__pupil { fill: #24243a; }
 .avatar-face__eyelid {

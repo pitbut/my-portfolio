@@ -5,10 +5,13 @@
 подставляется в системный промпт репетитора как {avatar_name}."""
 
 AVATAR_CHOICES = [
-    {"key": "alex", "name": "Алекс", "emoji": "🦉", "color": "#7c9cff"},
-    {"key": "nova", "name": "Нова", "emoji": "🦊", "color": "#ffb454"},
-    {"key": "leo", "name": "Лео", "emoji": "🐯", "color": "#f87171"},
-    {"key": "mira", "name": "Мира", "emoji": "🐬", "color": "#4ade80"},
+    {"key": "alex", "name": "Алекс", "emoji": "🦉", "color": "#7c9cff", "has_beard": False},
+    {"key": "nova", "name": "Нова", "emoji": "🦊", "color": "#ffb454", "has_beard": False},
+    {"key": "leo", "name": "Лео", "emoji": "🐯", "color": "#f87171", "has_beard": False},
+    {"key": "mira", "name": "Мира", "emoji": "🐬", "color": "#4ade80", "has_beard": False},
+    # Оригинальный персонаж, без отсылок к каким-либо мультфильмам — седой
+    # мудрый наставник с бородой (по запросу пользователя).
+    {"key": "kuzmich", "name": "Кузьмич", "emoji": "🧙", "color": "#94a3b8", "has_beard": True},
 ]
 
 AVATARS_BY_KEY = {a["key"]: a for a in AVATAR_CHOICES}
