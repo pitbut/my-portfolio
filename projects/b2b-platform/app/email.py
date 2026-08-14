@@ -28,6 +28,19 @@ def send_email(to, subject, body):
         )
         return False
 
+    sender = current_app.config.get("MAIL_DEFAULT_SENDER") or ""
+    if "resend.dev" in sender:
+        # onboarding@resend.dev — тестовый sandbox-адрес: Resend реально
+        # доставит письмо ТОЛЬКО на адрес, на который зарегистрирован сам
+        # Resend-аккаунт, на любой другой вернёт 403 — при этом send_email()
+        # снаружи выглядит настроенным (ключ есть), поэтому без явного
+        # предупреждения в логе это легко не заметить.
+        current_app.logger.warning(
+            "MAIL_DEFAULT_SENDER=%r похож на тестовый sandbox-адрес Resend — письма могут не доходить "
+            "ни до кого, кроме владельца Resend-аккаунта. Задайте адрес с подтверждённого домена.",
+            sender,
+        )
+
     payload = json.dumps({
         "from": current_app.config["MAIL_DEFAULT_SENDER"],
         "to": [to],

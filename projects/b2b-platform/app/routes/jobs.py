@@ -3,7 +3,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user
 
 from app import db
-from app.decorators import paywall_required
+from app.decorators import email_confirmed_required, paywall_required
 from app.models import JobResponse, ProfessionCategory, Region, Resume, Vacancy
 from app.notify import notify
 
@@ -45,6 +45,7 @@ def vacancies_index():
 
 @bp.route("/jobs/new", methods=["GET", "POST"])
 @paywall_required
+@email_confirmed_required
 def vacancy_new():
     professions = ProfessionCategory.query.order_by(ProfessionCategory.name_ru).all()
     regions = Region.query.order_by(Region.name_ru).all()
@@ -103,6 +104,7 @@ def vacancy_detail(vacancy_id):
 
 @bp.route("/jobs/<int:vacancy_id>/apply", methods=["POST"])
 @paywall_required
+@email_confirmed_required
 def vacancy_apply(vacancy_id):
     vacancy = db.session.get(Vacancy, vacancy_id)
     if vacancy is None:
@@ -209,6 +211,7 @@ def resume_detail(resume_id):
 
 @bp.route("/resumes/<int:resume_id>/invite", methods=["POST"])
 @paywall_required
+@email_confirmed_required
 def resume_invite(resume_id):
     resume = db.session.get(Resume, resume_id)
     if resume is None:

@@ -65,8 +65,14 @@ def client(app):
     return app.test_client()
 
 
-def register(client, email="user@example.com", password="password123", role="customer"):
-    return client.post(
+def register(client, email="user@example.com", password="password123", role="customer", confirm_email=True):
+    """confirm_email=True (по умолчанию) сразу подтверждает почту тестовому
+    пользователю — большинству тестов не важен сам процесс подтверждения,
+    важно, чтобы дальше можно было создавать заявки/ставки/отклики и т.п.
+    (теперь требующие email_confirmed=True, см. email_confirmed_required).
+    Тесты, которые проверяют именно процесс подтверждения, передают
+    confirm_email=False."""
+    resp = client.post(
         "/auth/register",
         data={
             "email": email, "password": password, "password2": password,
@@ -74,3 +80,12 @@ def register(client, email="user@example.com", password="password123", role="cus
         },
         follow_redirects=True,
     )
+    if confirm_email:
+        with client.application.app_context():
+            from app.models import User
+
+            user = User.query.filter_by(email=email).first()
+            if user is not None:
+                user.email_confirmed = True
+                db.session.commit()
+    return resp

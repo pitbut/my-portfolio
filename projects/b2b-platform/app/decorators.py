@@ -26,6 +26,31 @@ def paywall_required(view):
     return wrapped
 
 
+def email_confirmed_required(view):
+    """Требует подтверждённый email — вешается поверх paywall_required/
+    role_required на действия, которые создают контент или обязательства
+    перед другой стороной (заявка, ставка, сообщение, отзыв, объявление,
+    спор, вакансия/резюме и т.п.), а не на весь сайт: смотреть каталог,
+    искать и заполнять свою анкету можно и до подтверждения — иначе
+    свежезарегистрированный пользователь не смог бы даже донести анкету
+    до конца, если письмо задержится."""
+
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for("main.index", auth_required=1, next=request.full_path))
+        if not current_user.email_confirmed:
+            flash(
+                "Подтвердите email, чтобы выполнить это действие — проверьте почту "
+                "или запросите письмо ещё раз в личном кабинете.",
+                "error",
+            )
+            return redirect(request.referrer or url_for("main.index"))
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
 def role_required(role):
     """Требует конкретную бизнес-роль (customer/executor). Применяется поверх
     paywall_required. Если роль ещё не выбрана (первый вход через Google) —
