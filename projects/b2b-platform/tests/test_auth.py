@@ -68,7 +68,7 @@ def test_login_sets_persistent_remember_cookie(client):
 
 
 def test_email_confirmation_flow(client):
-    register(client, email="confirm@example.com")
+    register(client, email="confirm@example.com", confirm_email=False)
     with client.application.app_context():
         user = User.query.filter_by(email="confirm@example.com").first()
         assert user.email_confirmed is False
@@ -99,13 +99,33 @@ def _reset_path_for(client, email):
     return url.split("localhost", 1)[-1] if "localhost" in url else url
 
 
-def test_forgot_password_shows_reset_link_when_resend_not_configured(client):
+def test_forgot_password_hides_reset_link_in_production(client):
+    """Регресс: раньше ссылка сброса пароля показывалась прямо в ответе,
+    когда Resend не настроен — значит кто угодно, введя ЧУЖОЙ email в эту
+    форму, получал прямую ссылку для сброса чужого пароля, не имея доступа
+    к почте. В проде (DEBUG=False, как в тестовом конфиге по умолчанию)
+    ссылка теперь скрыта — остаётся только нейтральное сообщение."""
     register(client, email="reset@example.com", password="oldpassword1")
     client.get("/auth/logout")
 
     resp = client.post("/auth/forgot-password", data={"email": "reset@example.com"}, follow_redirects=True)
-    assert "ссылка для сброса пароля".encode() in resp.data
-    assert "/auth/reset-password/".encode() in resp.data
+    assert "Если такой email зарегистрирован".encode() in resp.data
+    assert "/auth/reset-password/".encode() not in resp.data
+
+
+def test_forgot_password_shows_reset_link_in_debug_mode(client):
+    """В dev-режиме (DEBUG=True) ссылка всё ещё показывается — это удобство
+    для локальной разработки без настроенного Resend, не дыра в проде."""
+    register(client, email="resetdebug@example.com", password="oldpassword1")
+    client.get("/auth/logout")
+
+    client.application.config["DEBUG"] = True
+    try:
+        resp = client.post("/auth/forgot-password", data={"email": "resetdebug@example.com"}, follow_redirects=True)
+        assert "ссылка для сброса пароля".encode() in resp.data
+        assert "/auth/reset-password/".encode() in resp.data
+    finally:
+        client.application.config["DEBUG"] = False
 
 
 def test_forgot_password_same_message_for_unknown_email(client):

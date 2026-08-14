@@ -129,10 +129,16 @@ def create_app(config_name=None):
 
     @app.context_processor
     def inject_pending_confirmation():
+        """Прямая ссылка подтверждения на самой странице — удобство только для
+        локальной разработки без настроенного Resend. На бою (DEBUG=False) её
+        показывать нельзя: иначе подтверждение email не проверяет вообще
+        ничего — достаточно зарегистрироваться любым (хоть чужим) адресом и
+        кликнуть ссылку прямо на сайте, не открывая почту."""
         from flask_login import current_user
 
         if (
-            current_user.is_authenticated
+            app.debug
+            and current_user.is_authenticated
             and not current_user.email_confirmed
             and not app.config.get("RESEND_API_KEY")
         ):

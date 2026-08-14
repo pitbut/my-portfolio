@@ -86,6 +86,13 @@ def thread(user_id):
     order = _order_context(user_id)
 
     if request.method == "POST":
+        if not current_user.email_confirmed:
+            flash(
+                "Подтвердите email, чтобы писать сообщения — проверьте почту "
+                "или запросите письмо ещё раз в личном кабинете.",
+                "error",
+            )
+            return redirect(url_for("chat.thread", user_id=user_id, order_id=order.id if order else None))
         body = (request.form.get("body") or "").strip()
         if not body:
             flash("Сообщение не может быть пустым.", "error")

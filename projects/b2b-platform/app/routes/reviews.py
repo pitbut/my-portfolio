@@ -3,7 +3,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user
 
 from app import db
-from app.decorators import paywall_required
+from app.decorators import email_confirmed_required, paywall_required
 from app.models import Order, Review
 from app.notify import notify
 
@@ -42,6 +42,7 @@ def _recalculate_rating(user):
 
 @bp.route("/orders/<int:order_id>/review", methods=["GET", "POST"])
 @paywall_required
+@email_confirmed_required
 def leave_review(order_id):
     order = db.session.get(Order, order_id)
     if order is None:

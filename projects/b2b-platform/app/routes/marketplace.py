@@ -3,7 +3,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user
 
 from app import db
-from app.decorators import paywall_required
+from app.decorators import email_confirmed_required, paywall_required
 from app.models import Listing, ListingCategory, ListingMedia, ListingResponse, Region
 from app.notify import notify
 from app.photos import upload_photo
@@ -49,6 +49,7 @@ def index():
 
 @bp.route("/new", methods=["GET", "POST"])
 @paywall_required
+@email_confirmed_required
 def new_listing():
     categories = ListingCategory.query.order_by(ListingCategory.name_ru).all()
     regions = Region.query.order_by(Region.name_ru).all()
@@ -120,6 +121,7 @@ def detail(listing_id):
 
 @bp.route("/<int:listing_id>/respond", methods=["POST"])
 @paywall_required
+@email_confirmed_required
 def respond(listing_id):
     listing = db.session.get(Listing, listing_id)
     if listing is None:

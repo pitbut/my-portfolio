@@ -124,10 +124,18 @@ def register():
         sent, confirm_url = _send_confirmation_email(user)
         if sent:
             flash("Регистрация почти завершена — мы отправили письмо со ссылкой подтверждения на ваш email.", "success")
-        else:
+        elif current_app.debug:
+            # Ссылка в открытом виде — только для локальной разработки без
+            # настроенного Resend. На бою так делать нельзя (см. inject_pending_confirmation).
             flash(
                 f"Регистрация завершена. Почтовый сервер ещё не настроен, поэтому подтвердите email по этой ссылке: {confirm_url}",
                 "info",
+            )
+        else:
+            flash(
+                "Регистрация завершена, но письмо с подтверждением отправить не удалось. "
+                "Попробуйте запросить его повторно из личного кабинета или обратитесь в поддержку.",
+                "error",
             )
 
         if role == "customer":
@@ -186,7 +194,10 @@ def forgot_password():
         # чтобы через эту форму нельзя было проверить, зарегистрирован ли адрес.
         if user is not None:
             sent, reset_url = _send_reset_email(user)
-            if not sent:
+            # Ссылку в открытом виде показываем только в dev-режиме — иначе
+            # тот, кто просто ввёл чужой email в эту форму, получил бы прямую
+            # ссылку для сброса ЧУЖОГО пароля, даже не имея доступа к почте.
+            if not sent and current_app.debug:
                 flash(
                     f"Почтовый сервер ещё не настроен — вот ссылка для сброса пароля: {reset_url}",
                     "info",
@@ -278,8 +289,10 @@ def resend_confirmation():
     sent, confirm_url = _send_confirmation_email(current_user)
     if sent:
         flash("Письмо с подтверждением отправлено повторно.", "success")
-    else:
+    elif current_app.debug:
         flash(f"Почтовый сервер не настроен, вот ссылка подтверждения: {confirm_url}", "info")
+    else:
+        flash("Не удалось отправить письмо. Попробуйте ещё раз позже или обратитесь в поддержку.", "error")
     return redirect(url_for("main.index"))
 
 

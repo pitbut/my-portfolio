@@ -3,7 +3,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user
 
 from app import db
-from app.decorators import paywall_required
+from app.decorators import email_confirmed_required, paywall_required
 from app.models import Dispute, DisputeEvidence, DisputeMessage, Order, record_status_change
 from app.notify import notify
 from app.photos import upload_photo
@@ -37,6 +37,7 @@ def _can_view_dispute(dispute):
 
 @bp.route("/orders/<int:order_id>/dispute/open", methods=["GET", "POST"])
 @paywall_required
+@email_confirmed_required
 def open_dispute(order_id):
     order = db.session.get(Order, order_id)
     if order is None:
@@ -119,6 +120,7 @@ def add_evidence(dispute_id):
 
 @bp.route("/disputes/<int:dispute_id>/message", methods=["POST"])
 @paywall_required
+@email_confirmed_required
 def add_message(dispute_id):
     dispute = db.session.get(Dispute, dispute_id)
     if dispute is None or not _can_view_dispute(dispute):

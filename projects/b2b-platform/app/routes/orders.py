@@ -5,7 +5,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, s
 from flask_login import current_user
 
 from app import db
-from app.decorators import paywall_required, role_required
+from app.decorators import email_confirmed_required, paywall_required, role_required
 from app.files import order_uploads_dir, upload_order_file
 from app.matching import notify_unmatched_executors, run_matching
 from app.models import (
@@ -52,6 +52,7 @@ def _can_view_order(order):
 
 @bp.route("/orders/new", methods=["GET", "POST"])
 @role_required("customer")
+@email_confirmed_required
 def new_order():
     profile = current_user.customer_profile
     if profile is None or profile.id is None:
@@ -255,6 +256,7 @@ def order_detail(order_id):
 
 @bp.route("/orders/<int:order_id>/bid", methods=["POST"])
 @role_required("executor")
+@email_confirmed_required
 def submit_bid(order_id):
     order = db.session.get(Order, order_id)
     if order is None:
