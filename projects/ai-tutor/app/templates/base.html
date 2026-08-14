@@ -49,14 +49,6 @@
     </div>
     {% endif %}
   {% endwith %}
-  {% if pending_confirm_url %}
-  <div class="wrap flash-messages">
-    <div class="flash flash--info">
-      Email ещё не подтверждён — на всякий случай, если письмо не дошло,
-      вот та же ссылка: <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
-    </div>
-  </div>
-  {% endif %}
   {% block content %}{% endblock %}
 </main>
 

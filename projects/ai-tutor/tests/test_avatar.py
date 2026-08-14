@@ -4,7 +4,9 @@ from app.models import User
 from tests.conftest import login
 
 
-def test_register_redirects_to_avatar_step(client):
+def test_register_redirects_to_confirm_pending_not_avatar_step(client):
+    """Онбординг (выбор аватара) начинается только после подтверждения
+    email — см. before_request-гейт в app/__init__.py."""
     response = client.post(
         "/auth/register",
         data={
@@ -15,7 +17,26 @@ def test_register_redirects_to_avatar_step(client):
         },
     )
     assert response.status_code == 302
-    assert "/onboarding/avatar" in response.headers["Location"]
+    assert "/auth/confirm-pending" in response.headers["Location"]
+
+
+def test_confirmed_user_reaches_avatar_step(app, client):
+    with app.app_context():
+        client.post(
+            "/auth/register",
+            data={
+                "name": "Аня",
+                "email": "anya@example.com",
+                "password": "password123",
+                "password2": "password123",
+            },
+        )
+        u = User.query.filter_by(email="anya@example.com").first()
+        u.email_confirmed = True
+        db.session.commit()
+
+        response = client.get("/onboarding/avatar")
+        assert response.status_code == 200
 
 
 def test_choose_avatar_sets_avatar_and_voice(app, client, user):
