@@ -39,6 +39,29 @@ def _send_confirmation_email(user):
     return sent, confirm_url
 
 
+def _flash_confirmation_result(sent, confirm_url):
+    """Сообщение после (пере)отправки письма подтверждения.
+
+    Важно: ссылку подтверждения показываем прямо пользователю ТОЛЬКО в
+    режиме разработки (DEBUG) — это исключительно удобство локального
+    тестирования без настоящего email-провайдера. В проде, если отправка
+    не удалась (Resend не настроен/отклонил/упал), ссылку никому не
+    показываем — иначе подтверждение email превращается в кнопку "поверь
+    мне на слово", а не в реальную проверку, что ученик владеет этим
+    почтовым ящиком (см. app/__init__.py: доступ к сайту гейтится именно
+    по email_confirmed)."""
+    if sent:
+        flash("Письмо со ссылкой подтверждения отправлено на ваш email.", "success")
+    elif current_app.debug:
+        flash(f"[режим разработки] Почта не отправляется, вот ссылка: {confirm_url}", "info")
+    else:
+        flash(
+            "Не удалось отправить письмо с подтверждением. Попробуйте запросить его ещё "
+            "раз через пару минут или обратитесь в поддержку.",
+            "error",
+        )
+
+
 @bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -73,15 +96,8 @@ def register():
         login_user(user)
 
         sent, confirm_url = _send_confirmation_email(user)
-        if sent:
-            flash("Регистрация почти завершена — мы отправили письмо со ссылкой подтверждения на ваш email.", "success")
-        else:
-            flash(
-                f"Регистрация завершена. Почтовый сервер ещё не настроен, поэтому "
-                f"подтвердите email по этой ссылке: {confirm_url}",
-                "info",
-            )
-        return redirect(url_for("onboarding.choose_avatar"))
+        _flash_confirmation_result(sent, confirm_url)
+        return redirect(url_for("auth.confirm_pending"))
 
     return render_template("auth/register.html", name="", email="")
 
@@ -150,8 +166,16 @@ def resend_confirmation():
         return redirect(url_for("main.index"))
 
     sent, confirm_url = _send_confirmation_email(current_user)
-    if sent:
-        flash("Письмо с подтверждением отправлено повторно.", "success")
-    else:
-        flash(f"Почтовый сервер не настроен, вот ссылка подтверждения: {confirm_url}", "info")
-    return redirect(url_for("main.index"))
+    _flash_confirmation_result(sent, confirm_url)
+    return redirect(url_for("auth.confirm_pending"))
+
+
+@bp.route("/confirm-pending")
+@login_required
+def confirm_pending():
+    """Страница-заглушка: пока email не подтверждён, остальной сайт
+    недоступен (см. before_request-гейт в app/__init__.py) — сюда
+    редиректит и после регистрации, и при попытке зайти куда-либо ещё."""
+    if current_user.email_confirmed:
+        return redirect(url_for("main.index"))
+    return render_template("auth/confirm_pending.html")

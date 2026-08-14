@@ -15,6 +15,9 @@ def test_choose_subject_sets_user_program(app, client):
             },
         )
         program = Program.query.first()
+        u = User.query.filter_by(email="borya@example.com").first()
+        u.email_confirmed = True
+        db.session.commit()
 
         response = client.post("/onboarding/subject", data={"program_id": program.id})
         assert response.status_code == 302

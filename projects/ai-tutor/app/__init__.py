@@ -2,8 +2,8 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask
-from flask_login import LoginManager
+from flask import Flask, redirect, request, url_for
+from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -50,21 +50,20 @@ def create_app(config_name=None):
     def load_user(user_id):
         return db.session.get(models.User, int(user_id))
 
-    @app.context_processor
-    def inject_pending_confirmation():
-        """Показываем ссылку подтверждения прямо на сайте, пока email не
-        подтверждён — не только один раз во flash-сообщении (иначе легко
-        потерять), и не только когда RESEND_API_KEY не настроен: письмо
-        может не дойти и при настроенном ключе (например, Resend отклонит
-        отправителя onboarding@resend.dev на чужой адрес, пока не привязан
-        свой домен, — см. app/email.py), а ученику всё равно нужен способ
-        подтвердить email."""
-        from flask_login import current_user
-
-        if current_user.is_authenticated and not current_user.email_confirmed:
-            from app.routes.auth import confirm_url_for
-
-            return {"pending_confirm_url": confirm_url_for(current_user)}
-        return {}
+    # Разделы auth/admin/static — исключение, чтобы (пере)отправить письмо,
+    # выйти или зайти в /admin можно было и с неподтверждённым email.
+    # Остальной сайт (кабинет, онбординг, занятия) недоступен, пока
+    # email_confirmed не станет True — это единственное, что реально
+    # проверяет, что ученик владеет своим почтовым ящиком, поэтому
+    # обходной ссылки на подтверждение прямо на странице сайта нет (см.
+    # app/routes/auth.py:_flash_confirmation_result — ссылку показываем
+    # только в DEBUG, для локальной разработки без реального email).
+    @app.before_request
+    def require_email_confirmation():
+        if not current_user.is_authenticated or current_user.email_confirmed:
+            return None
+        if request.blueprint in ("auth", "admin") or request.endpoint == "static":
+            return None
+        return redirect(url_for("auth.confirm_pending"))
 
     return app

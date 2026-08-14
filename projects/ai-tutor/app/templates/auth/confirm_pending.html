@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Подтвердите email — ИИ-репетитор{% endblock %}
+{% block content %}
+<div class="wrap" style="max-width:520px;">
+  <h1>Подтвердите email</h1>
+  <div class="card">
+    <p>
+      Мы отправили письмо со ссылкой подтверждения на <strong>{{ current_user.email }}</strong>.
+      Откройте его и перейдите по ссылке — после этого можно будет пользоваться сайтом.
+    </p>
+    <p style="color:var(--ink-dim);">
+      Письмо не пришло? Проверьте папку «Спам» и подождите пару минут — иногда доставка
+      задерживается.
+    </p>
+    <a class="btn" href="{{ url_for('auth.resend_confirmation') }}">Отправить письмо ещё раз</a>
+  </div>
+  <p style="color:var(--ink-dim); margin-top:16px;">
+    Зарегистрировались по ошибке или хотите выйти? <a href="{{ url_for('auth.logout') }}">Выйти из аккаунта</a>.
+  </p>
+</div>
+{% endblock %}
