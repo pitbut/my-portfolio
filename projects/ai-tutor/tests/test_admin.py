@@ -145,3 +145,102 @@ def test_admin_can_email_student(app, client, user):
         data={"subject": "Привет", "body": "Как дела?"},
     )
     assert response.status_code == 302  # без RESEND_API_KEY в тестах уйдёт в лог, не упадёт
+
+
+def test_generate_topics_shows_preview_without_saving(app, client, monkeypatch):
+    admin_login(app, client)
+
+    monkeypatch.setattr(
+        "app.routes.admin.generate_program",
+        lambda subject, grade, curriculum=None: [
+            {"order": 1, "title": "Сгенерированная тема 1", "description": "Описание 1"},
+            {"order": 2, "title": "Сгенерированная тема 2", "description": "Описание 2"},
+        ],
+    )
+
+    with app.app_context():
+        program_id = Program.query.first().id
+
+    response = client.post(f"/admin/programs/{program_id}/generate")
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert "Сгенерированная тема 1" in html
+    assert "Сгенерированная тема 2" in html
+
+    with app.app_context():
+        # фикстура app уже сажает 3 темы в первую программу — счётчик не должен
+        # вырасти, раз это только предпросмотр, а не сохранение
+        assert Topic.query.filter_by(program_id=program_id).count() == 3
+
+
+def test_generate_topics_handles_ai_error(app, client, monkeypatch):
+    from app.ai_client import AIClientError
+
+    admin_login(app, client)
+
+    def _raise(subject, grade, curriculum=None):
+        raise AIClientError("ключ не настроен")
+
+    monkeypatch.setattr("app.routes.admin.generate_program", _raise)
+
+    with app.app_context():
+        program_id = Program.query.first().id
+
+    response = client.post(f"/admin/programs/{program_id}/generate")
+    assert response.status_code == 302
+    assert f"/admin/programs/{program_id}/topics" in response.headers["Location"]
+
+
+def test_generate_topics_save_persists_only_checked_rows(app, client):
+    admin_login(app, client)
+
+    with app.app_context():
+        program_id = Program.query.first().id
+
+    response = client.post(
+        f"/admin/programs/{program_id}/generate/save",
+        data={
+            # фикстура app уже сажает темы с order 1-3 в эту программу —
+            # берём заведомо свободные номера, чтобы не словить UNIQUE-конфликт
+            "order": ["10", "11"],
+            "title": ["Принятая тема", "Отклонённая тема"],
+            "description": ["Описание", "Описание"],
+            "include": ["0"],  # только первая тема отмечена
+        },
+    )
+    assert response.status_code == 302
+
+    with app.app_context():
+        topics = Topic.query.filter_by(program_id=program_id).all()
+        titles = {t.title for t in topics}
+        assert "Принятая тема" in titles
+        assert "Отклонённая тема" not in titles
+
+
+def test_generate_topics_save_avoids_order_collision_with_existing_topics(app, client):
+    """Регрессия: у программы уже есть темы 1-3 (фикстура app). Раньше форма
+    предпросмотра предлагала номера от ИИ, тоже начинающиеся с 1 — сохранение
+    падало с IntegrityError по (program_id, order). Теперь конфликтующий
+    номер должен тихо переехать на первый свободный, а не уронить запрос."""
+    admin_login(app, client)
+
+    with app.app_context():
+        program_id = Program.query.first().id
+        existing_orders = {t.order for t in Topic.query.filter_by(program_id=program_id).all()}
+        assert 1 in existing_orders  # подтверждаем, что коллизия действительно возможна
+
+    response = client.post(
+        f"/admin/programs/{program_id}/generate/save",
+        data={
+            "order": ["1"],  # намеренно конфликтующий номер
+            "title": ["Тема с конфликтующим номером"],
+            "description": ["..."],
+            "include": ["0"],
+        },
+    )
+    assert response.status_code == 302
+
+    with app.app_context():
+        topic = Topic.query.filter_by(program_id=program_id, title="Тема с конфликтующим номером").first()
+        assert topic is not None
+        assert topic.order not in existing_orders

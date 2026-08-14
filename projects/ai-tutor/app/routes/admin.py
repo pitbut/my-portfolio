@@ -8,6 +8,7 @@ from functools import wraps
 from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 
 from app import db
+from app.ai_client import AIClientError, generate_program
 from app.email import send_email
 from app.models import Grade, Lesson, Program, ScheduledSession, Subject, Topic, User, UserProgress
 from app.slugify import slugify
@@ -118,6 +119,88 @@ def topics(program_id):
 
     next_order = max((t.order for t in program.topics), default=0) + 1
     return render_template("admin/topics.html", program=program, next_order=next_order)
+
+
+@bp.route("/programs/<int:program_id>/generate", methods=["POST"])
+@login_required
+def generate_topics(program_id):
+    """Промпт Б (app/ai_client.generate_program) прямо из панели: раньше
+    это был только офлайн-скрипт scripts/generate_program.py — теперь
+    админ без доступа к консоли может сгенерировать черновик программы
+    и отредактировать/отклонить темы перед сохранением (raw-роут
+    generate_topics_save ничего не пишет в БД, пока админ не нажмёт
+    "Сохранить" на странице предпросмотра)."""
+    program = Program.query.get_or_404(program_id)
+    curriculum = (request.form.get("curriculum") or "").strip() or None
+
+    try:
+        draft_topics = generate_program(program.subject.name, program.grade.name, curriculum=curriculum)
+    except AIClientError as exc:
+        flash(f"Не удалось сгенерировать темы: {exc}", "error")
+        return redirect(url_for("admin.topics", program_id=program.id))
+    except Exception:
+        current_app.logger.exception("Ошибка генерации программы через ИИ для program_id=%s", program.id)
+        flash("Модель вернула ответ, который не удалось разобрать. Попробуйте ещё раз.", "error")
+        return redirect(url_for("admin.topics", program_id=program.id))
+
+    if not draft_topics:
+        flash("Модель не предложила ни одной темы. Попробуйте ещё раз.", "error")
+        return redirect(url_for("admin.topics", program_id=program.id))
+
+    next_order = max((t.order for t in program.topics), default=0) + 1
+    return render_template(
+        "admin/topics_preview.html", program=program, draft_topics=draft_topics, next_order=next_order
+    )
+
+
+@bp.route("/programs/<int:program_id>/generate/save", methods=["POST"])
+@login_required
+def generate_topics_save(program_id):
+    """Сохраняет темы, отредактированные/отобранные админом на странице
+    предпросмотра (admin/topics_preview.html) — ничего не сохраняется без
+    явного подтверждения этой формой."""
+    program = Program.query.get_or_404(program_id)
+
+    orders = request.form.getlist("order")
+    titles = request.form.getlist("title")
+    descriptions = request.form.getlist("description")
+    included = set(request.form.getlist("include"))
+
+    # (program_id, order) уникален в БД — форма предзаполняет свободные номера,
+    # но админ мог вручную вписать номер, который уже занят существующей темой
+    # или другой строкой в этой же партии. Подстраховываемся, а не падаем 500.
+    used_orders = {t.order for t in program.topics}
+
+    def _next_free_order(taken):
+        candidate = (max(taken, default=0)) + 1
+        while candidate in taken:
+            candidate += 1
+        return candidate
+
+    added = 0
+    for i, title in enumerate(titles):
+        if str(i) not in included:
+            continue
+        title = title.strip()
+        if not title:
+            continue
+        try:
+            order = int(orders[i])
+        except (ValueError, IndexError):
+            order = None
+        if order is None or order in used_orders:
+            order = _next_free_order(used_orders)
+        used_orders.add(order)
+        description = (descriptions[i].strip() or None) if i < len(descriptions) else None
+        db.session.add(Topic(program_id=program.id, order=order, title=title, description=description))
+        added += 1
+
+    if added:
+        db.session.commit()
+        flash(f"Добавлено тем: {added}.", "success")
+    else:
+        flash("Ни одна тема не была отмечена для сохранения.", "info")
+    return redirect(url_for("admin.topics", program_id=program.id))
 
 
 @bp.route("/topics/<int:topic_id>/delete", methods=["POST"])
