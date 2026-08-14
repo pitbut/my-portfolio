@@ -1,5 +1,32 @@
 [
   {
+    "id": "chat",
+    "title": "Chat",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/chat/preview.jpg",
+    "link": "projects/chat/index.html",
+    "date": "2026-08-14",
+    "tags": []
+  },
+  {
+    "id": "checker",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/checker/preview.jpg",
+    "link": "projects/checker/index.html",
+    "date": "2026-08-14",
+    "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-08-14",
+    "tags": []
+  },
+  {
     "id": "ai-tutor",
     "title": "🎓 ИИ-репетитор",
     "description": "Модуль персонального ИИ-репетитора: аватар с TTS-озвучкой и голосовым barge-in, доска с формулами/диаграммами/графиками, эмоциональная адаптация, проверка решений по фото и админ-панель — через мультимодальный ИИ (Anthropic Claude). Flask + SQLAlchemy + Flask-Migrate.",
@@ -13,33 +40,6 @@
       "Anthropic Claude",
       "PostgreSQL"
     ]
-  },
-  {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-08-13",
-    "tags": []
-  },
-  {
-    "id": "checker",
-    "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/checker/preview.jpg",
-    "link": "projects/checker/index.html",
-    "date": "2026-08-13",
-    "tags": []
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-08-13",
-    "tags": []
   },
   {
     "id": "sixaxis-slicer-portfolio",
