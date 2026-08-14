@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Вход — VR Магазин</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hdr">
+      <a class="hdr-logo" href="/">◆ VR МАГАЗИН</a>
+      <a class="hdr-link" href="/register">Нет аккаунта? Регистрация</a>
+    </header>
+
+    <h1 class="title">Вход</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="form-result" style="border-color:#e05252;">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="form-card">
+      <label>Имя пользователя
+        <input type="text" name="username" required autofocus>
+      </label>
+      <label>Пароль
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit" class="btn-primary">Войти</button>
+    </form>
+  </div>
+</body>
+</html>

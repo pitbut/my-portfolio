@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{{ shop.name }} — VR Магазин</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="scene-body">
+  <div id="canvas-wrap"></div>
+
+  <div class="hud">
+    <a class="hud-back" href="/">← Все магазины</a>
+    <span class="hud-shop-name">{{ shop.name }}</span>
+    <div class="hud-right">
+      <button id="voice-all-btn" class="hud-invite">🎤 Общий чат</button>
+      <button id="voice-friends-btn" class="hud-invite">🎤 Только друзья</button>
+      <button id="invite-btn" class="hud-invite">Пригласить друзей</button>
+    </div>
+  </div>
+
+  <div id="voice-status" class="voice-status hidden"></div>
+
+  <div id="invite-box" class="invite-box hidden"></div>
+
+  <div id="seller-panel" class="seller-panel hidden">
+    <div class="seller-panel-close" id="seller-close">✕</div>
+    <div class="seller-panel-name">Продавец-консультант</div>
+    <div class="seller-panel-text" id="seller-text"></div>
+    <div class="seller-panel-price" id="seller-price"></div>
+    <div class="seller-panel-actions">
+      <button id="reviews-btn" class="btn-secondary">Отзывы</button>
+      <button id="buy-btn" class="btn-primary">Купить</button>
+    </div>
+    <div id="reviews-box" class="reviews-box hidden"></div>
+    <div id="buy-box" class="buy-box hidden"></div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script>
+    window.SHOP_ID = {{ shop.id }};
+    window.SHOP_THEME = {
+      wallColor: {{ shop.wall_color|tojson }},
+      floorColor: {{ shop.floor_color|tojson }},
+      hasWindow: {{ shop.has_window|tojson }},
+      hasPainting: {{ shop.has_painting|tojson }},
+      hasPlant: {{ shop.has_plant|tojson }}
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script type="module" src="/static/js/scene.js"></script>
+</body>
+</html>

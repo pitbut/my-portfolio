@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Кабинет продавца — VR Магазин</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hdr">
+      <a class="hdr-logo" href="/">◆ VR МАГАЗИН</a>
+      <a class="hdr-link" href="/logout">Выйти ({{ current_user.username }})</a>
+    </header>
+
+    <h1 class="title">Кабинет продавца</h1>
+    <p class="subtitle">Создавайте магазины, настраивайте оформление витрины и добавляйте товары.</p>
+
+    <h2 class="section-title">Создать новый магазин</h2>
+    <form method="POST" action="/seller/shops" class="form-card">
+      <label>Название магазина
+        <input type="text" name="name" placeholder="Например: Уютный дом" required>
+      </label>
+      <label>Описание
+        <textarea name="description" rows="2" placeholder="Пара слов о магазине"></textarea>
+      </label>
+
+      <div class="theme-row">
+        <label>Цвет стен
+          <input type="color" name="wall_color" value="#141821">
+        </label>
+        <label>Цвет пола
+          <input type="color" name="floor_color" value="#11141c">
+        </label>
+      </div>
+      <div class="theme-checks">
+        <label class="check-label"><input type="checkbox" name="has_window"> Окно</label>
+        <label class="check-label"><input type="checkbox" name="has_painting"> Картина на стене</label>
+        <label class="check-label"><input type="checkbox" name="has_plant"> Растение</label>
+      </div>
+      <p class="hint-text">Это упрощённая версия оформления — полноценный конструктор интерьера (расставлять мебель вручную) в разработке.</p>
+      <button type="submit" class="btn-primary">Создать магазин</button>
+    </form>
+
+    <h2 class="section-title">Мои магазины</h2>
+    {% if not shops %}
+    <p class="subtitle">У вас пока нет магазинов — создайте первый выше.</p>
+    {% endif %}
+    {% for shop in shops %}
+    <div class="shop-manage-card">
+      <div class="shop-manage-head">
+        <div>
+          <div class="shop-manage-name">{{ shop.name }}</div>
+          <div class="shop-manage-desc">{{ shop.description }}</div>
+        </div>
+        <a href="/shop/{{ shop.id }}" class="btn-secondary">Открыть витрину →</a>
+      </div>
+
+      <form class="product-form" data-shop-id="{{ shop.id }}">
+        <input type="text" name="name" placeholder="Название товара" required>
+        <input type="text" name="category" placeholder="Категория">
+        <input type="number" name="price" placeholder="Цена, сум" required>
+        <textarea name="description" rows="2" placeholder="Описание (расскажет продавец)"></textarea>
+        <input type="file" name="model" accept=".glb,.gltf">
+        <button type="submit" class="btn-primary">Добавить товар</button>
+        <span class="product-add-result"></span>
+      </form>
+
+      <div class="product-list">
+        {% for p in products_by_shop.get(shop.id, []) %}
+        <div class="product-list-row" data-product-id="{{ p.id }}">
+          <span class="product-list-name">{{ p.name }}</span>
+          <span class="product-list-price">{{ "%.0f"|format(p.price) }} сум</span>
+          <button class="btn-secondary product-delete-btn" data-product-id="{{ p.id }}">Удалить</button>
+        </div>
+        {% else %}
+        <div class="product-list-empty">Товаров пока нет.</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    document.querySelectorAll('.product-form').forEach((form) => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const shopId = form.dataset.shopId;
+        const fd = new FormData(form);
+        const resultEl = form.querySelector('.product-add-result');
+        resultEl.style.color = '';
+        const res = await fetch(`/api/shops/${shopId}/products`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          resultEl.textContent = `Добавлено: ${data.name}` + (data.used_fallback ? ' (без своей модели — временная заглушка)' : '');
+          form.reset();
+          setTimeout(() => window.location.reload(), 900);
+        } else {
+          resultEl.style.color = '#e05252';
+          resultEl.textContent = data.error || 'Ошибка добавления';
+        }
+      });
+    });
+
+    document.querySelectorAll('.product-delete-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Удалить этот товар из витрины?')) return;
+        const id = btn.dataset.productId;
+        const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          btn.closest('.product-list-row').remove();
+        } else {
+          alert('Не удалось удалить товар');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

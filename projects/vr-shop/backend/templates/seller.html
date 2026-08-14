@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Кабинет продавца — тест загрузки</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hdr">
+      <a class="hdr-logo" href="/">◆ VR МАГАЗИН</a>
+      <span class="hdr-link">Кабинет продавца</span>
+    </header>
+
+    <h1 class="title">Добавить товар (тест системы закладки)</h1>
+    <p class="subtitle">Загрузите свою 3D-модель (.glb / .gltf) — или оставьте пустым, и подставится тестовая заглушка.</p>
+
+    <form id="product-form" class="form-card">
+      <label>Магазин
+        <select name="shop_id" required>
+          {% for shop in shops %}
+          <option value="{{ shop.id }}">{{ shop.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Название товара
+        <input type="text" name="name" placeholder="Например: Настольная лампа Aurora" required>
+      </label>
+      <label>Категория
+        <input type="text" name="category" placeholder="Например: освещение">
+      </label>
+      <label>Цена (сум)
+        <input type="number" name="price" placeholder="150000" required>
+      </label>
+      <label>Описание (то, что расскажет продавец)
+        <textarea name="description" rows="3" placeholder="Краткое описание товара"></textarea>
+      </label>
+      <label>3D-модель (.glb/.gltf)
+        <input type="file" name="model" accept=".glb,.gltf">
+      </label>
+      <button type="submit" class="btn-primary">Добавить в витрину</button>
+    </form>
+
+    <div id="result" class="form-result hidden"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('product-form');
+    const result = document.getElementById('result');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const shopId = form.shop_id.value;
+      const fd = new FormData(form);
+      fd.delete('shop_id');
+      const res = await fetch(`/api/shops/${shopId}/products`, { method: 'POST', body: fd });
+      const data = await res.json();
+      result.classList.remove('hidden');
+      result.innerHTML = `Товар «${data.name}» добавлен в магазин.
+        <a href="/shop/${shopId}">Открыть витрину →</a>`;
+      form.reset();
+    });
+  </script>
+</body>
+</html>
