@@ -20,8 +20,22 @@
     </ul>
   </div>
 
+  <form method="post" action="{{ url_for('admin.generate_topics', program_id=program.id) }}" class="form-card card">
+    <h3 style="margin-top:0;">Сгенерировать темы через ИИ</h3>
+    <p style="color:var(--ink-dim);">
+      ИИ предложит список тем по программе «{{ program.subject.name }} · {{ program.grade.name }}» —
+      ничего не сохранится сразу, на следующей странице можно будет отредактировать
+      или убрать лишние темы перед сохранением.
+    </p>
+    <div class="field">
+      <label for="curriculum">Программа/учебник, на который ориентироваться (необязательно)</label>
+      <input type="text" id="curriculum" name="curriculum" placeholder="например: ФГОС, учебник Мерзляк">
+    </div>
+    <button type="submit" class="btn">Сгенерировать</button>
+  </form>
+
   <form method="post" class="form-card card">
-    <h3 style="margin-top:0;">Добавить тему</h3>
+    <h3 style="margin-top:0;">Добавить тему вручную</h3>
     <div class="field">
       <label for="order">Порядковый номер</label>
       <input type="number" id="order" name="order" min="1" value="{{ next_order }}">

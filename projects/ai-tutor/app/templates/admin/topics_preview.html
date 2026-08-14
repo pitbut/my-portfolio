@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Предпросмотр тем — {{ program.subject.name }} · {{ program.grade.name }}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <p><a href="{{ url_for('admin.topics', program_id=program.id) }}">← Назад к программе</a></p>
+  <h1>Проверьте темы перед сохранением</h1>
+  <p style="color:var(--ink-dim);">
+    ИИ предложил список тем для «{{ program.subject.name }} · {{ program.grade.name }}». Ничего ещё не
+    сохранено. Отметьте галочкой темы, которые нужно добавить, при желании поправьте название/номер/
+    описание, затем нажмите «Сохранить отмеченные темы» внизу.
+  </p>
+
+  <form method="post" action="{{ url_for('admin.generate_topics_save', program_id=program.id) }}">
+    <div class="card">
+      {% for topic in draft_topics %}
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--border);">
+        <input type="checkbox" name="include" value="{{ loop.index0 }}" checked style="margin-top:12px;">
+        <div style="flex:0 0 70px;">
+          <label style="font-size:.78rem; color:var(--ink-dim);">№</label>
+          <input type="number" name="order" value="{{ next_order + loop.index0 }}" min="1">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:.78rem; color:var(--ink-dim);">Название темы</label>
+          <input type="text" name="title" value="{{ topic.title }}" style="width:100%;">
+        </div>
+        <div style="flex:2;">
+          <label style="font-size:.78rem; color:var(--ink-dim);">Описание</label>
+          <textarea name="description" rows="2" style="width:100%;">{{ topic.description or '' }}</textarea>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn" style="margin-top:14px;">Сохранить отмеченные темы</button>
+  </form>
+</div>
+{% endblock %}
