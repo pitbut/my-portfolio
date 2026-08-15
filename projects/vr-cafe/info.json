@@ -1,7 +1,7 @@
 {
   "title": "☕ VR Cafe",
   "description": "Концепт виртуального кафе в браузере — атмосферное 3D-пространство, в котором можно посидеть за столиком, осмотреться и почувствовать себя в реальном кафе, не выходя из дома.",
-  "link": "https://vr-cafe-a073.onrender.com",
+  "link": "https://cafe.robutpit.com",
   "image": "preview.jpg",
   "date": "2026-07-24",
   "tags": ["VR", "3D", "Three.js", "WebXR", "Концепт"]
