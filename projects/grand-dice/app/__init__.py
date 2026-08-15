@@ -42,19 +42,27 @@ def create_app(config_name=None):
     from app.routes.auth import bp as auth_bp
     from app.routes.game import bp as game_bp
     from app.routes.wallet import bp as wallet_bp
+    from app.routes.support import bp as support_bp
     from app.routes.admin import bp as admin_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(game_bp, url_prefix="/game")
     app.register_blueprint(wallet_bp, url_prefix="/wallet")
+    app.register_blueprint(support_bp, url_prefix="/support")
     app.register_blueprint(admin_bp, url_prefix="/admin")
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 
     @login_manager.user_loader
     def load_user(user_id):
-        return db.session.get(models.User, int(user_id))
+        user = db.session.get(models.User, int(user_id))
+        # Если админ заблокировал игрока прямо во время его сессии — тот
+        # сразу теряет доступ (Flask-Login считает сессию недействительной),
+        # а не только при следующей попытке входа.
+        if user is not None and user.is_currently_blocked():
+            return None
+        return user
 
     @app.context_processor
     def inject_pending_confirmation():

@@ -16,6 +16,7 @@
     <nav class="main-nav">
       <a href="{{ url_for('game.play_page') }}" class="{{ 'is-active' if request.blueprint == 'game' }}">Игра</a>
       <a href="{{ url_for('wallet.index') }}" class="{{ 'is-active' if request.blueprint == 'wallet' }}">Кошелёк</a>
+      <a href="{{ url_for('support.index') }}" class="{{ 'is-active' if request.blueprint == 'support' }}">Поддержка</a>
       {% if current_user.is_admin %}
       <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if request.blueprint == 'admin' }}">Админка</a>
       {% endif %}

@@ -4,20 +4,64 @@
 <h1>Пользователи</h1>
 <p style="margin-bottom: 20px;"><a href="{{ url_for('admin.dashboard') }}">← Панель</a></p>
 
-<div class="panel">
+<div class="panel" style="overflow-x: auto;">
   <table>
     <thead>
-      <tr><th>Email</th><th>Регистрация</th><th>Email подтверждён</th><th>Реальный баланс</th><th>Демо-баланс</th><th>Админ</th></tr>
+      <tr>
+        <th>Email</th><th>Регистрация</th><th>Email подтверждён</th>
+        <th>Карта</th><th>Реальный баланс</th><th>Демо-баланс</th>
+        <th>Статус</th><th>Действия</th>
+      </tr>
     </thead>
     <tbody>
       {% for u in users %}
       <tr>
-        <td>{{ u.email }}</td>
+        <td>{{ u.email }}{% if u.is_admin %} <span class="badge badge--approved">админ</span>{% endif %}</td>
         <td>{{ u.created_at.strftime('%d.%m.%Y') }}</td>
         <td>{{ 'Да' if u.email_confirmed else 'Нет' }}</td>
+        <td>{{ u.card_number or '—' }}</td>
         <td>{{ u.real_balance }}</td>
         <td>{{ u.demo_balance }}</td>
-        <td>{{ 'Да' if u.is_admin else '—' }}</td>
+        <td>
+          {% if u.is_currently_blocked() %}
+            <span class="badge badge--rejected">
+              {{ 'Заблокирован навсегда' if u.is_blocked else 'До ' + u.blocked_until.strftime('%d.%m %H:%M') }}
+            </span>
+            {% if u.blocked_reason %}<div style="font-size: 0.8em; color: #999;">{{ u.blocked_reason }}</div>{% endif %}
+          {% else %}
+            <span class="badge badge--approved">Активен</span>
+          {% endif %}
+        </td>
+        <td style="white-space: nowrap;">
+          {% if not u.is_admin %}
+            {% if u.is_currently_blocked() %}
+            <form method="post" action="{{ url_for('admin.unblock_user', user_id=u.id) }}" style="display: inline;">
+              <button type="submit" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.85em;">Разблокировать</button>
+            </form>
+            {% else %}
+            <details style="display: inline-block;">
+              <summary class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.85em; display: inline; cursor: pointer;">Заблокировать</summary>
+              <form method="post" action="{{ url_for('admin.block_user', user_id=u.id) }}"
+                    style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 180px;">
+                <select name="duration">
+                  <option value="1d">На 1 день</option>
+                  <option value="7d">На 7 дней</option>
+                  <option value="30d">На 30 дней</option>
+                  <option value="forever">Навсегда</option>
+                </select>
+                <input type="text" name="reason" placeholder="Причина (необязательно)">
+                <button type="submit" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.85em;">Подтвердить</button>
+              </form>
+            </details>
+            {% endif %}
+            <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display: inline;"
+                  onsubmit="return confirm('Удалить пользователя {{ u.email }} безвозвратно? Вся история ставок и заявок будет удалена.');">
+              <button type="submit" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.85em;">Удалить</button>
+            </form>
+          {% else %}
+            —
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Переписка с {{ thread_user.email }} — Grand Dice Casino{% endblock %}
+{% block content %}
+<h1>Переписка с {{ thread_user.email }}</h1>
+<p style="margin-bottom: 20px;"><a href="{{ url_for('admin.support_inbox') }}">← Все обращения</a></p>
+
+<div class="panel">
+  <div class="chat-thread">
+    {% if messages %}
+      {% for m in messages %}
+      <div class="chat-bubble {{ 'from-admin' if m.sender_is_admin else 'from-user' }}">
+        <div class="meta">
+          <span>{{ 'Вы (админ)' if m.sender_is_admin else thread_user.email }}</span>
+          <span>
+            {{ m.created_at.strftime('%d.%m %H:%M') }}
+            <form method="post" action="{{ url_for('admin.delete_support_message', message_id=m.id) }}"
+                  style="display: inline;" onsubmit="return confirm('Удалить это сообщение?');">
+              <button type="submit" class="chat-delete-btn">удалить</button>
+            </form>
+          </span>
+        </div>
+        {% if m.body %}<div>{{ m.body }}</div>{% endif %}
+        {% if m.photo_filename %}
+        <img src="{{ url_for('support.photo', message_id=m.id) }}" alt="Фото">
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="chat-empty">Сообщений пока нет.</div>
+    {% endif %}
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="chat-form">
+    <textarea name="body" placeholder="Ответ игроку..."></textarea>
+    <input type="file" name="photo" accept="image/*" style="max-width: 180px;">
+    <button type="submit" class="btn">Отправить</button>
+  </form>
+</div>
+{% endblock %}

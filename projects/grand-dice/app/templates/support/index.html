@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Поддержка — Grand Dice Casino{% endblock %}
+{% block content %}
+<h1>Поддержка</h1>
+<p style="color: #ccc; margin-bottom: 20px;">Напишите администратору — можно приложить фото (например, скриншот перевода).</p>
+
+<div class="panel">
+  <div class="chat-thread">
+    {% if messages %}
+      {% for m in messages %}
+      <div class="chat-bubble {{ 'from-admin' if m.sender_is_admin else 'from-user' }}">
+        <div class="meta">
+          <span>{{ 'Администратор' if m.sender_is_admin else 'Вы' }}</span>
+          <span>{{ m.created_at.strftime('%d.%m %H:%M') }}</span>
+        </div>
+        {% if m.body %}<div>{{ m.body }}</div>{% endif %}
+        {% if m.photo_filename %}
+        <img src="{{ url_for('support.photo', message_id=m.id) }}" alt="Фото">
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="chat-empty">Сообщений пока нет — напишите первым.</div>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{{ url_for('support.send') }}" enctype="multipart/form-data" class="chat-form">
+    <textarea name="body" placeholder="Ваше сообщение..."></textarea>
+    <input type="file" name="photo" accept="image/*" style="max-width: 180px;">
+    <button type="submit" class="btn">Отправить</button>
+  </form>
+</div>
+{% endblock %}

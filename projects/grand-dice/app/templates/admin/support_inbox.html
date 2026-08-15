@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Поддержка — Grand Dice Casino{% endblock %}
+{% block content %}
+<h1>Обращения в поддержку</h1>
+<p style="margin-bottom: 20px;"><a href="{{ url_for('admin.dashboard') }}">← Панель</a></p>
+
+<div class="panel">
+  {% if threads %}
+  <table>
+    <thead>
+      <tr><th>Игрок</th><th>Последнее сообщение</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for t in threads %}
+      <tr>
+        <td>{{ t.user.email }}</td>
+        <td>{{ t.last_at.strftime('%d.%m %H:%M') }}</td>
+        <td><a href="{{ url_for('admin.support_thread', user_id=t.user.id) }}" class="btn" style="padding: 8px 14px; font-size: 0.9em;">Открыть</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color: #999;">Обращений пока нет.</p>
+  {% endif %}
+</div>
+{% endblock %}

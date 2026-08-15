@@ -35,6 +35,22 @@ def index():
     return render_template("wallet/index.html", requests=requests_)
 
 
+@bp.route("/card", methods=["POST"])
+@login_required
+def save_card():
+    card_number = (request.form.get("card_number") or "").strip()
+    digits_only = card_number.replace(" ", "")
+
+    if not digits_only.isdigit() or not (13 <= len(digits_only) <= 19):
+        flash("Введите корректный номер карты (13-19 цифр).", "error")
+        return redirect(url_for("wallet.index"))
+
+    current_user.card_number = card_number
+    db.session.commit()
+    flash("Номер карты сохранён.", "success")
+    return redirect(url_for("wallet.index"))
+
+
 @bp.route("/deposit", methods=["POST"])
 @login_required
 def deposit():
@@ -72,6 +88,10 @@ def withdraw_request():
         flash("Подтвердите email, чтобы выводить реальные средства.", "error")
         return redirect(url_for("wallet.index"))
 
+    if not current_user.card_number:
+        flash("Сначала укажите номер карты для выплат.", "error")
+        return redirect(url_for("wallet.index"))
+
     try:
         amount = Decimal(str(request.form.get("amount"))).quantize(Decimal("0.01"))
     except (InvalidOperation, TypeError):
@@ -83,6 +103,7 @@ def withdraw_request():
         flash(f"Минимальная сумма вывода — {min_amount}.", "error")
         return redirect(url_for("wallet.index"))
 
+    # Проверка, что нельзя вывести больше, чем реально есть на балансе.
     if amount > current_user.real_balance:
         flash("Недостаточно средств на реальном балансе.", "error")
         return redirect(url_for("wallet.index"))
@@ -92,6 +113,7 @@ def withdraw_request():
         user_id=current_user.id,
         kind="withdraw",
         amount=amount,
+        card_number=current_user.card_number,
         status="awaiting_otp",
         otp_hash=generate_password_hash(otp_code),
         otp_expires_at=datetime.utcnow() + timedelta(seconds=current_app.config["OTP_MAX_AGE"]),

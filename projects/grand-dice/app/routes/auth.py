@@ -108,6 +108,15 @@ def login():
             flash("Неверный email или пароль.", "error")
             return render_template("auth/login.html", email=email)
 
+        if user.is_currently_blocked():
+            if user.is_blocked:
+                until_text = "администратором"
+            else:
+                until_text = f"до {user.blocked_until.strftime('%d.%m.%Y %H:%M')} UTC"
+            reason = f" Причина: {user.blocked_reason}" if user.blocked_reason else ""
+            flash(f"Аккаунт заблокирован {until_text}.{reason}", "error")
+            return render_template("auth/login.html", email=email)
+
         login_user(user)
         flash("Вы вошли в аккаунт.", "success")
         return redirect(request.args.get("next") or url_for("game.play_page"))
