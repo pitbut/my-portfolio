@@ -565,6 +565,7 @@
         let currentBets = [];
         let isSpinning = false;
         let history = JSON.parse(localStorage.getItem('rouletteHistory')) || [];
+        let currentWheelRotation = 0;
 
         // Определение красных и чёрных чисел
         const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
@@ -737,11 +738,14 @@
             // небольшой случайный сдвиг внутри сектора, чтобы не останавливаться идеально по центру
             const jitter = (Math.random() - 0.5) * segAngle * 0.6;
             // указатель находится сверху (0deg); чтобы сектор оказался под ним,
-            // нужно довернуть колесо на -segMidAngle относительно текущего 0deg
+            // абсолютный угол колеса (по модулю 360) должен быть равен этому значению
             const landingAngle = ((360 - segMidAngle - jitter) % 360 + 360) % 360;
             const fullSpins = 5 + Math.floor(Math.random() * 3);
-            const targetRotation = fullSpins * 360 + landingAngle;
-            wheel.style.transform = `rotate(${targetRotation}deg)`;
+            // крутим дальше от текущего положения (не от нуля), чтобы после
+            // остановки колесо оставалось стоять на выпавшем числе
+            const delta = fullSpins * 360 + (((landingAngle - currentWheelRotation) % 360) + 360) % 360;
+            currentWheelRotation += delta;
+            wheel.style.transform = `rotate(${currentWheelRotation}deg)`;
 
             setTimeout(() => {
                 processResult(winningNumber);
@@ -825,16 +829,6 @@
 
             isSpinning = false;
             document.getElementById('spinButton').disabled = false;
-
-            // Сброс вращения колеса
-            setTimeout(() => {
-                const wheel = document.getElementById('wheel');
-                wheel.style.transition = 'none';
-                wheel.style.transform = 'rotate(0deg)';
-                setTimeout(() => {
-                    wheel.style.transition = 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-                }, 50);
-            }, 100);
         }
 
         function showMessage(text, isWin) {
