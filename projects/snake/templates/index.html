@@ -297,6 +297,7 @@
         let score = 0;
         let highScore = localStorage.getItem('snakeHighScore') || 0;
         let gameRunning = false;
+        let isGameOver = false;
         let gameSpeed = 100;
         let gameInterval;
 
@@ -418,6 +419,7 @@
 
         function endGame() {
             gameRunning = false;
+            isGameOver = true;
             clearInterval(gameInterval);
             
             if (score > highScore) {
@@ -436,6 +438,7 @@
             dy = 0;
             score = 0;
             gameSpeed = 100;
+            isGameOver = false;
             document.getElementById('score').textContent = score;
             document.getElementById('gameOver').classList.add('hidden');
             generateFood();
@@ -500,6 +503,8 @@
         }
 
         document.addEventListener('keydown', (e) => {
+            if (isGameOver) return;
+
             if (e.code === 'Space') {
                 e.preventDefault();
                 if (!gameRunning) {
