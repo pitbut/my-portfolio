@@ -2,7 +2,11 @@
   "title": "🐍 Змейка с рекордами",
   "description": "Классическая игра змейка с серверным сохранением рекордов. Управление стрелками или WASD. Набирайте очки и попадайте в топ-10!",
   "image": "snake-preview.jpg",
-  "link": "https://snake-game-1uo5.onrender.com",
+  "link": "https://snake.robutpit.com",
   "date": "2026-01-06",
-  "tags": ["Игра", "Python", "Flask"]
+  "tags": [
+    "Игра",
+    "Python",
+    "Flask"
+  ]
 }
