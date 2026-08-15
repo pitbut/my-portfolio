@@ -51,7 +51,7 @@ After=network.target
 User=root
 WorkingDirectory=/root/my-portfolio/projects/vr-shop/backend
 EnvironmentFile=/root/my-portfolio/projects/vr-shop/backend/.env
-ExecStart=/root/my-portfolio/projects/vr-shop/backend/venv/bin/gunicorn --worker-class gthread --threads 4 -w 1 --bind 127.0.0.1:8002 app:app
+ExecStart=/root/my-portfolio/projects/vr-shop/backend/venv/bin/gunicorn --worker-class gthread --threads 4 -w 1 --bind 127.0.0.1:8006 app:app
 Restart=always
 
 [Install]
@@ -64,12 +64,27 @@ sudo systemctl enable --now vr-shop
 sudo systemctl status vr-shop --no-pager -l | head -15
 ```
 
-Порт `8002` — **обязательно** проверь заранее, что он свободен
-(`sudo ss -tlnp | grep 800`), прежде чем создавать сервис: на этом VPS
-`b2b-platform` уже занимает `127.0.0.1:8001` — если два systemd-сервиса
-проксируются на один и тот же порт, nginx будет отдавать ответы того
-сервиса, который реально держит порт, независимо от домена (именно так
-`shop.robutpit.com` при первой попытке показывал b2b-platform).
+Порт `8006` — **обязательно** проверь заранее, что он свободен
+(`sudo ss -tlnp | grep 800`), прежде чем создавать сервис: если два
+systemd-сервиса проксируются на один и тот же порт, nginx будет отдавать
+ответы того сервиса, который реально держит порт, независимо от домена
+(так `shop.robutpit.com` сначала показывал b2b-platform, а после
+неудачной попытки занять чужой порт — istok).
+
+Карта портов на этом VPS (`grep -Hn proxy_pass /etc/nginx/sites-enabled/*`
++ `ss -tlnp`), актуально на 2026-08-15:
+
+| Порт | Проект       |
+|------|--------------|
+| 8001 | b2b-platform |
+| 8002 | istok        |
+| 8003 | ai-tutor     |
+| 8004 | balka        |
+| 8005 | ferma        |
+| 8006 | vr-shop      |
+
+При добавлении нового проекта на этот же VPS — бери следующий свободный
+порт (8007) и сверяйся с таблицей выше, а не угадывай.
 
 ## 4. nginx (обратный прокси + вебсокеты для Flask-SocketIO)
 
@@ -79,7 +94,7 @@ server {
     listen 80;
     server_name shop.robutpit.com;
     location / {
-        proxy_pass http://127.0.0.1:8002;
+        proxy_pass http://127.0.0.1:8006;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_http_version 1.1;
