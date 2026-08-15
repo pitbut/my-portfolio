@@ -1,0 +1,342 @@
+# Kazakh translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-15 18:42+0000\n"
+"PO-Revision-Date: 2026-08-15 18:42+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: kk\n"
+"Language-Team: kk <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/templates/base.html:17 app/templates/game/play.html:2
+msgid "Игра"
+msgstr "Ойын"
+
+#: app/templates/base.html:18 app/templates/wallet/index.html:2
+msgid "Кошелёк"
+msgstr "Әмиян"
+
+#: app/templates/base.html:19
+msgid "Поддержка"
+msgstr "Қолдау"
+
+#: app/templates/base.html:21
+msgid "Админка"
+msgstr "Әкімші панелі"
+
+#: app/templates/base.html:26
+msgid "Язык"
+msgstr "Тіл"
+
+#: app/templates/base.html:31
+msgid "Валюта"
+msgstr "Валюта"
+
+#: app/templates/base.html:38
+msgid "email не подтверждён"
+msgstr "email расталмаған"
+
+#: app/templates/base.html:39
+msgid "Выйти"
+msgstr "Шығу"
+
+#: app/templates/auth/login.html:15 app/templates/auth/register.html:21
+#: app/templates/base.html:43 app/templates/main/index.html:9
+msgid "Войти"
+msgstr "Кіру"
+
+#: app/templates/auth/register.html:2 app/templates/auth/register.html:5
+#: app/templates/base.html:44
+msgid "Регистрация"
+msgstr "Тіркелу"
+
+#: app/templates/base.html:65
+msgid "Почтовый сервер пока не настроен — письмо не отправляется автоматически."
+msgstr "Пошта сервері әлі бапталмаған — хат автоматты түрде жіберілмейді."
+
+#: app/templates/base.html:66
+msgid "Подтвердите email по ссылке:"
+msgstr "Email мекенжайыңызды сілтеме арқылы растаңыз:"
+
+#: app/templates/auth/login.html:2 app/templates/auth/login.html:5
+msgid "Вход"
+msgstr "Кіру"
+
+#: app/templates/auth/login.html:12
+msgid "Пароль"
+msgstr "Құпия сөз"
+
+#: app/templates/auth/login.html:17
+msgid "Нет аккаунта?"
+msgstr "Аккаунтыңыз жоқ па?"
+
+#: app/templates/auth/login.html:17 app/templates/main/index.html:8
+msgid "Зарегистрироваться"
+msgstr "Тіркелу"
+
+#: app/templates/auth/login.html:18
+msgid "Забыли пароль?"
+msgstr "Құпия сөзді ұмыттыңыз ба?"
+
+#: app/templates/auth/register.html:12
+msgid "Пароль (от 8 символов)"
+msgstr "Құпия сөз (кемінде 8 таңба)"
+
+#: app/templates/auth/register.html:16
+msgid "Повторите пароль"
+msgstr "Құпия сөзді қайталаңыз"
+
+#: app/templates/auth/register.html:19
+msgid "Создать аккаунт"
+msgstr "Аккаунт жасау"
+
+#: app/templates/auth/register.html:21
+msgid "Уже есть аккаунт?"
+msgstr "Аккаунтыңыз бар ма?"
+
+#: app/templates/game/four_dice.html:2 app/templates/game/four_dice.html:8
+#: app/templates/game/play.html:8 app/templates/game/two_dice.html:8
+msgid "Покер на костях"
+msgstr "Сүйек покері"
+
+#: app/templates/game/four_dice.html:6 app/templates/game/play.html:6
+#: app/templates/game/two_dice.html:6
+msgid "Классика"
+msgstr "Классика"
+
+#: app/templates/game/four_dice.html:7 app/templates/game/play.html:7
+#: app/templates/game/two_dice.html:2 app/templates/game/two_dice.html:7
+msgid "Два кубика"
+msgstr "Екі сүйек"
+
+#: app/templates/game/four_dice.html:13 app/templates/game/play.html:13
+#: app/templates/game/play.html:27 app/templates/game/two_dice.html:13
+#: app/templates/wallet/index.html:7
+msgid "Реальный баланс"
+msgstr "Нақты баланс"
+
+#: app/templates/game/four_dice.html:18 app/templates/game/play.html:18
+#: app/templates/game/two_dice.html:18 app/templates/wallet/index.html:12
+msgid "Демо-баланс"
+msgstr "Демо баланс"
+
+#: app/templates/game/play.html:26
+msgid "Демо-режим"
+msgstr "Демо режим"
+
+#: app/templates/game/play.html:38 app/templates/game/play.html:74
+msgid "Направление"
+msgstr "Бағыт"
+
+#: app/templates/game/play.html:40 app/templates/game/play.html:81
+msgid "Меньше"
+msgstr "Аз"
+
+#: app/templates/game/play.html:41 app/templates/game/play.html:81
+msgid "Больше"
+msgstr "Көп"
+
+#: app/templates/game/play.html:45
+msgid "Порог (2-98)"
+msgstr "Шек (2-98)"
+
+#: app/templates/game/play.html:51
+msgid "Сумма ставки"
+msgstr "Тігілетін сома"
+
+#: app/templates/game/play.html:56
+msgid "Шанс выигрыша:"
+msgstr "Ұту мүмкіндігі:"
+
+#: app/templates/game/play.html:57
+msgid "Множитель:"
+msgstr "Көбейткіш:"
+
+#: app/templates/game/play.html:58
+msgid "Возможный выигрыш:"
+msgstr "Мүмкін ұтыс:"
+
+#: app/templates/game/play.html:61
+msgid "Бросить кости"
+msgstr "Сүйек лақтыру"
+
+#: app/templates/game/play.html:64
+msgid ""
+"Ставки на реальные деньги недоступны, пока email не подтверждён. В "
+"демо-режиме играть можно."
+msgstr "Email расталғанға дейін нақты ақшаға тігу мүмкін емес. Демо режимде дереу ойнауға болады."
+
+#: app/templates/game/play.html:70
+msgid "Последние раунды"
+msgstr "Соңғы раундтар"
+
+#: app/templates/game/play.html:74
+msgid "Время"
+msgstr "Уақыт"
+
+#: app/templates/game/play.html:74
+msgid "Режим"
+msgstr "Режим"
+
+#: app/templates/game/play.html:74
+msgid "Порог"
+msgstr "Шек"
+
+#: app/templates/game/play.html:74
+msgid "Бросок"
+msgstr "Лақтыру"
+
+#: app/templates/game/play.html:74
+msgid "Ставка"
+msgstr "Тігім"
+
+#: app/templates/game/play.html:74
+msgid "Выплата"
+msgstr "Төлем"
+
+#: app/templates/game/play.html:80
+msgid "Реальный"
+msgstr "Нақты"
+
+#: app/templates/game/play.html:80
+msgid "Демо"
+msgstr "Демо"
+
+#: app/templates/game/play.html:91
+msgid "Раундов пока не было."
+msgstr "Әзірге раундтар болған жоқ."
+
+#: app/templates/game/play.html:97
+msgid "🎉 Выигрыш! +"
+msgstr "🎉 Ұтыс! +"
+
+#: app/templates/game/play.html:98
+msgid "😢 Проигрыш"
+msgstr "😢 Ұтылыс"
+
+#: app/templates/game/play.html:99
+msgid "Ошибка соединения."
+msgstr "Байланыс қатесі."
+
+#: app/templates/main/index.html:6
+msgid "Классическая игра в кости: выбирайте порог, направление и множитель."
+msgstr "Классикалық сүйек ойыны: шек, бағыт және көбейткішті таңдаңыз."
+
+#: app/templates/main/index.html:7
+msgid "Начните в демо-режиме — без риска для реальных денег."
+msgstr "Демо режимнен бастаңыз — нақты ақшаға қауіп жоқ."
+
+#: app/templates/wallet/index.html:19
+msgid ""
+"Приём и выдача реальных денег пока обрабатываются вручную администратором"
+" — оплата через Click появится здесь позже. Заявка на пополнение "
+"создаётся сразу, вывод дополнительно подтверждается кодом с email."
+msgstr "Қазіргі уақытта ақша салу мен шығару әкімшімен қолмен өңделеді — Click арқылы төлем кейінірек қосылады. Толықтыру өтінімі бірден жасалады, ал шығару email арқылы жіберілетін кодпен қосымша расталады."
+
+#: app/templates/wallet/index.html:23
+msgid "Карта для выплат"
+msgstr "Төлемдер үшін карта"
+
+#: app/templates/wallet/index.html:24
+msgid "Укажите номер карты, на которую администратор переведёт деньги при выводе."
+msgstr "Ақша шығарғанда әкімші аударатын карта нөмірін көрсетіңіз."
+
+#: app/templates/wallet/index.html:29
+msgid "Сохранить"
+msgstr "Сақтау"
+
+#: app/templates/wallet/index.html:35
+msgid "Пополнить"
+msgstr "Толықтыру"
+
+#: app/templates/wallet/index.html:38 app/templates/wallet/index.html:56
+#: app/templates/wallet/index.html:69
+msgid "Сумма"
+msgstr "Сома"
+
+#: app/templates/wallet/index.html:42
+msgid "Чек об оплате (фото или PDF, необязательно)"
+msgstr "Төлем чегі (фото немесе PDF, міндетті емес)"
+
+#: app/templates/wallet/index.html:45
+msgid "Создать заявку"
+msgstr "Өтінім жасау"
+
+#: app/templates/wallet/index.html:50
+msgid "Вывести"
+msgstr "Шығару"
+
+#: app/templates/wallet/index.html:52
+msgid "Сначала укажите номер карты выше."
+msgstr "Алдымен жоғарыда карта нөмірін көрсетіңіз."
+
+#: app/templates/wallet/index.html:59
+msgid "Запросить вывод"
+msgstr "Шығаруды сұрау"
+
+#: app/templates/wallet/index.html:65
+msgid "История заявок"
+msgstr "Өтінімдер тарихы"
+
+#: app/templates/wallet/index.html:69
+msgid "Дата"
+msgstr "Күні"
+
+#: app/templates/wallet/index.html:69
+msgid "Тип"
+msgstr "Түрі"
+
+#: app/templates/wallet/index.html:69
+msgid "Статус"
+msgstr "Мәртебесі"
+
+#: app/templates/wallet/index.html:69
+msgid "Чек"
+msgstr "Чек"
+
+#: app/templates/wallet/index.html:69
+msgid "Комментарий"
+msgstr "Түсініктеме"
+
+#: app/templates/wallet/index.html:75
+msgid "Пополнение"
+msgstr "Толықтыру"
+
+#: app/templates/wallet/index.html:75
+msgid "Вывод"
+msgstr "Шығару"
+
+#: app/templates/wallet/index.html:78
+msgid "В обработке"
+msgstr "Өңделуде"
+
+#: app/templates/wallet/index.html:78
+msgid "Одобрено"
+msgstr "Мақұлданды"
+
+#: app/templates/wallet/index.html:78
+msgid "Отклонено"
+msgstr "Қабылданбады"
+
+#: app/templates/wallet/index.html:78
+msgid "Ждёт код"
+msgstr "Код күтілуде"
+
+#: app/templates/wallet/index.html:80
+msgid "чек"
+msgstr "чек"
+
+#: app/templates/wallet/index.html:87
+msgid "Заявок пока не было."
+msgstr "Әзірге өтінімдер болған жоқ."
+

@@ -1,0 +1,343 @@
+# Maltese translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-15 18:42+0000\n"
+"PO-Revision-Date: 2026-08-15 18:42+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: mt\n"
+"Language-Team: mt <LL@li.org>\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : n==0 || ( n%100>=1 && "
+"n%100<=10) ? 1 : (n%100>10 && n%100<20 ) ? 2 : 3);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/templates/base.html:17 app/templates/game/play.html:2
+msgid "Игра"
+msgstr "Logħba"
+
+#: app/templates/base.html:18 app/templates/wallet/index.html:2
+msgid "Кошелёк"
+msgstr "Kartiera"
+
+#: app/templates/base.html:19
+msgid "Поддержка"
+msgstr "Appoġġ"
+
+#: app/templates/base.html:21
+msgid "Админка"
+msgstr "Pannell tal-Amministratur"
+
+#: app/templates/base.html:26
+msgid "Язык"
+msgstr "Lingwa"
+
+#: app/templates/base.html:31
+msgid "Валюта"
+msgstr "Munita"
+
+#: app/templates/base.html:38
+msgid "email не подтверждён"
+msgstr "email mhux ikkonfermat"
+
+#: app/templates/base.html:39
+msgid "Выйти"
+msgstr "Oħroġ"
+
+#: app/templates/auth/login.html:15 app/templates/auth/register.html:21
+#: app/templates/base.html:43 app/templates/main/index.html:9
+msgid "Войти"
+msgstr "Idħol"
+
+#: app/templates/auth/register.html:2 app/templates/auth/register.html:5
+#: app/templates/base.html:44
+msgid "Регистрация"
+msgstr "Reġistrazzjoni"
+
+#: app/templates/base.html:65
+msgid "Почтовый сервер пока не настроен — письмо не отправляется автоматически."
+msgstr "Is-server tal-posta għadu mhux ikkonfigurat — l-email ma tintbagħatx awtomatikament."
+
+#: app/templates/base.html:66
+msgid "Подтвердите email по ссылке:"
+msgstr "Ikkonferma l-email tiegħek permezz tal-link:"
+
+#: app/templates/auth/login.html:2 app/templates/auth/login.html:5
+msgid "Вход"
+msgstr "Dħul"
+
+#: app/templates/auth/login.html:12
+msgid "Пароль"
+msgstr "Password"
+
+#: app/templates/auth/login.html:17
+msgid "Нет аккаунта?"
+msgstr "M'għandekx kont?"
+
+#: app/templates/auth/login.html:17 app/templates/main/index.html:8
+msgid "Зарегистрироваться"
+msgstr "Irreġistra"
+
+#: app/templates/auth/login.html:18
+msgid "Забыли пароль?"
+msgstr "Insejt il-password?"
+
+#: app/templates/auth/register.html:12
+msgid "Пароль (от 8 символов)"
+msgstr "Password (minimu 8 karattri)"
+
+#: app/templates/auth/register.html:16
+msgid "Повторите пароль"
+msgstr "Erġa' daħħal il-password"
+
+#: app/templates/auth/register.html:19
+msgid "Создать аккаунт"
+msgstr "Oħloq kont"
+
+#: app/templates/auth/register.html:21
+msgid "Уже есть аккаунт?"
+msgstr "Għandek diġà kont?"
+
+#: app/templates/game/four_dice.html:2 app/templates/game/four_dice.html:8
+#: app/templates/game/play.html:8 app/templates/game/two_dice.html:8
+msgid "Покер на костях"
+msgstr "Poker tad-Dadi"
+
+#: app/templates/game/four_dice.html:6 app/templates/game/play.html:6
+#: app/templates/game/two_dice.html:6
+msgid "Классика"
+msgstr "Klassiku"
+
+#: app/templates/game/four_dice.html:7 app/templates/game/play.html:7
+#: app/templates/game/two_dice.html:2 app/templates/game/two_dice.html:7
+msgid "Два кубика"
+msgstr "Żewġ Dadi"
+
+#: app/templates/game/four_dice.html:13 app/templates/game/play.html:13
+#: app/templates/game/play.html:27 app/templates/game/two_dice.html:13
+#: app/templates/wallet/index.html:7
+msgid "Реальный баланс"
+msgstr "Bilanċ Reali"
+
+#: app/templates/game/four_dice.html:18 app/templates/game/play.html:18
+#: app/templates/game/two_dice.html:18 app/templates/wallet/index.html:12
+msgid "Демо-баланс"
+msgstr "Bilanċ Demo"
+
+#: app/templates/game/play.html:26
+msgid "Демо-режим"
+msgstr "Modalità Demo"
+
+#: app/templates/game/play.html:38 app/templates/game/play.html:74
+msgid "Направление"
+msgstr "Direzzjoni"
+
+#: app/templates/game/play.html:40 app/templates/game/play.html:81
+msgid "Меньше"
+msgstr "Inqas"
+
+#: app/templates/game/play.html:41 app/templates/game/play.html:81
+msgid "Больше"
+msgstr "Aktar"
+
+#: app/templates/game/play.html:45
+msgid "Порог (2-98)"
+msgstr "Limitu (2-98)"
+
+#: app/templates/game/play.html:51
+msgid "Сумма ставки"
+msgstr "Ammont tal-Imħatra"
+
+#: app/templates/game/play.html:56
+msgid "Шанс выигрыша:"
+msgstr "Ċans li tirbaħ:"
+
+#: app/templates/game/play.html:57
+msgid "Множитель:"
+msgstr "Multiplikatur:"
+
+#: app/templates/game/play.html:58
+msgid "Возможный выигрыш:"
+msgstr "Rebħ possibbli:"
+
+#: app/templates/game/play.html:61
+msgid "Бросить кости"
+msgstr "Itfa' d-Dadi"
+
+#: app/templates/game/play.html:64
+msgid ""
+"Ставки на реальные деньги недоступны, пока email не подтверждён. В "
+"демо-режиме играть можно."
+msgstr "L-imħatri bi flus reali mhumiex disponibbli qabel ma tikkonferma l-email. Fil-modalità demo tista' tilgħab minnufih."
+
+#: app/templates/game/play.html:70
+msgid "Последние раунды"
+msgstr "Rawnds Reċenti"
+
+#: app/templates/game/play.html:74
+msgid "Время"
+msgstr "Ħin"
+
+#: app/templates/game/play.html:74
+msgid "Режим"
+msgstr "Modalità"
+
+#: app/templates/game/play.html:74
+msgid "Порог"
+msgstr "Limitu"
+
+#: app/templates/game/play.html:74
+msgid "Бросок"
+msgstr "Tefgħa"
+
+#: app/templates/game/play.html:74
+msgid "Ставка"
+msgstr "Imħatra"
+
+#: app/templates/game/play.html:74
+msgid "Выплата"
+msgstr "Ħlas"
+
+#: app/templates/game/play.html:80
+msgid "Реальный"
+msgstr "Reali"
+
+#: app/templates/game/play.html:80
+msgid "Демо"
+msgstr "Demo"
+
+#: app/templates/game/play.html:91
+msgid "Раундов пока не было."
+msgstr "Għad m'hemm l-ebda rawnd."
+
+#: app/templates/game/play.html:97
+msgid "🎉 Выигрыш! +"
+msgstr "🎉 Rebaħt! +"
+
+#: app/templates/game/play.html:98
+msgid "😢 Проигрыш"
+msgstr "😢 Telfa"
+
+#: app/templates/game/play.html:99
+msgid "Ошибка соединения."
+msgstr "Żball ta' konnessjoni."
+
+#: app/templates/main/index.html:6
+msgid "Классическая игра в кости: выбирайте порог, направление и множитель."
+msgstr "Logħba klassika tad-dadi: agħżel il-limitu, id-direzzjoni u l-multiplikatur."
+
+#: app/templates/main/index.html:7
+msgid "Начните в демо-режиме — без риска для реальных денег."
+msgstr "Ibda fil-modalità demo — mingħajr riskju għal flus reali."
+
+#: app/templates/wallet/index.html:19
+msgid ""
+"Приём и выдача реальных денег пока обрабатываются вручную администратором"
+" — оплата через Click появится здесь позже. Заявка на пополнение "
+"создаётся сразу, вывод дополнительно подтверждается кодом с email."
+msgstr "Id-depożiti u l-irtirar bħalissa jiġu pproċessati manwalment mill-amministratur — il-ħlas permezz ta' Click se jiġi miżjud hawn aktar tard. Talba għal depożitu tinħoloq immedjatament, l-irtirar jiġi kkonfermat ukoll b'kodiċi mibgħut bl-email."
+
+#: app/templates/wallet/index.html:23
+msgid "Карта для выплат"
+msgstr "Karta għall-Ħlasijiet"
+
+#: app/templates/wallet/index.html:24
+msgid "Укажите номер карты, на которую администратор переведёт деньги при выводе."
+msgstr "Daħħal in-numru tal-karta li fuqha l-amministratur se jittrasferixxi l-flus meta tirtira."
+
+#: app/templates/wallet/index.html:29
+msgid "Сохранить"
+msgstr "Issejvja"
+
+#: app/templates/wallet/index.html:35
+msgid "Пополнить"
+msgstr "Iddepożita"
+
+#: app/templates/wallet/index.html:38 app/templates/wallet/index.html:56
+#: app/templates/wallet/index.html:69
+msgid "Сумма"
+msgstr "Ammont"
+
+#: app/templates/wallet/index.html:42
+msgid "Чек об оплате (фото или PDF, необязательно)"
+msgstr "Irċevuta tal-ħlas (ritratt jew PDF, mhux obbligatorju)"
+
+#: app/templates/wallet/index.html:45
+msgid "Создать заявку"
+msgstr "Oħloq talba"
+
+#: app/templates/wallet/index.html:50
+msgid "Вывести"
+msgstr "Irtira"
+
+#: app/templates/wallet/index.html:52
+msgid "Сначала укажите номер карты выше."
+msgstr "L-ewwel daħħal in-numru tal-karta hawn fuq."
+
+#: app/templates/wallet/index.html:59
+msgid "Запросить вывод"
+msgstr "Talab irtirar"
+
+#: app/templates/wallet/index.html:65
+msgid "История заявок"
+msgstr "Storja tat-Talbiet"
+
+#: app/templates/wallet/index.html:69
+msgid "Дата"
+msgstr "Data"
+
+#: app/templates/wallet/index.html:69
+msgid "Тип"
+msgstr "Tip"
+
+#: app/templates/wallet/index.html:69
+msgid "Статус"
+msgstr "Status"
+
+#: app/templates/wallet/index.html:69
+msgid "Чек"
+msgstr "Irċevuta"
+
+#: app/templates/wallet/index.html:69
+msgid "Комментарий"
+msgstr "Kumment"
+
+#: app/templates/wallet/index.html:75
+msgid "Пополнение"
+msgstr "Depożitu"
+
+#: app/templates/wallet/index.html:75
+msgid "Вывод"
+msgstr "Irtirar"
+
+#: app/templates/wallet/index.html:78
+msgid "В обработке"
+msgstr "Qed tiġi pproċessata"
+
+#: app/templates/wallet/index.html:78
+msgid "Одобрено"
+msgstr "Approvata"
+
+#: app/templates/wallet/index.html:78
+msgid "Отклонено"
+msgstr "Miċħuda"
+
+#: app/templates/wallet/index.html:78
+msgid "Ждёт код"
+msgstr "Tistenna l-kodiċi"
+
+#: app/templates/wallet/index.html:80
+msgid "чек"
+msgstr "irċevuta"
+
+#: app/templates/wallet/index.html:87
+msgid "Заявок пока не было."
+msgstr "Għad m'hemm l-ebda talba."
+

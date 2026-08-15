@@ -1,21 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Два кубика — Grand Dice Casino{% endblock %}
+{% block title %}{{ _('Два кубика') }} — Grand Dice Casino{% endblock %}
 {% block content %}
 
 <div class="game-switch">
-  <a href="{{ url_for('game.play_page') }}">🎲 Классика</a>
-  <a href="{{ url_for('game.two_dice_page') }}" class="is-active">🎲🎲 Два кубика</a>
-  <a href="{{ url_for('game.four_dice_page') }}">🃏 Покер на костях</a>
+  <a href="{{ url_for('game.play_page') }}">🎲 {{ _('Классика') }}</a>
+  <a href="{{ url_for('game.two_dice_page') }}" class="is-active">🎲🎲 {{ _('Два кубика') }}</a>
+  <a href="{{ url_for('game.four_dice_page') }}">🃏 {{ _('Покер на костях') }}</a>
 </div>
 
 <div class="balance-row">
   <div class="balance-card">
-    <div class="label">Реальный баланс</div>
-    <div class="value" id="realBalanceDisplay">{{ '%.2f'|format(current_user.real_balance) }}</div>
+    <div class="label">{{ _('Реальный баланс') }}</div>
+    <div class="value"><span id="realBalanceDisplay">{{ '%.2f'|format(current_user.real_balance) }}</span>
+      <span class="fx-equiv" id="realBalanceFx" data-uzs="{{ current_user.real_balance }}"></span></div>
   </div>
   <div class="balance-card">
-    <div class="label">Демо-баланс</div>
-    <div class="value" id="demoBalanceDisplay">{{ '%.2f'|format(current_user.demo_balance) }}</div>
+    <div class="label">{{ _('Демо-баланс') }}</div>
+    <div class="value"><span id="demoBalanceDisplay">{{ '%.2f'|format(current_user.demo_balance) }}</span>
+      <span class="fx-equiv" id="demoBalanceFx" data-uzs="{{ current_user.demo_balance }}"></span></div>
   </div>
 </div>
 
@@ -239,9 +241,12 @@ rollButton.addEventListener('click', () => {
 
             if (data.mode === 'real') {
                 document.getElementById('realBalanceDisplay').textContent = parseFloat(data.balance).toFixed(2);
+                document.getElementById('realBalanceFx').setAttribute('data-uzs', data.balance);
             } else {
                 document.getElementById('demoBalanceDisplay').textContent = parseFloat(data.balance).toFixed(2);
+                document.getElementById('demoBalanceFx').setAttribute('data-uzs', data.balance);
             }
+            if (typeof renderFxEquivalents === 'function') renderFxEquivalents();
         }, 500);
     }).catch(() => {
         isRolling = false;

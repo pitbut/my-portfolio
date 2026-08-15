@@ -65,6 +65,21 @@ class Config:
     # WalletRequest.card_number не сохраняются — см. app/crypto.py.
     CARD_ENCRYPTION_KEY = os.environ.get("CARD_ENCRYPTION_KEY")
 
+    # Языки интерфейса (Flask-Babel). 'ru' — язык исходных строк в шаблонах
+    # (msgid и есть готовый русский текст), остальным нужны файлы переводов
+    # в translations/<код>/LC_MESSAGES/messages.po.
+    LANGUAGES = {
+        "ru": "Русский",
+        "uz": "Oʻzbekcha",
+        "kk": "Қазақша",
+        "zh": "中文",
+        "ja": "日本語",
+        "de": "Deutsch",
+        "mt": "Malti",
+    }
+    BABEL_DEFAULT_LOCALE = "ru"
+    BABEL_TRANSLATION_DIRECTORIES = os.path.join(BASE_DIR, "translations")
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

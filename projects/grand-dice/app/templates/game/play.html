@@ -1,28 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Игра — Grand Dice Casino{% endblock %}
+{% block title %}{{ _('Игра') }} — Grand Dice Casino{% endblock %}
 {% block content %}
 
 <div class="game-switch">
-  <a href="{{ url_for('game.play_page') }}" class="is-active">🎲 Классика</a>
-  <a href="{{ url_for('game.two_dice_page') }}">🎲🎲 Два кубика</a>
-  <a href="{{ url_for('game.four_dice_page') }}">🃏 Покер на костях</a>
+  <a href="{{ url_for('game.play_page') }}" class="is-active">🎲 {{ _('Классика') }}</a>
+  <a href="{{ url_for('game.two_dice_page') }}">🎲🎲 {{ _('Два кубика') }}</a>
+  <a href="{{ url_for('game.four_dice_page') }}">🃏 {{ _('Покер на костях') }}</a>
 </div>
 
 <div class="balance-row">
   <div class="balance-card">
-    <div class="label">Реальный баланс</div>
-    <div class="value" id="realBalanceDisplay">{{ '%.2f'|format(current_user.real_balance) }}</div>
+    <div class="label">{{ _('Реальный баланс') }}</div>
+    <div class="value"><span id="realBalanceDisplay">{{ '%.2f'|format(current_user.real_balance) }}</span>
+      <span class="fx-equiv" id="realBalanceFx" data-uzs="{{ current_user.real_balance }}"></span></div>
   </div>
   <div class="balance-card">
-    <div class="label">Демо-баланс</div>
-    <div class="value" id="demoBalanceDisplay">{{ '%.2f'|format(current_user.demo_balance) }}</div>
+    <div class="label">{{ _('Демо-баланс') }}</div>
+    <div class="value"><span id="demoBalanceDisplay">{{ '%.2f'|format(current_user.demo_balance) }}</span>
+      <span class="fx-equiv" id="demoBalanceFx" data-uzs="{{ current_user.demo_balance }}"></span></div>
   </div>
 </div>
 
 <div class="panel">
   <div class="mode-toggle">
-    <button type="button" id="modeDemo" class="{{ 'active' if mode == 'demo' }}">🧪 Демо-режим</button>
-    <button type="button" id="modeReal" class="{{ 'active' if mode == 'real' }}">💰 Реальный баланс</button>
+    <button type="button" id="modeDemo" class="{{ 'active' if mode == 'demo' }}">🧪 {{ _('Демо-режим') }}</button>
+    <button type="button" id="modeReal" class="{{ 'active' if mode == 'real' }}">💰 {{ _('Реальный баланс') }}</button>
   </div>
 
   <div class="dice-stage">
@@ -33,50 +35,50 @@
 
   <div class="bet-controls">
     <div>
-      <label>Направление</label>
+      <label>{{ _('Направление') }}</label>
       <div class="direction-toggle">
-        <button type="button" id="dirUnder" class="active">Меньше</button>
-        <button type="button" id="dirOver">Больше</button>
+        <button type="button" id="dirUnder" class="active">{{ _('Меньше') }}</button>
+        <button type="button" id="dirOver">{{ _('Больше') }}</button>
       </div>
     </div>
     <div>
-      <label for="targetInput">Порог (2-98)</label>
+      <label for="targetInput">{{ _('Порог (2-98)') }}</label>
       <input type="number" id="targetInput" min="2" max="98" step="0.01" value="50">
     </div>
   </div>
 
   <div class="form-row">
-    <label for="betInput">Сумма ставки</label>
+    <label for="betInput">{{ _('Сумма ставки') }}</label>
     <input type="number" id="betInput" min="1" step="0.01" value="10">
   </div>
 
   <div class="payout-info">
-    <span>Шанс выигрыша: <strong id="chanceDisplay">49.00%</strong></span>
-    <span>Множитель: <strong id="multiplierDisplay">2.0000x</strong></span>
-    <span>Возможный выигрыш: <strong id="potentialPayout">20.00</strong></span>
+    <span>{{ _('Шанс выигрыша:') }} <strong id="chanceDisplay">49.00%</strong></span>
+    <span>{{ _('Множитель:') }} <strong id="multiplierDisplay">2.0000x</strong></span>
+    <span>{{ _('Возможный выигрыш:') }} <strong id="potentialPayout">20.00</strong></span>
   </div>
 
-  <button type="button" id="rollButton" class="btn" style="width: 100%; font-size: 1.2em;">🎲 Бросить кости</button>
+  <button type="button" id="rollButton" class="btn" style="width: 100%; font-size: 1.2em;">🎲 {{ _('Бросить кости') }}</button>
   {% if not current_user.email_confirmed %}
   <p style="margin-top: 12px; color: #ffb3c0; font-size: 0.9em;">
-    Ставки на реальные деньги недоступны, пока email не подтверждён. В демо-режиме играть можно.
+    {{ _('Ставки на реальные деньги недоступны, пока email не подтверждён. В демо-режиме играть можно.') }}
   </p>
   {% endif %}
 </div>
 
 <div class="panel">
-  <h2>Последние раунды</h2>
+  <h2>{{ _('Последние раунды') }}</h2>
   {% if history %}
   <table>
     <thead>
-      <tr><th>Время</th><th>Режим</th><th>Направление</th><th>Порог</th><th>Бросок</th><th>Ставка</th><th>Выплата</th></tr>
+      <tr><th>{{ _('Время') }}</th><th>{{ _('Режим') }}</th><th>{{ _('Направление') }}</th><th>{{ _('Порог') }}</th><th>{{ _('Бросок') }}</th><th>{{ _('Ставка') }}</th><th>{{ _('Выплата') }}</th></tr>
     </thead>
     <tbody>
       {% for r in history %}
       <tr class="{{ 'win' if r.win else 'lose' }}">
         <td>{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
-        <td>{{ 'Реальный' if r.mode == 'real' else 'Демо' }}</td>
-        <td>{{ 'Меньше' if r.direction == 'under' else 'Больше' }} {{ r.target }}</td>
+        <td>{{ _('Реальный') if r.mode == 'real' else _('Демо') }}</td>
+        <td>{{ _('Меньше') if r.direction == 'under' else _('Больше') }} {{ r.target }}</td>
         <td>{{ r.target }}</td>
         <td>{{ r.roll }}</td>
         <td>{{ r.bet_amount }}</td>
@@ -86,11 +88,16 @@
     </tbody>
   </table>
   {% else %}
-  <p style="color: #999;">Раундов пока не было.</p>
+  <p style="color: #999;">{{ _('Раундов пока не было.') }}</p>
   {% endif %}
 </div>
 
 <script>
+const T = {
+    win: {{ _('🎉 Выигрыш! +')|tojson }},
+    lose: {{ _('😢 Проигрыш')|tojson }},
+    connError: {{ _('Ошибка соединения.')|tojson }},
+};
 const HOUSE_EDGE = {{ house_edge }};
 let mode = "{{ mode }}";
 let direction = "under";
@@ -191,23 +198,26 @@ rollButton.addEventListener('click', () => {
             diceFace.className = 'dice-face ' + (data.win ? 'win' : 'lose');
 
             if (data.win) {
-                rollResult.textContent = `🎉 Выигрыш! +${data.payout}`;
+                rollResult.textContent = T.win + data.payout;
                 rollResult.style.color = '#b6f0ba';
             } else {
-                rollResult.textContent = `😢 Проигрыш`;
+                rollResult.textContent = T.lose;
                 rollResult.style.color = '#ff9fae';
             }
 
             if (data.mode === 'real') {
                 document.getElementById('realBalanceDisplay').textContent = parseFloat(data.balance).toFixed(2);
+                document.getElementById('realBalanceFx').setAttribute('data-uzs', data.balance);
             } else {
                 document.getElementById('demoBalanceDisplay').textContent = parseFloat(data.balance).toFixed(2);
+                document.getElementById('demoBalanceFx').setAttribute('data-uzs', data.balance);
             }
+            if (typeof renderFxEquivalents === 'function') renderFxEquivalents();
         }, 500);
     }).catch(() => {
         isRolling = false;
         rollButton.disabled = false;
-        rollResult.textContent = 'Ошибка соединения.';
+        rollResult.textContent = T.connError;
         rollResult.style.color = '#ff9fae';
     });
 });

@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Вход — Grand Dice Casino{% endblock %}
+{% block title %}{{ _('Вход') }} — Grand Dice Casino{% endblock %}
 {% block content %}
 <div class="panel" style="max-width: 420px; margin: 0 auto;">
-  <h1>Вход</h1>
+  <h1>{{ _('Вход') }}</h1>
   <form method="post">
     <div class="form-row">
       <label for="email">Email</label>
       <input type="email" id="email" name="email" value="{{ email }}" required>
     </div>
     <div class="form-row">
-      <label for="password">Пароль</label>
+      <label for="password">{{ _('Пароль') }}</label>
       <input type="password" id="password" name="password" required>
     </div>
-    <button type="submit" class="btn" style="width: 100%;">Войти</button>
+    <button type="submit" class="btn" style="width: 100%;">{{ _('Войти') }}</button>
   </form>
-  <p style="margin-top: 16px; color: #ccc;">Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></p>
-  <p style="margin-top: 8px; color: #ccc;"><a href="{{ url_for('auth.forgot_password') }}">Забыли пароль?</a></p>
+  <p style="margin-top: 16px; color: #ccc;">{{ _('Нет аккаунта?') }} <a href="{{ url_for('auth.register') }}">{{ _('Зарегистрироваться') }}</a></p>
+  <p style="margin-top: 8px; color: #ccc;"><a href="{{ url_for('auth.forgot_password') }}">{{ _('Забыли пароль?') }}</a></p>
 </div>
 {% endblock %}

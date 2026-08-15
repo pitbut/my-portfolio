@@ -163,6 +163,12 @@ class CasinoSettings(db.Model):
     # игра заблокируется для него на 1 час.
     loss_limit_percent = db.Column(db.Numeric(5, 2), nullable=False, default=30)
 
+    # Кэш курсов валют (JSON {код: сколько единиц за 1 сум}) для отображения
+    # эквивалента баланса игроку — см. app/currency.py. Сами ставки/баланс
+    # всегда в суммах, курс используется только для показа "на глаз".
+    fx_rates_json = db.Column(db.Text, nullable=True)
+    fx_rates_updated_at = db.Column(db.DateTime, nullable=True)
+
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     @classmethod

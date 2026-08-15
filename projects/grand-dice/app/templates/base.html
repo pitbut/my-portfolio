@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ current_lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,23 +14,37 @@
     <a class="brand" href="{{ url_for('main.index') }}">🎲 Grand Dice Casino</a>
     {% if current_user.is_authenticated %}
     <nav class="main-nav">
-      <a href="{{ url_for('game.play_page') }}" class="{{ 'is-active' if request.blueprint == 'game' }}">Игра</a>
-      <a href="{{ url_for('wallet.index') }}" class="{{ 'is-active' if request.blueprint == 'wallet' }}">Кошелёк</a>
-      <a href="{{ url_for('support.index') }}" class="{{ 'is-active' if request.blueprint == 'support' }}">Поддержка</a>
+      <a href="{{ url_for('game.play_page') }}" class="{{ 'is-active' if request.blueprint == 'game' }}">{{ _('Игра') }}</a>
+      <a href="{{ url_for('wallet.index') }}" class="{{ 'is-active' if request.blueprint == 'wallet' }}">{{ _('Кошелёк') }}</a>
+      <a href="{{ url_for('support.index') }}" class="{{ 'is-active' if request.blueprint == 'support' }}">{{ _('Поддержка') }}</a>
       {% if current_user.is_admin %}
-      <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if request.blueprint == 'admin' }}">Админка</a>
+      <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if request.blueprint == 'admin' }}">{{ _('Админка') }}</a>
       {% endif %}
     </nav>
-    <div class="account-nav">
-      <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">(email не подтверждён)</a>{% endif %}</span>
-      <a href="{{ url_for('auth.logout') }}">Выйти</a>
-    </div>
-    {% else %}
-    <div class="account-nav">
-      <a href="{{ url_for('auth.login') }}">Войти</a>
-      <a href="{{ url_for('auth.register') }}" class="btn-accent-small">Регистрация</a>
-    </div>
     {% endif %}
+    <div class="header-controls">
+      <select class="mini-select" id="langSelect" aria-label="{{ _('Язык') }}">
+        {% for code, label in languages.items() %}
+        <option value="{{ code }}" {{ 'selected' if code == current_lang }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <select class="mini-select" id="currencySelect" aria-label="{{ _('Валюта') }}">
+        {% for code, meta in fx_currencies.items() %}
+        <option value="{{ code }}">{{ meta.label }}</option>
+        {% endfor %}
+      </select>
+      {% if current_user.is_authenticated %}
+      <div class="account-nav">
+        <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">({{ _('email не подтверждён') }})</a>{% endif %}</span>
+        <a href="{{ url_for('auth.logout') }}">{{ _('Выйти') }}</a>
+      </div>
+      {% else %}
+      <div class="account-nav">
+        <a href="{{ url_for('auth.login') }}">{{ _('Войти') }}</a>
+        <a href="{{ url_for('auth.register') }}" class="btn-accent-small">{{ _('Регистрация') }}</a>
+      </div>
+      {% endif %}
+    </div>
   </div>
 </header>
 
@@ -48,8 +62,8 @@
     {% if pending_confirm_url %}
     <div class="flash-messages">
       <div class="flash flash--info">
-        Почтовый сервер пока не настроен — письмо не отправляется автоматически.
-        Подтвердите email по ссылке: <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
+        {{ _('Почтовый сервер пока не настроен — письмо не отправляется автоматически.') }}
+        {{ _('Подтвердите email по ссылке:') }} <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
       </div>
     </div>
     {% endif %}
@@ -57,5 +71,51 @@
     {% block content %}{% endblock %}
   </div>
 </main>
+
+<script>
+  // Курсы валют встроены на каждой странице (см. app/currency.py) — конвертация
+  // только для отображения, баланс и ставки на сервере всегда в суммах.
+  const FX_RATES = {{ fx_rates|tojson }};
+  const FX_CURRENCIES = {{ fx_currencies|tojson }};
+
+  function currentCurrency() {
+    return localStorage.getItem('displayCurrency') || 'UZS';
+  }
+
+  function renderFxEquivalents() {
+    const cur = currentCurrency();
+    document.querySelectorAll('[data-uzs]').forEach(function (el) {
+      const uzs = parseFloat(el.getAttribute('data-uzs'));
+      if (isNaN(uzs)) return;
+      if (cur === 'UZS' || !FX_RATES[cur]) {
+        el.textContent = '';
+        return;
+      }
+      const converted = uzs * FX_RATES[cur];
+      const meta = FX_CURRENCIES[cur];
+      el.textContent = '≈ ' + converted.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' ' + (meta ? meta.symbol : cur);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const currencySelect = document.getElementById('currencySelect');
+    if (currencySelect) {
+      currencySelect.value = currentCurrency();
+      currencySelect.addEventListener('change', function () {
+        localStorage.setItem('displayCurrency', currencySelect.value);
+        renderFxEquivalents();
+      });
+    }
+    renderFxEquivalents();
+
+    const langSelect = document.getElementById('langSelect');
+    if (langSelect) {
+      langSelect.addEventListener('change', function () {
+        window.location.href = '{{ url_for("main.set_language", code="__CODE__") }}'.replace('__CODE__', langSelect.value);
+      });
+    }
+  });
+</script>
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>

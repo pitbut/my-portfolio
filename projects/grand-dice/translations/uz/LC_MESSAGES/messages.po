@@ -1,0 +1,342 @@
+# Uzbek translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-15 18:42+0000\n"
+"PO-Revision-Date: 2026-08-15 18:42+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: uz\n"
+"Language-Team: uz <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/templates/base.html:17 app/templates/game/play.html:2
+msgid "Игра"
+msgstr "Oʻyin"
+
+#: app/templates/base.html:18 app/templates/wallet/index.html:2
+msgid "Кошелёк"
+msgstr "Hamyon"
+
+#: app/templates/base.html:19
+msgid "Поддержка"
+msgstr "Yordam"
+
+#: app/templates/base.html:21
+msgid "Админка"
+msgstr "Admin panel"
+
+#: app/templates/base.html:26
+msgid "Язык"
+msgstr "Til"
+
+#: app/templates/base.html:31
+msgid "Валюта"
+msgstr "Valyuta"
+
+#: app/templates/base.html:38
+msgid "email не подтверждён"
+msgstr "email tasdiqlanmagan"
+
+#: app/templates/base.html:39
+msgid "Выйти"
+msgstr "Chiqish"
+
+#: app/templates/auth/login.html:15 app/templates/auth/register.html:21
+#: app/templates/base.html:43 app/templates/main/index.html:9
+msgid "Войти"
+msgstr "Kirish"
+
+#: app/templates/auth/register.html:2 app/templates/auth/register.html:5
+#: app/templates/base.html:44
+msgid "Регистрация"
+msgstr "Roʻyxatdan oʻtish"
+
+#: app/templates/base.html:65
+msgid "Почтовый сервер пока не настроен — письмо не отправляется автоматически."
+msgstr "Pochta serveri hali sozlanmagan — xat avtomatik yuborilmaydi."
+
+#: app/templates/base.html:66
+msgid "Подтвердите email по ссылке:"
+msgstr "Emailingizni quyidagi havola orqali tasdiqlang:"
+
+#: app/templates/auth/login.html:2 app/templates/auth/login.html:5
+msgid "Вход"
+msgstr "Kirish"
+
+#: app/templates/auth/login.html:12
+msgid "Пароль"
+msgstr "Parol"
+
+#: app/templates/auth/login.html:17
+msgid "Нет аккаунта?"
+msgstr "Akkountingiz yoʻqmi?"
+
+#: app/templates/auth/login.html:17 app/templates/main/index.html:8
+msgid "Зарегистрироваться"
+msgstr "Roʻyxatdan oʻtish"
+
+#: app/templates/auth/login.html:18
+msgid "Забыли пароль?"
+msgstr "Parolni unutdingizmi?"
+
+#: app/templates/auth/register.html:12
+msgid "Пароль (от 8 символов)"
+msgstr "Parol (kamida 8 ta belgi)"
+
+#: app/templates/auth/register.html:16
+msgid "Повторите пароль"
+msgstr "Parolni takrorlang"
+
+#: app/templates/auth/register.html:19
+msgid "Создать аккаунт"
+msgstr "Akkount yaratish"
+
+#: app/templates/auth/register.html:21
+msgid "Уже есть аккаунт?"
+msgstr "Akkountingiz bormi?"
+
+#: app/templates/game/four_dice.html:2 app/templates/game/four_dice.html:8
+#: app/templates/game/play.html:8 app/templates/game/two_dice.html:8
+msgid "Покер на костях"
+msgstr "Zar pokeri"
+
+#: app/templates/game/four_dice.html:6 app/templates/game/play.html:6
+#: app/templates/game/two_dice.html:6
+msgid "Классика"
+msgstr "Klassika"
+
+#: app/templates/game/four_dice.html:7 app/templates/game/play.html:7
+#: app/templates/game/two_dice.html:2 app/templates/game/two_dice.html:7
+msgid "Два кубика"
+msgstr "Ikki zar"
+
+#: app/templates/game/four_dice.html:13 app/templates/game/play.html:13
+#: app/templates/game/play.html:27 app/templates/game/two_dice.html:13
+#: app/templates/wallet/index.html:7
+msgid "Реальный баланс"
+msgstr "Real balans"
+
+#: app/templates/game/four_dice.html:18 app/templates/game/play.html:18
+#: app/templates/game/two_dice.html:18 app/templates/wallet/index.html:12
+msgid "Демо-баланс"
+msgstr "Demo balans"
+
+#: app/templates/game/play.html:26
+msgid "Демо-режим"
+msgstr "Demo rejim"
+
+#: app/templates/game/play.html:38 app/templates/game/play.html:74
+msgid "Направление"
+msgstr "Yoʻnalish"
+
+#: app/templates/game/play.html:40 app/templates/game/play.html:81
+msgid "Меньше"
+msgstr "Kam"
+
+#: app/templates/game/play.html:41 app/templates/game/play.html:81
+msgid "Больше"
+msgstr "Koʻp"
+
+#: app/templates/game/play.html:45
+msgid "Порог (2-98)"
+msgstr "Chegara (2-98)"
+
+#: app/templates/game/play.html:51
+msgid "Сумма ставки"
+msgstr "Tikish summasi"
+
+#: app/templates/game/play.html:56
+msgid "Шанс выигрыша:"
+msgstr "Yutish ehtimoli:"
+
+#: app/templates/game/play.html:57
+msgid "Множитель:"
+msgstr "Multiplikator:"
+
+#: app/templates/game/play.html:58
+msgid "Возможный выигрыш:"
+msgstr "Mumkin boʻlgan yutuq:"
+
+#: app/templates/game/play.html:61
+msgid "Бросить кости"
+msgstr "Zar tashlash"
+
+#: app/templates/game/play.html:64
+msgid ""
+"Ставки на реальные деньги недоступны, пока email не подтверждён. В "
+"демо-режиме играть можно."
+msgstr "Email tasdiqlanmaguncha real pulga tikish mumkin emas. Demo rejimda darhol oʻynash mumkin."
+
+#: app/templates/game/play.html:70
+msgid "Последние раунды"
+msgstr "Soʻnggi turlar"
+
+#: app/templates/game/play.html:74
+msgid "Время"
+msgstr "Vaqt"
+
+#: app/templates/game/play.html:74
+msgid "Режим"
+msgstr "Rejim"
+
+#: app/templates/game/play.html:74
+msgid "Порог"
+msgstr "Chegara"
+
+#: app/templates/game/play.html:74
+msgid "Бросок"
+msgstr "Tashlash"
+
+#: app/templates/game/play.html:74
+msgid "Ставка"
+msgstr "Tikish"
+
+#: app/templates/game/play.html:74
+msgid "Выплата"
+msgstr "Toʻlov"
+
+#: app/templates/game/play.html:80
+msgid "Реальный"
+msgstr "Real"
+
+#: app/templates/game/play.html:80
+msgid "Демо"
+msgstr "Demo"
+
+#: app/templates/game/play.html:91
+msgid "Раундов пока не было."
+msgstr "Hali turlar boʻlmagan."
+
+#: app/templates/game/play.html:97
+msgid "🎉 Выигрыш! +"
+msgstr "🎉 Yutuq! +"
+
+#: app/templates/game/play.html:98
+msgid "😢 Проигрыш"
+msgstr "😢 Yutqizish"
+
+#: app/templates/game/play.html:99
+msgid "Ошибка соединения."
+msgstr "Ulanish xatosi."
+
+#: app/templates/main/index.html:6
+msgid "Классическая игра в кости: выбирайте порог, направление и множитель."
+msgstr "Klassik zar oʻyini: chegara, yoʻnalish va multiplikatorni tanlang."
+
+#: app/templates/main/index.html:7
+msgid "Начните в демо-режиме — без риска для реальных денег."
+msgstr "Demo rejimda boshlang — real pul uchun xavfsiz."
+
+#: app/templates/wallet/index.html:19
+msgid ""
+"Приём и выдача реальных денег пока обрабатываются вручную администратором"
+" — оплата через Click появится здесь позже. Заявка на пополнение "
+"создаётся сразу, вывод дополнительно подтверждается кодом с email."
+msgstr "Hozircha pul kirim va chiqimlari administrator tomonidan qoʻlda qayta ishlanadi — Click orqali toʻlov keyinroq qoʻshiladi. Toʻldirish arizasi darhol yaratiladi, pul yechish esa emailga yuboriladigan kod bilan qoʻshimcha tasdiqlanadi."
+
+#: app/templates/wallet/index.html:23
+msgid "Карта для выплат"
+msgstr "Toʻlovlar uchun karta"
+
+#: app/templates/wallet/index.html:24
+msgid "Укажите номер карты, на которую администратор переведёт деньги при выводе."
+msgstr "Pul yechib olishda administrator pul oʻtkazadigan karta raqamini kiriting."
+
+#: app/templates/wallet/index.html:29
+msgid "Сохранить"
+msgstr "Saqlash"
+
+#: app/templates/wallet/index.html:35
+msgid "Пополнить"
+msgstr "Toʻldirish"
+
+#: app/templates/wallet/index.html:38 app/templates/wallet/index.html:56
+#: app/templates/wallet/index.html:69
+msgid "Сумма"
+msgstr "Summa"
+
+#: app/templates/wallet/index.html:42
+msgid "Чек об оплате (фото или PDF, необязательно)"
+msgstr "Toʻlov cheki (rasm yoki PDF, ixtiyoriy)"
+
+#: app/templates/wallet/index.html:45
+msgid "Создать заявку"
+msgstr "Ariza yaratish"
+
+#: app/templates/wallet/index.html:50
+msgid "Вывести"
+msgstr "Pul yechish"
+
+#: app/templates/wallet/index.html:52
+msgid "Сначала укажите номер карты выше."
+msgstr "Avval yuqorida karta raqamini kiriting."
+
+#: app/templates/wallet/index.html:59
+msgid "Запросить вывод"
+msgstr "Yechishni soʻrash"
+
+#: app/templates/wallet/index.html:65
+msgid "История заявок"
+msgstr "Arizalar tarixi"
+
+#: app/templates/wallet/index.html:69
+msgid "Дата"
+msgstr "Sana"
+
+#: app/templates/wallet/index.html:69
+msgid "Тип"
+msgstr "Turi"
+
+#: app/templates/wallet/index.html:69
+msgid "Статус"
+msgstr "Holati"
+
+#: app/templates/wallet/index.html:69
+msgid "Чек"
+msgstr "Chek"
+
+#: app/templates/wallet/index.html:69
+msgid "Комментарий"
+msgstr "Izoh"
+
+#: app/templates/wallet/index.html:75
+msgid "Пополнение"
+msgstr "Toʻldirish"
+
+#: app/templates/wallet/index.html:75
+msgid "Вывод"
+msgstr "Yechish"
+
+#: app/templates/wallet/index.html:78
+msgid "В обработке"
+msgstr "Koʻrib chiqilmoqda"
+
+#: app/templates/wallet/index.html:78
+msgid "Одобрено"
+msgstr "Tasdiqlandi"
+
+#: app/templates/wallet/index.html:78
+msgid "Отклонено"
+msgstr "Rad etildi"
+
+#: app/templates/wallet/index.html:78
+msgid "Ждёт код"
+msgstr "Kod kutilmoqda"
+
+#: app/templates/wallet/index.html:80
+msgid "чек"
+msgstr "chek"
+
+#: app/templates/wallet/index.html:87
+msgid "Заявок пока не было."
+msgstr "Hali arizalar boʻlmagan."
+

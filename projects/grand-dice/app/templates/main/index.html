@@ -3,9 +3,9 @@
 {% block content %}
 <div class="hero">
   <h1>🎲 Grand Dice Casino</h1>
-  <p>Классическая игра в кости: выбирайте порог, направление и множитель.<br>
-     Начните в демо-режиме — без риска для реальных денег.</p>
-  <a href="{{ url_for('auth.register') }}" class="btn">Зарегистрироваться</a>
-  <a href="{{ url_for('auth.login') }}" class="btn btn-secondary" style="margin-left: 12px;">Войти</a>
+  <p>{{ _('Классическая игра в кости: выбирайте порог, направление и множитель.') }}<br>
+     {{ _('Начните в демо-режиме — без риска для реальных денег.') }}</p>
+  <a href="{{ url_for('auth.register') }}" class="btn">{{ _('Зарегистрироваться') }}</a>
+  <a href="{{ url_for('auth.login') }}" class="btn btn-secondary" style="margin-left: 12px;">{{ _('Войти') }}</a>
 </div>
 {% endblock %}

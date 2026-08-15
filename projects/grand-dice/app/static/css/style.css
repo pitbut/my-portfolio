@@ -48,6 +48,21 @@ a { color: var(--gold); text-decoration: none; }
 .main-nav a { color: #ddd; font-weight: 600; }
 .main-nav a.is-active, .main-nav a:hover { color: var(--gold); }
 
+.header-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.mini-select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    color: #ddd;
+    font-size: 0.85em;
+    cursor: pointer;
+}
+.mini-select:focus { outline: none; border-color: var(--gold); }
+
+.fx-equiv { display: block; font-size: 0.6em; color: #999; font-weight: 400; }
+
 .account-nav { display: flex; align-items: center; gap: 16px; font-size: 0.95em; }
 .account-nav__email { color: #ccc; }
 .account-nav__unconfirmed { color: var(--dark-gold); }

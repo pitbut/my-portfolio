@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 # пустые/отсутствующие значения и не встанет на дефолты (например, SQLite).
 load_dotenv()
 
-from flask import Flask
+from flask import Flask, request, session
+from flask_babel import Babel
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -20,6 +21,17 @@ from config import config
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+babel = Babel()
+
+
+def _select_locale():
+    """Язык интерфейса: явный выбор игрока (сессия) > язык браузера > русский."""
+    from flask import current_app
+
+    languages = current_app.config["LANGUAGES"]
+    if session.get("lang") in languages:
+        return session["lang"]
+    return request.accept_languages.best_match(languages.keys()) or current_app.config["BABEL_DEFAULT_LOCALE"]
 
 
 def create_app(config_name=None):
@@ -37,6 +49,7 @@ def create_app(config_name=None):
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Войдите, чтобы продолжить."
     login_manager.login_message_category = "info"
+    babel.init_app(app, locale_selector=_select_locale)
 
     from app.routes.main import bp as main_bp
     from app.routes.auth import bp as auth_bp
@@ -80,5 +93,19 @@ def create_app(config_name=None):
 
             return {"pending_confirm_url": confirm_url_for(current_user)}
         return {}
+
+    @app.context_processor
+    def inject_i18n_and_currency():
+        """Курсы валют и список языков — нужны в base.html на каждой
+        странице (переключатели в шапке), поэтому проще внедрить их
+        контекст-процессором, чем передавать из каждого view."""
+        from app.currency import SUPPORTED_CURRENCIES, get_cached_rates
+
+        return {
+            "fx_rates": get_cached_rates(),
+            "fx_currencies": SUPPORTED_CURRENCIES,
+            "languages": app.config["LANGUAGES"],
+            "current_lang": _select_locale(),
+        }
 
     return app

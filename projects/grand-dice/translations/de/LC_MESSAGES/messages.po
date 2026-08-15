@@ -1,0 +1,342 @@
+# German translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-15 18:42+0000\n"
+"PO-Revision-Date: 2026-08-15 18:42+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/templates/base.html:17 app/templates/game/play.html:2
+msgid "Игра"
+msgstr "Spiel"
+
+#: app/templates/base.html:18 app/templates/wallet/index.html:2
+msgid "Кошелёк"
+msgstr "Kasse"
+
+#: app/templates/base.html:19
+msgid "Поддержка"
+msgstr "Support"
+
+#: app/templates/base.html:21
+msgid "Админка"
+msgstr "Admin-Bereich"
+
+#: app/templates/base.html:26
+msgid "Язык"
+msgstr "Sprache"
+
+#: app/templates/base.html:31
+msgid "Валюта"
+msgstr "Währung"
+
+#: app/templates/base.html:38
+msgid "email не подтверждён"
+msgstr "E-Mail nicht bestätigt"
+
+#: app/templates/base.html:39
+msgid "Выйти"
+msgstr "Abmelden"
+
+#: app/templates/auth/login.html:15 app/templates/auth/register.html:21
+#: app/templates/base.html:43 app/templates/main/index.html:9
+msgid "Войти"
+msgstr "Anmelden"
+
+#: app/templates/auth/register.html:2 app/templates/auth/register.html:5
+#: app/templates/base.html:44
+msgid "Регистрация"
+msgstr "Registrierung"
+
+#: app/templates/base.html:65
+msgid "Почтовый сервер пока не настроен — письмо не отправляется автоматически."
+msgstr "Der Mailserver ist noch nicht eingerichtet — die E-Mail wird nicht automatisch gesendet."
+
+#: app/templates/base.html:66
+msgid "Подтвердите email по ссылке:"
+msgstr "Bestätigen Sie Ihre E-Mail über den Link:"
+
+#: app/templates/auth/login.html:2 app/templates/auth/login.html:5
+msgid "Вход"
+msgstr "Anmeldung"
+
+#: app/templates/auth/login.html:12
+msgid "Пароль"
+msgstr "Passwort"
+
+#: app/templates/auth/login.html:17
+msgid "Нет аккаунта?"
+msgstr "Noch kein Konto?"
+
+#: app/templates/auth/login.html:17 app/templates/main/index.html:8
+msgid "Зарегистрироваться"
+msgstr "Registrieren"
+
+#: app/templates/auth/login.html:18
+msgid "Забыли пароль?"
+msgstr "Passwort vergessen?"
+
+#: app/templates/auth/register.html:12
+msgid "Пароль (от 8 символов)"
+msgstr "Passwort (mindestens 8 Zeichen)"
+
+#: app/templates/auth/register.html:16
+msgid "Повторите пароль"
+msgstr "Passwort wiederholen"
+
+#: app/templates/auth/register.html:19
+msgid "Создать аккаунт"
+msgstr "Konto erstellen"
+
+#: app/templates/auth/register.html:21
+msgid "Уже есть аккаунт?"
+msgstr "Bereits registriert?"
+
+#: app/templates/game/four_dice.html:2 app/templates/game/four_dice.html:8
+#: app/templates/game/play.html:8 app/templates/game/two_dice.html:8
+msgid "Покер на костях"
+msgstr "Würfelpoker"
+
+#: app/templates/game/four_dice.html:6 app/templates/game/play.html:6
+#: app/templates/game/two_dice.html:6
+msgid "Классика"
+msgstr "Klassisch"
+
+#: app/templates/game/four_dice.html:7 app/templates/game/play.html:7
+#: app/templates/game/two_dice.html:2 app/templates/game/two_dice.html:7
+msgid "Два кубика"
+msgstr "Zwei Würfel"
+
+#: app/templates/game/four_dice.html:13 app/templates/game/play.html:13
+#: app/templates/game/play.html:27 app/templates/game/two_dice.html:13
+#: app/templates/wallet/index.html:7
+msgid "Реальный баланс"
+msgstr "Echtgeld-Saldo"
+
+#: app/templates/game/four_dice.html:18 app/templates/game/play.html:18
+#: app/templates/game/two_dice.html:18 app/templates/wallet/index.html:12
+msgid "Демо-баланс"
+msgstr "Demo-Saldo"
+
+#: app/templates/game/play.html:26
+msgid "Демо-режим"
+msgstr "Demo-Modus"
+
+#: app/templates/game/play.html:38 app/templates/game/play.html:74
+msgid "Направление"
+msgstr "Richtung"
+
+#: app/templates/game/play.html:40 app/templates/game/play.html:81
+msgid "Меньше"
+msgstr "Niedriger"
+
+#: app/templates/game/play.html:41 app/templates/game/play.html:81
+msgid "Больше"
+msgstr "Höher"
+
+#: app/templates/game/play.html:45
+msgid "Порог (2-98)"
+msgstr "Schwelle (2-98)"
+
+#: app/templates/game/play.html:51
+msgid "Сумма ставки"
+msgstr "Einsatzbetrag"
+
+#: app/templates/game/play.html:56
+msgid "Шанс выигрыша:"
+msgstr "Gewinnchance:"
+
+#: app/templates/game/play.html:57
+msgid "Множитель:"
+msgstr "Multiplikator:"
+
+#: app/templates/game/play.html:58
+msgid "Возможный выигрыш:"
+msgstr "Möglicher Gewinn:"
+
+#: app/templates/game/play.html:61
+msgid "Бросить кости"
+msgstr "Würfeln"
+
+#: app/templates/game/play.html:64
+msgid ""
+"Ставки на реальные деньги недоступны, пока email не подтверждён. В "
+"демо-режиме играть можно."
+msgstr "Einsätze mit Echtgeld sind erst nach Bestätigung der E-Mail möglich. Im Demo-Modus können Sie sofort spielen."
+
+#: app/templates/game/play.html:70
+msgid "Последние раунды"
+msgstr "Letzte Runden"
+
+#: app/templates/game/play.html:74
+msgid "Время"
+msgstr "Zeit"
+
+#: app/templates/game/play.html:74
+msgid "Режим"
+msgstr "Modus"
+
+#: app/templates/game/play.html:74
+msgid "Порог"
+msgstr "Schwelle"
+
+#: app/templates/game/play.html:74
+msgid "Бросок"
+msgstr "Wurf"
+
+#: app/templates/game/play.html:74
+msgid "Ставка"
+msgstr "Einsatz"
+
+#: app/templates/game/play.html:74
+msgid "Выплата"
+msgstr "Auszahlung"
+
+#: app/templates/game/play.html:80
+msgid "Реальный"
+msgstr "Echtgeld"
+
+#: app/templates/game/play.html:80
+msgid "Демо"
+msgstr "Demo"
+
+#: app/templates/game/play.html:91
+msgid "Раундов пока не было."
+msgstr "Noch keine Runden gespielt."
+
+#: app/templates/game/play.html:97
+msgid "🎉 Выигрыш! +"
+msgstr "🎉 Gewonnen! +"
+
+#: app/templates/game/play.html:98
+msgid "😢 Проигрыш"
+msgstr "😢 Verloren"
+
+#: app/templates/game/play.html:99
+msgid "Ошибка соединения."
+msgstr "Verbindungsfehler."
+
+#: app/templates/main/index.html:6
+msgid "Классическая игра в кости: выбирайте порог, направление и множитель."
+msgstr "Klassisches Würfelspiel: Wählen Sie Schwelle, Richtung und Multiplikator."
+
+#: app/templates/main/index.html:7
+msgid "Начните в демо-режиме — без риска для реальных денег."
+msgstr "Starten Sie im Demo-Modus — ohne Risiko für echtes Geld."
+
+#: app/templates/wallet/index.html:19
+msgid ""
+"Приём и выдача реальных денег пока обрабатываются вручную администратором"
+" — оплата через Click появится здесь позже. Заявка на пополнение "
+"создаётся сразу, вывод дополнительно подтверждается кодом с email."
+msgstr "Ein- und Auszahlungen werden derzeit noch manuell vom Administrator bearbeitet — die Zahlung über Click wird später hier hinzugefügt. Ein Einzahlungsantrag wird sofort erstellt, eine Auszahlung wird zusätzlich per E-Mail-Code bestätigt."
+
+#: app/templates/wallet/index.html:23
+msgid "Карта для выплат"
+msgstr "Karte für Auszahlungen"
+
+#: app/templates/wallet/index.html:24
+msgid "Укажите номер карты, на которую администратор переведёт деньги при выводе."
+msgstr "Geben Sie die Kartennummer an, auf die der Administrator bei einer Auszahlung das Geld überweist."
+
+#: app/templates/wallet/index.html:29
+msgid "Сохранить"
+msgstr "Speichern"
+
+#: app/templates/wallet/index.html:35
+msgid "Пополнить"
+msgstr "Einzahlen"
+
+#: app/templates/wallet/index.html:38 app/templates/wallet/index.html:56
+#: app/templates/wallet/index.html:69
+msgid "Сумма"
+msgstr "Betrag"
+
+#: app/templates/wallet/index.html:42
+msgid "Чек об оплате (фото или PDF, необязательно)"
+msgstr "Zahlungsbeleg (Foto oder PDF, optional)"
+
+#: app/templates/wallet/index.html:45
+msgid "Создать заявку"
+msgstr "Antrag erstellen"
+
+#: app/templates/wallet/index.html:50
+msgid "Вывести"
+msgstr "Auszahlen"
+
+#: app/templates/wallet/index.html:52
+msgid "Сначала укажите номер карты выше."
+msgstr "Geben Sie zuerst oben die Kartennummer an."
+
+#: app/templates/wallet/index.html:59
+msgid "Запросить вывод"
+msgstr "Auszahlung beantragen"
+
+#: app/templates/wallet/index.html:65
+msgid "История заявок"
+msgstr "Antragsverlauf"
+
+#: app/templates/wallet/index.html:69
+msgid "Дата"
+msgstr "Datum"
+
+#: app/templates/wallet/index.html:69
+msgid "Тип"
+msgstr "Typ"
+
+#: app/templates/wallet/index.html:69
+msgid "Статус"
+msgstr "Status"
+
+#: app/templates/wallet/index.html:69
+msgid "Чек"
+msgstr "Beleg"
+
+#: app/templates/wallet/index.html:69
+msgid "Комментарий"
+msgstr "Kommentar"
+
+#: app/templates/wallet/index.html:75
+msgid "Пополнение"
+msgstr "Einzahlung"
+
+#: app/templates/wallet/index.html:75
+msgid "Вывод"
+msgstr "Auszahlung"
+
+#: app/templates/wallet/index.html:78
+msgid "В обработке"
+msgstr "In Bearbeitung"
+
+#: app/templates/wallet/index.html:78
+msgid "Одобрено"
+msgstr "Genehmigt"
+
+#: app/templates/wallet/index.html:78
+msgid "Отклонено"
+msgstr "Abgelehnt"
+
+#: app/templates/wallet/index.html:78
+msgid "Ждёт код"
+msgstr "Wartet auf Code"
+
+#: app/templates/wallet/index.html:80
+msgid "чек"
+msgstr "Beleg"
+
+#: app/templates/wallet/index.html:87
+msgid "Заявок пока не было."
+msgstr "Noch keine Anträge."
+
