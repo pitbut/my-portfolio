@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расчёт балки · Сопромат</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="mark">⊢⊣</span> РАСЧЁТ БАЛКИ
+    <span class="topbar-sub">метод конечных элементов · до 4 опор · эпюры Q, M · записка .docx</span>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============ ЛЕВАЯ ПАНЕЛЬ: ВВОД ============ -->
+  <section class="panel panel-input">
+
+    <div class="block">
+      <h2><span class="idx">01</span> Балка</h2>
+      <div class="row">
+        <label>Длина L, м
+          <input type="number" id="length" value="6" min="0.1" step="0.1">
+        </label>
+        <label>Модуль упругости E, ГПа
+          <input type="number" id="E_gpa" value="200" step="1">
+        </label>
+        <label>Допуск. напряжение [σ], МПа
+          <input type="number" id="sigma_allow" value="160" step="1">
+        </label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">02</span> Сечение</h2>
+      <div class="row">
+        <label>Форма
+          <select id="sec_type">
+            <option value="rectangle">Прямоугольник</option>
+            <option value="circle">Круг</option>
+            <option value="pipe">Труба (кольцо)</option>
+            <option value="box">Короб (прямоуг. труба)</option>
+            <option value="i_beam">Двутавр</option>
+          </select>
+        </label>
+      </div>
+      <div class="row" id="sec_dims"></div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">03</span> Опоры <span class="hint">(до 4)</span></h2>
+      <div id="supports_list" class="item-list"></div>
+      <div class="add-row">
+        <input type="number" id="new_sup_x" placeholder="x, м" step="0.1">
+        <select id="new_sup_kind">
+          <option value="pin">Шарнирно-неподвижная</option>
+          <option value="roller">Шарнирно-подвижная</option>
+          <option value="fixed">Жёсткая заделка</option>
+        </select>
+        <button type="button" class="btn-add" onclick="addSupport()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">04</span> Сосредоточенные силы</h2>
+      <div id="forces_list" class="item-list"></div>
+      <div class="add-row">
+        <input type="number" id="new_f_x" placeholder="x, м" step="0.1">
+        <input type="number" id="new_f_val" placeholder="F, Н" step="10">
+        <select id="new_f_dir"><option value="down">вниз</option><option value="up">вверх</option></select>
+        <button type="button" class="btn-add" onclick="addForce()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">05</span> Сосредоточенные моменты</h2>
+      <div id="moments_list" class="item-list"></div>
+      <div class="add-row">
+        <input type="number" id="new_m_x" placeholder="x, м" step="0.1">
+        <input type="number" id="new_m_val" placeholder="M, Н·м" step="10">
+        <select id="new_m_dir"><option value="ccw">против ч.с.</option><option value="cw">по ч.с.</option></select>
+        <button type="button" class="btn-add" onclick="addMoment()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">06</span> Распределённые нагрузки</h2>
+      <div id="dloads_list" class="item-list"></div>
+      <div class="add-row wrap">
+        <input type="number" id="new_d_x1" placeholder="x₁, м" step="0.1">
+        <input type="number" id="new_d_x2" placeholder="x₂, м" step="0.1">
+        <input type="number" id="new_d_q1" placeholder="q₁, Н/м" step="10">
+        <input type="number" id="new_d_q2" placeholder="q₂, Н/м (=q₁ если пусто)" step="10">
+        <select id="new_d_dir"><option value="down">вниз</option><option value="up">вверх</option></select>
+        <button type="button" class="btn-add" onclick="addDload()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-primary" onclick="calculate()">Рассчитать →</button>
+      <button type="button" class="btn-secondary" onclick="downloadReport()" id="btn-report" disabled>
+        Скачать записку .docx
+      </button>
+    </div>
+    <div id="error_box" class="error-box" hidden></div>
+  </section>
+
+  <!-- ============ ПРАВАЯ ПАНЕЛЬ: СХЕМА + РЕЗУЛЬТАТЫ ============ -->
+  <section class="panel panel-output">
+    <div class="block">
+      <h2><span class="idx">◈</span> Расчётная схема (предпросмотр)</h2>
+      <canvas id="preview" width="900" height="220"></canvas>
+    </div>
+
+    <div id="results" class="results" hidden>
+      <div class="block">
+        <h2><span class="idx">◈</span> Опорные реакции</h2>
+        <table id="reactions_table"><thead>
+          <tr><th>x, м</th><th>Тип опоры</th><th>R, Н</th><th>M, Н·м</th></tr>
+        </thead><tbody></tbody></table>
+        <p class="determinacy-note" id="determinacy_note"></p>
+      </div>
+
+      <div class="block metrics">
+        <div class="metric"><span class="metric-label">Q<sub>max</sub></span><span class="metric-value" id="m_Qmax">—</span></div>
+        <div class="metric"><span class="metric-label">M<sub>max</sub></span><span class="metric-value" id="m_Mmax">—</span></div>
+        <div class="metric"><span class="metric-label">σ<sub>max</sub></span><span class="metric-value" id="m_sigma">—</span></div>
+        <div class="metric"><span class="metric-label">запас n</span><span class="metric-value" id="m_n">—</span></div>
+        <div class="metric"><span class="metric-label">v<sub>max</sub></span><span class="metric-value" id="m_v">—</span></div>
+      </div>
+
+      <div class="block">
+        <h2><span class="idx">◈</span> Эпюра Q(x)</h2>
+        <img id="img_Q" class="epure-img">
+      </div>
+      <div class="block">
+        <h2><span class="idx">◈</span> Эпюра M(x)</h2>
+        <img id="img_M" class="epure-img">
+      </div>
+      <div class="block">
+        <h2><span class="idx">◈</span> Эпюра прогибов v(x)</h2>
+        <img id="img_D" class="epure-img">
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
