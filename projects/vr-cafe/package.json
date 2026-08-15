@@ -1,0 +1,22 @@
+{
+  "name": "vr-cafe",
+  "version": "1.0.0",
+  "description": "Виртуальное 3D-кафе с голосовым чатом и приглашениями в Telegram",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "aframe": "^1.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongodb": "^7.5.0",
+    "node-fetch": "^2.7.0",
+    "peer": "^1.0.2",
+    "peerjs": "^1.5.4",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
+  }
+}
