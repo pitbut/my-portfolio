@@ -729,12 +729,21 @@
             document.getElementById('spinButton').disabled = true;
             document.getElementById('resultDisplay').textContent = 'Крутим...';
 
+            const winningNumber = Math.floor(Math.random() * 37); // 0-36
             const wheel = document.getElementById('wheel');
-            const randomRotation = 360 * 5 + Math.random() * 360;
-            wheel.style.transform = `rotate(${randomRotation}deg)`;
+            const segAngle = 360 / wheelOrder.length;
+            const segIndex = wheelOrder.indexOf(winningNumber);
+            const segMidAngle = segIndex * segAngle + segAngle / 2;
+            // небольшой случайный сдвиг внутри сектора, чтобы не останавливаться идеально по центру
+            const jitter = (Math.random() - 0.5) * segAngle * 0.6;
+            // указатель находится сверху (0deg); чтобы сектор оказался под ним,
+            // нужно довернуть колесо на -segMidAngle относительно текущего 0deg
+            const landingAngle = ((360 - segMidAngle - jitter) % 360 + 360) % 360;
+            const fullSpins = 5 + Math.floor(Math.random() * 3);
+            const targetRotation = fullSpins * 360 + landingAngle;
+            wheel.style.transform = `rotate(${targetRotation}deg)`;
 
             setTimeout(() => {
-                const winningNumber = Math.floor(Math.random() * 37); // 0-36
                 processResult(winningNumber);
             }, 3000);
         }
