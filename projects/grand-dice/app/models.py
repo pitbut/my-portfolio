@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from app import db
+from app.crypto import decrypt_card_number, encrypt_card_number
 
 
 class TimestampMixin:
@@ -22,8 +23,19 @@ class User(TimestampMixin, db.Model):
 
     # Номер карты для выплат при выводе средств — админ смотрит его при
     # обработке заявки на вывод (пока Click API не подключён, перевод идёт
-    # вручную на эту карту).
-    card_number = db.Column(db.String(32), nullable=True)
+    # вручную на эту карту). Хранится зашифрованным (Fernet, CARD_ENCRYPTION_KEY);
+    # колонка в БД по-прежнему называется card_number, но содержит шифротекст —
+    # доступ идёт через property card_number ниже, которое прозрачно
+    # шифрует/расшифровывает, чтобы остальной код не менялся.
+    _card_number = db.Column("card_number", db.Text, nullable=True)
+
+    @property
+    def card_number(self):
+        return decrypt_card_number(self._card_number)
+
+    @card_number.setter
+    def card_number(self, value):
+        self._card_number = encrypt_card_number(value)
 
     # Блокировка аккаунта администратором. is_blocked — бессрочная ручная
     # блокировка; blocked_until — временная (снимается сама по истечении).
@@ -133,8 +145,16 @@ class WalletRequest(db.Model):
 
     # Снимок номера карты пользователя на момент заявки (для вывода) — так
     # админ видит, куда переводить, даже если пользователь потом сменит
-    # карту в профиле.
-    card_number = db.Column(db.String(32), nullable=True)
+    # карту в профиле. Хранится зашифрованным, как и User.card_number.
+    _card_number = db.Column("card_number", db.Text, nullable=True)
+
+    @property
+    def card_number(self):
+        return decrypt_card_number(self._card_number)
+
+    @card_number.setter
+    def card_number(self, value):
+        self._card_number = encrypt_card_number(value)
 
     # awaiting_otp -> pending -> approved | rejected
     # (awaiting_otp применяется только к выводу; депозит сразу pending)

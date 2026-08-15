@@ -60,6 +60,10 @@ class Config:
     MIN_WITHDRAW_AMOUNT = float(os.environ.get("MIN_WITHDRAW_AMOUNT", 10))
     MIN_DEPOSIT_AMOUNT = float(os.environ.get("MIN_DEPOSIT_AMOUNT", 10))
 
+    # Ключ шифрования номеров карт (Fernet). Без него User.card_number /
+    # WalletRequest.card_number не сохраняются — см. app/crypto.py.
+    CARD_ENCRYPTION_KEY = os.environ.get("CARD_ENCRYPTION_KEY")
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
