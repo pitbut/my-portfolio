@@ -33,6 +33,7 @@
           {% endif %}
         </td>
         <td style="white-space: nowrap;">
+          <a href="{{ url_for('admin.support_thread', user_id=u.id) }}" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.85em;">Написать</a>
           {% if not u.is_admin %}
             {% if u.is_currently_blocked() %}
             <form method="post" action="{{ url_for('admin.unblock_user', user_id=u.id) }}" style="display: inline;">

@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Покер на костях — Grand Dice Casino{% endblock %}
+{% block content %}
+
+<div class="game-switch">
+  <a href="{{ url_for('game.play_page') }}">🎲 Классика</a>
+  <a href="{{ url_for('game.two_dice_page') }}">🎲🎲 Два кубика</a>
+  <a href="{{ url_for('game.four_dice_page') }}" class="is-active">🃏 Покер на костях</a>
+</div>
+
+<div class="balance-row">
+  <div class="balance-card">
+    <div class="label">Реальный баланс</div>
+    <div class="value" id="realBalanceDisplay">{{ '%.2f'|format(current_user.real_balance) }}</div>
+  </div>
+  <div class="balance-card">
+    <div class="label">Демо-баланс</div>
+    <div class="value" id="demoBalanceDisplay">{{ '%.2f'|format(current_user.demo_balance) }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Правила</h2>
+  <p style="color: #ccc; margin-bottom: 10px;">
+    Вы и казино одновременно бросаете по 4 кубика. Побеждает более сильная комбинация:
+  </p>
+  <p style="color: #ccc; margin-bottom: 10px;">
+    <strong style="color: var(--gold);">Каре</strong> (все 4 одинаковых) &gt;
+    <strong style="color: var(--gold);">Сет</strong> (3 одинаковых) &gt;
+    <strong style="color: var(--gold);">Стрит</strong> (4 подряд: 1-2-3-4, 2-3-4-5 или 3-4-5-6) &gt;
+    <strong style="color: var(--gold);">Две пары</strong> &gt;
+    <strong style="color: var(--gold);">Пара</strong> &gt;
+    <strong style="color: var(--gold);">Пусто</strong> (по старшей кости).
+  </p>
+  <p style="color: #ccc;">
+    При равном ранге сильнее та комбинация, где выше значение (например, каре шестёрок бьёт каре троек).
+    Полное совпадение — <strong style="color: var(--gold);">ничья с казино</strong>: ставка возвращается
+    за вычетом свопа. Точная вероятность выигрыша — {{ win_chance }}%.
+  </p>
+</div>
+
+<div class="panel">
+  <div class="mode-toggle">
+    <button type="button" id="modeDemo" class="{{ 'active' if mode == 'demo' }}">🧪 Демо-режим</button>
+    <button type="button" id="modeReal" class="{{ 'active' if mode == 'real' }}">💰 Реальный баланс</button>
+  </div>
+
+  <div class="dice-vs">
+    <div class="dice-group">
+      <div class="dice-group-label">Вы</div>
+      <div class="dice-group-dice">
+        <div class="die-small" id="pDie0">?</div>
+        <div class="die-small" id="pDie1">?</div>
+        <div class="die-small" id="pDie2">?</div>
+        <div class="die-small" id="pDie3">?</div>
+      </div>
+      <div class="hand-label" id="playerHandLabel">&nbsp;</div>
+    </div>
+    <div class="dice-group">
+      <div class="dice-group-label">Казино</div>
+      <div class="dice-group-dice">
+        <div class="die-small" id="dDie0">?</div>
+        <div class="die-small" id="dDie1">?</div>
+        <div class="die-small" id="dDie2">?</div>
+        <div class="die-small" id="dDie3">?</div>
+      </div>
+      <div class="hand-label" id="dealerHandLabel">&nbsp;</div>
+    </div>
+  </div>
+
+  <div id="rollResult" style="text-align: center; min-height: 30px; margin-bottom: 20px; font-weight: 700;"></div>
+
+  <div class="form-row">
+    <label for="betInput">Сумма ставки</label>
+    <input type="number" id="betInput" min="1" step="0.01" value="10">
+  </div>
+
+  <div class="payout-info">
+    <span>Шанс выигрыша: <strong>{{ win_chance }}%</strong></span>
+    <span>Множитель при выигрыше: <strong id="multiplierDisplay">-</strong></span>
+    <span>Возможный выигрыш: <strong id="potentialPayout">-</strong></span>
+  </div>
+
+  <button type="button" id="rollButton" class="btn" style="width: 100%; font-size: 1.2em;">🃏 Раздать кости</button>
+  {% if not current_user.email_confirmed %}
+  <p style="margin-top: 12px; color: #ffb3c0; font-size: 0.9em;">
+    Ставки на реальные деньги недоступны, пока email не подтверждён. В демо-режиме играть можно.
+  </p>
+  {% endif %}
+</div>
+
+<div class="panel">
+  <h2>Последние раунды</h2>
+  {% if history %}
+  <table>
+    <thead>
+      <tr><th>Время</th><th>Режим</th><th>Вы</th><th>Казино</th><th>Ставка</th><th>Результат</th></tr>
+    </thead>
+    <tbody>
+      {% for item in history %}
+      {% set r = item.round %}
+      <tr class="{{ 'win' if r.win else ('lose' if not r.push else '') }}">
+        <td>{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
+        <td>{{ 'Реальный' if r.mode == 'real' else 'Демо' }}</td>
+        <td>{{ item.detail.player|join(' ') }} ({{ item.detail.player_hand }})</td>
+        <td>{{ item.detail.dealer|join(' ') }} ({{ item.detail.dealer_hand }})</td>
+        <td>{{ r.bet_amount }}</td>
+        <td>{% if r.push %}Ничья ({{ r.payout }}){% elif r.win %}+{{ r.payout }}{% else %}Проигрыш{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color: #999;">Раундов пока не было.</p>
+  {% endif %}
+</div>
+
+<script>
+const HOUSE_EDGE = {{ house_edge }};
+const WIN_CHANCE = {{ win_chance }};
+let mode = "{{ mode }}";
+let isRolling = false;
+const DICE_FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+const betInput = document.getElementById('betInput');
+const multiplierDisplay = document.getElementById('multiplierDisplay');
+const potentialPayout = document.getElementById('potentialPayout');
+const rollResult = document.getElementById('rollResult');
+const rollButton = document.getElementById('rollButton');
+const playerHandLabel = document.getElementById('playerHandLabel');
+const dealerHandLabel = document.getElementById('dealerHandLabel');
+
+function multiplier() {
+    return (100 - HOUSE_EDGE) / WIN_CHANCE;
+}
+
+function updatePayoutInfo() {
+    const bet = parseFloat(betInput.value) || 0;
+    const m = multiplier();
+    multiplierDisplay.textContent = m.toFixed(4) + 'x';
+    potentialPayout.textContent = (bet * m).toFixed(2);
+}
+betInput.addEventListener('input', updatePayoutInfo);
+
+function setMode(newMode) {
+    fetch('{{ url_for("game.set_mode") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'mode=' + newMode
+    }).then(r => r.json()).then(data => {
+        if (!data.ok) {
+            rollResult.textContent = data.error;
+            rollResult.style.color = '#ff9fae';
+            return;
+        }
+        mode = data.mode;
+        document.getElementById('modeDemo').classList.toggle('active', mode === 'demo');
+        document.getElementById('modeReal').classList.toggle('active', mode === 'real');
+    });
+}
+document.getElementById('modeDemo').addEventListener('click', () => setMode('demo'));
+document.getElementById('modeReal').addEventListener('click', () => setMode('real'));
+
+rollButton.addEventListener('click', () => {
+    if (isRolling) return;
+    isRolling = true;
+    rollButton.disabled = true;
+    rollResult.textContent = '';
+    playerHandLabel.textContent = ' ';
+    dealerHandLabel.textContent = ' ';
+    for (let i = 0; i < 4; i++) {
+        const pd = document.getElementById('pDie' + i);
+        const dd = document.getElementById('dDie' + i);
+        pd.className = 'die-small rolling'; pd.textContent = '?';
+        dd.className = 'die-small rolling'; dd.textContent = '?';
+    }
+
+    const body = new URLSearchParams({ bet_amount: betInput.value });
+
+    fetch('{{ url_for("game.four_dice_play") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
+    }).then(r => r.json()).then(data => {
+        setTimeout(() => {
+            isRolling = false;
+            rollButton.disabled = false;
+
+            if (!data.ok) {
+                for (let i = 0; i < 4; i++) {
+                    document.getElementById('pDie' + i).className = 'die-small';
+                    document.getElementById('pDie' + i).textContent = '?';
+                    document.getElementById('dDie' + i).className = 'die-small';
+                    document.getElementById('dDie' + i).textContent = '?';
+                }
+                rollResult.textContent = data.error;
+                rollResult.style.color = '#ff9fae';
+                return;
+            }
+
+            const cls = data.outcome === 'win' ? 'win' : (data.outcome === 'push' ? 'push' : 'lose');
+            for (let i = 0; i < 4; i++) {
+                const pd = document.getElementById('pDie' + i);
+                const dd = document.getElementById('dDie' + i);
+                pd.textContent = DICE_FACES[data.player_dice[i]];
+                dd.textContent = DICE_FACES[data.dealer_dice[i]];
+                pd.className = 'die-small ' + cls;
+                dd.className = 'die-small ' + cls;
+            }
+            playerHandLabel.textContent = data.player_hand;
+            dealerHandLabel.textContent = data.dealer_hand;
+
+            if (data.outcome === 'win') {
+                rollResult.textContent = `🎉 ${data.player_hand} бьёт ${data.dealer_hand}! +${data.payout}`;
+                rollResult.style.color = '#b6f0ba';
+            } else if (data.outcome === 'push') {
+                rollResult.textContent = `🤝 Ничья (${data.player_hand} = ${data.dealer_hand}). Возврат ${data.payout} (своп удержан).`;
+                rollResult.style.color = '#ffe9a8';
+            } else {
+                rollResult.textContent = `😢 ${data.dealer_hand} казино бьёт вашу ${data.player_hand}.`;
+                rollResult.style.color = '#ff9fae';
+            }
+
+            if (data.locked_until) {
+                rollResult.textContent += ` Реальная игра заблокирована до ${data.locked_until} UTC (лимит проигрыша).`;
+            }
+
+            if (data.mode === 'real') {
+                document.getElementById('realBalanceDisplay').textContent = parseFloat(data.balance).toFixed(2);
+            } else {
+                document.getElementById('demoBalanceDisplay').textContent = parseFloat(data.balance).toFixed(2);
+            }
+        }, 500);
+    }).catch(() => {
+        isRolling = false;
+        rollButton.disabled = false;
+        rollResult.textContent = 'Ошибка соединения.';
+        rollResult.style.color = '#ff9fae';
+    });
+});
+
+updatePayoutInfo();
+</script>
+{% endblock %}

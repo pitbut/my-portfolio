@@ -5,13 +5,14 @@ seed.py), логинится через обычную форму входа.
 """
 import os
 from datetime import datetime, timedelta
+from decimal import Decimal, InvalidOperation
 from functools import wraps
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app import db
-from app.models import GameRound, SupportMessage, User, WalletRequest
+from app.models import CasinoSettings, GameRound, SupportMessage, User, WalletRequest
 from app.uploads import save_support_photo, support_photo_path
 
 bp = Blueprint("admin", __name__)
@@ -60,8 +61,62 @@ def dashboard():
         "total_real_balance": db.session.query(db.func.coalesce(db.func.sum(User.real_balance), 0)).scalar(),
         "house_revenue": real_bets - real_payouts,
         "support_threads": db.session.query(SupportMessage.user_id).distinct().count(),
+        "house_bank": CasinoSettings.get().house_bank,
     }
     return render_template("admin/dashboard.html", pending=pending, stats=stats)
+
+
+@bp.route("/requests")
+@admin_required
+def requests_history():
+    """Полная история заявок на пополнение/вывод — не только очередь
+    необработанных, но и уже одобренные/отклонённые, чтобы при повторной
+    проверке было видно, что заявка закрыта (и кем/когда)."""
+    status_filter = request.args.get("status") or "all"
+    query = WalletRequest.query
+    if status_filter != "all":
+        query = query.filter_by(status=status_filter)
+    requests_ = query.order_by(WalletRequest.created_at.desc()).limit(300).all()
+    return render_template("admin/requests.html", requests=requests_, status_filter=status_filter)
+
+
+@bp.route("/settings", methods=["GET", "POST"])
+@admin_required
+def settings():
+    settings_ = CasinoSettings.get()
+
+    if request.method == "POST":
+        action = request.form.get("action")
+
+        if action == "set_bank":
+            try:
+                amount = Decimal(str(request.form.get("house_bank"))).quantize(Decimal("0.01"))
+            except (InvalidOperation, TypeError):
+                flash("Некорректная сумма банка.", "error")
+                return redirect(url_for("admin.settings"))
+            if amount < 0:
+                flash("Банк не может быть отрицательным.", "error")
+                return redirect(url_for("admin.settings"))
+            settings_.house_bank = amount
+            db.session.commit()
+            flash(f"Банк казино установлен: {amount}.", "success")
+
+        elif action == "set_loss_limit":
+            try:
+                percent = Decimal(str(request.form.get("loss_limit_percent")))
+            except (InvalidOperation, TypeError):
+                flash("Некорректное значение лимита.", "error")
+                return redirect(url_for("admin.settings"))
+            if percent < 1 or percent > 100:
+                flash("Лимит должен быть от 1 до 100%.", "error")
+                return redirect(url_for("admin.settings"))
+            settings_.loss_limit_percent = percent
+            db.session.commit()
+            flash(f"Лимит проигрыша за сессию установлен: {percent}%.", "success")
+
+        return redirect(url_for("admin.settings"))
+
+    return render_template("admin/settings.html", settings=settings_)
 
 
 @bp.route("/users")

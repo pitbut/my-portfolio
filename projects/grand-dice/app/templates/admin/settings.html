@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Настройки казино — Grand Dice Casino{% endblock %}
+{% block content %}
+<h1>Настройки казино</h1>
+<p style="margin-bottom: 20px;"><a href="{{ url_for('admin.dashboard') }}">← Панель</a></p>
+
+<div class="panel" style="margin-bottom: 20px;">
+  <h2>Банк казино</h2>
+  <p style="color: #ccc; margin-bottom: 16px;">
+    Сумма, находящаяся в игре на реальные деньги. Растёт, когда казино выигрывает у
+    игроков, уменьшается при выплатах. Если банк опустеет — реальная игра для всех
+    игроков автоматически блокируется, пока вы не пополните его здесь.
+  </p>
+  <div class="stat-card" style="margin-bottom: 16px; max-width: 260px;">
+    <div class="value">{{ '%.2f'|format(settings.house_bank) }}</div>
+    <div class="label">Текущий банк</div>
+  </div>
+  <form method="post" style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <input type="hidden" name="action" value="set_bank">
+    <input type="number" name="house_bank" min="0" step="0.01" value="{{ settings.house_bank }}"
+           style="flex: 1; min-width: 200px;" required>
+    <button type="submit" class="btn">Установить банк</button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>Лимит проигрыша за сессию</h2>
+  <p style="color: #ccc; margin-bottom: 16px;">
+    До какого % потери от баланса на момент входа в реальный режим игроку разрешено
+    проиграть, прежде чем реальная игра автоматически заблокируется для него на 1 час.
+    Например, при 30%: игрок зашёл с 30 000, потерял 9 000 (30%) — блокировка на час.
+  </p>
+  <form method="post" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <input type="hidden" name="action" value="set_loss_limit">
+    <input type="range" id="lossLimitRange" min="1" max="100" step="1"
+           value="{{ settings.loss_limit_percent|int }}" oninput="lossLimitValue.textContent = this.value + '%'"
+           style="flex: 1; min-width: 220px;">
+    <span id="lossLimitValue" style="min-width: 50px; font-weight: 700; color: var(--gold);">{{ settings.loss_limit_percent|int }}%</span>
+    <input type="hidden" name="loss_limit_percent" id="lossLimitHidden" value="{{ settings.loss_limit_percent|int }}">
+    <button type="submit" class="btn">Сохранить</button>
+  </form>
+</div>
+
+<script>
+  const range = document.getElementById('lossLimitRange');
+  const hidden = document.getElementById('lossLimitHidden');
+  range.addEventListener('input', () => { hidden.value = range.value; });
+</script>
+{% endblock %}

@@ -18,9 +18,10 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Жёсткий лимit на размер запроса (защита от заливки огромных файлов в
-    # чат поддержки) — с запасом над MAX_PHOTO_BYTES из app/uploads.py.
-    MAX_CONTENT_LENGTH = 6 * 1024 * 1024
+    # Жёсткий лимит на размер запроса (защита от заливки огромных файлов в
+    # чат поддержки/чеки пополнения) — с запасом над MAX_RECEIPT_BYTES
+    # (8 МБ, самый большой из лимитов в app/uploads.py).
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
 
     # Пароль администратора больше не используется напрямую — админ это
     # обычный пользователь с флагом is_admin=True (см. seed.py). Значение

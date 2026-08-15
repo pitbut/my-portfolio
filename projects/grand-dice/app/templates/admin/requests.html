@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Заявки — Grand Dice Casino{% endblock %}
+{% block content %}
+<h1>Заявки на пополнение/вывод</h1>
+<p style="margin-bottom: 20px;"><a href="{{ url_for('admin.dashboard') }}">← Панель</a></p>
+
+<div class="panel" style="margin-bottom: 16px;">
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    {% for value, label in [('all', 'Все'), ('pending', 'В очереди'), ('awaiting_otp', 'Ждут код'), ('approved', 'Одобренные'), ('rejected', 'Отклонённые')] %}
+    <a href="{{ url_for('admin.requests_history', status=value) }}"
+       class="btn {{ 'btn-secondary' if status_filter != value }}" style="padding: 6px 14px; font-size: 0.9em;">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="panel" style="overflow-x: auto;">
+  {% if requests %}
+  <table>
+    <thead>
+      <tr>
+        <th>Дата</th><th>Пользователь</th><th>Тип</th><th>Сумма</th><th>Карта</th><th>Чек</th>
+        <th>Статус</th><th>Обработал</th><th>Когда</th><th>Комментарий</th><th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in requests %}
+      <tr>
+        <td>{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
+        <td>{{ r.user.email }}</td>
+        <td>{{ 'Пополнение' if r.kind == 'deposit' else 'Вывод' }}</td>
+        <td>{{ r.amount }}</td>
+        <td>{{ r.card_number or '—' }}</td>
+        <td>{% if r.receipt_filename %}<a href="{{ url_for('wallet.receipt', request_id=r.id) }}" target="_blank">чек</a>{% else %}—{% endif %}</td>
+        <td>
+          <span class="badge badge--{{ r.status }}">
+            {{ {'pending': 'В обработке', 'approved': 'Одобрено', 'rejected': 'Отклонено', 'awaiting_otp': 'Ждёт код'}[r.status] }}
+          </span>
+        </td>
+        <td>{{ r.processed_by.email if r.processed_by else '—' }}</td>
+        <td>{{ r.processed_at.strftime('%d.%m %H:%M') if r.processed_at else '—' }}</td>
+        <td>{{ r.admin_note or '—' }}</td>
+        <td style="white-space: nowrap;">
+          {% if r.status == 'pending' %}
+          <form method="post" action="{{ url_for('admin.approve_request', request_id=r.id) }}" style="display: inline;">
+            <button type="submit" class="btn" style="padding: 6px 10px; font-size: 0.85em;">Одобрить</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.reject_request', request_id=r.id) }}" style="display: inline;">
+            <button type="submit" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.85em;">Отклонить</button>
+          </form>
+          {% else %}
+          —
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color: #999;">Заявок нет.</p>
+  {% endif %}
+</div>
+{% endblock %}

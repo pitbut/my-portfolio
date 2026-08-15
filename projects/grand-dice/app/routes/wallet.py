@@ -10,13 +10,14 @@ import secrets
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
-from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, send_file, url_for
 from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db
 from app.email import send_email
 from app.models import User, WalletRequest
+from app.uploads import receipt_path, save_receipt_file
 
 bp = Blueprint("wallet", __name__)
 
@@ -69,7 +70,16 @@ def deposit():
         flash(f"Минимальная сумма пополнения — {min_amount}.", "error")
         return redirect(url_for("wallet.index"))
 
-    req = WalletRequest(user_id=current_user.id, kind="deposit", amount=amount, status="pending")
+    try:
+        receipt_filename = save_receipt_file(request.files.get("receipt"))
+    except ValueError as exc:
+        flash(str(exc), "error")
+        return redirect(url_for("wallet.index"))
+
+    req = WalletRequest(
+        user_id=current_user.id, kind="deposit", amount=amount, status="pending",
+        receipt_filename=receipt_filename,
+    )
     db.session.add(req)
     db.session.commit()
 
@@ -194,3 +204,14 @@ def withdraw_confirm(request_id):
         return redirect(url_for("wallet.index"))
 
     return render_template("wallet/withdraw_confirm.html", req=req)
+
+
+@bp.route("/receipt/<int:request_id>")
+@login_required
+def receipt(request_id):
+    req = WalletRequest.query.get_or_404(request_id)
+    if req.user_id != current_user.id and not current_user.is_admin:
+        abort(403)
+    if not req.receipt_filename:
+        abort(404)
+    return send_file(receipt_path(req.receipt_filename))

@@ -61,6 +61,13 @@ class User(TimestampMixin, db.Model):
     # денег не касается. Пополняется бесплатно самим пользователем.
     demo_balance = db.Column(db.Numeric(12, 2), nullable=False, default=0)
 
+    # Лимит проигрыша за сессию: снимок реального баланса на момент входа в
+    # реальный режим (см. game.set_mode) и метка времени, до которой игрок
+    # заблокирован в реальном режиме после достижения лимита (в процентах —
+    # CasinoSettings.loss_limit_percent, ползунок админа).
+    session_start_balance = db.Column(db.Numeric(12, 2), nullable=True)
+    real_play_locked_until = db.Column(db.DateTime, nullable=True)
+
     rounds = db.relationship(
         "GameRound", backref="user", lazy="dynamic", cascade="all, delete-orphan"
     )
@@ -103,7 +110,7 @@ class User(TimestampMixin, db.Model):
 
 
 class GameRound(db.Model):
-    """Один раунд игры в кости."""
+    """Один раунд игры в кости — классика, "два кубика" или "покер на костях"."""
 
     __tablename__ = "game_rounds"
 
@@ -111,19 +118,76 @@ class GameRound(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
 
     mode = db.Column(db.String(10), nullable=False)  # 'real' | 'demo'
-    direction = db.Column(db.String(10), nullable=False)  # 'under' | 'over'
-    target = db.Column(db.Numeric(5, 2), nullable=False)  # порог 2.00-98.00
-    roll = db.Column(db.Numeric(5, 2), nullable=False)  # выпавшее число 0.00-99.99
+    # 'classic' (1 кость 0-99.99) | 'two_dice' (сумма 2 костей) | 'four_dice' (покер на костях)
+    game_type = db.Column(db.String(20), nullable=False, default="classic")
+
+    # Направление/порог/бросок используются только режимом classic и
+    # two_dice (для two_dice target/roll — целые суммы 2-12, хранятся как
+    # Numeric без дробной части). В four_dice всегда NULL — там результат
+    # хранится в dice_json.
+    direction = db.Column(db.String(10), nullable=True)  # 'under' | 'over'
+    target = db.Column(db.Numeric(5, 2), nullable=True)
+    roll = db.Column(db.Numeric(5, 2), nullable=True)
 
     bet_amount = db.Column(db.Numeric(12, 2), nullable=False)
     multiplier = db.Column(db.Numeric(10, 4), nullable=False)
     payout = db.Column(db.Numeric(12, 2), nullable=False)  # 0, если проигрыш
     win = db.Column(db.Boolean, nullable=False)
+    # Ничья с казино (пуш) — ставка вернулась за вычетом свопа, не выигрыш и не проигрыш.
+    push = db.Column(db.Boolean, nullable=False, default=False)
+
+    # Доп. данные броска для two_dice/four_dice (кости игрока/казино, руки) — JSON-текст.
+    dice_json = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def __repr__(self):
-        return f"<GameRound user={self.user_id} {self.direction} {self.target} roll={self.roll}>"
+        return f"<GameRound user={self.user_id} {self.game_type} roll={self.roll}>"
+
+
+class CasinoSettings(db.Model):
+    """Единственная строка (id=1) с общими настройками казино, которые
+    правит админ: банк, находящийся в игре, и лимит проигрыша за сессию."""
+
+    __tablename__ = "casino_settings"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Банк казино "в игре" — растёт, когда казино выигрывает у игроков, и
+    # уменьшается при выплатах. Никогда не должен уходить в минус: реальная
+    # игра блокируется глобально, если банка не хватает на покрытие ставки.
+    house_bank = db.Column(db.Numeric(14, 2), nullable=False, default=0)
+
+    # Ползунок админа: до какого % потери от стартового баланса сессии
+    # игроку разрешено проиграть в реальном режиме, прежде чем реальная
+    # игра заблокируется для него на 1 час.
+    loss_limit_percent = db.Column(db.Numeric(5, 2), nullable=False, default=30)
+
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    @classmethod
+    def get(cls):
+        row = db.session.get(cls, 1)
+        if row is None:
+            row = cls(id=1, house_bank=0, loss_limit_percent=30)
+            db.session.add(row)
+            db.session.commit()
+        return row
+
+    @classmethod
+    def get_locked(cls):
+        """Как get(), но с блокировкой строки (SELECT ... FOR UPDATE) — для
+        безопасного изменения house_bank внутри одной транзакции ставки."""
+        row = db.session.query(cls).filter_by(id=1).with_for_update().first()
+        if row is None:
+            row = cls(id=1, house_bank=0, loss_limit_percent=30)
+            db.session.add(row)
+            db.session.commit()
+            row = db.session.query(cls).filter_by(id=1).with_for_update().first()
+        return row
+
+    def __repr__(self):
+        return f"<CasinoSettings bank={self.house_bank} loss_limit={self.loss_limit_percent}%>"
 
 
 class WalletRequest(db.Model):
@@ -155,6 +219,10 @@ class WalletRequest(db.Model):
     @card_number.setter
     def card_number(self, value):
         self._card_number = encrypt_card_number(value)
+
+    # Фото/PDF чека, приложенные игроком к заявке на пополнение — для
+    # проверки админом, что оплата действительно прошла (необязательно).
+    receipt_filename = db.Column(db.String(255), nullable=True)
 
     # awaiting_otp -> pending -> approved | rejected
     # (awaiting_otp применяется только к выводу; депозит сразу pending)
