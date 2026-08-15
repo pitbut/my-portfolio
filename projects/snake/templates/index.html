@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Змейка - Классическая игра</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .score-display {
+            display: flex;
+            gap: 20px;
+            font-size: 1.2em;
+        }
+
+        .score-display strong {
+            color: #667eea;
+            font-size: 1.3em;
+        }
+
+        .controls-info {
+            text-align: right;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .game-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        #gameCanvas {
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            background: #f0f0f0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-width: 100%;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            min-width: 300px;
+            z-index: 10;
+        }
+
+        .game-over.hidden {
+            display: none;
+        }
+
+        .game-over h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .game-over p {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+        }
+
+        .game-over #finalScore {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        .game-over input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .game-over input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .game-over button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .game-over button:hover {
+            background: #764ba2;
+        }
+
+        .leaderboard {
+            margin-top: 30px;
+        }
+
+        .leaderboard h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        #scoresList {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .score-item.top-1 {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+        }
+
+        .score-item.top-2 {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+            color: white;
+        }
+
+        .score-item.top-3 {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+            color: white;
+        }
+
+        .score-item .rank {
+            font-weight: bold;
+            color: #764ba2;
+            margin-right: 10px;
+            min-width: 30px;
+        }
+
+        .score-item.top-1 .rank,
+        .score-item.top-2 .rank,
+        .score-item.top-3 .rank {
+            color: white;
+        }
+
+        .score-item .name {
+            flex: 1;
+            color: #333;
+        }
+
+        .score-item.top-1 .name,
+        .score-item.top-2 .name,
+        .score-item.top-3 .name {
+            color: white;
+        }
+
+        .score-item .points {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .score-item.top-1 .points,
+        .score-item.top-2 .points,
+        .score-item.top-3 .points {
+            color: white;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .controls-info {
+                text-align: center;
+            }
+            
+            .game-over {
+                min-width: 250px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐍 ЗМЕЙКА</h1>
+        
+        <div class="game-info">
+            <div class="score-display">
+                <span>Счёт: <strong id="score">0</strong></span>
+                <span>Рекорд: <strong id="highScore">0</strong></span>
+            </div>
+            <div class="controls-info">
+                <p>Управление: ← ↑ → ↓ или WASD</p>
+                <p>Пробел - Пауза/Старт</p>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div id="gameOver" class="game-over hidden">
+                <h2>Игра окончена!</h2>
+                <p>Ваш счёт: <span id="finalScore">0</span></p>
+                <input type="text" id="playerName" placeholder="Ваше имя" maxlength="20">
+                <button onclick="saveScore()">Сохранить результат</button>
+                <button onclick="restartGame()">Играть снова</button>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <h2>🏆 Таблица рекордов</h2>
+            <div id="scoresList">Загрузка...</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [{x: 10, y: 10}];
+        let dx = 0;
+        let dy = 0;
+        let foodX = 15;
+        let foodY = 15;
+        let score = 0;
+        let highScore = localStorage.getItem('snakeHighScore') || 0;
+        let gameRunning = false;
+        let gameSpeed = 100;
+        let gameInterval;
+
+        document.getElementById('highScore').textContent = highScore;
+
+        function generateFood() {
+            foodX = Math.floor(Math.random() * tileCount);
+            foodY = Math.floor(Math.random() * tileCount);
+            
+            for (let segment of snake) {
+                if (segment.x === foodX && segment.y === foodY) {
+                    generateFood();
+                    return;
+                }
+            }
+        }
+
+        function drawGame() {
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= tileCount; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * gridSize, 0);
+                ctx.lineTo(i * gridSize, canvas.height);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(0, i * gridSize);
+                ctx.lineTo(canvas.width, i * gridSize);
+                ctx.stroke();
+            }
+            
+            ctx.fillStyle = '#ff4757';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ff4757';
+            ctx.beginPath();
+            ctx.arc(
+                foodX * gridSize + gridSize / 2,
+                foodY * gridSize + gridSize / 2,
+                gridSize / 2 - 2,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            snake.forEach((segment, index) => {
+                if (index === 0) {
+                    ctx.fillStyle = '#667eea';
+                    ctx.shadowBlur = 5;
+                    ctx.shadowColor = '#667eea';
+                } else {
+                    const opacity = 1 - (index / snake.length) * 0.3;
+                    ctx.fillStyle = `rgba(118, 75, 162, ${opacity})`;
+                    ctx.shadowBlur = 0;
+                }
+                
+                ctx.fillRect(
+                    segment.x * gridSize + 1,
+                    segment.y * gridSize + 1,
+                    gridSize - 2,
+                    gridSize - 2
+                );
+                
+                if (index === 0) {
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(segment.x * gridSize + 5, segment.y * gridSize + 5, 4, 4);
+                    ctx.fillRect(segment.x * gridSize + 11, segment.y * gridSize + 5, 4, 4);
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(segment.x * gridSize + 6, segment.y * gridSize + 6, 2, 2);
+                    ctx.fillRect(segment.x * gridSize + 12, segment.y * gridSize + 6, 2, 2);
+                }
+            });
+            ctx.shadowBlur = 0;
+        }
+
+        function updateGame() {
+            if (!gameRunning) return;
+            
+            const head = {
+                x: snake[0].x + dx,
+                y: snake[0].y + dy
+            };
+            
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                endGame();
+                return;
+            }
+            
+            for (let segment of snake) {
+                if (segment.x === head.x && segment.y === head.y) {
+                    endGame();
+                    return;
+                }
+            }
+            
+            snake.unshift(head);
+            
+            if (head.x === foodX && head.y === foodY) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+                
+                if (score % 50 === 0 && gameSpeed > 50) {
+                    gameSpeed -= 5;
+                    clearInterval(gameInterval);
+                    gameInterval = setInterval(updateGame, gameSpeed);
+                }
+                
+                generateFood();
+            } else {
+                snake.pop();
+            }
+            
+            drawGame();
+        }
+
+        function endGame() {
+            gameRunning = false;
+            clearInterval(gameInterval);
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('snakeHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+            }
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            snake = [{x: 10, y: 10}];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            gameSpeed = 100;
+            document.getElementById('score').textContent = score;
+            document.getElementById('gameOver').classList.add('hidden');
+            generateFood();
+            drawGame();
+        }
+
+        async function saveScore() {
+            const name = document.getElementById('playerName').value.trim() || 'Аноним';
+            
+            try {
+                const response = await fetch('/api/scores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        score: score
+                    })
+                });
+                
+                if (response.ok) {
+                    await loadScores();
+                    alert('Результат сохранён!');
+                } else {
+                    alert('Ошибка сохранения результата');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка сохранения результата');
+            }
+        }
+
+        async function loadScores() {
+            try {
+                const response = await fetch('/api/scores');
+                const scores = await response.json();
+                
+                const scoresList = document.getElementById('scoresList');
+                if (scores.length === 0) {
+                    scoresList.innerHTML = '<p style="text-align: center; color: #999;">Пока нет результатов</p>';
+                    return;
+                }
+                
+                scoresList.innerHTML = scores.map((item, index) => {
+                    const topClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : '';
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                    
+                    return `
+                        <div class="score-item ${topClass}">
+                            <span class="rank">${medal} ${index + 1}.</span>
+                            <span class="name">${item.name}</span>
+                            <span class="points">${item.score}</span>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Ошибка загрузки рекордов:', error);
+                document.getElementById('scoresList').innerHTML = 
+                    '<p style="text-align: center; color: #999;">Ошибка загрузки</p>';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!gameRunning) {
+                    gameRunning = true;
+                    if (dx === 0 && dy === 0) {
+                        dx = 1;
+                    }
+                    gameInterval = setInterval(updateGame, gameSpeed);
+                } else {
+                    gameRunning = false;
+                    clearInterval(gameInterval);
+                }
+                return;
+            }
+            
+            switch(e.code) {
+                case 'ArrowLeft':
+                case 'KeyA':
+                    if (dx === 0) { dx = -1; dy = 0; }
+                    break;
+                case 'ArrowRight':
+                case 'KeyD':
+                    if (dx === 0) { dx = 1; dy = 0; }
+                    break;
+                case 'ArrowUp':
+                case 'KeyW':
+                    if (dy === 0) { dx = 0; dy = -1; }
+                    break;
+                case 'ArrowDown':
+                case 'KeyS':
+                    if (dy === 0) { dx = 0; dy = 1; }
+                    break;
+            }
+            
+            if (!gameRunning && (dx !== 0 || dy !== 0)) {
+                gameRunning = true;
+                gameInterval = setInterval(updateGame, gameSpeed);
+            }
+        });
+
+        generateFood();
+        drawGame();
+        loadScores();
+    </script>
+</body>
+</html>

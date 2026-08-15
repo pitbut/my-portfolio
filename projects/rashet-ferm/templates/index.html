@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расчёт фермы · Сопромат</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="mark">⊿⊿⊿</span> РАСЧЁТ ФЕРМЫ
+    <span class="topbar-sub">метод конечных элементов · узлы, стержни, опоры, нагрузки · записка .docx</span>
+  </div>
+</header>
+
+<main class="layout">
+
+  <section class="panel panel-input">
+
+    <div class="block">
+      <h2><span class="idx">00</span> Быстрый шаблон</h2>
+      <div class="row">
+        <label>Пролёт, м <input type="number" id="tpl_span" value="8" step="0.5"></label>
+        <label>Высота, м <input type="number" id="tpl_height" value="2" step="0.5"></label>
+        <label>Панелей <input type="number" id="tpl_panels" value="4" step="1" min="2"></label>
+      </div>
+      <button type="button" class="btn-add" onclick="buildPrattTemplate()" style="width:100%;">
+        + Сгенерировать ферму Пратта
+      </button>
+      <p class="hint" style="margin-top:8px;">Или собери ферму вручную ниже — узлы, стержни, опоры, нагрузки.</p>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">01</span> Материал / сечение стержней</h2>
+      <div class="row">
+        <label>Модуль упругости E, ГПа <input type="number" id="E_gpa" value="200" step="1"></label>
+        <label>Допуск. напряжение [σ], МПа <input type="number" id="sigma_allow" value="160" step="1"></label>
+      </div>
+      <div class="row">
+        <label>Форма сечения
+          <select id="sec_type">
+            <option value="pipe">Труба (кольцо)</option>
+            <option value="circle">Круг</option>
+            <option value="rectangle">Прямоугольник</option>
+            <option value="box">Короб</option>
+            <option value="i_beam">Двутавр</option>
+          </select>
+        </label>
+      </div>
+      <div class="row" id="sec_dims"></div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">02</span> Узлы</h2>
+      <div id="nodes_list" class="item-list"></div>
+      <div class="add-row">
+        <input type="number" id="new_n_x" placeholder="x, м" step="0.1">
+        <input type="number" id="new_n_y" placeholder="y, м" step="0.1">
+        <button type="button" class="btn-add" onclick="addNode()">+ Добавить узел</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">03</span> Стержни</h2>
+      <div id="members_list" class="item-list"></div>
+      <div class="add-row">
+        <input type="number" id="new_m_i" placeholder="узел i" step="1" min="0">
+        <input type="number" id="new_m_j" placeholder="узел j" step="1" min="0">
+        <button type="button" class="btn-add" onclick="addMember()">+ Добавить стержень</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">04</span> Опоры</h2>
+      <div id="supports_list" class="item-list"></div>
+      <div class="add-row">
+        <input type="number" id="new_s_node" placeholder="узел" step="1" min="0">
+        <select id="new_s_kind">
+          <option value="pin">Шарнирно-неподвижная</option>
+          <option value="roller_y">Каток (гориз. смещение)</option>
+          <option value="roller_x">Каток (верт. смещение)</option>
+        </select>
+        <button type="button" class="btn-add" onclick="addSupport()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><span class="idx">05</span> Узловые нагрузки</h2>
+      <div id="loads_list" class="item-list"></div>
+      <div class="add-row">
+        <input type="number" id="new_l_node" placeholder="узел" step="1" min="0">
+        <input type="number" id="new_l_fx" placeholder="Fx, Н" step="10">
+        <input type="number" id="new_l_fy" placeholder="Fy, Н (вниз = отриц.)" step="10">
+        <button type="button" class="btn-add" onclick="addLoad()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-primary" onclick="calculate()">Рассчитать →</button>
+      <button type="button" class="btn-secondary" onclick="downloadReport()" id="btn-report" disabled>
+        Скачать записку .docx
+      </button>
+    </div>
+    <div id="error_box" class="error-box" hidden></div>
+  </section>
+
+  <section class="panel panel-output">
+    <div class="block">
+      <h2><span class="idx">◈</span> Расчётная схема (предпросмотр)</h2>
+      <canvas id="preview" width="900" height="480"></canvas>
+    </div>
+
+    <div id="results" class="results" hidden>
+      <div class="block">
+        <h2><span class="idx">◈</span> Статическая определимость</h2>
+        <p id="determinacy_note" class="determinacy-note"></p>
+      </div>
+
+      <div class="block">
+        <h2><span class="idx">◈</span> Опорные реакции</h2>
+        <table id="reactions_table"><thead>
+          <tr><th>Узел</th><th>Тип</th><th>Rx, Н</th><th>Ry, Н</th></tr>
+        </thead><tbody></tbody></table>
+      </div>
+
+      <div class="block">
+        <h2><span class="idx">◈</span> Усилия в стержнях</h2>
+        <table id="forces_table"><thead>
+          <tr><th>№</th><th>Узлы</th><th>N, Н</th><th>σ, МПа</th><th>Проверка</th></tr>
+        </thead><tbody></tbody></table>
+      </div>
+
+      <div class="block">
+        <h2><span class="idx">◈</span> Схема усилий</h2>
+        <img id="img_forces" class="epure-img">
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
