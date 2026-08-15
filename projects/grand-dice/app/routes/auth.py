@@ -16,6 +16,7 @@ bp = Blueprint("auth", __name__)
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 CONFIRM_SALT = "email-confirm"
+RESET_SALT = "password-reset"
 
 
 def _serializer():
@@ -162,3 +163,96 @@ def resend_confirmation():
     else:
         flash(f"Почтовый сервер не настроен, вот ссылка подтверждения: {confirm_url}", "info")
     return redirect(url_for("game.play_page"))
+
+
+def reset_url_for(user):
+    token = _serializer().dumps(user.email, salt=RESET_SALT)
+    return url_for("auth.reset_password", token=token, _external=True)
+
+
+def _send_reset_email(user):
+    reset_url = reset_url_for(user)
+    body = (
+        f"Здравствуйте!\n\n"
+        f"Чтобы установить новый пароль в Grand Dice Casino, перейдите по ссылке:\n"
+        f"{reset_url}\n\n"
+        f"Ссылка действительна {current_app.config['RESET_TOKEN_MAX_AGE'] // 60} минут. "
+        f"Если вы не запрашивали смену пароля — просто проигнорируйте это письмо, "
+        f"пароль останется прежним."
+    )
+    sent = send_email(user.email, "Восстановление пароля — Grand Dice Casino", body)
+    return sent, reset_url
+
+
+@bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index"))
+
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        user = User.query.filter_by(email=email).first()
+
+        # Одинаковый ответ независимо от того, найден пользователь или нет —
+        # иначе форма превращается в способ проверить, кто зарегистрирован.
+        generic_message = (
+            "Если такой email зарегистрирован, на него отправлена ссылка "
+            "для восстановления пароля."
+        )
+
+        if user is None:
+            flash(generic_message, "info")
+            return redirect(url_for("auth.login"))
+
+        sent, reset_url = _send_reset_email(user)
+        if sent:
+            flash(generic_message, "info")
+        else:
+            flash(
+                f"Почтовый сервер не настроен, вот ссылка для сброса пароля: {reset_url}",
+                "info",
+            )
+        return redirect(url_for("auth.login"))
+
+    return render_template("auth/forgot_password.html")
+
+
+@bp.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index"))
+
+    try:
+        email = _serializer().loads(
+            token, salt=RESET_SALT, max_age=current_app.config["RESET_TOKEN_MAX_AGE"]
+        )
+    except SignatureExpired:
+        flash("Ссылка для сброса пароля устарела. Запросите новую.", "error")
+        return redirect(url_for("auth.forgot_password"))
+    except BadSignature:
+        flash("Ссылка для сброса пароля недействительна.", "error")
+        return redirect(url_for("auth.forgot_password"))
+
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        flash("Пользователь не найден.", "error")
+        return redirect(url_for("auth.forgot_password"))
+
+    if request.method == "POST":
+        password = request.form.get("password") or ""
+        password2 = request.form.get("password2") or ""
+
+        if len(password) < 8:
+            flash("Пароль должен быть не короче 8 символов.", "error")
+            return render_template("auth/reset_password.html", token=token)
+        if password != password2:
+            flash("Пароли не совпадают.", "error")
+            return render_template("auth/reset_password.html", token=token)
+
+        user.password_hash = generate_password_hash(password)
+        db.session.commit()
+
+        flash("Пароль изменён. Теперь можно войти с новым паролем.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("auth/reset_password.html", token=token)

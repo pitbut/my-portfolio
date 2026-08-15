@@ -15,5 +15,6 @@
     <button type="submit" class="btn" style="width: 100%;">Войти</button>
   </form>
   <p style="margin-top: 16px; color: #ccc;">Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></p>
+  <p style="margin-top: 8px; color: #ccc;"><a href="{{ url_for('auth.forgot_password') }}">Забыли пароль?</a></p>
 </div>
 {% endblock %}

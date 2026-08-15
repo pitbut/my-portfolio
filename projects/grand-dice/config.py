@@ -36,6 +36,10 @@ class Config:
     # Срок жизни ссылки подтверждения email, в секундах (по умолчанию сутки).
     CONFIRM_TOKEN_MAX_AGE = int(os.environ.get("CONFIRM_TOKEN_MAX_AGE", 86400))
 
+    # Срок жизни ссылки восстановления пароля, в секундах (по умолчанию час —
+    # короче, чем подтверждение email, т.к. эта ссылка даёт доступ к аккаунту).
+    RESET_TOKEN_MAX_AGE = int(os.environ.get("RESET_TOKEN_MAX_AGE", 3600))
+
     # Срок жизни OTP-кода на вывод средств, в секундах.
     OTP_MAX_AGE = int(os.environ.get("OTP_MAX_AGE", 600))
 
