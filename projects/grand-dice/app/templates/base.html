@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}🎲 Grand Dice Casino{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="{{ url_for('main.index') }}">🎲 Grand Dice Casino</a>
+    {% if current_user.is_authenticated %}
+    <nav class="main-nav">
+      <a href="{{ url_for('game.play_page') }}" class="{{ 'is-active' if request.blueprint == 'game' }}">Игра</a>
+      <a href="{{ url_for('wallet.index') }}" class="{{ 'is-active' if request.blueprint == 'wallet' }}">Кошелёк</a>
+      {% if current_user.is_admin %}
+      <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if request.blueprint == 'admin' }}">Админка</a>
+      {% endif %}
+    </nav>
+    <div class="account-nav">
+      <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">(email не подтверждён)</a>{% endif %}</span>
+      <a href="{{ url_for('auth.logout') }}">Выйти</a>
+    </div>
+    {% else %}
+    <div class="account-nav">
+      <a href="{{ url_for('auth.login') }}">Войти</a>
+      <a href="{{ url_for('auth.register') }}" class="btn-accent-small">Регистрация</a>
+    </div>
+    {% endif %}
+  </div>
+</header>
+
+<main class="site-main">
+  <div class="wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    {% if pending_confirm_url %}
+    <div class="flash-messages">
+      <div class="flash flash--info">
+        Почтовый сервер пока не настроен — письмо не отправляется автоматически.
+        Подтвердите email по ссылке: <a href="{{ pending_confirm_url }}">{{ pending_confirm_url }}</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Пользователи — Grand Dice Casino{% endblock %}
+{% block content %}
+<h1>Пользователи</h1>
+<p style="margin-bottom: 20px;"><a href="{{ url_for('admin.dashboard') }}">← Панель</a></p>
+
+<div class="panel">
+  <table>
+    <thead>
+      <tr><th>Email</th><th>Регистрация</th><th>Email подтверждён</th><th>Реальный баланс</th><th>Демо-баланс</th><th>Админ</th></tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.email }}</td>
+        <td>{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+        <td>{{ 'Да' if u.email_confirmed else 'Нет' }}</td>
+        <td>{{ u.real_balance }}</td>
+        <td>{{ u.demo_balance }}</td>
+        <td>{{ 'Да' if u.is_admin else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
