@@ -221,6 +221,44 @@
             color: white;
         }
 
+        .touch-controls {
+            display: none;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .touch-controls.visible {
+            display: flex;
+        }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 6px;
+        }
+
+        .dpad button {
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.5em;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .dpad button:active {
+            transform: scale(0.92);
+            filter: brightness(0.9);
+        }
+
+        .dpad .dpad-up { grid-column: 2; grid-row: 1; }
+        .dpad .dpad-left { grid-column: 1; grid-row: 2; }
+        .dpad .dpad-down { grid-column: 2; grid-row: 3; }
+        .dpad .dpad-right { grid-column: 3; grid-row: 2; }
+
         @media (max-width: 500px) {
             .container {
                 padding: 15px;
@@ -274,6 +312,15 @@
                 <input type="text" id="playerName" placeholder="Ваше имя" maxlength="20">
                 <button onclick="saveScore()">Сохранить результат</button>
                 <button onclick="restartGame()">Играть снова</button>
+            </div>
+        </div>
+
+        <div class="touch-controls" id="touchControls">
+            <div class="dpad">
+                <button class="dpad-up" type="button">↑</button>
+                <button class="dpad-left" type="button">←</button>
+                <button class="dpad-down" type="button">↓</button>
+                <button class="dpad-right" type="button">→</button>
             </div>
         </div>
 
@@ -502,6 +549,23 @@
             }
         }
 
+        function setDirection(newDx, newDy) {
+            if (isGameOver) return;
+
+            if (newDx !== 0 && dx === 0) {
+                dx = newDx;
+                dy = 0;
+            } else if (newDy !== 0 && dy === 0) {
+                dx = 0;
+                dy = newDy;
+            }
+
+            if (!gameRunning && (dx !== 0 || dy !== 0)) {
+                gameRunning = true;
+                gameInterval = setInterval(updateGame, gameSpeed);
+            }
+        }
+
         document.addEventListener('keydown', (e) => {
             if (isGameOver) return;
 
@@ -519,31 +583,59 @@
                 }
                 return;
             }
-            
+
             switch(e.code) {
                 case 'ArrowLeft':
                 case 'KeyA':
-                    if (dx === 0) { dx = -1; dy = 0; }
+                    setDirection(-1, 0);
                     break;
                 case 'ArrowRight':
                 case 'KeyD':
-                    if (dx === 0) { dx = 1; dy = 0; }
+                    setDirection(1, 0);
                     break;
                 case 'ArrowUp':
                 case 'KeyW':
-                    if (dy === 0) { dx = 0; dy = -1; }
+                    setDirection(0, -1);
                     break;
                 case 'ArrowDown':
                 case 'KeyS':
-                    if (dy === 0) { dx = 0; dy = 1; }
+                    setDirection(0, 1);
                     break;
             }
-            
-            if (!gameRunning && (dx !== 0 || dy !== 0)) {
-                gameRunning = true;
-                gameInterval = setInterval(updateGame, gameSpeed);
-            }
         });
+
+        // Сенсорное управление: D-pad кнопки
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            document.getElementById('touchControls').classList.add('visible');
+        }
+
+        document.querySelector('.dpad-up').addEventListener('click', () => setDirection(0, -1));
+        document.querySelector('.dpad-down').addEventListener('click', () => setDirection(0, 1));
+        document.querySelector('.dpad-left').addEventListener('click', () => setDirection(-1, 0));
+        document.querySelector('.dpad-right').addEventListener('click', () => setDirection(1, 0));
+
+        // Сенсорное управление: свайпы прямо по игровому полю
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', (e) => {
+            const dxTouch = e.changedTouches[0].clientX - touchStartX;
+            const dyTouch = e.changedTouches[0].clientY - touchStartY;
+            const SWIPE_THRESHOLD = 20;
+
+            if (Math.max(Math.abs(dxTouch), Math.abs(dyTouch)) < SWIPE_THRESHOLD) return;
+
+            if (Math.abs(dxTouch) > Math.abs(dyTouch)) {
+                setDirection(dxTouch > 0 ? 1 : -1, 0);
+            } else {
+                setDirection(0, dyTouch > 0 ? 1 : -1);
+            }
+        }, { passive: true });
 
         generateFood();
         drawGame();
