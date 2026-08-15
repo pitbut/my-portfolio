@@ -51,7 +51,7 @@ After=network.target
 User=root
 WorkingDirectory=/root/my-portfolio/projects/vr-shop/backend
 EnvironmentFile=/root/my-portfolio/projects/vr-shop/backend/.env
-ExecStart=/root/my-portfolio/projects/vr-shop/backend/venv/bin/gunicorn --worker-class gthread --threads 4 -w 1 --bind 127.0.0.1:8001 app:app
+ExecStart=/root/my-portfolio/projects/vr-shop/backend/venv/bin/gunicorn --worker-class gthread --threads 4 -w 1 --bind 127.0.0.1:8002 app:app
 Restart=always
 
 [Install]
@@ -64,9 +64,12 @@ sudo systemctl enable --now vr-shop
 sudo systemctl status vr-shop --no-pager -l | head -15
 ```
 
-Порт `8001` — проверь заранее, что он свободен (`sudo ss -tlnp`), у других
-проектов на этом же VPS (b2b-platform, ai-tutor, istok) могут быть заняты
-соседние порты.
+Порт `8002` — **обязательно** проверь заранее, что он свободен
+(`sudo ss -tlnp | grep 800`), прежде чем создавать сервис: на этом VPS
+`b2b-platform` уже занимает `127.0.0.1:8001` — если два systemd-сервиса
+проксируются на один и тот же порт, nginx будет отдавать ответы того
+сервиса, который реально держит порт, независимо от домена (именно так
+`shop.robutpit.com` при первой попытке показывал b2b-platform).
 
 ## 4. nginx (обратный прокси + вебсокеты для Flask-SocketIO)
 
@@ -76,7 +79,7 @@ server {
     listen 80;
     server_name shop.robutpit.com;
     location / {
-        proxy_pass http://127.0.0.1:8001;
+        proxy_pass http://127.0.0.1:8002;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_http_version 1.1;
