@@ -41,7 +41,7 @@ After=network.target
 User=root
 WorkingDirectory=/root/my-portfolio/projects/telegram-bazar-bot
 EnvironmentFile=/root/my-portfolio/projects/telegram-bazar-bot/.env
-ExecStart=/root/my-portfolio/projects/telegram-bazar-bot/venv/bin/gunicorn --bind 127.0.0.1:8008 app:app
+ExecStart=/root/my-portfolio/projects/telegram-bazar-bot/venv/bin/gunicorn --bind 127.0.0.1:8010 app:app
 Restart=always
 
 [Install]
@@ -54,9 +54,9 @@ sudo systemctl enable --now telegram-bazar-bot
 sudo systemctl status telegram-bazar-bot --no-pager -l | head -15
 ```
 
-Порт `8008` — **обязательно** проверь заранее, что он свободен
-(`sudo ss -tlnp | grep 800`). Карта портов на этом VPS
-(актуально на 2026-08-15):
+Порт `8010` — **обязательно** проверь заранее, что он свободен
+(`sudo ss -tlnp | grep 801`). Карта портов на этом VPS
+(актуально на 2026-08-15, включая проекты из параллельных сессий):
 
 | Порт | Проект              |
 |------|----------------------|
@@ -67,10 +67,14 @@ sudo systemctl status telegram-bazar-bot --no-pager -l | head -15
 | 8005 | ferma                |
 | 8006 | vr-shop              |
 | 8007 | vr-cafe              |
-| 8008 | telegram-bazar-bot   |
+| 8008 | bilet                |
+| 8009 | snake                |
+| 8010 | telegram-bazar-bot   |
 
-При добавлении нового проекта — бери следующий свободный порт (8009) и
-сверяйся с этой таблицей, а не угадывай.
+При добавлении нового проекта — **не доверяй этой таблице вслепую**,
+всегда перепроверяй `ss -tlnp | grep 8` перед выбором порта: несколько
+человек/сессий могут деплоить на этот VPS параллельно и занимать порты,
+не отражённые здесь.
 
 ## 4. nginx
 
@@ -80,7 +84,7 @@ server {
     listen 80;
     server_name bazar.robutpit.com;
     location / {
-        proxy_pass http://127.0.0.1:8008;
+        proxy_pass http://127.0.0.1:8010;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
