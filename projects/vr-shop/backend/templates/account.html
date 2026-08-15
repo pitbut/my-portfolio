@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Мой кабинет — VR Магазин</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hdr">
+      <a class="hdr-logo" href="/">◆ VR МАГАЗИН</a>
+      <a class="hdr-link" href="/logout">Выйти ({{ current_user.username }})</a>
+    </header>
+
+    <h1 class="title">Мой кабинет</h1>
+    <p class="subtitle">История покупок: что, когда, почём и у кого.</p>
+
+    {% if order_rows %}
+    <div class="orders-table">
+      <div class="orders-row orders-head">
+        <div>Товар</div><div>Магазин</div><div>Цена</div><div>Дата</div><div>Статус</div>
+      </div>
+      {% for row in order_rows %}
+      <div class="orders-row">
+        <div>{{ row.product_name }}</div>
+        <div>{{ row.shop_name }}</div>
+        <div>{{ "%.0f"|format(row.order.price) }} сум</div>
+        <div>{{ row.order.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+        <div>{{ row.order.status }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="subtitle">Пока нет покупок — самое время зайти в <a href="/" style="color:#5eead4;">магазин</a>.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

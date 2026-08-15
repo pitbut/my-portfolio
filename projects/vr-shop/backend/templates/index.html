@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>VR Магазин — витрина</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hdr">
+      <span class="hdr-logo">◆ VR МАГАЗИН</span>
+      <nav class="hdr-nav">
+        {% if current_user.is_authenticated %}
+          {% if current_user.role == 'seller' %}
+            <a class="hdr-link" href="/seller/dashboard">Кабинет продавца</a>
+          {% else %}
+            <a class="hdr-link" href="/account">Мой кабинет</a>
+          {% endif %}
+          <a class="hdr-link" href="/logout">Выйти</a>
+        {% else %}
+          <a class="hdr-link" href="/login">Войти</a>
+          <a class="hdr-link" href="/register">Регистрация</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <form class="search-form" method="GET" action="/">
+      <input type="text" name="q" placeholder="Что вы ищете? Например: лампа" value="{{ query or '' }}">
+      <button type="submit" class="btn-secondary">Искать</button>
+    </form>
+
+    {% if results is not none %}
+      <h1 class="title">Результаты поиска: «{{ query }}»</h1>
+      {% if results %}
+      <div class="shop-grid">
+        {% for p in results %}
+        <a class="shop-card" href="/shop/{{ p.shop_id }}">
+          <div class="shop-card-glyph">{{ p.name[0] }}</div>
+          <div class="shop-card-name">{{ p.name }}</div>
+          <div class="shop-card-desc">{{ p.category }} · {{ "%.0f"|format(p.price) }} сум · магазин: {{ p.shop.name }}</div>
+          <div class="shop-card-enter">Перейти в магазин →</div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="subtitle">Ничего не найдено. Попробуйте другой запрос.</p>
+      {% endif %}
+    {% else %}
+      <h1 class="title">Выберите магазин</h1>
+      <p class="subtitle">Прототип: {{ shops|length }} магазина(-ов) загружено. Каждый — со своей 3D-витриной.</p>
+
+      <div class="shop-grid">
+        {% for shop in shops %}
+        <a class="shop-card" href="/shop/{{ shop.id }}">
+          <div class="shop-card-glyph">{{ shop.name[0] }}</div>
+          <div class="shop-card-name">{{ shop.name }}</div>
+          <div class="shop-card-desc">{{ shop.description }}</div>
+          <div class="shop-card-enter">Войти в магазин →</div>
+        </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
