@@ -239,6 +239,52 @@
             background: rgba(0, 0, 0, 0.6);
         }
 
+        .number-table {
+            display: grid;
+            grid-template-columns: 44px repeat(12, 1fr);
+            grid-template-rows: repeat(3, 40px);
+            gap: 3px;
+        }
+
+        .number-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95em;
+            color: #fff;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .number-cell.red {
+            background: #c41e3a;
+        }
+
+        .number-cell.black {
+            background: #1a1a1a;
+        }
+
+        .number-cell.green {
+            background: #0a6b0d;
+            grid-row: 1 / 4;
+            grid-column: 1;
+            font-size: 1.1em;
+        }
+
+        .number-cell:hover {
+            transform: scale(1.08);
+            border-color: #FFD700;
+        }
+
+        .number-cell.active {
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
         .bet-amount-container {
             margin: 25px 0;
         }
@@ -523,13 +569,8 @@
                 </div>
 
                 <div class="bet-type">
-                    <h3>Прямая ставка на число (0-36)</h3>
-                    <input type="number" id="straightNumber" min="0" max="36" 
-                           placeholder="Введите число 0-36" class="bet-amount-input" 
-                           style="margin-bottom: 10px;">
-                    <button class="bet-btn" onclick="selectStraightBet()">
-                        Ставка на число<br>x36
-                    </button>
+                    <h3>Прямая ставка на число (x36)</h3>
+                    <div class="number-table" id="numberTable"></div>
                 </div>
 
                 <div class="bet-amount-container">
@@ -650,8 +691,45 @@
             updateBetsList();
         }
 
-        function selectStraightBet() {
-            const number = parseInt(document.getElementById('straightNumber').value);
+        function buildNumberTable() {
+            const table = document.getElementById('numberTable');
+            table.innerHTML = '';
+
+            const zero = document.createElement('div');
+            zero.className = 'number-cell green';
+            zero.textContent = '0';
+            zero.dataset.number = '0';
+            zero.onclick = () => selectStraightBet(0);
+            table.appendChild(zero);
+
+            // 3 ряда по 12 чисел: нижний 1-34, средний 2-35, верхний 3-36 (как на настоящем столе)
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 12; col++) {
+                    const number = col * 3 + (3 - row);
+                    const cell = document.createElement('div');
+                    cell.className = 'number-cell ' + (redNumbers.includes(number) ? 'red' : 'black');
+                    cell.textContent = number;
+                    cell.dataset.number = String(number);
+                    cell.style.gridRow = String(row + 1);
+                    cell.style.gridColumn = String(col + 2);
+                    cell.onclick = () => selectStraightBet(number);
+                    table.appendChild(cell);
+                }
+            }
+        }
+
+        function updateNumberTableHighlights() {
+            const activeNumbers = new Set(
+                currentBets
+                    .filter(bet => bet.type.startsWith('straight-'))
+                    .map(bet => bet.type.split('-')[1])
+            );
+            document.querySelectorAll('.number-cell').forEach(cell => {
+                cell.classList.toggle('active', activeNumbers.has(cell.dataset.number));
+            });
+        }
+
+        function selectStraightBet(number) {
             const amount = parseInt(document.getElementById('betAmount').value);
 
             if (isNaN(number) || number < 0 || number > 36) {
@@ -688,6 +766,7 @@
             const betsDiv = document.getElementById('betsList');
             if (currentBets.length === 0) {
                 betsDiv.innerHTML = 'Ставок пока нет';
+                updateNumberTableHighlights();
                 return;
             }
 
@@ -698,6 +777,7 @@
                     <span style="color: #FFD700;">x${bet.multiplier}</span>
                 </div>`;
             }).join('');
+            updateNumberTableHighlights();
         }
 
         function clearBets() {
@@ -843,6 +923,7 @@
 
         // Инициализация
         buildWheel();
+        buildNumberTable();
         updateBalance();
         updateHistory();
         updateBetsList();
