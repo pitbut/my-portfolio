@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Баннеры — модерация — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  {% with admin_title = "Баннеры на главной" %}{% include "admin/_nav.html" %}{% endwith %}
+
+  <div class="admin-list">
+    {% for slot in slots %}
+    {% set banner = items[loop.index0] %}
+    <article class="admin-item">
+      <div class="admin-item__meta">Слот {{ slot }} &middot; {{ banner.banner_type if banner else "пусто" }}</div>
+      <h3 style="margin: 6px 0;">{{ banner.title if banner and banner.title else "(без заголовка)" }}</h3>
+      {% if banner %}
+        {% if banner.banner_type == "text" %}
+        <p>{{ banner.text_content | truncate(160) }}</p>
+        {% else %}
+        <p class="admin-item__meta">{{ banner.content_url }}</p>
+        {% endif %}
+      {% else %}
+      <p class="admin-item__meta">Баннер не задан.</p>
+      {% endif %}
+      <div class="admin-item__actions">
+        <a href="{{ url_for('admin.edit_banner', slot=slot) }}" class="btn btn--approve">{{ "Редактировать" if banner else "Задать баннер" }}</a>
+        {% if banner %}
+        <form method="post" action="{{ url_for('admin.clear_banner', slot=slot) }}" onsubmit="return confirm('Очистить этот баннер?');">
+          <button type="submit" class="btn btn--reject">Очистить</button>
+        </form>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

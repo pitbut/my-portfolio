@@ -10,4 +10,5 @@
   <a href="{{ url_for('admin.reviews') }}" class="{{ 'is-active' if request.endpoint == 'admin.reviews' }}">Отзывы</a>
   <a href="{{ url_for('admin.messages') }}" class="{{ 'is-active' if request.endpoint == 'admin.messages' }}">Сообщения</a>
   <a href="{{ url_for('admin.users') }}" class="{{ 'is-active' if request.endpoint in ('admin.users', 'admin.user_detail') }}">Пользователи</a>
+  <a href="{{ url_for('admin.banners') }}" class="{{ 'is-active' if request.endpoint in ('admin.banners', 'admin.edit_banner') }}">Баннеры</a>
 </div>

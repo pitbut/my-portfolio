@@ -15,6 +15,29 @@
   </svg>
 </section>
 
+{% if banners | select | list %}
+<section class="banner-row wrap">
+  {% for banner in banners %}
+    {% if banner %}
+    <div class="banner-slot">
+      {% if banner.link_url %}<a href="{{ banner.link_url }}" target="_blank" rel="noopener">{% endif %}
+      {% if banner.banner_type == "video" and banner.content_url %}
+        <video src="{{ banner.content_url }}" autoplay muted loop playsinline></video>
+      {% elif banner.banner_type == "image" and banner.content_url %}
+        <img src="{{ banner.content_url }}" alt="{{ banner.title or 'реклама' }}" loading="lazy">
+      {% elif banner.banner_type == "text" %}
+        <div class="banner-slot__text">
+          {% if banner.title %}<h4>{{ banner.title }}</h4>{% endif %}
+          <p>{{ banner.text_content }}</p>
+        </div>
+      {% endif %}
+      {% if banner.link_url %}</a>{% endif %}
+    </div>
+    {% endif %}
+  {% endfor %}
+</section>
+{% endif %}
+
 <section class="section wrap">
   <div class="section__header">
     <h2>Священные источники мира</h2>

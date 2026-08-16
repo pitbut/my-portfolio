@@ -18,6 +18,7 @@ from flask import (
 from app import db
 from app.models import (
     Article,
+    Banner,
     Book,
     ContactMessage,
     DeliveryService,
@@ -30,7 +31,10 @@ from app.models import (
     User,
     WaterBrand,
 )
+from app.photos import upload_photo
 from app.routes.reviews import REVIEW_TARGETS
+
+BANNER_SLOTS = (1, 2, 3)
 
 bp = Blueprint("admin", __name__, template_folder="../templates/admin")
 
@@ -433,6 +437,65 @@ def edit_content(content_type, item_id):
         return redirect(url_for("admin.users"))
 
     return render_template("admin/edit_content.html", item=item, spec=spec, content_type=content_type)
+
+
+@bp.route("/banners")
+@login_required
+def banners():
+    by_slot = {b.slot: b for b in Banner.query.all()}
+    items = [by_slot.get(slot) for slot in BANNER_SLOTS]
+    return render_template("admin/banners.html", items=items, slots=BANNER_SLOTS)
+
+
+@bp.route("/banners/<int:slot>/edit", methods=["GET", "POST"])
+@login_required
+def edit_banner(slot):
+    if slot not in BANNER_SLOTS:
+        abort(404)
+    banner = Banner.query.filter_by(slot=slot).first()
+
+    if request.method == "POST":
+        banner_type = request.form.get("banner_type") or "text"
+        if banner_type not in Banner.BANNER_TYPES:
+            banner_type = "text"
+        title = (request.form.get("title") or "").strip()
+        content_url = (request.form.get("content_url") or "").strip()
+        text_content = (request.form.get("text_content") or "").strip()
+        link_url = (request.form.get("link_url") or "").strip()
+
+        if banner_type == "image":
+            uploaded_url, photo_error = upload_photo(request.files.get("image_file"))
+            if uploaded_url:
+                content_url = uploaded_url
+            elif photo_error:
+                flash(photo_error, "info")
+
+        if banner is None:
+            banner = Banner(slot=slot)
+            db.session.add(banner)
+
+        banner.banner_type = banner_type
+        banner.title = title or None
+        banner.content_url = content_url or None
+        banner.text_content = text_content or None
+        banner.link_url = link_url or None
+        db.session.commit()
+
+        flash(f"Баннер {slot} сохранён.", "success")
+        return redirect(url_for("admin.banners"))
+
+    return render_template("admin/banner_edit.html", banner=banner, slot=slot)
+
+
+@bp.route("/banners/<int:slot>/clear", methods=["POST"])
+@login_required
+def clear_banner(slot):
+    banner = Banner.query.filter_by(slot=slot).first()
+    if banner is not None:
+        db.session.delete(banner)
+        db.session.commit()
+        flash(f"Баннер {slot} очищен.", "info")
+    return redirect(url_for("admin.banners"))
 
 
 @bp.route("/reviews")
