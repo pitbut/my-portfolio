@@ -23,6 +23,25 @@ bp = Blueprint("main", __name__)
 
 MAX_MESSAGE_LENGTH = 4000
 
+# Реестр разделов для site-wide поиска (/search): по каким полям искать,
+# как назвать раздел в результатах и куда вести ссылку карточки.
+SEARCH_SPECS = [
+    ("sacred_source", "Священные источники", "sacred.detail", SacredSource, "name",
+     lambda m: [m.name, m.location, m.belief]),
+    ("water_brand", "Марки воды", "catalog.detail", WaterBrand, "name",
+     lambda m: [m.name, m.origin, m.description]),
+    ("book", "Библиотека", "library.detail", Book, "title",
+     lambda m: [m.title, m.author, m.description]),
+    ("article", "Статьи", "articles.detail", Article, "title",
+     lambda m: [m.title, m.body, m.summary]),
+    ("equipment", "Оборудование", "main.equipment_detail", Equipment, "name",
+     lambda m: [m.name, m.description, m.manufacturer]),
+    ("experiment", "Опыты", "main.experiment_detail", Experiment, "title",
+     lambda m: [m.title, m.description]),
+    ("delivery_service", "Доставка воды", "main.delivery_detail", DeliveryService, "name",
+     lambda m: [m.name, m.coverage]),
+]
+
 
 @bp.route("/")
 def index():
@@ -278,6 +297,35 @@ def delivery_detail(slug):
         target_type="delivery_service",
         target_id=service.id,
     )
+
+
+@bp.route("/search")
+def search():
+    q = (request.args.get("q") or "").strip()
+    groups = []
+    total = 0
+
+    if q:
+        like = f"%{q}%"
+        for content_type, label, endpoint, model, name_field, fields_fn in SEARCH_SPECS:
+            conditions = [f.ilike(like) for f in fields_fn(model) if f is not None]
+            items = model.query.filter(or_(*conditions)).limit(20).all()
+            if items:
+                groups.append({
+                    "type": content_type,
+                    "label": label,
+                    "results": [
+                        {
+                            "name": getattr(item, name_field),
+                            "url": url_for(endpoint, slug=item.slug),
+                            "verified": getattr(item, "verified", True),
+                        }
+                        for item in items
+                    ],
+                })
+                total += len(items)
+
+    return render_template("search.html", q=q, groups=groups, total=total)
 
 
 @bp.route("/contact", methods=["GET", "POST"])

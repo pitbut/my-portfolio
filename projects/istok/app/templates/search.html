@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Поиск{% if q %}: {{ q }}{% endif %} — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  <div class="section__header">
+    <h2>Поиск по сайту{% if q %}: «{{ q }}»{% endif %}</h2>
+  </div>
+
+  {% if not q %}
+  <div class="empty-state">Введите запрос в строке поиска сверху.</div>
+  {% elif total == 0 %}
+  <div class="empty-state">По запросу «{{ q }}» ничего не нашлось.</div>
+  {% else %}
+  <p class="prose">Найдено: {{ total }}</p>
+  {% for group in groups %}
+  <div class="form-block" style="border-top:none; padding-top:0;">
+    <h3>{{ group.label }} ({{ group.results | length }})</h3>
+    <div class="grid">
+      {% for item in group.results %}
+      <article class="card">
+        <h3><a href="{{ item.url }}">{{ item.name }}</a>{% if not item.verified %} <span class="badge badge--myth">не проверено</span>{% endif %}</h3>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}
