@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Написать пользователю — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 480px;">
+  <div class="breadcrumb"><a href="{{ url_for('messages.inbox') }}">{{ _('Сообщения') }}</a> / {{ _('Написать пользователю') }}</div>
+  <div class="section__header">
+    <h2>{{ _('Написать пользователю') }}</h2>
+  </div>
+
+  {% if users %}
+  <div class="admin-list">
+    {% for u in users %}
+    <article class="admin-item">
+      <h3 style="margin: 6px 0;"><a href="{{ url_for('messages.thread_user', user_id=u.id) }}">{{ u.email }}</a></h3>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">{{ _('Пока других зарегистрированных пользователей нет.') }}</div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -134,6 +134,31 @@ class User(TimestampMixin, db.Model):
         return f"<User {self.email!r}>"
 
 
+class Message(TimestampMixin, db.Model):
+    """Личное сообщение между двумя пользователями или пользователем и
+    администрацией.
+
+    У администратора нет своей строки в users (вход по общему паролю, а не
+    по аккаунту), поэтому "администрация" как участник переписки — это
+    sender_user_id/recipient_user_id = NULL, а не отдельная запись. Тред
+    между двумя участниками — все сообщения, где эта пара стоит в любом
+    порядке в sender/recipient."""
+
+    __tablename__ = "messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+    sender_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True, index=True)
+    recipient_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True, index=True)
+    body = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+
+    sender = db.relationship("User", foreign_keys=[sender_user_id])
+    recipient = db.relationship("User", foreign_keys=[recipient_user_id])
+
+    def __repr__(self):
+        return f"<Message #{self.id} {self.sender_user_id}->{self.recipient_user_id}>"
+
+
 class Supplier(TimestampMixin, db.Model):
     """Точка продажи/оптовый поставщик конкретной марки воды."""
 

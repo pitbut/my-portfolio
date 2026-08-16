@@ -62,6 +62,7 @@ def create_app(config_name=None):
     from app.routes.admin import bp as admin_bp
     from app.routes.auth import bp as auth_bp
     from app.routes.reviews import bp as reviews_bp
+    from app.routes.messages import bp as messages_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(sacred_bp, url_prefix="/sacred")
@@ -71,6 +72,7 @@ def create_app(config_name=None):
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(reviews_bp, url_prefix="/reviews")
+    app.register_blueprint(messages_bp, url_prefix="/messages")
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 
@@ -120,6 +122,17 @@ def create_app(config_name=None):
     @app.context_processor
     def inject_language_switcher():
         return {"LANGUAGES": LANGUAGES, "current_lang": get_locale()}
+
+    @app.context_processor
+    def inject_unread_messages():
+        from flask_login import current_user
+
+        if current_user.is_authenticated:
+            count = models.Message.query.filter_by(
+                recipient_user_id=current_user.id, is_read=False
+            ).count()
+            return {"unread_messages_count": count}
+        return {"unread_messages_count": 0}
 
     @app.template_global()
     def image_url(value):
