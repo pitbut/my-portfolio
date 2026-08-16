@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ other_user.email if other_user else "Администрация" }} — сообщения — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 640px;">
+  <div class="breadcrumb"><a href="{{ url_for('messages.inbox') }}">{{ _('Сообщения') }}</a> / {{ other_user.email if other_user else _('Администрация') }}</div>
+  <div class="section__header">
+    <h2>{{ other_user.email if other_user else ("💧 " ~ _('Администрация')) }}</h2>
+  </div>
+
+  <div class="review-list">
+    {% for m in thread %}
+    <article class="review">
+      <div class="review__head">
+        <span class="review__author">
+          {% if m.sender_user_id is none %}💧 {{ _('Администрация') }}{% elif m.sender_user_id == current_user.id %}{{ _('Вы') }}{% else %}{{ m.sender.email if m.sender else _('Удалённый пользователь') }}{% endif %}
+        </span>
+        <span class="review__date">{{ m.created_at.strftime("%d.%m.%Y %H:%M") }}</span>
+      </div>
+      <p class="review__body">{{ m.body }}</p>
+    </article>
+    {% else %}
+    <div class="empty-state">{{ _('Сообщений пока нет — напишите первым.') }}</div>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{{ url_for('messages.send_to_admin') if other_id is none else url_for('messages.send_to_user', user_id=other_id) }}" style="margin-top:20px;">
+    <div class="field">
+      <label for="body">{{ _('Сообщение') }}</label>
+      <textarea id="body" name="body" rows="3" maxlength="4000" required></textarea>
+    </div>
+    <button type="submit" class="btn btn--primary">{{ _('Отправить') }}</button>
+  </form>
+</section>
+{% endblock %}

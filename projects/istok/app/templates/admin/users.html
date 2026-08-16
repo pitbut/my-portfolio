@@ -14,6 +14,7 @@
           <th>Регистрация</th>
           <th>Email подтверждён</th>
           <th>Добавлений</th>
+          <th>Непрочитанных</th>
           <th></th>
         </tr>
       </thead>
@@ -24,6 +25,7 @@
           <td>{{ user.created_at.strftime("%d.%m.%Y") }}</td>
           <td>{{ "да" if user.email_confirmed else "нет" }}</td>
           <td>{{ addition_counts.get(user.id, 0) }}</td>
+          <td>{% if unread_counts.get(user.id) %}<span class="unread-badge">{{ unread_counts[user.id] }}</span>{% else %}—{% endif %}</td>
           <td><a href="{{ url_for('admin.user_detail', user_id=user.id) }}">Подробнее →</a></td>
         </tr>
         {% endfor %}

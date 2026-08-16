@@ -25,6 +25,7 @@ from app.models import (
     EditSuggestion,
     Equipment,
     Experiment,
+    Message,
     Review,
     SacredSource,
     SiteStat,
@@ -363,7 +364,13 @@ def users():
         )
         for user in items
     }
-    return render_template("admin/users.html", items=items, addition_counts=addition_counts)
+    unread_counts = {
+        user.id: Message.query.filter_by(sender_user_id=user.id, is_read=False).count()
+        for user in items
+    }
+    return render_template(
+        "admin/users.html", items=items, addition_counts=addition_counts, unread_counts=unread_counts
+    )
 
 
 @bp.route("/users/<int:user_id>")
@@ -383,7 +390,36 @@ def user_detail(user_id):
                 "obj": obj,
                 "view_url": view_url,
             })
-    return render_template("admin/user_detail.html", user=user, additions=additions)
+
+    thread = (
+        Message.query.filter(
+            db.or_(
+                db.and_(Message.sender_user_id == user_id, Message.recipient_user_id.is_(None)),
+                db.and_(Message.sender_user_id.is_(None), Message.recipient_user_id == user_id),
+            )
+        )
+        .order_by(Message.created_at.asc())
+        .all()
+    )
+    unread = [m for m in thread if m.sender_user_id == user_id and not m.is_read]
+    for m in unread:
+        m.is_read = True
+    if unread:
+        db.session.commit()
+
+    return render_template("admin/user_detail.html", user=user, additions=additions, thread=thread)
+
+
+@bp.route("/users/<int:user_id>/message", methods=["POST"])
+@login_required
+def message_user(user_id):
+    User.query.get_or_404(user_id)
+    body = (request.form.get("body") or "").strip()
+    if body:
+        db.session.add(Message(sender_user_id=None, recipient_user_id=user_id, body=body))
+        db.session.commit()
+        flash("Сообщение отправлено.", "success")
+    return redirect(url_for("admin.user_detail", user_id=user_id))
 
 
 @bp.route("/users/<int:user_id>/delete", methods=["POST"])
@@ -395,10 +431,12 @@ def delete_user(user_id):
     # конкретное добавление можно отдельно, кнопкой рядом с ним.
     for spec in CONTENT_TYPES.values():
         spec["model"].query.filter_by(added_by_user_id=user_id).update({"added_by_user_id": None})
+    Message.query.filter_by(sender_user_id=user_id).delete()
+    Message.query.filter_by(recipient_user_id=user_id).delete()
     email = user.email
     db.session.delete(user)
     db.session.commit()
-    flash(f"Пользователь «{email}» удалён (его добавления остались на сайте).", "info")
+    flash(f"Пользователь «{email}» удалён (его добавления остались на сайте, переписка удалена).", "info")
     return redirect(url_for("admin.users"))
 
 

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Сообщения — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 640px;">
+  <div class="section__header">
+    <h2>{{ _('Сообщения') }}</h2>
+    <a class="see-all" href="{{ url_for('messages.directory') }}">{{ _('Написать пользователю') }}</a>
+  </div>
+
+  <div class="admin-list">
+    <article class="admin-item">
+      <h3 style="margin: 6px 0;">
+        <a href="{{ url_for('messages.thread_admin') }}">💧 {{ _('Администрация') }}</a>
+        {% if admin_unread %}<span class="unread-badge">{{ admin_unread }}</span>{% endif %}
+      </h3>
+      <p class="admin-item__meta">{{ _('Написать в поддержку сайта') }}</p>
+    </article>
+
+    {% for p in partners %}
+    {% if p.other_id %}
+    <article class="admin-item">
+      <div class="admin-item__meta">
+        {% if p.unread %}<span class="unread-badge">{{ p.unread }}</span>{% endif %}
+        {{ p.last.created_at.strftime("%d.%m.%Y %H:%M") }}
+      </div>
+      <h3 style="margin: 6px 0;">
+        <a href="{{ url_for('messages.thread_user', user_id=p.other_id) }}">{{ p.other_user.email if p.other_user else _('Удалённый пользователь') }}</a>
+      </h3>
+      <p>{{ p.last.body | truncate(120) }}</p>
+    </article>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

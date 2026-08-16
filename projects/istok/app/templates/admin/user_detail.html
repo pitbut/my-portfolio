@@ -41,5 +41,28 @@
   {% else %}
   <div class="empty-state">Этот пользователь пока ничего не добавил.</div>
   {% endif %}
+
+  <h3 style="margin-top:32px;">Переписка</h3>
+  <div class="review-list">
+    {% for m in thread %}
+    <article class="review">
+      <div class="review__head">
+        <span class="review__author">{{ "Администрация" if m.sender_user_id is none else user.email }}</span>
+        <span class="review__date">{{ m.created_at.strftime("%d.%m.%Y %H:%M") }}</span>
+      </div>
+      <p class="review__body">{{ m.body }}</p>
+    </article>
+    {% else %}
+    <div class="empty-state">Переписки с этим пользователем пока нет.</div>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{{ url_for('admin.message_user', user_id=user.id) }}" style="margin-top:16px;">
+    <div class="field">
+      <label for="body">Сообщение пользователю</label>
+      <textarea id="body" name="body" rows="3" maxlength="4000" required></textarea>
+    </div>
+    <button type="submit" class="btn btn--primary">Отправить</button>
+  </form>
 </section>
 {% endblock %}
