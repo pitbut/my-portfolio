@@ -2,14 +2,20 @@
 import os
 
 from dotenv import load_dotenv
+
+# До импорта config — переменные из .env (DATABASE_URL и т.д.) должны попасть
+# в окружение раньше, чем config.py прочитает их при определении классов
+# конфигурации, иначе при прямом запуске скриптов (seed.py и т.п., в отличие
+# от `flask` CLI, который подгружает .env сам ещё раньше) SQLALCHEMY_DATABASE_URI
+# останется пустым.
+load_dotenv()
+
 from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from config import config
-
-load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
