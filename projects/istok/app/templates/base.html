@@ -31,6 +31,10 @@
       <a href="{{ url_for('main.delivery_list') }}" class="{{ 'is-active' if request.endpoint == 'main.delivery_list' }}">Доставка</a>
       <a href="{{ url_for('main.contact') }}" class="{{ 'is-active' if request.endpoint == 'main.contact' }}">Контакты</a>
     </nav>
+    <form class="site-search" action="{{ url_for('main.search') }}" method="get">
+      <input type="text" name="q" placeholder="Поиск по сайту…" value="{{ request.args.get('q', '') if request.endpoint == 'main.search' else '' }}" aria-label="Поиск по сайту">
+      <button type="submit" aria-label="Искать">🔍</button>
+    </form>
     <div class="account-nav">
       {% if current_user.is_authenticated %}
         <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">(email не подтверждён — отправить письмо ещё раз)</a>{% endif %}</span>
