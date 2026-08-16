@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 # останется пустым.
 load_dotenv()
 
-from flask import Flask
+from flask import Flask, request, session
+from flask_babel import Babel
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -20,6 +21,20 @@ from config import config
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+babel = Babel()
+
+# Три языка интерфейса — переводится только "обвязка" сайта (меню, кнопки,
+# подписи форм), контент (статьи, источники, марки воды и т.д.) остаётся
+# на том языке, на котором его ввели.
+LANGUAGES = {"ru": "Русский", "uz": "O'zbekcha", "en": "English"}
+DEFAULT_LANGUAGE = "ru"
+
+
+def get_locale():
+    lang = session.get("lang")
+    if lang in LANGUAGES:
+        return lang
+    return request.accept_languages.best_match(LANGUAGES.keys()) or DEFAULT_LANGUAGE
 
 
 def create_app(config_name=None):
@@ -33,6 +48,7 @@ def create_app(config_name=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
+    babel.init_app(app, locale_selector=get_locale)
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Войдите, чтобы продолжить."
@@ -100,6 +116,10 @@ def create_app(config_name=None):
         if result.rowcount == 0:
             db.session.add(models.SiteStat(id=1, total_views=1))
         db.session.commit()
+
+    @app.context_processor
+    def inject_language_switcher():
+        return {"LANGUAGES": LANGUAGES, "current_lang": get_locale()}
 
     @app.template_global()
     def image_url(value):

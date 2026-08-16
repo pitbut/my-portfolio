@@ -157,6 +157,26 @@ p { color: var(--ink-dim); }
 
 .site-search button:hover { color: var(--gold); }
 
+.lang-switch {
+  display: flex;
+  gap: 6px;
+  font-size: .78rem;
+}
+
+.lang-switch a {
+  color: var(--ink-dim);
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+.lang-switch a:hover { color: var(--foam); }
+
+.lang-switch a.is-active {
+  color: var(--abyss);
+  background: var(--gold);
+  font-weight: 700;
+}
+
 .account-nav {
   display: flex;
   align-items: center;

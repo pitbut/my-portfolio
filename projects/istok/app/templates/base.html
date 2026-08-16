@@ -22,26 +22,31 @@
       <span class="brand__name">Исток</span>
     </a>
     <nav class="main-nav">
-      <a href="{{ url_for('sacred.index') }}" class="{{ 'is-active' if request.blueprint == 'sacred' }}">Источники</a>
-      <a href="{{ url_for('articles.index') }}" class="{{ 'is-active' if request.blueprint == 'articles' }}">Статьи</a>
-      <a href="{{ url_for('catalog.index') }}" class="{{ 'is-active' if request.blueprint == 'catalog' }}">Каталог</a>
-      <a href="{{ url_for('library.index') }}" class="{{ 'is-active' if request.blueprint == 'library' }}">Библиотека</a>
-      <a href="{{ url_for('main.equipment_list') }}" class="{{ 'is-active' if request.endpoint == 'main.equipment_list' }}">Оборудование</a>
-      <a href="{{ url_for('main.experiments_list') }}" class="{{ 'is-active' if request.endpoint == 'main.experiments_list' }}">Опыты</a>
-      <a href="{{ url_for('main.delivery_list') }}" class="{{ 'is-active' if request.endpoint == 'main.delivery_list' }}">Доставка</a>
-      <a href="{{ url_for('main.contact') }}" class="{{ 'is-active' if request.endpoint == 'main.contact' }}">Контакты</a>
+      <a href="{{ url_for('sacred.index') }}" class="{{ 'is-active' if request.blueprint == 'sacred' }}">{{ _('Источники') }}</a>
+      <a href="{{ url_for('articles.index') }}" class="{{ 'is-active' if request.blueprint == 'articles' }}">{{ _('Статьи') }}</a>
+      <a href="{{ url_for('catalog.index') }}" class="{{ 'is-active' if request.blueprint == 'catalog' }}">{{ _('Каталог') }}</a>
+      <a href="{{ url_for('library.index') }}" class="{{ 'is-active' if request.blueprint == 'library' }}">{{ _('Библиотека') }}</a>
+      <a href="{{ url_for('main.equipment_list') }}" class="{{ 'is-active' if request.endpoint == 'main.equipment_list' }}">{{ _('Оборудование') }}</a>
+      <a href="{{ url_for('main.experiments_list') }}" class="{{ 'is-active' if request.endpoint == 'main.experiments_list' }}">{{ _('Опыты') }}</a>
+      <a href="{{ url_for('main.delivery_list') }}" class="{{ 'is-active' if request.endpoint == 'main.delivery_list' }}">{{ _('Доставка') }}</a>
+      <a href="{{ url_for('main.contact') }}" class="{{ 'is-active' if request.endpoint == 'main.contact' }}">{{ _('Контакты') }}</a>
     </nav>
     <form class="site-search" action="{{ url_for('main.search') }}" method="get">
-      <input type="text" name="q" placeholder="Поиск по сайту…" value="{{ request.args.get('q', '') if request.endpoint == 'main.search' else '' }}" aria-label="Поиск по сайту">
-      <button type="submit" aria-label="Искать">🔍</button>
+      <input type="text" name="q" placeholder="{{ _('Поиск по сайту…') }}" value="{{ request.args.get('q', '') if request.endpoint == 'main.search' else '' }}" aria-label="{{ _('Поиск по сайту') }}">
+      <button type="submit" aria-label="{{ _('Искать') }}">🔍</button>
     </form>
+    <div class="lang-switch">
+      {% for code, label in LANGUAGES.items() %}
+      <a href="{{ url_for('main.set_language', code=code) }}" class="{{ 'is-active' if code == current_lang }}">{{ code|upper }}</a>
+      {% endfor %}
+    </div>
     <div class="account-nav">
       {% if current_user.is_authenticated %}
-        <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">(email не подтверждён — отправить письмо ещё раз)</a>{% endif %}</span>
-        <a href="{{ url_for('auth.logout') }}">Выйти</a>
+        <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">({{ _('email не подтверждён — отправить письмо ещё раз') }})</a>{% endif %}</span>
+        <a href="{{ url_for('auth.logout') }}">{{ _('Выйти') }}</a>
       {% else %}
-        <a href="{{ url_for('auth.login') }}">Войти</a>
-        <a href="{{ url_for('auth.register') }}">Регистрация</a>
+        <a href="{{ url_for('auth.login') }}">{{ _('Войти') }}</a>
+        <a href="{{ url_for('auth.register') }}">{{ _('Регистрация') }}</a>
       {% endif %}
     </div>
   </div>
@@ -71,9 +76,9 @@
 <footer class="site-footer">
   <div class="wrap site-footer__inner">
     <div class="site-footer__brand">
-      <span class="brand__drop">💧</span> Исток — портал о воде
+      <span class="brand__drop">💧</span> {{ _('Исток — портал о воде') }}
     </div>
-    <p class="site-footer__note">Вода помнит путь к морю, даже когда течёт под землёй.</p>
+    <p class="site-footer__note">{{ _('Вода помнит путь к морю, даже когда течёт под землёй.') }}</p>
   </div>
 </footer>
 

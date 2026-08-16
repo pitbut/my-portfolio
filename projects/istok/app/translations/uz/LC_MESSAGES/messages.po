@@ -1,0 +1,695 @@
+# Uzbek translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-16 19:22+0000\n"
+"PO-Revision-Date: 2026-08-16 19:22+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: uz\n"
+"Language-Team: uz <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/templates/_reviews.html:6
+msgid "Отзывы"
+msgstr "Sharhlar"
+
+#: app/templates/_reviews.html:8
+msgid "Средняя оценка"
+msgstr "O'rtacha baho"
+
+#: app/templates/_reviews.html:8 app/templates/_reviews.html:20
+msgid "из 5"
+msgstr "5 dan"
+
+#: app/templates/_reviews.html:20 app/templates/_reviews.html:41
+#: app/templates/catalog/index.html:51
+msgid "Оценка"
+msgstr "Baho"
+
+#: app/templates/_reviews.html:21
+msgid "Аноним"
+msgstr "Anonim"
+
+#: app/templates/_reviews.html:26
+msgid "Фото к отзыву"
+msgstr "Sharh uchun foto"
+
+#: app/templates/_reviews.html:32
+msgid "Отзывов пока нет — будьте первым."
+msgstr "Hali sharhlar yo'q — birinchi bo'ling."
+
+#: app/templates/_reviews.html:36
+msgid "Оставить отзыв"
+msgstr "Sharh qoldirish"
+
+#: app/templates/_reviews.html:43
+msgid "отлично"
+msgstr "a'lo"
+
+#: app/templates/_reviews.html:44
+msgid "хорошо"
+msgstr "yaxshi"
+
+#: app/templates/_reviews.html:45
+msgid "нормально"
+msgstr "o'rtacha"
+
+#: app/templates/_reviews.html:46
+msgid "так себе"
+msgstr "shunchaki"
+
+#: app/templates/_reviews.html:47
+msgid "плохо"
+msgstr "yomon"
+
+#: app/templates/_reviews.html:52
+msgid "Отзыв"
+msgstr "Sharh"
+
+#: app/templates/_reviews.html:57 app/templates/main/contact.html:18
+msgid "Ваше имя (необязательно)"
+msgstr "Ismingiz (ixtiyoriy)"
+
+#: app/templates/_reviews.html:62 app/templates/catalog/add_supplier.html:51
+#: app/templates/main/equipment_add.html:42 app/templates/sacred/add.html:52
+msgid "Фото (необязательно)"
+msgstr "Foto (ixtiyoriy)"
+
+#: app/templates/_reviews.html:66
+msgid "Отправить отзыв"
+msgstr "Sharhni yuborish"
+
+#: app/templates/base.html:25
+msgid "Источники"
+msgstr "Manbalar"
+
+#: app/templates/articles/index.html:7 app/templates/base.html:26
+#: app/templates/main/index.html:60
+msgid "Статьи"
+msgstr "Maqolalar"
+
+#: app/templates/base.html:27
+msgid "Каталог"
+msgstr "Katalog"
+
+#: app/templates/base.html:28
+msgid "Библиотека"
+msgstr "Kutubxona"
+
+#: app/templates/base.html:29
+msgid "Оборудование"
+msgstr "Jihozlar"
+
+#: app/templates/base.html:30
+msgid "Опыты"
+msgstr "Tajribalar"
+
+#: app/templates/base.html:31
+msgid "Доставка"
+msgstr "Yetkazib berish"
+
+#: app/templates/base.html:32
+msgid "Контакты"
+msgstr "Kontaktlar"
+
+#: app/templates/base.html:35
+msgid "Поиск по сайту…"
+msgstr "Sayt bo'yicha qidiruv…"
+
+#: app/templates/base.html:35
+msgid "Поиск по сайту"
+msgstr "Sayt bo'yicha qidiruv"
+
+#: app/templates/base.html:36
+msgid "Искать"
+msgstr "Qidirish"
+
+#: app/templates/base.html:45
+msgid "email не подтверждён — отправить письмо ещё раз"
+msgstr "email tasdiqlanmagan — xatni qayta yuborish"
+
+#: app/templates/base.html:46
+msgid "Выйти"
+msgstr "Chiqish"
+
+#: app/templates/auth/forgot_password.html:17 app/templates/auth/login.html:18
+#: app/templates/auth/register.html:25 app/templates/base.html:48
+msgid "Войти"
+msgstr "Kirish"
+
+#: app/templates/auth/register.html:7 app/templates/base.html:49
+msgid "Регистрация"
+msgstr "Ro'yxatdan o'tish"
+
+#: app/templates/base.html:79
+msgid "Исток — портал о воде"
+msgstr "Istok — suv haqida portal"
+
+#: app/templates/base.html:81
+msgid "Вода помнит путь к морю, даже когда течёт под землёй."
+msgstr "Suv yer ostida oqsa ham, dengizga yo'lni eslab qoladi."
+
+#: app/templates/admin/equipment.html:22 app/templates/admin/suppliers.html:22
+#: app/templates/admin/user_detail.html:27
+#: app/templates/admin/water_brands.html:22
+#: app/templates/articles/detail.html:12 app/templates/articles/index.html:21
+#: app/templates/catalog/detail.html:20 app/templates/catalog/detail.html:43
+#: app/templates/catalog/index.html:60 app/templates/library/detail.html:13
+#: app/templates/library/index.html:30 app/templates/main/delivery.html:17
+#: app/templates/main/delivery_detail.html:12
+#: app/templates/main/equipment.html:38
+#: app/templates/main/equipment_detail.html:13
+#: app/templates/main/experiment_detail.html:11
+#: app/templates/main/experiments.html:17 app/templates/sacred/detail.html:23
+#: app/templates/sacred/index.html:30 app/templates/search.html:22
+msgid "не проверено"
+msgstr "tekshirilmagan"
+
+#: app/templates/admin/equipment.html:22 app/templates/admin/suppliers.html:22
+#: app/templates/admin/user_detail.html:27
+#: app/templates/admin/water_brands.html:22
+#: app/templates/catalog/detail.html:43
+#: app/templates/main/equipment_detail.html:13
+msgid "проверено"
+msgstr "tekshirilgan"
+
+#: app/templates/articles/add.html:6 app/templates/articles/add.html:41
+#: app/templates/catalog/add.html:65 app/templates/catalog/add_supplier.html:55
+#: app/templates/library/add.html:6 app/templates/library/add.html:46
+#: app/templates/main/delivery_add.html:6
+#: app/templates/main/delivery_add.html:46
+#: app/templates/main/equipment_add.html:6
+#: app/templates/main/equipment_add.html:46
+#: app/templates/main/experiment_add.html:6
+#: app/templates/main/experiment_add.html:34 app/templates/sacred/add.html:6
+#: app/templates/sacred/add.html:56
+msgid "Добавить"
+msgstr "Qo'shish"
+
+#: app/templates/articles/add.html:8 app/templates/articles/index.html:9
+msgid "Добавить статью"
+msgstr "Maqola qo'shish"
+
+#: app/templates/articles/add.html:17
+msgid "Заголовок"
+msgstr "Sarlavha"
+
+#: app/templates/articles/add.html:22
+msgid "Рубрика"
+msgstr "Rukn"
+
+#: app/templates/articles/add.html:27
+msgid "Краткое содержание (необязательно)"
+msgstr "Qisqacha mazmuni (ixtiyoriy)"
+
+#: app/templates/articles/add.html:32
+msgid "Текст статьи"
+msgstr "Maqola matni"
+
+#: app/templates/articles/add.html:37 app/templates/library/add.html:42
+msgid "Обложка (необязательно)"
+msgstr "Muqova (ixtiyoriy)"
+
+#: app/templates/articles/index.html:51 app/templates/main/index.html:71
+msgid "Статьи пока не добавлены."
+msgstr "Maqolalar hali qo'shilmagan."
+
+#: app/templates/auth/forgot_password.html:7
+msgid "Восстановление пароля"
+msgstr "Parolni tiklash"
+
+#: app/templates/auth/forgot_password.html:9
+msgid ""
+"Укажите email, с которым вы регистрировались — пришлём ссылку для смены "
+"пароля."
+msgstr ""
+
+#: app/templates/auth/forgot_password.html:12 app/templates/auth/login.html:11
+#: app/templates/auth/register.html:12
+msgid "Email"
+msgstr "Email"
+
+#: app/templates/auth/forgot_password.html:15
+msgid "Отправить ссылку"
+msgstr "Havolani yuborish"
+
+#: app/templates/auth/forgot_password.html:17
+msgid "Вспомнили пароль?"
+msgstr "Parolni eslaysizmi?"
+
+#: app/templates/auth/login.html:7
+msgid "Вход"
+msgstr "Kirish"
+
+#: app/templates/auth/login.html:15
+msgid "Пароль"
+msgstr "Parol"
+
+#: app/templates/auth/login.html:21
+msgid "Нет аккаунта?"
+msgstr "Hisobingiz yo'qmi?"
+
+#: app/templates/auth/login.html:21 app/templates/auth/register.html:23
+msgid "Зарегистрироваться"
+msgstr "Ro'yxatdan o'tish"
+
+#: app/templates/auth/login.html:22
+msgid "Забыли пароль?"
+msgstr "Parolni unutdingizmi?"
+
+#: app/templates/auth/login.html:22
+msgid "Восстановить"
+msgstr "Tiklash"
+
+#: app/templates/auth/register.html:9
+msgid "Аккаунт нужен, чтобы добавлять свой контент на сайт."
+msgstr "Hisob saytga o'z kontentingizni qo'shish uchun kerak."
+
+#: app/templates/auth/register.html:16
+msgid "Пароль (не короче 8 символов)"
+msgstr "Parol (kamida 8 belgi)"
+
+#: app/templates/auth/register.html:20
+#: app/templates/auth/reset_password.html:15
+msgid "Повторите пароль"
+msgstr "Parolni takrorlang"
+
+#: app/templates/auth/register.html:25
+msgid "Уже есть аккаунт?"
+msgstr "Hisobingiz bormi?"
+
+#: app/templates/auth/reset_password.html:7
+msgid "Новый пароль"
+msgstr "Yangi parol"
+
+#: app/templates/auth/reset_password.html:11
+msgid "Новый пароль (не короче 8 символов)"
+msgstr "Yangi parol (kamida 8 belgi)"
+
+#: app/templates/auth/reset_password.html:18
+msgid "Сохранить пароль"
+msgstr "Parolni saqlash"
+
+#: app/templates/catalog/add.html:6
+msgid "Добавить марку"
+msgstr "Marka qo'shish"
+
+#: app/templates/catalog/add.html:8 app/templates/catalog/index.html:14
+msgid "Добавить марку воды"
+msgstr "Suv markasini qo'shish"
+
+#: app/templates/catalog/add.html:17 app/templates/catalog/add_supplier.html:17
+#: app/templates/library/add.html:17 app/templates/main/delivery_add.html:17
+#: app/templates/main/equipment_add.html:17
+#: app/templates/main/experiment_add.html:17 app/templates/sacred/add.html:17
+msgid "Название"
+msgstr "Nomi"
+
+#: app/templates/catalog/add.html:22
+msgid "Тип воды"
+msgstr "Suv turi"
+
+#: app/templates/catalog/add.html:27
+msgid "Объём, л"
+msgstr "Hajmi, l"
+
+#: app/templates/catalog/add.html:32 app/templates/catalog/index.html:50
+msgid "Цена"
+msgstr "Narxi"
+
+#: app/templates/catalog/add.html:37
+msgid "Валюта"
+msgstr "Valyuta"
+
+#: app/templates/catalog/add.html:46
+msgid "Страна (необязательно)"
+msgstr "Davlat (ixtiyoriy)"
+
+#: app/templates/catalog/add.html:51
+msgid "Происхождение (необязательно)"
+msgstr "Kelib chiqishi (ixtiyoriy)"
+
+#: app/templates/catalog/add.html:56
+msgid "Минерализация, мг/л (необязательно)"
+msgstr "Minerallashuv, mg/l (ixtiyoriy)"
+
+#: app/templates/catalog/add.html:61 app/templates/sacred/add.html:47
+msgid "Описание (необязательно)"
+msgstr "Tavsif (ixtiyoriy)"
+
+#: app/templates/catalog/add_supplier.html:6
+#: app/templates/catalog/add_supplier.html:8
+msgid "Добавить точку продажи"
+msgstr "Sotuv nuqtasini qo'shish"
+
+#: app/templates/catalog/add_supplier.html:22
+msgid "Тип (опт / розница)"
+msgstr "Turi (ulgurji / chakana)"
+
+#: app/templates/catalog/add_supplier.html:27
+msgid "Адрес"
+msgstr "Manzil"
+
+#: app/templates/catalog/add_supplier.html:32
+msgid "Широта (необязательно, для карты)"
+msgstr "Kenglik (ixtiyoriy, xarita uchun)"
+
+#: app/templates/catalog/add_supplier.html:36
+msgid "Долгота (необязательно, для карты)"
+msgstr "Uzunlik (ixtiyoriy, xarita uchun)"
+
+#: app/templates/catalog/add_supplier.html:41
+#: app/templates/main/delivery_add.html:37
+msgid "Телефон (необязательно)"
+msgstr "Telefon (ixtiyoriy)"
+
+#: app/templates/catalog/add_supplier.html:46
+#: app/templates/main/delivery_add.html:42
+msgid "Сайт (необязательно)"
+msgstr "Sayt (ixtiyoriy)"
+
+#: app/templates/catalog/index.html:12
+msgid "Каталог цен на питьевую воду"
+msgstr "Ichimlik suvi narxlari katalogi"
+
+#: app/templates/catalog/index.html:18
+msgid ""
+"Кликните по заголовку столбца, чтобы отсортировать таблицу по нему "
+"(повторный клик меняет направление)."
+msgstr ""
+
+#: app/templates/catalog/index.html:21
+msgid "Знаете марку, которой нет в каталоге?"
+msgstr "Katalogda yo'q markani bilasizmi?"
+
+#: app/templates/catalog/index.html:21
+msgid "Зарегистрируйтесь"
+msgstr "Ro'yxatdan o'ting"
+
+#: app/templates/catalog/index.html:21
+msgid "чтобы добавить её."
+msgstr "uni qo'shish uchun."
+
+#: app/templates/catalog/index.html:23
+msgid "Чтобы добавить свою марку воды, сначала подтвердите email."
+msgstr "O'z suv markangizni qo'shish uchun avval emailingizni tasdiqlang."
+
+#: app/templates/catalog/index.html:30
+msgid "Страна:"
+msgstr "Davlat:"
+
+#: app/templates/catalog/index.html:32
+msgid "Все страны"
+msgstr "Barcha davlatlar"
+
+#: app/templates/catalog/index.html:37
+msgid "Сбросить"
+msgstr "Bekor qilish"
+
+#: app/templates/catalog/index.html:46
+msgid "Марка"
+msgstr "Marka"
+
+#: app/templates/catalog/index.html:47
+msgid "Тип"
+msgstr "Turi"
+
+#: app/templates/catalog/index.html:48
+msgid "Минерализация"
+msgstr "Minerallashuv"
+
+#: app/templates/catalog/index.html:49
+msgid "Объём"
+msgstr "Hajmi"
+
+#: app/templates/catalog/index.html:52
+msgid "Происхождение"
+msgstr "Kelib chiqishi"
+
+#: app/templates/catalog/index.html:74
+msgid "По этому фильтру ничего не нашлось."
+msgstr "Bu filtr bo'yicha hech narsa topilmadi."
+
+#: app/templates/library/add.html:8 app/templates/library/index.html:9
+msgid "Добавить книгу"
+msgstr "Kitob qo'shish"
+
+#: app/templates/library/add.html:22
+msgid "Автор"
+msgstr "Muallif"
+
+#: app/templates/library/add.html:27
+msgid "Год издания (необязательно)"
+msgstr "Nashr yili (ixtiyoriy)"
+
+#: app/templates/library/add.html:32
+msgid "Жанр (необязательно)"
+msgstr "Janr (ixtiyoriy)"
+
+#: app/templates/library/add.html:37 app/templates/main/equipment_add.html:27
+#: app/templates/main/experiment_add.html:22
+msgid "Описание"
+msgstr "Tavsif"
+
+#: app/templates/library/index.html:7 app/templates/main/index.html:96
+msgid "Библиотека книг о воде"
+msgstr "Suv haqidagi kitoblar kutubxonasi"
+
+#: app/templates/library/index.html:15
+msgid "все жанры"
+msgstr "barcha janrlar"
+
+#: app/templates/library/index.html:29 app/templates/main/index.html:102
+msgid "книга"
+msgstr "kitob"
+
+#: app/templates/library/index.html:37 app/templates/main/index.html:107
+msgid "Книги пока не добавлены."
+msgstr "Kitoblar hali qo'shilmagan."
+
+#: app/templates/main/contact.html:7
+msgid "Связаться с нами"
+msgstr "Biz bilan bog'lanish"
+
+#: app/templates/main/contact.html:11
+msgid ""
+"По вопросам о портале, партнёрствам или с найденными неточностями "
+"напишите через форму ниже."
+msgstr ""
+
+#: app/templates/main/contact.html:23
+msgid "Ваш email (необязательно, если хотите ответ)"
+msgstr "Sizning email (ixtiyoriy, javob olmoqchi bo'lsangiz)"
+
+#: app/templates/main/contact.html:28
+msgid "Сообщение"
+msgstr "Xabar"
+
+#: app/templates/main/contact.html:32
+msgid "Отправить"
+msgstr "Yuborish"
+
+#: app/templates/main/delivery.html:7
+msgid "Службы доставки воды"
+msgstr "Suv yetkazib berish xizmatlari"
+
+#: app/templates/main/delivery.html:9
+msgid "Добавить службу"
+msgstr "Xizmat qo'shish"
+
+#: app/templates/main/delivery.html:27 app/templates/main/index.html:161
+msgid "Службы доставки пока не добавлены."
+msgstr "Yetkazib berish xizmatlari hali qo'shilmagan."
+
+#: app/templates/main/delivery_add.html:8
+msgid "Добавить службу доставки"
+msgstr "Yetkazib berish xizmatini qo'shish"
+
+#: app/templates/main/delivery_add.html:22
+msgid "Зона доставки (необязательно)"
+msgstr "Yetkazib berish zonasi (ixtiyoriy)"
+
+#: app/templates/main/delivery_add.html:27
+msgid "Сроки доставки"
+msgstr "Yetkazib berish muddati"
+
+#: app/templates/main/delivery_add.html:32
+#: app/templates/main/equipment_add.html:37
+msgid "Цена, ₽ (необязательно)"
+msgstr "Narxi, ₽ (ixtiyoriy)"
+
+#: app/templates/main/equipment.html:7 app/templates/main/index.html:114
+msgid "Оборудование для воды"
+msgstr "Suv uchun jihozlar"
+
+#: app/templates/main/equipment.html:9 app/templates/main/equipment_add.html:8
+msgid "Добавить оборудование"
+msgstr "Jihoz qo'shish"
+
+#: app/templates/main/equipment.html:11
+msgid "Зарегистрируйтесь, чтобы добавить"
+msgstr "Qo'shish uchun ro'yxatdan o'ting"
+
+#: app/templates/main/equipment.html:16
+msgid "Поиск по названию, описанию, производителю…"
+msgstr "Nomi, tavsifi, ishlab chiqaruvchi bo'yicha qidirish…"
+
+#: app/templates/main/equipment.html:18
+msgid "Найти"
+msgstr "Qidirish"
+
+#: app/templates/main/equipment.html:23
+msgid "все категории"
+msgstr "barcha kategoriyalar"
+
+#: app/templates/main/equipment.html:50
+msgid "Ничего не найдено."
+msgstr "Hech narsa topilmadi."
+
+#: app/templates/main/equipment.html:50 app/templates/main/index.html:125
+msgid "Оборудование пока не добавлено."
+msgstr "Jihozlar hali qo'shilmagan."
+
+#: app/templates/main/equipment_add.html:22
+msgid "Категория"
+msgstr "Kategoriya"
+
+#: app/templates/main/equipment_add.html:32
+msgid "Производитель (необязательно)"
+msgstr "Ishlab chiqaruvchi (ixtiyoriy)"
+
+#: app/templates/main/experiment_add.html:8
+msgid "Добавить опыт с водой"
+msgstr "Suv bilan tajriba qo'shish"
+
+#: app/templates/main/experiment_add.html:27
+msgid "Вердикт"
+msgstr "Xulosa"
+
+#: app/templates/main/experiments.html:7 app/templates/main/index.html:132
+msgid "Опыты с водой: наука vs мифы"
+msgstr "Suv bilan tajribalar: fan va afsonalar"
+
+#: app/templates/main/experiments.html:9
+msgid "Добавить опыт"
+msgstr "Tajriba qo'shish"
+
+#: app/templates/main/experiments.html:16 app/templates/main/index.html:138
+msgid "наука"
+msgstr "fan"
+
+#: app/templates/main/experiments.html:16 app/templates/main/index.html:138
+msgid "миф"
+msgstr "afsona"
+
+#: app/templates/main/experiments.html:24 app/templates/main/index.html:143
+msgid "Опыты пока не добавлены."
+msgstr "Tajribalar hali qo'shilmagan."
+
+#: app/templates/main/index.html:6
+msgid "портал о воде"
+msgstr "suv haqida portal"
+
+#: app/templates/main/index.html:9
+msgid ""
+"От священных источников на другом краю света до стакана воды на вашем "
+"столе — исследуем воду как культуру, науку и повседневность."
+msgstr ""
+
+#: app/templates/main/index.html:26
+msgid "реклама"
+msgstr "reklama"
+
+#: app/templates/main/index.html:42 app/templates/sacred/index.html:7
+msgid "Священные источники мира"
+msgstr "Dunyoning muqaddas manbalari"
+
+#: app/templates/main/index.html:43
+msgid "Все источники →"
+msgstr "Barcha manbalar →"
+
+#: app/templates/main/index.html:53
+msgid "Источники пока не добавлены."
+msgstr "Manbalar hali qo'shilmagan."
+
+#: app/templates/main/index.html:61
+msgid "Все статьи →"
+msgstr "Barcha maqolalar →"
+
+#: app/templates/main/index.html:78
+msgid "Каталог питьевой воды"
+msgstr "Ichimlik suvi katalogi"
+
+#: app/templates/main/index.html:79
+msgid "Весь каталог →"
+msgstr "Butun katalog →"
+
+#: app/templates/main/index.html:89
+msgid "Каталог пока пуст."
+msgstr "Katalog hali bo'sh."
+
+#: app/templates/main/index.html:97
+msgid "Вся библиотека →"
+msgstr "Butun kutubxona →"
+
+#: app/templates/main/index.html:115
+msgid "Всё оборудование →"
+msgstr "Barcha jihozlar →"
+
+#: app/templates/main/index.html:133
+msgid "Все опыты →"
+msgstr "Barcha tajribalar →"
+
+#: app/templates/main/index.html:150
+msgid "Доставка воды"
+msgstr "Suv yetkazib berish"
+
+#: app/templates/main/index.html:151
+msgid "Все службы →"
+msgstr "Barcha xizmatlar →"
+
+#: app/templates/sacred/add.html:8
+msgid "Добавить священный источник"
+msgstr "Muqaddas manba qo'shish"
+
+#: app/templates/sacred/add.html:22
+msgid "Страна"
+msgstr "Davlat"
+
+#: app/templates/sacred/add.html:27
+msgid "Местоположение"
+msgstr "Joylashuv"
+
+#: app/templates/sacred/add.html:32
+msgid "Во что верят люди"
+msgstr "Odamlar nimaga ishonishadi"
+
+#: app/templates/sacred/add.html:37
+msgid "Что можно"
+msgstr "Nima mumkin"
+
+#: app/templates/sacred/add.html:42
+msgid "Что нельзя"
+msgstr "Nima mumkin emas"
+
+#: app/templates/sacred/index.html:9
+msgid "Добавить источник"
+msgstr "Manba qo'shish"
+
+#: app/templates/sacred/index.html:15
+msgid "все страны"
+msgstr "barcha davlatlar"
+
+#: app/templates/sacred/index.html:63
+msgid "Источники в этой стране пока не добавлены."
+msgstr "Bu davlatda manbalar hali qo'shilmagan."
+

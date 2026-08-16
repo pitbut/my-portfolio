@@ -17,7 +17,7 @@
     <span>{{ brand.volume_l }} л &middot; {{ "%.2f"|format(brand.price) }} {{ brand.currency_symbol }}</span>
     {% if brand.mineralization_mg_l %}<span>{{ brand.mineralization_mg_l }} мг/л</span>{% endif %}
     {% if brand.origin %}<span>📍 {{ brand.origin }}</span>{% endif %}
-    {% if not brand.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+    {% if not brand.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
   </div>
 
   {% if brand.description %}
@@ -40,7 +40,7 @@
         {% if image_url(s.image_url) %}
         <img class="card-photo" src="{{ image_url(s.image_url) }}" alt="{{ s.name }}" loading="lazy">
         {% endif %}
-        <span class="badge {{ 'badge--science' if s.verified else 'badge--myth' }}">{{ 'проверено' if s.verified else 'не проверено' }}</span>
+        <span class="badge {{ 'badge--science' if s.verified else 'badge--myth' }}">{{ _('проверено') if s.verified else _('не проверено') }}</span>
         <h3>{{ s.name }}</h3>
         {% if s.supplier_type %}<span class="meta">{{ s.supplier_type }}</span>{% endif %}
         <p>{{ s.address }}</p>

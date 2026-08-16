@@ -10,7 +10,7 @@
     <span><em>{{ book.author }}</em></span>
     {% if book.year %}<span>{{ book.year }}</span>{% endif %}
     {% if book.genre %}<span>{{ book.genre }}</span>{% endif %}
-    {% if not book.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+    {% if not book.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
   </div>
 
   {% if image_url(book.cover_url) %}

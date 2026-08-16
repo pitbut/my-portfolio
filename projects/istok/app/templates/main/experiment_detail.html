@@ -8,7 +8,7 @@
   <h1>{{ experiment.title }}</h1>
   <div class="meta-row">
     <span class="badge {{ 'badge--science' if experiment.verdict == 'наука' else 'badge--myth' }}">{{ experiment.verdict }}</span>
-    {% if not experiment.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+    {% if not experiment.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
   </div>
 
   <div class="prose">

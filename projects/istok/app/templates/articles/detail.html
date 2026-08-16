@@ -9,7 +9,7 @@
   <div class="meta-row">
     <span>{{ article.category }}</span>
     <span>{{ article.published_at.strftime("%d.%m.%Y") }}</span>
-    {% if not article.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+    {% if not article.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
   </div>
   {% if image_url(article.cover_url) %}
   <img class="detail-photo" src="{{ image_url(article.cover_url) }}" alt="{{ article.title }}" loading="lazy">

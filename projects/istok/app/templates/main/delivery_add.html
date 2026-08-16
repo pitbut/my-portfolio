@@ -3,9 +3,9 @@
 
 {% block content %}
 <section class="section wrap" style="max-width: 520px;">
-  <div class="breadcrumb"><a href="{{ url_for('main.delivery_list') }}">Доставка</a> / Добавить</div>
+  <div class="breadcrumb"><a href="{{ url_for('main.delivery_list') }}">Доставка</a> / {{ _('Добавить') }}</div>
   <div class="section__header">
-    <h2>Добавить службу доставки</h2>
+    <h2>{{ _('Добавить службу доставки') }}</h2>
   </div>
   <p class="prose">
     Служба появится на сайте сразу с пометкой «не проверено» —
@@ -14,36 +14,36 @@
 
   <form method="post">
     <div class="field">
-      <label for="name">Название</label>
+      <label for="name">{{ _('Название') }}</label>
       <input type="text" id="name" name="name" maxlength="255" required>
     </div>
 
     <div class="field">
-      <label for="coverage">Зона доставки (необязательно)</label>
+      <label for="coverage">{{ _('Зона доставки (необязательно)') }}</label>
       <input type="text" id="coverage" name="coverage" maxlength="255">
     </div>
 
     <div class="field">
-      <label for="delivery_time">Сроки доставки</label>
+      <label for="delivery_time">{{ _('Сроки доставки') }}</label>
       <input type="text" id="delivery_time" name="delivery_time" placeholder="1-2 дня" required>
     </div>
 
     <div class="field">
-      <label for="price_rub">Цена, ₽ (необязательно)</label>
+      <label for="price_rub">{{ _('Цена, ₽ (необязательно)') }}</label>
       <input type="text" id="price_rub" name="price_rub" placeholder="150">
     </div>
 
     <div class="field">
-      <label for="phone">Телефон (необязательно)</label>
+      <label for="phone">{{ _('Телефон (необязательно)') }}</label>
       <input type="text" id="phone" name="phone" maxlength="50">
     </div>
 
     <div class="field">
-      <label for="website">Сайт (необязательно)</label>
+      <label for="website">{{ _('Сайт (необязательно)') }}</label>
       <input type="text" id="website" name="website" maxlength="255">
     </div>
 
-    <button type="submit" class="btn btn--primary">Добавить</button>
+    <button type="submit" class="btn btn--primary">{{ _('Добавить') }}</button>
   </form>
 </section>
 {% endblock %}

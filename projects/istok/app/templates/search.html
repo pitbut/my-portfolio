@@ -19,7 +19,7 @@
     <div class="grid">
       {% for item in group.results %}
       <article class="card">
-        <h3><a href="{{ item.url }}">{{ item.name }}</a>{% if not item.verified %} <span class="badge badge--myth">не проверено</span>{% endif %}</h3>
+        <h3><a href="{{ item.url }}">{{ item.name }}</a>{% if not item.verified %} <span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}</h3>
       </article>
       {% endfor %}
     </div>

@@ -3,11 +3,10 @@
 
 {% block content %}
 <section class="hero wrap">
-  <span class="hero__eyebrow">портал о воде</span>
+  <span class="hero__eyebrow">{{ _('портал о воде') }}</span>
   <h1>Исток</h1>
   <p class="lead">
-    От священных источников на другом краю света до стакана воды на вашем столе —
-    исследуем воду как культуру, науку и повседневность.
+    {{ _('От священных источников на другом краю света до стакана воды на вашем столе — исследуем воду как культуру, науку и повседневность.') }}
   </p>
   <svg class="wave-divider" viewBox="0 0 1200 60" preserveAspectRatio="none">
     <path d="M0,30 C150,60 350,0 600,30 C850,60 1050,0 1200,30 L1200,60 L0,60 Z" fill="rgba(58,166,168,0.18)"/>
@@ -24,7 +23,7 @@
       {% if banner.banner_type == "video" and banner.content_url %}
         <video src="{{ banner.content_url }}" autoplay muted loop playsinline></video>
       {% elif banner.banner_type == "image" and banner.content_url %}
-        <img src="{{ banner.content_url }}" alt="{{ banner.title or 'реклама' }}" loading="lazy">
+        <img src="{{ banner.content_url }}" alt="{{ banner.title or _('реклама') }}" loading="lazy">
       {% elif banner.banner_type == "text" %}
         <div class="banner-slot__text">
           {% if banner.title %}<h4>{{ banner.title }}</h4>{% endif %}
@@ -40,8 +39,8 @@
 
 <section class="section wrap">
   <div class="section__header">
-    <h2>Священные источники мира</h2>
-    <a class="see-all" href="{{ url_for('sacred.index') }}">Все источники →</a>
+    <h2>{{ _('Священные источники мира') }}</h2>
+    <a class="see-all" href="{{ url_for('sacred.index') }}">{{ _('Все источники →') }}</a>
   </div>
   <div class="grid">
     {% for s in sacred_sources %}
@@ -51,15 +50,15 @@
       <p>{{ s.belief | truncate(120) }}</p>
     </article>
     {% else %}
-    <p>Источники пока не добавлены.</p>
+    <p>{{ _('Источники пока не добавлены.') }}</p>
     {% endfor %}
   </div>
 </section>
 
 <section class="section wrap">
   <div class="section__header">
-    <h2>Статьи</h2>
-    <a class="see-all" href="{{ url_for('articles.index') }}">Все статьи →</a>
+    <h2>{{ _('Статьи') }}</h2>
+    <a class="see-all" href="{{ url_for('articles.index') }}">{{ _('Все статьи →') }}</a>
   </div>
   <div class="grid">
     {% for a in articles %}
@@ -69,15 +68,15 @@
       <p>{{ a.summary or (a.body | truncate(120)) }}</p>
     </article>
     {% else %}
-    <p>Статьи пока не добавлены.</p>
+    <p>{{ _('Статьи пока не добавлены.') }}</p>
     {% endfor %}
   </div>
 </section>
 
 <section class="section wrap">
   <div class="section__header">
-    <h2>Каталог питьевой воды</h2>
-    <a class="see-all" href="{{ url_for('catalog.index') }}">Весь каталог →</a>
+    <h2>{{ _('Каталог питьевой воды') }}</h2>
+    <a class="see-all" href="{{ url_for('catalog.index') }}">{{ _('Весь каталог →') }}</a>
   </div>
   <div class="grid">
     {% for w in water_brands %}
@@ -87,33 +86,33 @@
       <p>{{ w.volume_l }} л &middot; {{ "%.2f"|format(w.price) }} {{ w.currency_symbol }}</p>
     </article>
     {% else %}
-    <p>Каталог пока пуст.</p>
+    <p>{{ _('Каталог пока пуст.') }}</p>
     {% endfor %}
   </div>
 </section>
 
 <section class="section wrap">
   <div class="section__header">
-    <h2>Библиотека книг о воде</h2>
-    <a class="see-all" href="{{ url_for('library.index') }}">Вся библиотека →</a>
+    <h2>{{ _('Библиотека книг о воде') }}</h2>
+    <a class="see-all" href="{{ url_for('library.index') }}">{{ _('Вся библиотека →') }}</a>
   </div>
   <div class="grid">
     {% for b in books %}
     <article class="card">
-      <span class="meta">{{ b.genre or "книга" }}</span>
+      <span class="meta">{{ b.genre or _('книга') }}</span>
       <h3>{{ b.title }}</h3>
       <p>{{ b.author }}{% if b.year %}, {{ b.year }}{% endif %}</p>
     </article>
     {% else %}
-    <p>Книги пока не добавлены.</p>
+    <p>{{ _('Книги пока не добавлены.') }}</p>
     {% endfor %}
   </div>
 </section>
 
 <section class="section wrap">
   <div class="section__header">
-    <h2>Оборудование для воды</h2>
-    <a class="see-all" href="{{ url_for('main.equipment_list') }}">Всё оборудование →</a>
+    <h2>{{ _('Оборудование для воды') }}</h2>
+    <a class="see-all" href="{{ url_for('main.equipment_list') }}">{{ _('Всё оборудование →') }}</a>
   </div>
   <div class="grid">
     {% for e in equipment %}
@@ -123,33 +122,33 @@
       <p>{{ e.description | truncate(110) }}</p>
     </article>
     {% else %}
-    <p>Оборудование пока не добавлено.</p>
+    <p>{{ _('Оборудование пока не добавлено.') }}</p>
     {% endfor %}
   </div>
 </section>
 
 <section class="section wrap">
   <div class="section__header">
-    <h2>Опыты с водой: наука vs мифы</h2>
-    <a class="see-all" href="{{ url_for('main.experiments_list') }}">Все опыты →</a>
+    <h2>{{ _('Опыты с водой: наука vs мифы') }}</h2>
+    <a class="see-all" href="{{ url_for('main.experiments_list') }}">{{ _('Все опыты →') }}</a>
   </div>
   <div class="grid">
     {% for exp in experiments %}
     <article class="card">
-      <span class="badge {{ 'badge--science' if exp.verdict == 'наука' else 'badge--myth' }}">{{ exp.verdict }}</span>
+      <span class="badge {{ 'badge--science' if exp.verdict == 'наука' else 'badge--myth' }}">{{ _('наука') if exp.verdict == 'наука' else _('миф') }}</span>
       <h3>{{ exp.title }}</h3>
       <p>{{ exp.description | truncate(110) }}</p>
     </article>
     {% else %}
-    <p>Опыты пока не добавлены.</p>
+    <p>{{ _('Опыты пока не добавлены.') }}</p>
     {% endfor %}
   </div>
 </section>
 
 <section class="section wrap">
   <div class="section__header">
-    <h2>Доставка воды</h2>
-    <a class="see-all" href="{{ url_for('main.delivery_list') }}">Все службы →</a>
+    <h2>{{ _('Доставка воды') }}</h2>
+    <a class="see-all" href="{{ url_for('main.delivery_list') }}">{{ _('Все службы →') }}</a>
   </div>
   <div class="grid">
     {% for d in delivery_services %}
@@ -159,7 +158,7 @@
       <p>{{ d.coverage or "" }}</p>
     </article>
     {% else %}
-    <p>Службы доставки пока не добавлены.</p>
+    <p>{{ _('Службы доставки пока не добавлены.') }}</p>
     {% endfor %}
   </div>
 </section>

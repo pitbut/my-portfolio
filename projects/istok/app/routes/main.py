@@ -1,10 +1,10 @@
 """Главная страница и разделы без собственного блюпринта (оборудование,
 опыты, доставка, контакты)."""
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import func, or_
 
-from app import db
+from app import LANGUAGES, db
 from app.models import (
     Article,
     Banner,
@@ -301,6 +301,13 @@ def delivery_detail(slug):
         target_type="delivery_service",
         target_id=service.id,
     )
+
+
+@bp.route("/lang/<code>")
+def set_language(code):
+    if code in LANGUAGES:
+        session["lang"] = code
+    return redirect(request.referrer or url_for("main.index"))
 
 
 @bp.route("/search")

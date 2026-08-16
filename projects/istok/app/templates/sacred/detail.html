@@ -20,7 +20,7 @@
     {% if source.annual_visitors %}
       <span>👥 ~{{ "{:,}".format(source.annual_visitors).replace(",", " ") }} посетителей в год</span>
     {% endif %}
-    {% if not source.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+    {% if not source.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
   </div>
 
   {% if image_url(source.image_url) %}

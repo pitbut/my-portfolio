@@ -3,9 +3,9 @@
 
 {% block content %}
 <section class="section wrap" style="max-width: 620px;">
-  <div class="breadcrumb"><a href="{{ url_for('sacred.index') }}">Источники</a> / Добавить</div>
+  <div class="breadcrumb"><a href="{{ url_for('sacred.index') }}">Источники</a> / {{ _('Добавить') }}</div>
   <div class="section__header">
-    <h2>Добавить священный источник</h2>
+    <h2>{{ _('Добавить священный источник') }}</h2>
   </div>
   <p class="prose">
     Источник появится на сайте сразу с пометкой «не проверено» —
@@ -14,46 +14,46 @@
 
   <form method="post" enctype="multipart/form-data">
     <div class="field">
-      <label for="name">Название</label>
+      <label for="name">{{ _('Название') }}</label>
       <input type="text" id="name" name="name" maxlength="255" required>
     </div>
 
     <div class="field">
-      <label for="country">Страна</label>
+      <label for="country">{{ _('Страна') }}</label>
       <input type="text" id="country" name="country" maxlength="120" required>
     </div>
 
     <div class="field">
-      <label for="location">Местоположение</label>
+      <label for="location">{{ _('Местоположение') }}</label>
       <input type="text" id="location" name="location" maxlength="255" required>
     </div>
 
     <div class="field">
-      <label for="belief">Во что верят люди</label>
+      <label for="belief">{{ _('Во что верят люди') }}</label>
       <textarea id="belief" name="belief" rows="3" required></textarea>
     </div>
 
     <div class="field">
-      <label for="allowed">Что можно</label>
+      <label for="allowed">{{ _('Что можно') }}</label>
       <textarea id="allowed" name="allowed" rows="3" required></textarea>
     </div>
 
     <div class="field">
-      <label for="forbidden">Что нельзя</label>
+      <label for="forbidden">{{ _('Что нельзя') }}</label>
       <textarea id="forbidden" name="forbidden" rows="3" required></textarea>
     </div>
 
     <div class="field">
-      <label for="description">Описание (необязательно)</label>
+      <label for="description">{{ _('Описание (необязательно)') }}</label>
       <textarea id="description" name="description" rows="4"></textarea>
     </div>
 
     <div class="field">
-      <label for="photo">Фото (необязательно)</label>
+      <label for="photo">{{ _('Фото (необязательно)') }}</label>
       <input type="file" id="photo" name="photo" accept="image/*">
     </div>
 
-    <button type="submit" class="btn btn--primary">Добавить</button>
+    <button type="submit" class="btn btn--primary">{{ _('Добавить') }}</button>
   </form>
 </section>
 {% endblock %}
