@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Пользователи — модерация — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  {% with admin_title = "Пользователи" %}{% include "admin/_nav.html" %}{% endwith %}
+
+  {% if items %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Регистрация</th>
+          <th>Email подтверждён</th>
+          <th>Добавлений</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in items %}
+        <tr>
+          <td>{{ user.email }}</td>
+          <td>{{ user.created_at.strftime("%d.%m.%Y") }}</td>
+          <td>{{ "да" if user.email_confirmed else "нет" }}</td>
+          <td>{{ addition_counts.get(user.id, 0) }}</td>
+          <td><a href="{{ url_for('admin.user_detail', user_id=user.id) }}">Подробнее →</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">Пока никто не зарегистрировался.</div>
+  {% endif %}
+</section>
+{% endblock %}

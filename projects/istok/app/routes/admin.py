@@ -5,6 +5,7 @@ from functools import wraps
 
 from flask import (
     Blueprint,
+    abort,
     current_app,
     flash,
     redirect,
@@ -15,10 +16,103 @@ from flask import (
 )
 
 from app import db
-from app.models import ContactMessage, EditSuggestion, Equipment, Review, Supplier, WaterBrand
+from app.models import (
+    Article,
+    Book,
+    ContactMessage,
+    DeliveryService,
+    EditSuggestion,
+    Equipment,
+    Experiment,
+    Review,
+    SacredSource,
+    Supplier,
+    User,
+    WaterBrand,
+)
 from app.routes.reviews import REVIEW_TARGETS
 
 bp = Blueprint("admin", __name__, template_folder="../templates/admin")
+
+# Реестр всех типов пользовательского контента — используется страницей
+# пользователя (/admin/users/<id>) и общими роутами
+# редактирования/удаления (/admin/content/<type>/<id>/...), чтобы не
+# писать отдельные edit/delete-роуты на каждый из 8 разделов сайта.
+CONTENT_TYPES = {
+    "water_brand": {
+        "model": WaterBrand, "label": "Марка воды", "name_field": "name",
+        "view_endpoint": "catalog.detail",
+        "fields": [
+            ("name", "Название", "text"), ("water_type", "Тип воды", "text"),
+            ("mineralization_mg_l", "Минерализация, мг/л", "number"),
+            ("volume_l", "Объём, л", "number"), ("price", "Цена", "number"),
+            ("currency", "Валюта", "text"), ("country", "Страна", "text"),
+            ("origin", "Происхождение", "text"), ("description", "Описание", "textarea"),
+        ],
+    },
+    "equipment": {
+        "model": Equipment, "label": "Оборудование", "name_field": "name",
+        "view_endpoint": "main.equipment_detail",
+        "fields": [
+            ("name", "Название", "text"), ("category", "Категория", "text"),
+            ("description", "Описание", "textarea"), ("manufacturer", "Производитель", "text"),
+            ("price_rub", "Цена, ₽", "number"),
+        ],
+    },
+    "supplier": {
+        "model": Supplier, "label": "Точка продажи", "name_field": "name",
+        "view_endpoint": None,
+        "fields": [
+            ("name", "Название", "text"), ("supplier_type", "Тип", "text"),
+            ("address", "Адрес", "text"), ("phone", "Телефон", "text"),
+            ("website", "Сайт", "text"),
+        ],
+    },
+    "book": {
+        "model": Book, "label": "Книга", "name_field": "title",
+        "view_endpoint": "library.detail",
+        "fields": [
+            ("title", "Название", "text"), ("author", "Автор", "text"),
+            ("year", "Год", "number"), ("genre", "Жанр", "text"),
+            ("description", "Описание", "textarea"),
+        ],
+    },
+    "article": {
+        "model": Article, "label": "Статья", "name_field": "title",
+        "view_endpoint": "articles.detail",
+        "fields": [
+            ("title", "Заголовок", "text"), ("category", "Рубрика", "text"),
+            ("summary", "Краткое содержание", "text"), ("body", "Текст", "textarea"),
+        ],
+    },
+    "sacred_source": {
+        "model": SacredSource, "label": "Священный источник", "name_field": "name",
+        "view_endpoint": "sacred.detail",
+        "fields": [
+            ("name", "Название", "text"), ("country", "Страна", "text"),
+            ("location", "Местоположение", "text"), ("belief", "Во что верят", "textarea"),
+            ("allowed", "Что можно", "textarea"), ("forbidden", "Что нельзя", "textarea"),
+            ("description", "Описание", "textarea"), ("comment", "Комментарий редакции", "textarea"),
+        ],
+    },
+    "experiment": {
+        "model": Experiment, "label": "Опыт", "name_field": "title",
+        "view_endpoint": "main.experiment_detail",
+        "fields": [
+            ("title", "Название", "text"), ("description", "Описание", "textarea"),
+            ("verdict", "Вердикт (наука/миф)", "text"),
+        ],
+    },
+    "delivery_service": {
+        "model": DeliveryService, "label": "Служба доставки", "name_field": "name",
+        "view_endpoint": "main.delivery_detail",
+        "fields": [
+            ("name", "Название", "text"), ("coverage", "Зона доставки", "text"),
+            ("delivery_time", "Сроки", "text"), ("price_rub", "Цена, ₽", "number"),
+            ("phone", "Телефон", "text"), ("website", "Сайт", "text"),
+        ],
+    },
+}
 
 
 @bp.route("/")
@@ -245,6 +339,100 @@ def delete_water_brand(brand_id):
     db.session.commit()
     flash("Марка воды удалена.", "info")
     return redirect(url_for("admin.water_brands"))
+
+
+@bp.route("/users")
+@login_required
+def users():
+    items = User.query.order_by(User.created_at.desc()).all()
+    addition_counts = {
+        user.id: sum(
+            spec["model"].query.filter_by(added_by_user_id=user.id).count()
+            for spec in CONTENT_TYPES.values()
+        )
+        for user in items
+    }
+    return render_template("admin/users.html", items=items, addition_counts=addition_counts)
+
+
+@bp.route("/users/<int:user_id>")
+@login_required
+def user_detail(user_id):
+    user = User.query.get_or_404(user_id)
+    additions = []
+    for content_type, spec in CONTENT_TYPES.items():
+        for obj in spec["model"].query.filter_by(added_by_user_id=user_id).all():
+            view_url = None
+            if spec["view_endpoint"]:
+                view_url = url_for(spec["view_endpoint"], slug=obj.slug)
+            additions.append({
+                "type": content_type,
+                "label": spec["label"],
+                "name": getattr(obj, spec["name_field"]),
+                "obj": obj,
+                "view_url": view_url,
+            })
+    return render_template("admin/user_detail.html", user=user, additions=additions)
+
+
+@bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@login_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    # Добавления пользователя не удаляются вместе с ним — они остаются на
+    # сайте, просто теряют указание автора (added_by_user_id). Удалить
+    # конкретное добавление можно отдельно, кнопкой рядом с ним.
+    for spec in CONTENT_TYPES.values():
+        spec["model"].query.filter_by(added_by_user_id=user_id).update({"added_by_user_id": None})
+    email = user.email
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"Пользователь «{email}» удалён (его добавления остались на сайте).", "info")
+    return redirect(url_for("admin.users"))
+
+
+@bp.route("/content/<content_type>/<int:item_id>/delete", methods=["POST"])
+@login_required
+def delete_content(content_type, item_id):
+    spec = CONTENT_TYPES.get(content_type)
+    if spec is None:
+        abort(404)
+    item = spec["model"].query.get_or_404(item_id)
+    redirect_user_id = item.added_by_user_id
+    db.session.delete(item)
+    db.session.commit()
+    flash(f"{spec['label']} удалено(а).", "info")
+    if redirect_user_id:
+        return redirect(url_for("admin.user_detail", user_id=redirect_user_id))
+    return redirect(request.referrer or url_for("admin.users"))
+
+
+@bp.route("/content/<content_type>/<int:item_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_content(content_type, item_id):
+    spec = CONTENT_TYPES.get(content_type)
+    if spec is None:
+        abort(404)
+    item = spec["model"].query.get_or_404(item_id)
+
+    if request.method == "POST":
+        for field_name, _label, field_type in spec["fields"]:
+            raw = request.form.get(field_name)
+            if field_type == "number":
+                try:
+                    value = float(raw) if raw not in (None, "") else None
+                except ValueError:
+                    value = getattr(item, field_name)
+            else:
+                value = (raw or "").strip() or None
+            setattr(item, field_name, value)
+        db.session.commit()
+        flash(f"{spec['label']} изменено(а).", "success")
+        if item.added_by_user_id:
+            return redirect(url_for("admin.user_detail", user_id=item.added_by_user_id))
+        return redirect(url_for("admin.users"))
+
+    return render_template("admin/edit_content.html", item=item, spec=spec, content_type=content_type)
 
 
 @bp.route("/reviews")
