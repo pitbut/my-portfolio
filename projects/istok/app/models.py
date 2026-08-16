@@ -297,6 +297,29 @@ class DeliveryService(TimestampMixin, SlugMixin, db.Model):
         return f"<DeliveryService {self.name!r}>"
 
 
+class Banner(TimestampMixin, db.Model):
+    """Рекламный баннер в одном из 3 слотов на главной странице.
+
+    "Универсальный" — один и тот же слот может содержать видео, картинку/гиф
+    или просто текст, в зависимости от banner_type; лишние для выбранного
+    типа поля просто не используются."""
+
+    __tablename__ = "banners"
+
+    BANNER_TYPES = ("video", "image", "text")
+
+    id = db.Column(db.Integer, primary_key=True)
+    slot = db.Column(db.Integer, unique=True, nullable=False)  # 1, 2 или 3
+    banner_type = db.Column(db.String(20), nullable=False, default="text")
+    title = db.Column(db.String(255), nullable=True)
+    content_url = db.Column(db.String(500), nullable=True)  # ссылка на видео/картинку
+    text_content = db.Column(db.Text, nullable=True)  # текст для banner_type="text"
+    link_url = db.Column(db.String(500), nullable=True)  # необязательная ссылка при клике
+
+    def __repr__(self):
+        return f"<Banner slot={self.slot} type={self.banner_type!r}>"
+
+
 class Review(TimestampMixin, db.Model):
     """Отзыв с оценкой на любой раздел сайта (источник, марка воды,
     оборудование, книга, статья, опыт, служба доставки).

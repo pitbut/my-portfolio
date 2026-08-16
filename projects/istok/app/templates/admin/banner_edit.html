@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Баннер {{ slot }} — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 560px;">
+  <div class="breadcrumb"><a href="{{ url_for('admin.banners') }}">Баннеры</a> / Слот {{ slot }}</div>
+  <div class="section__header">
+    <h2>Баннер {{ slot }}</h2>
+  </div>
+
+  <form method="post" enctype="multipart/form-data">
+    <div class="field">
+      <label for="banner_type">Тип баннера</label>
+      <select id="banner_type" name="banner_type">
+        <option value="text" {{ "selected" if banner and banner.banner_type == "text" }}>Текст</option>
+        <option value="image" {{ "selected" if banner and banner.banner_type == "image" }}>Картинка / гиф</option>
+        <option value="video" {{ "selected" if banner and banner.banner_type == "video" }}>Видео (ссылка на файл)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="title">Заголовок (необязательно)</label>
+      <input type="text" id="title" name="title" maxlength="255" value="{{ banner.title if banner else '' }}">
+    </div>
+
+    <div class="field">
+      <label for="text_content">Текст — используется, если тип «Текст» (необязательно)</label>
+      <textarea id="text_content" name="text_content" rows="4">{{ banner.text_content if banner else '' }}</textarea>
+    </div>
+
+    <div class="field">
+      <label for="content_url">Ссылка на видео/картинку — используется, если тип «Видео» или вставляете ссылкой, а не файлом</label>
+      <input type="text" id="content_url" name="content_url" placeholder="https://…" value="{{ banner.content_url if banner else '' }}">
+    </div>
+
+    <div class="field">
+      <label for="image_file">Загрузить картинку/гиф файлом (необязательно, только для типа «Картинка / гиф»)</label>
+      <input type="file" id="image_file" name="image_file" accept="image/*">
+    </div>
+
+    <div class="field">
+      <label for="link_url">Ссылка при клике на баннер (необязательно)</label>
+      <input type="text" id="link_url" name="link_url" placeholder="https://…" value="{{ banner.link_url if banner else '' }}">
+    </div>
+
+    <button type="submit" class="btn btn--primary">Сохранить</button>
+  </form>
+</section>
+{% endblock %}

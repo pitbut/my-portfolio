@@ -7,6 +7,7 @@ from sqlalchemy import func, or_
 from app import db
 from app.models import (
     Article,
+    Banner,
     Book,
     ContactMessage,
     DeliveryService,
@@ -52,6 +53,8 @@ def index():
     equipment = Equipment.query.order_by(Equipment.created_at.desc()).limit(3).all()
     experiments = Experiment.query.order_by(Experiment.created_at.desc()).limit(3).all()
     delivery_services = DeliveryService.query.order_by(DeliveryService.name).limit(3).all()
+    by_slot = {b.slot: b for b in Banner.query.all()}
+    banners = [by_slot.get(slot) for slot in (1, 2, 3)]
 
     return render_template(
         "main/index.html",
@@ -61,6 +64,7 @@ def index():
         books=books,
         equipment=equipment,
         experiments=experiments,
+        banners=banners,
         delivery_services=delivery_services,
     )
 
