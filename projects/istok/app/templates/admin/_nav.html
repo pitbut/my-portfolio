@@ -5,6 +5,7 @@
 <div class="sort-bar">
   <a href="{{ url_for('admin.suggestions') }}" class="{{ 'is-active' if request.endpoint == 'admin.suggestions' }}">Правки источников</a>
   <a href="{{ url_for('admin.suppliers') }}" class="{{ 'is-active' if request.endpoint == 'admin.suppliers' }}">Точки продажи</a>
+  <a href="{{ url_for('admin.water_brands') }}" class="{{ 'is-active' if request.endpoint == 'admin.water_brands' }}">Марки воды</a>
   <a href="{{ url_for('admin.equipment') }}" class="{{ 'is-active' if request.endpoint == 'admin.equipment' }}">Оборудование</a>
   <a href="{{ url_for('admin.reviews') }}" class="{{ 'is-active' if request.endpoint == 'admin.reviews' }}">Отзывы</a>
   <a href="{{ url_for('admin.messages') }}" class="{{ 'is-active' if request.endpoint == 'admin.messages' }}">Сообщения</a>

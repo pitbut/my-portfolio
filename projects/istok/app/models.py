@@ -77,6 +77,10 @@ class WaterBrand(TimestampMixin, SlugMixin, db.Model):
     country = db.Column(db.String(120), nullable=True, index=True)
     origin = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
+    verified = db.Column(db.Boolean, nullable=False, default=True)
+    added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    added_by = db.relationship("User")
 
     CURRENCY_SYMBOLS = {
         "RUB": "₽", "UZS": "сум", "KZT": "₸", "GEL": "₾",

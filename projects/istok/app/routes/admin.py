@@ -15,7 +15,7 @@ from flask import (
 )
 
 from app import db
-from app.models import ContactMessage, EditSuggestion, Equipment, Review, Supplier
+from app.models import ContactMessage, EditSuggestion, Equipment, Review, Supplier, WaterBrand
 from app.routes.reviews import REVIEW_TARGETS
 
 bp = Blueprint("admin", __name__, template_folder="../templates/admin")
@@ -196,6 +196,55 @@ def delete_equipment(equipment_id):
     db.session.commit()
     flash("Оборудование удалено.", "info")
     return redirect(url_for("admin.equipment"))
+
+
+@bp.route("/water-brands")
+@login_required
+def water_brands():
+    status = request.args.get("status", "unverified")
+    query = WaterBrand.query
+    if status == "unverified":
+        query = query.filter_by(verified=False)
+    elif status == "verified":
+        query = query.filter_by(verified=True)
+    items = query.order_by(WaterBrand.created_at.desc()).all()
+    unverified_count = WaterBrand.query.filter_by(verified=False).count()
+    return render_template(
+        "admin/water_brands.html",
+        items=items,
+        active_status=status,
+        unverified_count=unverified_count,
+    )
+
+
+@bp.route("/water-brands/<int:brand_id>/verify", methods=["POST"])
+@login_required
+def verify_water_brand(brand_id):
+    brand = WaterBrand.query.get_or_404(brand_id)
+    brand.verified = True
+    db.session.commit()
+    flash(f"«{brand.name}» отмечена как проверенная.", "success")
+    return redirect(url_for("admin.water_brands"))
+
+
+@bp.route("/water-brands/<int:brand_id>/unverify", methods=["POST"])
+@login_required
+def unverify_water_brand(brand_id):
+    brand = WaterBrand.query.get_or_404(brand_id)
+    brand.verified = False
+    db.session.commit()
+    flash(f"«{brand.name}» снова помечена как непроверенная.", "info")
+    return redirect(url_for("admin.water_brands"))
+
+
+@bp.route("/water-brands/<int:brand_id>/delete", methods=["POST"])
+@login_required
+def delete_water_brand(brand_id):
+    brand = WaterBrand.query.get_or_404(brand_id)
+    db.session.delete(brand)
+    db.session.commit()
+    flash("Марка воды удалена.", "info")
+    return redirect(url_for("admin.water_brands"))
 
 
 @bp.route("/reviews")

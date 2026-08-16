@@ -296,6 +296,16 @@ table.data-table th {
 
 table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
 
+.sortable-th {
+  color: var(--gold-soft);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sortable-th:hover { color: var(--gold); text-decoration: underline; }
+
+.sortable-th.is-sorted { color: var(--gold); font-weight: 700; }
+
 .sort-bar {
   display: flex;
   gap: 8px;

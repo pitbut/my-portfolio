@@ -17,6 +17,7 @@
     <span>{{ brand.volume_l }} л &middot; {{ "%.2f"|format(brand.price) }} {{ brand.currency_symbol }}</span>
     {% if brand.mineralization_mg_l %}<span>{{ brand.mineralization_mg_l }} мг/л</span>{% endif %}
     {% if brand.origin %}<span>📍 {{ brand.origin }}</span>{% endif %}
+    {% if not brand.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
   </div>
 
   {% if brand.description %}

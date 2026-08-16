@@ -137,6 +137,7 @@ def load_water_brands():
             country=clean(row.get("country")),
             origin=clean(row.get("origin")),
             description=clean(row.get("description")),
+            verified=True,
         )
 
 
