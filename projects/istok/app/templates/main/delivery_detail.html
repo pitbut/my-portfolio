@@ -9,6 +9,7 @@
     <span>{{ service.delivery_time }}</span>
     {% if service.coverage %}<span>📍 {{ service.coverage }}</span>{% endif %}
     {% if service.price_rub %}<span>от {{ "%.0f"|format(service.price_rub) }} ₽</span>{% endif %}
+    {% if not service.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
   </div>
 
   {% if service.phone or service.website %}

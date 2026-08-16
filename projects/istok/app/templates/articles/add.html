@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Добавить статью — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 620px;">
+  <div class="breadcrumb"><a href="{{ url_for('articles.index') }}">Статьи</a> / Добавить</div>
+  <div class="section__header">
+    <h2>Добавить статью</h2>
+  </div>
+  <p class="prose">
+    Статья появится на сайте сразу с пометкой «не проверено» —
+    администрация проверит текст и подтвердит его.
+  </p>
+
+  <form method="post" enctype="multipart/form-data">
+    <div class="field">
+      <label for="title">Заголовок</label>
+      <input type="text" id="title" name="title" maxlength="255" required>
+    </div>
+
+    <div class="field">
+      <label for="category">Рубрика</label>
+      <input type="text" id="category" name="category" maxlength="120" required>
+    </div>
+
+    <div class="field">
+      <label for="summary">Краткое содержание (необязательно)</label>
+      <input type="text" id="summary" name="summary" maxlength="500">
+    </div>
+
+    <div class="field">
+      <label for="body">Текст статьи</label>
+      <textarea id="body" name="body" rows="10" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="cover">Обложка (необязательно)</label>
+      <input type="file" id="cover" name="cover" accept="image/*">
+    </div>
+
+    <button type="submit" class="btn btn--primary">Добавить</button>
+  </form>
+</section>
+{% endblock %}

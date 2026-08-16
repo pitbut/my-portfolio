@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Добавить источник — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 620px;">
+  <div class="breadcrumb"><a href="{{ url_for('sacred.index') }}">Источники</a> / Добавить</div>
+  <div class="section__header">
+    <h2>Добавить священный источник</h2>
+  </div>
+  <p class="prose">
+    Источник появится на сайте сразу с пометкой «не проверено» —
+    администрация проверит сведения и подтвердит их.
+  </p>
+
+  <form method="post" enctype="multipart/form-data">
+    <div class="field">
+      <label for="name">Название</label>
+      <input type="text" id="name" name="name" maxlength="255" required>
+    </div>
+
+    <div class="field">
+      <label for="country">Страна</label>
+      <input type="text" id="country" name="country" maxlength="120" required>
+    </div>
+
+    <div class="field">
+      <label for="location">Местоположение</label>
+      <input type="text" id="location" name="location" maxlength="255" required>
+    </div>
+
+    <div class="field">
+      <label for="belief">Во что верят люди</label>
+      <textarea id="belief" name="belief" rows="3" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="allowed">Что можно</label>
+      <textarea id="allowed" name="allowed" rows="3" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="forbidden">Что нельзя</label>
+      <textarea id="forbidden" name="forbidden" rows="3" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="description">Описание (необязательно)</label>
+      <textarea id="description" name="description" rows="4"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="photo">Фото (необязательно)</label>
+      <input type="file" id="photo" name="photo" accept="image/*">
+    </div>
+
+    <button type="submit" class="btn btn--primary">Добавить</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Добавить опыт — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 520px;">
+  <div class="breadcrumb"><a href="{{ url_for('main.experiments_list') }}">Опыты</a> / Добавить</div>
+  <div class="section__header">
+    <h2>Добавить опыт с водой</h2>
+  </div>
+  <p class="prose">
+    Опыт появится на сайте сразу с пометкой «не проверено» —
+    администрация проверит сведения и подтвердит их.
+  </p>
+
+  <form method="post">
+    <div class="field">
+      <label for="title">Название</label>
+      <input type="text" id="title" name="title" maxlength="255" required>
+    </div>
+
+    <div class="field">
+      <label for="description">Описание</label>
+      <textarea id="description" name="description" rows="5" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="verdict">Вердикт</label>
+      <select id="verdict" name="verdict" required>
+        <option value="наука">Наука</option>
+        <option value="миф">Миф</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn--primary">Добавить</button>
+  </form>
+</section>
+{% endblock %}

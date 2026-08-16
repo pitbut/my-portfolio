@@ -93,6 +93,7 @@ def load_sacred_sources():
             description=clean(row.get("description")),
             image_url=clean(row.get("image_url")),
             comment=clean(row.get("comment")),
+            verified=True,
         )
 
 
@@ -108,6 +109,7 @@ def load_books():
             genre=clean(row.get("genre")),
             description=row["description"].strip(),
             cover_url=clean(row.get("cover_url")),
+            verified=True,
         )
 
 
@@ -121,6 +123,7 @@ def load_articles():
             body=row["body"].strip(),
             published_at=to_date(row.get("published_at")) or datetime.utcnow(),
             cover_url=clean(row.get("cover_url")),
+            verified=True,
         )
 
 
@@ -189,6 +192,7 @@ def load_experiments():
             title=title,
             description=row["description"].strip(),
             verdict=row["verdict"].strip(),
+            verified=True,
         )
 
 
@@ -204,6 +208,7 @@ def load_delivery_services():
             price_rub=to_decimal_str(row.get("price_rub")),
             phone=clean(row.get("phone")),
             website=clean(row.get("website")),
+            verified=True,
         )
 
 

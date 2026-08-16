@@ -5,13 +5,16 @@
 <section class="section wrap">
   <div class="section__header">
     <h2>Службы доставки воды</h2>
+    {% if current_user.is_authenticated %}
+    <a class="see-all" href="{{ url_for('main.delivery_add') }}">+ Добавить службу</a>
+    {% endif %}
   </div>
   {% if services %}
   <div class="grid">
     {% for d in services %}
     <article class="card">
       <span class="meta">{{ d.delivery_time }}</span>
-      <h3><a href="{{ url_for('main.delivery_detail', slug=d.slug) }}">{{ d.name }}</a></h3>
+      <h3><a href="{{ url_for('main.delivery_detail', slug=d.slug) }}">{{ d.name }}</a>{% if not d.verified %} <span class="badge badge--myth">не проверено</span>{% endif %}</h3>
       <p>{{ d.coverage or "" }}</p>
       <p>
         {% if d.price_rub %}от {{ "%.0f"|format(d.price_rub) }} ₽{% endif %}

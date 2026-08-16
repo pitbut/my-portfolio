@@ -1,11 +1,13 @@
 """Раздел «Священные источники мира»."""
 from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from sqlalchemy import func
 
 from app import db
 from app.models import EditSuggestion, SacredSource
 from app.photos import upload_photo
 from app.routes.reviews import reviews_for
+from app.slugify import unique_slug
 
 bp = Blueprint("sacred", __name__, template_folder="../templates/sacred")
 
@@ -42,6 +44,57 @@ def index():
         active_country=country,
         total_count=total_count,
     )
+
+
+@bp.route("/add", methods=["GET", "POST"])
+@login_required
+def add():
+    if not current_user.email_confirmed:
+        flash("Сначала подтвердите email — так мы защищаем каталог от спама.", "error")
+        return redirect(url_for("sacred.index"))
+
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        country = (request.form.get("country") or "").strip()
+        location = (request.form.get("location") or "").strip()
+        belief = (request.form.get("belief") or "").strip()
+        allowed = (request.form.get("allowed") or "").strip()
+        forbidden = (request.form.get("forbidden") or "").strip()
+        description = (request.form.get("description") or "").strip()
+
+        if not name or not country or not location or not belief or not allowed or not forbidden:
+            flash("Заполните название, страну, местоположение и разделы «во что верят»/«что можно»/«что нельзя».", "error")
+            return render_template("sacred/add.html")
+
+        image_url, photo_error = upload_photo(request.files.get("photo"))
+        if photo_error:
+            flash(photo_error, "info")
+
+        used_slugs = {row[0] for row in db.session.query(SacredSource.slug).all()}
+        source = SacredSource(
+            slug=unique_slug(name, used_slugs, "source"),
+            name=name,
+            country=country,
+            location=location,
+            belief=belief,
+            allowed=allowed,
+            forbidden=forbidden,
+            description=description or None,
+            image_url=image_url,
+            verified=False,
+            added_by_user_id=current_user.id,
+        )
+        db.session.add(source)
+        db.session.commit()
+
+        flash(
+            "Источник добавлен и уже виден на сайте с пометкой «не проверено» "
+            "— администрация проверит и подтвердит.",
+            "success",
+        )
+        return redirect(url_for("sacred.detail", slug=source.slug))
+
+    return render_template("sacred/add.html")
 
 
 @bp.route("/<slug>")

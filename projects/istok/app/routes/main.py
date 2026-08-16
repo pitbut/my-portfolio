@@ -155,6 +155,44 @@ def experiments_list():
     return render_template("main/experiments.html", experiments=experiments)
 
 
+@bp.route("/experiments/add", methods=["GET", "POST"])
+@login_required
+def experiment_add():
+    if not current_user.email_confirmed:
+        flash("Сначала подтвердите email — так мы защищаем каталог от спама.", "error")
+        return redirect(url_for("main.experiments_list"))
+
+    if request.method == "POST":
+        title = (request.form.get("title") or "").strip()
+        description = (request.form.get("description") or "").strip()
+        verdict = (request.form.get("verdict") or "").strip()
+
+        if not title or not description or verdict not in ("наука", "миф"):
+            flash("Заполните название, описание и выберите вердикт.", "error")
+            return render_template("main/experiment_add.html")
+
+        used_slugs = {row[0] for row in db.session.query(Experiment.slug).all()}
+        experiment = Experiment(
+            slug=unique_slug(title, used_slugs, "experiment"),
+            title=title,
+            description=description,
+            verdict=verdict,
+            verified=False,
+            added_by_user_id=current_user.id,
+        )
+        db.session.add(experiment)
+        db.session.commit()
+
+        flash(
+            "Опыт добавлен и уже виден на сайте с пометкой «не проверено» "
+            "— администрация проверит и подтвердит.",
+            "success",
+        )
+        return redirect(url_for("main.experiment_detail", slug=experiment.slug))
+
+    return render_template("main/experiment_add.html")
+
+
 @bp.route("/experiments/<slug>")
 def experiment_detail(slug):
     experiment = Experiment.query.filter_by(slug=slug).first()
@@ -175,6 +213,55 @@ def experiment_detail(slug):
 def delivery_list():
     services = DeliveryService.query.order_by(DeliveryService.name).all()
     return render_template("main/delivery.html", services=services)
+
+
+@bp.route("/delivery/add", methods=["GET", "POST"])
+@login_required
+def delivery_add():
+    if not current_user.email_confirmed:
+        flash("Сначала подтвердите email — так мы защищаем каталог от спама.", "error")
+        return redirect(url_for("main.delivery_list"))
+
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        coverage = (request.form.get("coverage") or "").strip()
+        delivery_time = (request.form.get("delivery_time") or "").strip()
+        price_rub = request.form.get("price_rub") or None
+        phone = (request.form.get("phone") or "").strip()
+        website = (request.form.get("website") or "").strip()
+
+        if not name or not delivery_time:
+            flash("Заполните название и сроки доставки.", "error")
+            return render_template("main/delivery_add.html")
+
+        try:
+            price_rub = float(price_rub) if price_rub else None
+        except ValueError:
+            price_rub = None
+
+        used_slugs = {row[0] for row in db.session.query(DeliveryService.slug).all()}
+        service = DeliveryService(
+            slug=unique_slug(name, used_slugs, "service"),
+            name=name,
+            coverage=coverage or None,
+            delivery_time=delivery_time,
+            price_rub=price_rub,
+            phone=phone or None,
+            website=website or None,
+            verified=False,
+            added_by_user_id=current_user.id,
+        )
+        db.session.add(service)
+        db.session.commit()
+
+        flash(
+            "Служба доставки добавлена и уже видна на сайте с пометкой «не проверено» "
+            "— администрация проверит и подтвердит.",
+            "success",
+        )
+        return redirect(url_for("main.delivery_detail", slug=service.slug))
+
+    return render_template("main/delivery_add.html")
 
 
 @bp.route("/delivery/<slug>")

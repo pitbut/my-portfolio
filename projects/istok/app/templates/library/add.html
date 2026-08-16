@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Добавить книгу — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 520px;">
+  <div class="breadcrumb"><a href="{{ url_for('library.index') }}">Библиотека</a> / Добавить</div>
+  <div class="section__header">
+    <h2>Добавить книгу</h2>
+  </div>
+  <p class="prose">
+    Книга появится в библиотеке сразу с пометкой «не проверено» —
+    администрация проверит сведения и подтвердит их.
+  </p>
+
+  <form method="post" enctype="multipart/form-data">
+    <div class="field">
+      <label for="title">Название</label>
+      <input type="text" id="title" name="title" maxlength="255" required>
+    </div>
+
+    <div class="field">
+      <label for="author">Автор</label>
+      <input type="text" id="author" name="author" maxlength="255" required>
+    </div>
+
+    <div class="field">
+      <label for="year">Год издания (необязательно)</label>
+      <input type="text" id="year" name="year" placeholder="2020">
+    </div>
+
+    <div class="field">
+      <label for="genre">Жанр (необязательно)</label>
+      <input type="text" id="genre" name="genre" maxlength="120">
+    </div>
+
+    <div class="field">
+      <label for="description">Описание</label>
+      <textarea id="description" name="description" rows="5" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="cover">Обложка (необязательно)</label>
+      <input type="file" id="cover" name="cover" accept="image/*">
+    </div>
+
+    <button type="submit" class="btn btn--primary">Добавить</button>
+  </form>
+</section>
+{% endblock %}
