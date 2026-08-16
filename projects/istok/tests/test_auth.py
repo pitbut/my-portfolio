@@ -1,13 +1,20 @@
 from itsdangerous import URLSafeTimedSerializer
+from werkzeug.security import check_password_hash
 
 from app.models import User
-from app.routes.auth import CONFIRM_SALT
+from app.routes.auth import CONFIRM_SALT, RESET_SALT
 
 
 def _confirm_token(app, email):
     with app.app_context():
         serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
         return serializer.dumps(email, salt=CONFIRM_SALT)
+
+
+def _reset_token(app, email):
+    with app.app_context():
+        serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+        return serializer.dumps(email, salt=RESET_SALT)
 
 
 def test_register_creates_unconfirmed_user(client, app):
@@ -198,6 +205,80 @@ def test_pending_confirm_link_shown_when_mail_not_configured(client):
     )
     resp = client.get("/")
     assert "/auth/confirm/".encode() in resp.data
+
+
+def test_forgot_password_unknown_email_shows_generic_message(client):
+    resp = client.post(
+        "/auth/forgot-password",
+        data={"email": "nosuchuser@user.example"},
+        follow_redirects=True,
+    )
+    assert "Если такой email зарегистрирован".encode() in resp.data
+
+
+def test_forgot_password_known_email_shows_fallback_link(client):
+    client.post(
+        "/auth/register",
+        data={"email": "forgot@user.example", "password": "password123", "password2": "password123"},
+    )
+    client.get("/auth/logout")
+
+    resp = client.post(
+        "/auth/forgot-password",
+        data={"email": "forgot@user.example"},
+        follow_redirects=True,
+    )
+    assert "/auth/reset-password/".encode() in resp.data
+
+
+def test_reset_password_with_valid_token(client, app):
+    client.post(
+        "/auth/register",
+        data={"email": "reset@user.example", "password": "password123", "password2": "password123"},
+    )
+    client.get("/auth/logout")
+
+    token = _reset_token(app, "reset@user.example")
+    resp = client.post(
+        f"/auth/reset-password/{token}",
+        data={"password": "newpassword456", "password2": "newpassword456"},
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+
+    with app.app_context():
+        user = User.query.filter_by(email="reset@user.example").first()
+        assert check_password_hash(user.password_hash, "newpassword456")
+        assert not check_password_hash(user.password_hash, "password123")
+
+    client.get("/auth/logout")
+    resp = client.post(
+        "/auth/login",
+        data={"email": "reset@user.example", "password": "newpassword456"},
+        follow_redirects=True,
+    )
+    assert "reset@user.example".encode() in resp.data
+
+
+def test_reset_password_mismatch(client, app):
+    client.post(
+        "/auth/register",
+        data={"email": "resetmismatch@user.example", "password": "password123", "password2": "password123"},
+    )
+    client.get("/auth/logout")
+
+    token = _reset_token(app, "resetmismatch@user.example")
+    resp = client.post(
+        f"/auth/reset-password/{token}",
+        data={"password": "newpassword456", "password2": "other789012"},
+        follow_redirects=True,
+    )
+    assert "Пароли не совпадают".encode() in resp.data
+
+
+def test_reset_password_invalid_token(client):
+    resp = client.get("/auth/reset-password/not-a-real-token", follow_redirects=True)
+    assert "недействительна".encode() in resp.data
 
 
 def test_pending_confirm_link_hidden_after_confirmation(client, app):

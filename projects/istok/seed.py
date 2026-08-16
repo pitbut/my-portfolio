@@ -132,7 +132,9 @@ def load_water_brands():
             water_type=row["water_type"].strip(),
             mineralization_mg_l=to_int(row.get("mineralization_mg_l")),
             volume_l=to_decimal_str(row["volume_l"]),
-            price_rub=to_decimal_str(row["price_rub"]),
+            price=to_decimal_str(row["price"]),
+            currency=(clean(row.get("currency")) or "RUB"),
+            country=clean(row.get("country")),
             origin=clean(row.get("origin")),
             description=clean(row.get("description")),
         )

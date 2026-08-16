@@ -54,10 +54,24 @@ def app():
             water_type="питьевая",
             mineralization_mg_l=200,
             volume_l=1.5,
-            price_rub=50,
+            price=50,
+            currency="RUB",
+            country="Россия",
             description="Описание тестовой воды.",
         )
         db.session.add(water_brand)
+        db.session.add(
+            WaterBrand(
+                name="Тестовая вода 2",
+                slug="test-water-2",
+                water_type="природная негазированная",
+                volume_l=1.0,
+                price=3000,
+                currency="UZS",
+                country="Узбекистан",
+                description="Вторая тестовая марка для проверки фильтра по стране.",
+            )
+        )
         db.session.flush()
         db.session.add(
             Supplier(

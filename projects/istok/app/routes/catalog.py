@@ -1,17 +1,21 @@
 """Раздел «Каталог цен на питьевую воду»."""
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import func
 
 from app import db
-from app.models import Supplier, WaterBrand
+from app.models import Review, Supplier, WaterBrand
 from app.photos import upload_photo
 from app.routes.reviews import reviews_for
 
 bp = Blueprint("catalog", __name__)
 
+# Цена хранится в собственной валюте каждой марки (см. WaterBrand.currency),
+# поэтому сортировка по цене сравнивает "сырые" числа разных валют — это
+# осознанный компромисс, а не пересчёт по курсу.
 SORT_OPTIONS = {
-    "price_asc": (WaterBrand.price_rub.asc(), "цена: по возрастанию"),
-    "price_desc": (WaterBrand.price_rub.desc(), "цена: по убыванию"),
+    "price_asc": (WaterBrand.price.asc(), "цена: по возрастанию"),
+    "price_desc": (WaterBrand.price.desc(), "цена: по убыванию"),
     "name": (WaterBrand.name.asc(), "по названию"),
     "mineralization": (WaterBrand.mineralization_mg_l.asc(), "по минерализации"),
 }
@@ -25,13 +29,37 @@ def index():
         sort = DEFAULT_SORT
     order_by, _ = SORT_OPTIONS[sort]
 
-    brands = WaterBrand.query.order_by(order_by).all()
+    country = (request.args.get("country") or "").strip()
+
+    query = WaterBrand.query
+    if country:
+        query = query.filter_by(country=country)
+    brands = query.order_by(order_by).all()
+
+    countries = [
+        row[0]
+        for row in db.session.query(WaterBrand.country)
+        .filter(WaterBrand.country.isnot(None))
+        .distinct()
+        .order_by(WaterBrand.country)
+        .all()
+    ]
+
+    avg_ratings = dict(
+        db.session.query(Review.target_id, func.avg(Review.rating))
+        .filter(Review.target_type == "water_brand")
+        .group_by(Review.target_id)
+        .all()
+    )
 
     return render_template(
         "catalog/index.html",
         brands=brands,
         sort=sort,
         sort_options=SORT_OPTIONS,
+        countries=countries,
+        selected_country=country,
+        avg_ratings=avg_ratings,
     )
 
 

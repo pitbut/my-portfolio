@@ -17,6 +17,9 @@
     </div>
     <button type="submit" class="btn btn--primary">Войти</button>
   </form>
-  <p class="prose" style="margin-top:16px;">Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></p>
+  <p class="prose" style="margin-top:16px;">
+    Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a><br>
+    Забыли пароль? <a href="{{ url_for('auth.forgot_password') }}">Восстановить</a>
+  </p>
 </section>
 {% endblock %}

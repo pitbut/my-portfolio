@@ -61,7 +61,7 @@
     <article class="card">
       <span class="meta">{{ w.water_type }}</span>
       <h3><a href="{{ url_for('catalog.detail', slug=w.slug) }}">{{ w.name }}</a></h3>
-      <p>{{ w.volume_l }} л &middot; {{ "%.0f"|format(w.price_rub) }} ₽</p>
+      <p>{{ w.volume_l }} л &middot; {{ "%.2f"|format(w.price) }} {{ w.currency_symbol }}</p>
     </article>
     {% else %}
     <p>Каталог пока пуст.</p>

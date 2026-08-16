@@ -14,7 +14,7 @@
   <h1>{{ brand.name }}</h1>
   <div class="meta-row">
     <span>{{ brand.water_type }}</span>
-    <span>{{ brand.volume_l }} л &middot; {{ "%.0f"|format(brand.price_rub) }} ₽</span>
+    <span>{{ brand.volume_l }} л &middot; {{ "%.2f"|format(brand.price) }} {{ brand.currency_symbol }}</span>
     {% if brand.mineralization_mg_l %}<span>{{ brand.mineralization_mg_l }} мг/л</span>{% endif %}
     {% if brand.origin %}<span>📍 {{ brand.origin }}</span>{% endif %}
   </div>
