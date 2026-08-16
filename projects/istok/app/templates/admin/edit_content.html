@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Редактировать — {{ spec.label }} — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 620px;">
+  <div class="section__header">
+    <h2>Редактировать: {{ spec.label }}</h2>
+  </div>
+
+  <form method="post">
+    {% for field_name, label, field_type in spec.fields %}
+    <div class="field">
+      <label for="{{ field_name }}">{{ label }}</label>
+      {% if field_type == "textarea" %}
+      <textarea id="{{ field_name }}" name="{{ field_name }}" rows="4">{{ item[field_name] if item[field_name] is not none else "" }}</textarea>
+      {% else %}
+      <input type="text" id="{{ field_name }}" name="{{ field_name }}" value="{{ item[field_name] if item[field_name] is not none else "" }}">
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn--primary">Сохранить</button>
+  </form>
+</section>
+{% endblock %}

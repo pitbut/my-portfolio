@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ user.email }} — пользователь — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  {% with admin_title = "Пользователь: " ~ user.email %}{% include "admin/_nav.html" %}{% endwith %}
+
+  <p class="admin-item__meta">
+    Зарегистрирован {{ user.created_at.strftime("%d.%m.%Y %H:%M") }}
+    &middot; email {{ "подтверждён" if user.email_confirmed else "не подтверждён" }}
+  </p>
+
+  <div class="admin-item__actions" style="margin: 12px 0 24px;">
+    <form method="post" action="{{ url_for('admin.delete_user', user_id=user.id) }}" onsubmit="return confirm('Удалить этого пользователя? Его добавления останутся на сайте, но без указания автора.');">
+      <button type="submit" class="btn btn--reject">Удалить пользователя</button>
+    </form>
+  </div>
+
+  <h3>Добавления ({{ additions | length }})</h3>
+
+  {% if additions %}
+  <div class="admin-list">
+    {% for a in additions %}
+    <article class="admin-item">
+      <div class="admin-item__meta">
+        {{ a.label }}
+        &middot; <span class="badge {{ 'badge--science' if a.obj.verified else 'badge--myth' }}">{{ 'проверено' if a.obj.verified else 'не проверено' }}</span>
+      </div>
+      <h3 style="margin: 6px 0;">
+        {% if a.view_url %}<a href="{{ a.view_url }}" target="_blank">{{ a.name }}</a>{% else %}{{ a.name }}{% endif %}
+      </h3>
+      <div class="admin-item__actions">
+        <a href="{{ url_for('admin.edit_content', content_type=a.type, item_id=a.obj.id) }}" class="btn btn--approve">Редактировать</a>
+        <form method="post" action="{{ url_for('admin.delete_content', content_type=a.type, item_id=a.obj.id) }}" onsubmit="return confirm('Удалить это добавление?');">
+          <button type="submit" class="btn btn--reject">Удалить</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Этот пользователь пока ничего не добавил.</div>
+  {% endif %}
+</section>
+{% endblock %}
