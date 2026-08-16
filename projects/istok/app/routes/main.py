@@ -28,7 +28,7 @@ MAX_MESSAGE_LENGTH = 4000
 def index():
     sacred_sources = SacredSource.query.order_by(SacredSource.name).limit(3).all()
     articles = Article.query.order_by(Article.published_at.desc()).limit(3).all()
-    water_brands = WaterBrand.query.order_by(WaterBrand.price_rub).limit(4).all()
+    water_brands = WaterBrand.query.order_by(WaterBrand.price).limit(4).all()
     books = Book.query.order_by(Book.created_at.desc()).limit(3).all()
     equipment = Equipment.query.order_by(Equipment.created_at.desc()).limit(3).all()
     experiments = Experiment.query.order_by(Experiment.created_at.desc()).limit(3).all()

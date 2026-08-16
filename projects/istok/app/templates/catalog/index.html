@@ -9,9 +9,23 @@
 
   <div class="sort-bar">
     {% for key, (order_by, label) in sort_options.items() %}
-      <a href="{{ url_for('catalog.index', sort=key) }}" class="{{ 'is-active' if key == sort }}">{{ label }}</a>
+      <a href="{{ url_for('catalog.index', sort=key, country=selected_country or none) }}" class="{{ 'is-active' if key == sort }}">{{ label }}</a>
     {% endfor %}
   </div>
+
+  {% if countries %}
+  <form method="get" class="sort-bar" style="margin-top:8px;">
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <label for="country-filter" style="align-self:center; color: var(--ink-dim); font-size:.9rem;">Страна:</label>
+    <select id="country-filter" name="country" onchange="this.form.submit()">
+      <option value="">Все страны</option>
+      {% for c in countries %}
+      <option value="{{ c }}" {{ "selected" if c == selected_country }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    {% if selected_country %}<a href="{{ url_for('catalog.index', sort=sort) }}">Сбросить</a>{% endif %}
+  </form>
+  {% endif %}
 
   {% if brands %}
   <div class="table-wrap">
@@ -23,6 +37,7 @@
           <th>Минерализация</th>
           <th>Объём</th>
           <th>Цена</th>
+          <th>Оценка</th>
           <th>Происхождение</th>
         </tr>
       </thead>
@@ -33,7 +48,8 @@
           <td>{{ w.water_type }}</td>
           <td>{{ w.mineralization_mg_l ~ " мг/л" if w.mineralization_mg_l else "—" }}</td>
           <td>{{ w.volume_l }} л</td>
-          <td>{{ "%.0f"|format(w.price_rub) }} ₽</td>
+          <td>{{ "%.2f"|format(w.price) }} {{ w.currency_symbol }}</td>
+          <td>{{ "★ %.1f"|format(avg_ratings[w.id]) if w.id in avg_ratings else "—" }}</td>
           <td>{{ w.origin or "—" }}</td>
         </tr>
         {% endfor %}
@@ -41,7 +57,7 @@
     </table>
   </div>
   {% else %}
-  <div class="empty-state">Каталог пока пуст.</div>
+  <div class="empty-state">По этому фильтру ничего не нашлось.</div>
   {% endif %}
 </section>
 {% endblock %}

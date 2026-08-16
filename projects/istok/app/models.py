@@ -69,9 +69,23 @@ class WaterBrand(TimestampMixin, SlugMixin, db.Model):
     water_type = db.Column(db.String(120), nullable=False)  # питьевая/минеральная/родниковая...
     mineralization_mg_l = db.Column(db.Integer, nullable=True)  # мг/л
     volume_l = db.Column(db.Numeric(5, 2), nullable=False)
-    price_rub = db.Column(db.Numeric(10, 2), nullable=False)
+    # Цена хранится в собственной валюте страны происхождения (см. currency),
+    # а не всегда в рублях — так её можно показывать в естественных для
+    # покупателя единицах вместо пересчёта по курсу.
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    currency = db.Column(db.String(8), nullable=False, default="RUB")
+    country = db.Column(db.String(120), nullable=True, index=True)
     origin = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
+
+    CURRENCY_SYMBOLS = {
+        "RUB": "₽", "UZS": "сум", "KZT": "₸", "GEL": "₾",
+        "AMD": "֏", "BYN": "Br", "MDL": "L", "EUR": "€",
+    }
+
+    @property
+    def currency_symbol(self):
+        return self.CURRENCY_SYMBOLS.get(self.currency, self.currency)
 
     def __repr__(self):
         return f"<WaterBrand {self.name!r}>"
