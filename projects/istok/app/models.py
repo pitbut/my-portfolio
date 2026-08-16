@@ -297,6 +297,23 @@ class DeliveryService(TimestampMixin, SlugMixin, db.Model):
         return f"<DeliveryService {self.name!r}>"
 
 
+class SiteStat(db.Model):
+    """Однострочная таблица со счётчиком просмотров сайта (для /admin).
+
+    Инкрементируется в app/__init__.py при каждом обычном запросе странице
+    (не /static, не /admin) через прямой SQL UPDATE — без чтения-затем-записи,
+    чтобы не терять счёт при параллельных запросах в нескольких воркерах
+    gunicorn."""
+
+    __tablename__ = "site_stats"
+
+    id = db.Column(db.Integer, primary_key=True)
+    total_views = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<SiteStat total_views={self.total_views}>"
+
+
 class Banner(TimestampMixin, db.Model):
     """Рекламный баннер в одном из 3 слотов на главной странице.
 

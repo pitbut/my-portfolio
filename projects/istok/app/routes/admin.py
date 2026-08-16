@@ -27,6 +27,7 @@ from app.models import (
     Experiment,
     Review,
     SacredSource,
+    SiteStat,
     Supplier,
     User,
     WaterBrand,
@@ -37,6 +38,12 @@ from app.routes.reviews import REVIEW_TARGETS
 BANNER_SLOTS = (1, 2, 3)
 
 bp = Blueprint("admin", __name__, template_folder="../templates/admin")
+
+
+@bp.context_processor
+def inject_total_views():
+    stat = SiteStat.query.get(1)
+    return {"total_views": stat.total_views if stat else 0}
 
 # Реестр всех типов пользовательского контента — используется страницей
 # пользователя (/admin/users/<id>) и общими роутами

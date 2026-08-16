@@ -1,5 +1,6 @@
 <div class="section__header">
   <h2>{{ admin_title }}</h2>
+  <span class="admin-item__meta">👁 {{ "{:,}".format(total_views).replace(",", " ") }} просмотров сайта</span>
   <a class="see-all" href="{{ url_for('admin.logout') }}">Выйти</a>
 </div>
 <div class="sort-bar">
