@@ -19,7 +19,7 @@
         <a href="{{ url_for('catalog.detail', slug=s.water_brand.slug) }}" target="_blank">{{ s.water_brand.name }}</a>
         &middot; {{ s.created_at.strftime("%d.%m.%Y %H:%M") }}
         {% if s.added_by %} &middot; добавил(а) {{ s.added_by.email }}{% endif %}
-        &middot; <span class="badge {{ 'badge--science' if s.verified else 'badge--myth' }}">{{ 'проверено' if s.verified else 'не проверено' }}</span>
+        &middot; <span class="badge {{ 'badge--science' if s.verified else 'badge--myth' }}">{{ _('проверено') if s.verified else _('не проверено') }}</span>
       </div>
       <h3 style="margin: 6px 0;">{{ s.name }}</h3>
       {% if s.supplier_type %}<p class="admin-item__meta">{{ s.supplier_type }}</p>{% endif %}

@@ -4,23 +4,23 @@
 {% block content %}
 <section class="section wrap">
   <div class="section__header">
-    <h2>Оборудование для воды</h2>
+    <h2>{{ _('Оборудование для воды') }}</h2>
     {% if current_user.is_authenticated %}
-      <a class="see-all" href="{{ url_for('main.equipment_add') }}">+ Добавить оборудование</a>
+      <a class="see-all" href="{{ url_for('main.equipment_add') }}">+ {{ _('Добавить оборудование') }}</a>
     {% else %}
-      <a class="see-all" href="{{ url_for('auth.register') }}">Зарегистрируйтесь, чтобы добавить</a>
+      <a class="see-all" href="{{ url_for('auth.register') }}">{{ _('Зарегистрируйтесь, чтобы добавить') }}</a>
     {% endif %}
   </div>
 
   <form method="get" class="search-bar">
-    <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию, описанию, производителю…">
+    <input type="text" name="q" value="{{ q }}" placeholder="{{ _('Поиск по названию, описанию, производителю…') }}">
     {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
-    <button type="submit" class="btn btn--primary">Найти</button>
+    <button type="submit" class="btn btn--primary">{{ _('Найти') }}</button>
   </form>
 
   {% if category_counts %}
   <div class="sort-bar">
-    <a href="{{ url_for('main.equipment_list', q=q) }}" class="{{ 'is-active' if not active_category }}">все категории</a>
+    <a href="{{ url_for('main.equipment_list', q=q) }}" class="{{ 'is-active' if not active_category }}">{{ _('все категории') }}</a>
     {% for cat, count in category_counts %}
       <a href="{{ url_for('main.equipment_list', category=cat, q=q) }}" class="{{ 'is-active' if cat == active_category }}">{{ cat }} ({{ count }})</a>
     {% endfor %}
@@ -35,7 +35,7 @@
       <img class="card-photo" src="{{ image_url(e.image_url) }}" alt="{{ e.name }}" loading="lazy">
       {% endif %}
       <span class="meta">{{ e.category }}</span>
-      {% if not e.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+      {% if not e.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
       <h3><a href="{{ url_for('main.equipment_detail', slug=e.slug) }}">{{ e.name }}</a></h3>
       <p>{{ e.description | truncate(140) }}</p>
       <p>
@@ -47,7 +47,7 @@
   </div>
   {% else %}
   <div class="empty-state">
-    {% if q or active_category %}Ничего не найдено.{% else %}Оборудование пока не добавлено.{% endif %}
+    {% if q or active_category %}{{ _('Ничего не найдено.') }}{% else %}{{ _('Оборудование пока не добавлено.') }}{% endif %}
   </div>
   {% endif %}
 </section>

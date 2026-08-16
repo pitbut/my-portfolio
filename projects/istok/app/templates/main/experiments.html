@@ -4,24 +4,24 @@
 {% block content %}
 <section class="section wrap">
   <div class="section__header">
-    <h2>Опыты с водой: наука vs мифы</h2>
+    <h2>{{ _('Опыты с водой: наука vs мифы') }}</h2>
     {% if current_user.is_authenticated %}
-    <a class="see-all" href="{{ url_for('main.experiment_add') }}">+ Добавить опыт</a>
+    <a class="see-all" href="{{ url_for('main.experiment_add') }}">+ {{ _('Добавить опыт') }}</a>
     {% endif %}
   </div>
   {% if experiments %}
   <div class="grid">
     {% for exp in experiments %}
     <article class="card">
-      <span class="badge {{ 'badge--science' if exp.verdict == 'наука' else 'badge--myth' }}">{{ exp.verdict }}</span>
-      {% if not exp.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+      <span class="badge {{ 'badge--science' if exp.verdict == 'наука' else 'badge--myth' }}">{{ _('наука') if exp.verdict == 'наука' else _('миф') }}</span>
+      {% if not exp.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
       <h3><a href="{{ url_for('main.experiment_detail', slug=exp.slug) }}">{{ exp.title }}</a></h3>
       <p>{{ exp.description | truncate(140) }}</p>
     </article>
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state">Опыты пока не добавлены.</div>
+  <div class="empty-state">{{ _('Опыты пока не добавлены.') }}</div>
   {% endif %}
 </section>
 {% endblock %}

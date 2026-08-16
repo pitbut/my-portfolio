@@ -3,9 +3,9 @@
 
 {% block content %}
 <section class="section wrap" style="max-width: 520px;">
-  <div class="breadcrumb"><a href="{{ url_for('library.index') }}">Библиотека</a> / Добавить</div>
+  <div class="breadcrumb"><a href="{{ url_for('library.index') }}">Библиотека</a> / {{ _('Добавить') }}</div>
   <div class="section__header">
-    <h2>Добавить книгу</h2>
+    <h2>{{ _('Добавить книгу') }}</h2>
   </div>
   <p class="prose">
     Книга появится в библиотеке сразу с пометкой «не проверено» —
@@ -14,36 +14,36 @@
 
   <form method="post" enctype="multipart/form-data">
     <div class="field">
-      <label for="title">Название</label>
+      <label for="title">{{ _('Название') }}</label>
       <input type="text" id="title" name="title" maxlength="255" required>
     </div>
 
     <div class="field">
-      <label for="author">Автор</label>
+      <label for="author">{{ _('Автор') }}</label>
       <input type="text" id="author" name="author" maxlength="255" required>
     </div>
 
     <div class="field">
-      <label for="year">Год издания (необязательно)</label>
+      <label for="year">{{ _('Год издания (необязательно)') }}</label>
       <input type="text" id="year" name="year" placeholder="2020">
     </div>
 
     <div class="field">
-      <label for="genre">Жанр (необязательно)</label>
+      <label for="genre">{{ _('Жанр (необязательно)') }}</label>
       <input type="text" id="genre" name="genre" maxlength="120">
     </div>
 
     <div class="field">
-      <label for="description">Описание</label>
+      <label for="description">{{ _('Описание') }}</label>
       <textarea id="description" name="description" rows="5" required></textarea>
     </div>
 
     <div class="field">
-      <label for="cover">Обложка (необязательно)</label>
+      <label for="cover">{{ _('Обложка (необязательно)') }}</label>
       <input type="file" id="cover" name="cover" accept="image/*">
     </div>
 
-    <button type="submit" class="btn btn--primary">Добавить</button>
+    <button type="submit" class="btn btn--primary">{{ _('Добавить') }}</button>
   </form>
 </section>
 {% endblock %}

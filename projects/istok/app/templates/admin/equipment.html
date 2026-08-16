@@ -19,7 +19,7 @@
         <a href="{{ url_for('main.equipment_detail', slug=item.slug) }}" target="_blank">{{ item.category }}</a>
         &middot; {{ item.created_at.strftime("%d.%m.%Y %H:%M") }}
         {% if item.added_by %} &middot; добавил(а) {{ item.added_by.email }}{% endif %}
-        &middot; <span class="badge {{ 'badge--science' if item.verified else 'badge--myth' }}">{{ 'проверено' if item.verified else 'не проверено' }}</span>
+        &middot; <span class="badge {{ 'badge--science' if item.verified else 'badge--myth' }}">{{ _('проверено') if item.verified else _('не проверено') }}</span>
       </div>
       <h3 style="margin: 6px 0;">{{ item.name }}</h3>
       <p>{{ item.description | truncate(200) }}</p>

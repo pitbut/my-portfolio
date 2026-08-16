@@ -24,7 +24,7 @@
     <article class="admin-item">
       <div class="admin-item__meta">
         {{ a.label }}
-        &middot; <span class="badge {{ 'badge--science' if a.obj.verified else 'badge--myth' }}">{{ 'проверено' if a.obj.verified else 'не проверено' }}</span>
+        &middot; <span class="badge {{ 'badge--science' if a.obj.verified else 'badge--myth' }}">{{ _('проверено') if a.obj.verified else _('не проверено') }}</span>
       </div>
       <h3 style="margin: 6px 0;">
         {% if a.view_url %}<a href="{{ a.view_url }}" target="_blank">{{ a.name }}</a>{% else %}{{ a.name }}{% endif %}

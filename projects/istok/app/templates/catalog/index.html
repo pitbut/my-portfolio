@@ -9,32 +9,32 @@
 {% block content %}
 <section class="section wrap">
   <div class="section__header">
-    <h2>Каталог цен на питьевую воду</h2>
+    <h2>{{ _('Каталог цен на питьевую воду') }}</h2>
     {% if current_user.is_authenticated %}
-    <a class="see-all" href="{{ url_for('catalog.add') }}">+ Добавить марку воды</a>
+    <a class="see-all" href="{{ url_for('catalog.add') }}">+ {{ _('Добавить марку воды') }}</a>
     {% endif %}
   </div>
 
-  <p class="prose">Кликните по заголовку столбца, чтобы отсортировать таблицу по нему (повторный клик меняет направление).</p>
+  <p class="prose">{{ _('Кликните по заголовку столбца, чтобы отсортировать таблицу по нему (повторный клик меняет направление).') }}</p>
 
   {% if not current_user.is_authenticated %}
-  <p class="prose">Знаете марку, которой нет в каталоге? <a href="{{ url_for('auth.register') }}">Зарегистрируйтесь</a>, чтобы добавить её.</p>
+  <p class="prose">{{ _('Знаете марку, которой нет в каталоге?') }} <a href="{{ url_for('auth.register') }}">{{ _('Зарегистрируйтесь') }}</a>, {{ _('чтобы добавить её.') }}</p>
   {% elif not current_user.email_confirmed %}
-  <p class="prose">Чтобы добавить свою марку воды, сначала подтвердите email.</p>
+  <p class="prose">{{ _('Чтобы добавить свою марку воды, сначала подтвердите email.') }}</p>
   {% endif %}
 
   {% if countries %}
   <form method="get" class="sort-bar" style="margin-top:8px;">
     <input type="hidden" name="sort" value="{{ sort_column }}">
     <input type="hidden" name="dir" value="{{ sort_dir }}">
-    <label for="country-filter" style="align-self:center; color: var(--ink-dim); font-size:.9rem;">Страна:</label>
+    <label for="country-filter" style="align-self:center; color: var(--ink-dim); font-size:.9rem;">{{ _('Страна:') }}</label>
     <select id="country-filter" name="country" onchange="this.form.submit()">
-      <option value="">Все страны</option>
+      <option value="">{{ _('Все страны') }}</option>
       {% for c in countries %}
       <option value="{{ c }}" {{ "selected" if c == selected_country }}>{{ c }}</option>
       {% endfor %}
     </select>
-    {% if selected_country %}<a href="{{ url_for('catalog.index', sort=sort_column, dir=sort_dir) }}">Сбросить</a>{% endif %}
+    {% if selected_country %}<a href="{{ url_for('catalog.index', sort=sort_column, dir=sort_dir) }}">{{ _('Сбросить') }}</a>{% endif %}
   </form>
   {% endif %}
 
@@ -43,13 +43,13 @@
     <table class="data-table">
       <thead>
         <tr>
-          {{ sort_th("name", "Марка") }}
-          {{ sort_th("water_type", "Тип") }}
-          {{ sort_th("mineralization", "Минерализация") }}
-          {{ sort_th("volume", "Объём") }}
-          {{ sort_th("price", "Цена") }}
-          {{ sort_th("rating", "Оценка") }}
-          {{ sort_th("country", "Происхождение") }}
+          {{ sort_th("name", _("Марка")) }}
+          {{ sort_th("water_type", _("Тип")) }}
+          {{ sort_th("mineralization", _("Минерализация")) }}
+          {{ sort_th("volume", _("Объём")) }}
+          {{ sort_th("price", _("Цена")) }}
+          {{ sort_th("rating", _("Оценка")) }}
+          {{ sort_th("country", _("Происхождение")) }}
         </tr>
       </thead>
       <tbody>
@@ -57,7 +57,7 @@
         <tr>
           <td>
             <a href="{{ url_for('catalog.detail', slug=w.slug) }}">{{ w.name }}</a>
-            {% if not w.verified %}<span class="badge badge--myth">не проверено</span>{% endif %}
+            {% if not w.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
           </td>
           <td>{{ w.water_type }}</td>
           <td>{{ w.mineralization_mg_l ~ " мг/л" if w.mineralization_mg_l else "—" }}</td>
@@ -71,7 +71,7 @@
     </table>
   </div>
   {% else %}
-  <div class="empty-state">По этому фильтру ничего не нашлось.</div>
+  <div class="empty-state">{{ _('По этому фильтру ничего не нашлось.') }}</div>
   {% endif %}
 </section>
 {% endblock %}

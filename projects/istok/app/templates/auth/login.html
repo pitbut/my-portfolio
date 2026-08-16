@@ -4,22 +4,22 @@
 {% block content %}
 <section class="section wrap" style="max-width: 420px;">
   <div class="section__header">
-    <h2>Вход</h2>
+    <h2>{{ _('Вход') }}</h2>
   </div>
   <form method="post">
     <div class="field">
-      <label for="email">Email</label>
+      <label for="email">{{ _('Email') }}</label>
       <input type="text" id="email" name="email" value="{{ email }}" required autofocus>
     </div>
     <div class="field">
-      <label for="password">Пароль</label>
+      <label for="password">{{ _('Пароль') }}</label>
       <input type="password" id="password" name="password" required>
     </div>
-    <button type="submit" class="btn btn--primary">Войти</button>
+    <button type="submit" class="btn btn--primary">{{ _('Войти') }}</button>
   </form>
   <p class="prose" style="margin-top:16px;">
-    Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a><br>
-    Забыли пароль? <a href="{{ url_for('auth.forgot_password') }}">Восстановить</a>
+    {{ _('Нет аккаунта?') }} <a href="{{ url_for('auth.register') }}">{{ _('Зарегистрироваться') }}</a><br>
+    {{ _('Забыли пароль?') }} <a href="{{ url_for('auth.forgot_password') }}">{{ _('Восстановить') }}</a>
   </p>
 </section>
 {% endblock %}

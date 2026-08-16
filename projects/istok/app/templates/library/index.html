@@ -4,15 +4,15 @@
 {% block content %}
 <section class="section wrap">
   <div class="section__header">
-    <h2>Библиотека книг о воде</h2>
+    <h2>{{ _('Библиотека книг о воде') }}</h2>
     {% if current_user.is_authenticated %}
-    <a class="see-all" href="{{ url_for('library.add') }}">+ Добавить книгу</a>
+    <a class="see-all" href="{{ url_for('library.add') }}">+ {{ _('Добавить книгу') }}</a>
     {% endif %}
   </div>
 
   {% if genres %}
   <div class="sort-bar">
-    <a href="{{ url_for('library.index') }}" class="{{ 'is-active' if not active_genre }}">все жанры</a>
+    <a href="{{ url_for('library.index') }}" class="{{ 'is-active' if not active_genre }}">{{ _('все жанры') }}</a>
     {% for g in genres %}
       <a href="{{ url_for('library.index', genre=g) }}" class="{{ 'is-active' if g == active_genre }}">{{ g }}</a>
     {% endfor %}
@@ -26,15 +26,15 @@
       {% if image_url(b.cover_url) %}
       <img class="card-photo" src="{{ image_url(b.cover_url) }}" alt="{{ b.title }}" loading="lazy">
       {% endif %}
-      <span class="meta">{{ b.genre or "книга" }}{% if b.year %} &middot; {{ b.year }}{% endif %}</span>
-      <h3><a href="{{ url_for('library.detail', slug=b.slug) }}">{{ b.title }}</a>{% if not b.verified %} <span class="badge badge--myth">не проверено</span>{% endif %}</h3>
+      <span class="meta">{{ b.genre or _('книга') }}{% if b.year %} &middot; {{ b.year }}{% endif %}</span>
+      <h3><a href="{{ url_for('library.detail', slug=b.slug) }}">{{ b.title }}</a>{% if not b.verified %} <span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}</h3>
       <p><em>{{ b.author }}</em></p>
       <p>{{ b.description | truncate(140) }}</p>
     </article>
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state">Книги пока не добавлены.</div>
+  <div class="empty-state">{{ _('Книги пока не добавлены.') }}</div>
   {% endif %}
 </section>
 {% endblock %}

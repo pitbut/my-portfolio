@@ -10,7 +10,7 @@
     <span>{{ item.category }}</span>
     {% if item.manufacturer %}<span>{{ item.manufacturer }}</span>{% endif %}
     {% if item.price_rub %}<span>от {{ "%.0f"|format(item.price_rub) }} ₽</span>{% endif %}
-    <span class="badge {{ 'badge--science' if item.verified else 'badge--myth' }}">{{ 'проверено' if item.verified else 'не проверено' }}</span>
+    <span class="badge {{ 'badge--science' if item.verified else 'badge--myth' }}">{{ _('проверено') if item.verified else _('не проверено') }}</span>
   </div>
 
   {% if image_url(item.image_url) %}

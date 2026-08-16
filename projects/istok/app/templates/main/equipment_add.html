@@ -3,9 +3,9 @@
 
 {% block content %}
 <section class="section wrap" style="max-width: 520px;">
-  <div class="breadcrumb"><a href="{{ url_for('main.equipment_list') }}">Оборудование</a> / Добавить</div>
+  <div class="breadcrumb"><a href="{{ url_for('main.equipment_list') }}">Оборудование</a> / {{ _('Добавить') }}</div>
   <div class="section__header">
-    <h2>Добавить оборудование</h2>
+    <h2>{{ _('Добавить оборудование') }}</h2>
   </div>
   <p class="prose">
     Оборудование появится в каталоге сразу с пометкой «не проверено» —
@@ -14,36 +14,36 @@
 
   <form method="post" enctype="multipart/form-data">
     <div class="field">
-      <label for="name">Название</label>
+      <label for="name">{{ _('Название') }}</label>
       <input type="text" id="name" name="name" maxlength="255" required>
     </div>
 
     <div class="field">
-      <label for="category">Категория</label>
+      <label for="category">{{ _('Категория') }}</label>
       <input type="text" id="category" name="category" maxlength="120" placeholder="фильтр / кулер / счётчик" required>
     </div>
 
     <div class="field">
-      <label for="description">Описание</label>
+      <label for="description">{{ _('Описание') }}</label>
       <textarea id="description" name="description" rows="5" required></textarea>
     </div>
 
     <div class="field">
-      <label for="manufacturer">Производитель (необязательно)</label>
+      <label for="manufacturer">{{ _('Производитель (необязательно)') }}</label>
       <input type="text" id="manufacturer" name="manufacturer" maxlength="255">
     </div>
 
     <div class="field">
-      <label for="price_rub">Цена, ₽ (необязательно)</label>
+      <label for="price_rub">{{ _('Цена, ₽ (необязательно)') }}</label>
       <input type="text" id="price_rub" name="price_rub" placeholder="1990">
     </div>
 
     <div class="field">
-      <label for="photo">Фото (необязательно)</label>
+      <label for="photo">{{ _('Фото (необязательно)') }}</label>
       <input type="file" id="photo" name="photo" accept="image/*">
     </div>
 
-    <button type="submit" class="btn btn--primary">Добавить</button>
+    <button type="submit" class="btn btn--primary">{{ _('Добавить') }}</button>
   </form>
 </section>
 {% endblock %}

@@ -3,9 +3,9 @@
 
 {% block content %}
 <section class="section wrap" style="max-width: 560px;">
-  <div class="breadcrumb"><a href="{{ url_for('catalog.index') }}">Каталог</a> / Добавить марку</div>
+  <div class="breadcrumb"><a href="{{ url_for('catalog.index') }}">Каталог</a> / {{ _('Добавить марку') }}</div>
   <div class="section__header">
-    <h2>Добавить марку воды</h2>
+    <h2>{{ _('Добавить марку воды') }}</h2>
   </div>
   <p class="prose">
     Марка появится в каталоге сразу с пометкой «не проверено» —
@@ -14,27 +14,27 @@
 
   <form method="post">
     <div class="field">
-      <label for="name">Название</label>
+      <label for="name">{{ _('Название') }}</label>
       <input type="text" id="name" name="name" maxlength="255" required>
     </div>
 
     <div class="field">
-      <label for="water_type">Тип воды</label>
+      <label for="water_type">{{ _('Тип воды') }}</label>
       <input type="text" id="water_type" name="water_type" maxlength="120" placeholder="питьевая негазированная" required>
     </div>
 
     <div class="field">
-      <label for="volume_l">Объём, л</label>
+      <label for="volume_l">{{ _('Объём, л') }}</label>
       <input type="text" id="volume_l" name="volume_l" placeholder="1.5" required>
     </div>
 
     <div class="field">
-      <label for="price">Цена</label>
+      <label for="price">{{ _('Цена') }}</label>
       <input type="text" id="price" name="price" placeholder="65" required>
     </div>
 
     <div class="field">
-      <label for="currency">Валюта</label>
+      <label for="currency">{{ _('Валюта') }}</label>
       <select id="currency" name="currency">
         {% for code, symbol in currencies.items() %}
         <option value="{{ code }}" {{ "selected" if code == "RUB" }}>{{ code }} ({{ symbol }})</option>
@@ -43,26 +43,26 @@
     </div>
 
     <div class="field">
-      <label for="country">Страна (необязательно)</label>
+      <label for="country">{{ _('Страна (необязательно)') }}</label>
       <input type="text" id="country" name="country" maxlength="120" placeholder="Россия">
     </div>
 
     <div class="field">
-      <label for="origin">Происхождение (необязательно)</label>
+      <label for="origin">{{ _('Происхождение (необязательно)') }}</label>
       <input type="text" id="origin" name="origin" maxlength="255" placeholder="Например, регион и производитель">
     </div>
 
     <div class="field">
-      <label for="mineralization_mg_l">Минерализация, мг/л (необязательно)</label>
+      <label for="mineralization_mg_l">{{ _('Минерализация, мг/л (необязательно)') }}</label>
       <input type="text" id="mineralization_mg_l" name="mineralization_mg_l" placeholder="250">
     </div>
 
     <div class="field">
-      <label for="description">Описание (необязательно)</label>
+      <label for="description">{{ _('Описание (необязательно)') }}</label>
       <textarea id="description" name="description" rows="4"></textarea>
     </div>
 
-    <button type="submit" class="btn btn--primary">Добавить</button>
+    <button type="submit" class="btn btn--primary">{{ _('Добавить') }}</button>
   </form>
 </section>
 {% endblock %}

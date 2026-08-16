@@ -1,0 +1,695 @@
+# English translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-16 19:22+0000\n"
+"PO-Revision-Date: 2026-08-16 19:22+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/templates/_reviews.html:6
+msgid "Отзывы"
+msgstr "Reviews"
+
+#: app/templates/_reviews.html:8
+msgid "Средняя оценка"
+msgstr "Average rating"
+
+#: app/templates/_reviews.html:8 app/templates/_reviews.html:20
+msgid "из 5"
+msgstr "out of 5"
+
+#: app/templates/_reviews.html:20 app/templates/_reviews.html:41
+#: app/templates/catalog/index.html:51
+msgid "Оценка"
+msgstr "Rating"
+
+#: app/templates/_reviews.html:21
+msgid "Аноним"
+msgstr "Anonymous"
+
+#: app/templates/_reviews.html:26
+msgid "Фото к отзыву"
+msgstr "Photo for the review"
+
+#: app/templates/_reviews.html:32
+msgid "Отзывов пока нет — будьте первым."
+msgstr "No reviews yet — be the first."
+
+#: app/templates/_reviews.html:36
+msgid "Оставить отзыв"
+msgstr "Leave a review"
+
+#: app/templates/_reviews.html:43
+msgid "отлично"
+msgstr "excellent"
+
+#: app/templates/_reviews.html:44
+msgid "хорошо"
+msgstr "good"
+
+#: app/templates/_reviews.html:45
+msgid "нормально"
+msgstr "okay"
+
+#: app/templates/_reviews.html:46
+msgid "так себе"
+msgstr "mediocre"
+
+#: app/templates/_reviews.html:47
+msgid "плохо"
+msgstr "poor"
+
+#: app/templates/_reviews.html:52
+msgid "Отзыв"
+msgstr "Review"
+
+#: app/templates/_reviews.html:57 app/templates/main/contact.html:18
+msgid "Ваше имя (необязательно)"
+msgstr "Your name (optional)"
+
+#: app/templates/_reviews.html:62 app/templates/catalog/add_supplier.html:51
+#: app/templates/main/equipment_add.html:42 app/templates/sacred/add.html:52
+msgid "Фото (необязательно)"
+msgstr "Photo (optional)"
+
+#: app/templates/_reviews.html:66
+msgid "Отправить отзыв"
+msgstr "Submit review"
+
+#: app/templates/base.html:25
+msgid "Источники"
+msgstr "Sources"
+
+#: app/templates/articles/index.html:7 app/templates/base.html:26
+#: app/templates/main/index.html:60
+msgid "Статьи"
+msgstr "Articles"
+
+#: app/templates/base.html:27
+msgid "Каталог"
+msgstr "Catalog"
+
+#: app/templates/base.html:28
+msgid "Библиотека"
+msgstr "Library"
+
+#: app/templates/base.html:29
+msgid "Оборудование"
+msgstr "Equipment"
+
+#: app/templates/base.html:30
+msgid "Опыты"
+msgstr "Experiments"
+
+#: app/templates/base.html:31
+msgid "Доставка"
+msgstr "Delivery"
+
+#: app/templates/base.html:32
+msgid "Контакты"
+msgstr "Contacts"
+
+#: app/templates/base.html:35
+msgid "Поиск по сайту…"
+msgstr "Search the site…"
+
+#: app/templates/base.html:35
+msgid "Поиск по сайту"
+msgstr "Site search"
+
+#: app/templates/base.html:36
+msgid "Искать"
+msgstr "Search"
+
+#: app/templates/base.html:45
+msgid "email не подтверждён — отправить письмо ещё раз"
+msgstr "email not confirmed — resend the letter"
+
+#: app/templates/base.html:46
+msgid "Выйти"
+msgstr "Log out"
+
+#: app/templates/auth/forgot_password.html:17 app/templates/auth/login.html:18
+#: app/templates/auth/register.html:25 app/templates/base.html:48
+msgid "Войти"
+msgstr "Log in"
+
+#: app/templates/auth/register.html:7 app/templates/base.html:49
+msgid "Регистрация"
+msgstr "Registration"
+
+#: app/templates/base.html:79
+msgid "Исток — портал о воде"
+msgstr "Istok — a water portal"
+
+#: app/templates/base.html:81
+msgid "Вода помнит путь к морю, даже когда течёт под землёй."
+msgstr "Water remembers its path to the sea, even when flowing underground."
+
+#: app/templates/admin/equipment.html:22 app/templates/admin/suppliers.html:22
+#: app/templates/admin/user_detail.html:27
+#: app/templates/admin/water_brands.html:22
+#: app/templates/articles/detail.html:12 app/templates/articles/index.html:21
+#: app/templates/catalog/detail.html:20 app/templates/catalog/detail.html:43
+#: app/templates/catalog/index.html:60 app/templates/library/detail.html:13
+#: app/templates/library/index.html:30 app/templates/main/delivery.html:17
+#: app/templates/main/delivery_detail.html:12
+#: app/templates/main/equipment.html:38
+#: app/templates/main/equipment_detail.html:13
+#: app/templates/main/experiment_detail.html:11
+#: app/templates/main/experiments.html:17 app/templates/sacred/detail.html:23
+#: app/templates/sacred/index.html:30 app/templates/search.html:22
+msgid "не проверено"
+msgstr "unverified"
+
+#: app/templates/admin/equipment.html:22 app/templates/admin/suppliers.html:22
+#: app/templates/admin/user_detail.html:27
+#: app/templates/admin/water_brands.html:22
+#: app/templates/catalog/detail.html:43
+#: app/templates/main/equipment_detail.html:13
+msgid "проверено"
+msgstr "verified"
+
+#: app/templates/articles/add.html:6 app/templates/articles/add.html:41
+#: app/templates/catalog/add.html:65 app/templates/catalog/add_supplier.html:55
+#: app/templates/library/add.html:6 app/templates/library/add.html:46
+#: app/templates/main/delivery_add.html:6
+#: app/templates/main/delivery_add.html:46
+#: app/templates/main/equipment_add.html:6
+#: app/templates/main/equipment_add.html:46
+#: app/templates/main/experiment_add.html:6
+#: app/templates/main/experiment_add.html:34 app/templates/sacred/add.html:6
+#: app/templates/sacred/add.html:56
+msgid "Добавить"
+msgstr "Add"
+
+#: app/templates/articles/add.html:8 app/templates/articles/index.html:9
+msgid "Добавить статью"
+msgstr "Add article"
+
+#: app/templates/articles/add.html:17
+msgid "Заголовок"
+msgstr "Title"
+
+#: app/templates/articles/add.html:22
+msgid "Рубрика"
+msgstr "Category"
+
+#: app/templates/articles/add.html:27
+msgid "Краткое содержание (необязательно)"
+msgstr "Summary (optional)"
+
+#: app/templates/articles/add.html:32
+msgid "Текст статьи"
+msgstr "Article text"
+
+#: app/templates/articles/add.html:37 app/templates/library/add.html:42
+msgid "Обложка (необязательно)"
+msgstr "Cover (optional)"
+
+#: app/templates/articles/index.html:51 app/templates/main/index.html:71
+msgid "Статьи пока не добавлены."
+msgstr "No articles added yet."
+
+#: app/templates/auth/forgot_password.html:7
+msgid "Восстановление пароля"
+msgstr "Password recovery"
+
+#: app/templates/auth/forgot_password.html:9
+msgid ""
+"Укажите email, с которым вы регистрировались — пришлём ссылку для смены "
+"пароля."
+msgstr ""
+
+#: app/templates/auth/forgot_password.html:12 app/templates/auth/login.html:11
+#: app/templates/auth/register.html:12
+msgid "Email"
+msgstr "Email"
+
+#: app/templates/auth/forgot_password.html:15
+msgid "Отправить ссылку"
+msgstr "Send link"
+
+#: app/templates/auth/forgot_password.html:17
+msgid "Вспомнили пароль?"
+msgstr "Remembered your password?"
+
+#: app/templates/auth/login.html:7
+msgid "Вход"
+msgstr "Login"
+
+#: app/templates/auth/login.html:15
+msgid "Пароль"
+msgstr "Password"
+
+#: app/templates/auth/login.html:21
+msgid "Нет аккаунта?"
+msgstr "No account?"
+
+#: app/templates/auth/login.html:21 app/templates/auth/register.html:23
+msgid "Зарегистрироваться"
+msgstr "Sign up"
+
+#: app/templates/auth/login.html:22
+msgid "Забыли пароль?"
+msgstr "Forgot password?"
+
+#: app/templates/auth/login.html:22
+msgid "Восстановить"
+msgstr "Recover"
+
+#: app/templates/auth/register.html:9
+msgid "Аккаунт нужен, чтобы добавлять свой контент на сайт."
+msgstr "An account is needed to add your own content to the site."
+
+#: app/templates/auth/register.html:16
+msgid "Пароль (не короче 8 символов)"
+msgstr "Password (at least 8 characters)"
+
+#: app/templates/auth/register.html:20
+#: app/templates/auth/reset_password.html:15
+msgid "Повторите пароль"
+msgstr "Repeat password"
+
+#: app/templates/auth/register.html:25
+msgid "Уже есть аккаунт?"
+msgstr "Already have an account?"
+
+#: app/templates/auth/reset_password.html:7
+msgid "Новый пароль"
+msgstr "New password"
+
+#: app/templates/auth/reset_password.html:11
+msgid "Новый пароль (не короче 8 символов)"
+msgstr "New password (at least 8 characters)"
+
+#: app/templates/auth/reset_password.html:18
+msgid "Сохранить пароль"
+msgstr "Save password"
+
+#: app/templates/catalog/add.html:6
+msgid "Добавить марку"
+msgstr "Add brand"
+
+#: app/templates/catalog/add.html:8 app/templates/catalog/index.html:14
+msgid "Добавить марку воды"
+msgstr "Add water brand"
+
+#: app/templates/catalog/add.html:17 app/templates/catalog/add_supplier.html:17
+#: app/templates/library/add.html:17 app/templates/main/delivery_add.html:17
+#: app/templates/main/equipment_add.html:17
+#: app/templates/main/experiment_add.html:17 app/templates/sacred/add.html:17
+msgid "Название"
+msgstr "Name"
+
+#: app/templates/catalog/add.html:22
+msgid "Тип воды"
+msgstr "Water type"
+
+#: app/templates/catalog/add.html:27
+msgid "Объём, л"
+msgstr "Volume, L"
+
+#: app/templates/catalog/add.html:32 app/templates/catalog/index.html:50
+msgid "Цена"
+msgstr "Price"
+
+#: app/templates/catalog/add.html:37
+msgid "Валюта"
+msgstr "Currency"
+
+#: app/templates/catalog/add.html:46
+msgid "Страна (необязательно)"
+msgstr "Country (optional)"
+
+#: app/templates/catalog/add.html:51
+msgid "Происхождение (необязательно)"
+msgstr "Origin (optional)"
+
+#: app/templates/catalog/add.html:56
+msgid "Минерализация, мг/л (необязательно)"
+msgstr "Mineralization, mg/l (optional)"
+
+#: app/templates/catalog/add.html:61 app/templates/sacred/add.html:47
+msgid "Описание (необязательно)"
+msgstr "Description (optional)"
+
+#: app/templates/catalog/add_supplier.html:6
+#: app/templates/catalog/add_supplier.html:8
+msgid "Добавить точку продажи"
+msgstr "Add point of sale"
+
+#: app/templates/catalog/add_supplier.html:22
+msgid "Тип (опт / розница)"
+msgstr "Type (wholesale / retail)"
+
+#: app/templates/catalog/add_supplier.html:27
+msgid "Адрес"
+msgstr "Address"
+
+#: app/templates/catalog/add_supplier.html:32
+msgid "Широта (необязательно, для карты)"
+msgstr "Latitude (optional, for the map)"
+
+#: app/templates/catalog/add_supplier.html:36
+msgid "Долгота (необязательно, для карты)"
+msgstr "Longitude (optional, for the map)"
+
+#: app/templates/catalog/add_supplier.html:41
+#: app/templates/main/delivery_add.html:37
+msgid "Телефон (необязательно)"
+msgstr "Phone (optional)"
+
+#: app/templates/catalog/add_supplier.html:46
+#: app/templates/main/delivery_add.html:42
+msgid "Сайт (необязательно)"
+msgstr "Website (optional)"
+
+#: app/templates/catalog/index.html:12
+msgid "Каталог цен на питьевую воду"
+msgstr "Drinking water price catalog"
+
+#: app/templates/catalog/index.html:18
+msgid ""
+"Кликните по заголовку столбца, чтобы отсортировать таблицу по нему "
+"(повторный клик меняет направление)."
+msgstr ""
+
+#: app/templates/catalog/index.html:21
+msgid "Знаете марку, которой нет в каталоге?"
+msgstr "Know a brand that's not in the catalog?"
+
+#: app/templates/catalog/index.html:21
+msgid "Зарегистрируйтесь"
+msgstr "Sign up"
+
+#: app/templates/catalog/index.html:21
+msgid "чтобы добавить её."
+msgstr "to add it."
+
+#: app/templates/catalog/index.html:23
+msgid "Чтобы добавить свою марку воды, сначала подтвердите email."
+msgstr "To add your own water brand, confirm your email first."
+
+#: app/templates/catalog/index.html:30
+msgid "Страна:"
+msgstr "Country:"
+
+#: app/templates/catalog/index.html:32
+msgid "Все страны"
+msgstr "All countries"
+
+#: app/templates/catalog/index.html:37
+msgid "Сбросить"
+msgstr "Reset"
+
+#: app/templates/catalog/index.html:46
+msgid "Марка"
+msgstr "Brand"
+
+#: app/templates/catalog/index.html:47
+msgid "Тип"
+msgstr "Type"
+
+#: app/templates/catalog/index.html:48
+msgid "Минерализация"
+msgstr "Mineralization"
+
+#: app/templates/catalog/index.html:49
+msgid "Объём"
+msgstr "Volume"
+
+#: app/templates/catalog/index.html:52
+msgid "Происхождение"
+msgstr "Origin"
+
+#: app/templates/catalog/index.html:74
+msgid "По этому фильтру ничего не нашлось."
+msgstr "Nothing found for this filter."
+
+#: app/templates/library/add.html:8 app/templates/library/index.html:9
+msgid "Добавить книгу"
+msgstr "Add book"
+
+#: app/templates/library/add.html:22
+msgid "Автор"
+msgstr "Author"
+
+#: app/templates/library/add.html:27
+msgid "Год издания (необязательно)"
+msgstr "Publication year (optional)"
+
+#: app/templates/library/add.html:32
+msgid "Жанр (необязательно)"
+msgstr "Genre (optional)"
+
+#: app/templates/library/add.html:37 app/templates/main/equipment_add.html:27
+#: app/templates/main/experiment_add.html:22
+msgid "Описание"
+msgstr "Description"
+
+#: app/templates/library/index.html:7 app/templates/main/index.html:96
+msgid "Библиотека книг о воде"
+msgstr "Library of books about water"
+
+#: app/templates/library/index.html:15
+msgid "все жанры"
+msgstr "all genres"
+
+#: app/templates/library/index.html:29 app/templates/main/index.html:102
+msgid "книга"
+msgstr "book"
+
+#: app/templates/library/index.html:37 app/templates/main/index.html:107
+msgid "Книги пока не добавлены."
+msgstr "No books added yet."
+
+#: app/templates/main/contact.html:7
+msgid "Связаться с нами"
+msgstr "Contact us"
+
+#: app/templates/main/contact.html:11
+msgid ""
+"По вопросам о портале, партнёрствам или с найденными неточностями "
+"напишите через форму ниже."
+msgstr ""
+
+#: app/templates/main/contact.html:23
+msgid "Ваш email (необязательно, если хотите ответ)"
+msgstr "Your email (optional, if you want a reply)"
+
+#: app/templates/main/contact.html:28
+msgid "Сообщение"
+msgstr "Message"
+
+#: app/templates/main/contact.html:32
+msgid "Отправить"
+msgstr "Send"
+
+#: app/templates/main/delivery.html:7
+msgid "Службы доставки воды"
+msgstr "Water delivery services"
+
+#: app/templates/main/delivery.html:9
+msgid "Добавить службу"
+msgstr "Add service"
+
+#: app/templates/main/delivery.html:27 app/templates/main/index.html:161
+msgid "Службы доставки пока не добавлены."
+msgstr "No delivery services added yet."
+
+#: app/templates/main/delivery_add.html:8
+msgid "Добавить службу доставки"
+msgstr "Add delivery service"
+
+#: app/templates/main/delivery_add.html:22
+msgid "Зона доставки (необязательно)"
+msgstr "Delivery area (optional)"
+
+#: app/templates/main/delivery_add.html:27
+msgid "Сроки доставки"
+msgstr "Delivery time"
+
+#: app/templates/main/delivery_add.html:32
+#: app/templates/main/equipment_add.html:37
+msgid "Цена, ₽ (необязательно)"
+msgstr "Price, ₽ (optional)"
+
+#: app/templates/main/equipment.html:7 app/templates/main/index.html:114
+msgid "Оборудование для воды"
+msgstr "Water equipment"
+
+#: app/templates/main/equipment.html:9 app/templates/main/equipment_add.html:8
+msgid "Добавить оборудование"
+msgstr "Add equipment"
+
+#: app/templates/main/equipment.html:11
+msgid "Зарегистрируйтесь, чтобы добавить"
+msgstr "Sign up to add"
+
+#: app/templates/main/equipment.html:16
+msgid "Поиск по названию, описанию, производителю…"
+msgstr "Search by name, description, manufacturer…"
+
+#: app/templates/main/equipment.html:18
+msgid "Найти"
+msgstr "Find"
+
+#: app/templates/main/equipment.html:23
+msgid "все категории"
+msgstr "all categories"
+
+#: app/templates/main/equipment.html:50
+msgid "Ничего не найдено."
+msgstr "Nothing found."
+
+#: app/templates/main/equipment.html:50 app/templates/main/index.html:125
+msgid "Оборудование пока не добавлено."
+msgstr "No equipment added yet."
+
+#: app/templates/main/equipment_add.html:22
+msgid "Категория"
+msgstr "Category"
+
+#: app/templates/main/equipment_add.html:32
+msgid "Производитель (необязательно)"
+msgstr "Manufacturer (optional)"
+
+#: app/templates/main/experiment_add.html:8
+msgid "Добавить опыт с водой"
+msgstr "Add a water experiment"
+
+#: app/templates/main/experiment_add.html:27
+msgid "Вердикт"
+msgstr "Verdict"
+
+#: app/templates/main/experiments.html:7 app/templates/main/index.html:132
+msgid "Опыты с водой: наука vs мифы"
+msgstr "Water experiments: science vs myths"
+
+#: app/templates/main/experiments.html:9
+msgid "Добавить опыт"
+msgstr "Add experiment"
+
+#: app/templates/main/experiments.html:16 app/templates/main/index.html:138
+msgid "наука"
+msgstr "science"
+
+#: app/templates/main/experiments.html:16 app/templates/main/index.html:138
+msgid "миф"
+msgstr "myth"
+
+#: app/templates/main/experiments.html:24 app/templates/main/index.html:143
+msgid "Опыты пока не добавлены."
+msgstr "No experiments added yet."
+
+#: app/templates/main/index.html:6
+msgid "портал о воде"
+msgstr "a water portal"
+
+#: app/templates/main/index.html:9
+msgid ""
+"От священных источников на другом краю света до стакана воды на вашем "
+"столе — исследуем воду как культуру, науку и повседневность."
+msgstr ""
+
+#: app/templates/main/index.html:26
+msgid "реклама"
+msgstr "advertisement"
+
+#: app/templates/main/index.html:42 app/templates/sacred/index.html:7
+msgid "Священные источники мира"
+msgstr "Sacred sources of the world"
+
+#: app/templates/main/index.html:43
+msgid "Все источники →"
+msgstr "All sources →"
+
+#: app/templates/main/index.html:53
+msgid "Источники пока не добавлены."
+msgstr "No sources added yet."
+
+#: app/templates/main/index.html:61
+msgid "Все статьи →"
+msgstr "All articles →"
+
+#: app/templates/main/index.html:78
+msgid "Каталог питьевой воды"
+msgstr "Drinking water catalog"
+
+#: app/templates/main/index.html:79
+msgid "Весь каталог →"
+msgstr "Full catalog →"
+
+#: app/templates/main/index.html:89
+msgid "Каталог пока пуст."
+msgstr "The catalog is currently empty."
+
+#: app/templates/main/index.html:97
+msgid "Вся библиотека →"
+msgstr "Full library →"
+
+#: app/templates/main/index.html:115
+msgid "Всё оборудование →"
+msgstr "All equipment →"
+
+#: app/templates/main/index.html:133
+msgid "Все опыты →"
+msgstr "All experiments →"
+
+#: app/templates/main/index.html:150
+msgid "Доставка воды"
+msgstr "Water delivery"
+
+#: app/templates/main/index.html:151
+msgid "Все службы →"
+msgstr "All services →"
+
+#: app/templates/sacred/add.html:8
+msgid "Добавить священный источник"
+msgstr "Add sacred source"
+
+#: app/templates/sacred/add.html:22
+msgid "Страна"
+msgstr "Country"
+
+#: app/templates/sacred/add.html:27
+msgid "Местоположение"
+msgstr "Location"
+
+#: app/templates/sacred/add.html:32
+msgid "Во что верят люди"
+msgstr "What people believe"
+
+#: app/templates/sacred/add.html:37
+msgid "Что можно"
+msgstr "What's allowed"
+
+#: app/templates/sacred/add.html:42
+msgid "Что нельзя"
+msgstr "What's forbidden"
+
+#: app/templates/sacred/index.html:9
+msgid "Добавить источник"
+msgstr "Add source"
+
+#: app/templates/sacred/index.html:15
+msgid "все страны"
+msgstr "all countries"
+
+#: app/templates/sacred/index.html:63
+msgid "Источники в этой стране пока не добавлены."
+msgstr "No sources added for this country yet."
+
