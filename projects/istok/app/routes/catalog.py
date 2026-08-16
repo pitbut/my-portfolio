@@ -7,34 +7,59 @@ from app import db
 from app.models import Review, Supplier, WaterBrand
 from app.photos import upload_photo
 from app.routes.reviews import reviews_for
+from app.slugify import unique_slug
 
 bp = Blueprint("catalog", __name__)
 
-# Цена хранится в собственной валюте каждой марки (см. WaterBrand.currency),
-# поэтому сортировка по цене сравнивает "сырые" числа разных валют — это
-# осознанный компромисс, а не пересчёт по курсу.
-SORT_OPTIONS = {
-    "price_asc": (WaterBrand.price.asc(), "цена: по возрастанию"),
-    "price_desc": (WaterBrand.price.desc(), "цена: по убыванию"),
-    "name": (WaterBrand.name.asc(), "по названию"),
-    "mineralization": (WaterBrand.mineralization_mg_l.asc(), "по минерализации"),
+# Столбцы таблицы каталога, по которым можно кликнуть в заголовке и
+# отсортировать (по возрастанию/убыванию, повторный клик по тому же
+# столбцу переключает направление). "rating" — особый случай: считается
+# в Python по уже посчитанным avg_ratings, а не в SQL, т.к. это агрегат
+# из отдельной таблицы отзывов.
+SORTABLE_COLUMNS = {
+    "name": WaterBrand.name,
+    "water_type": WaterBrand.water_type,
+    "mineralization": WaterBrand.mineralization_mg_l,
+    "volume": WaterBrand.volume_l,
+    # Цена хранится в собственной валюте каждой марки (см. WaterBrand.currency),
+    # поэтому сортировка по цене сравнивает "сырые" числа разных валют — это
+    # осознанный компромисс, а не пересчёт по курсу.
+    "price": WaterBrand.price,
+    "country": WaterBrand.country,
 }
-DEFAULT_SORT = "price_asc"
+DEFAULT_SORT_COLUMN = "price"
+DEFAULT_SORT_DIR = "asc"
 
 
 @bp.route("/")
 def index():
-    sort = request.args.get("sort", DEFAULT_SORT)
-    if sort not in SORT_OPTIONS:
-        sort = DEFAULT_SORT
-    order_by, _ = SORT_OPTIONS[sort]
+    sort_column = request.args.get("sort", DEFAULT_SORT_COLUMN)
+    if sort_column not in SORTABLE_COLUMNS and sort_column != "rating":
+        sort_column = DEFAULT_SORT_COLUMN
+    sort_dir = request.args.get("dir", DEFAULT_SORT_DIR)
+    if sort_dir not in ("asc", "desc"):
+        sort_dir = DEFAULT_SORT_DIR
 
     country = (request.args.get("country") or "").strip()
 
     query = WaterBrand.query
     if country:
         query = query.filter_by(country=country)
-    brands = query.order_by(order_by).all()
+
+    avg_ratings = dict(
+        db.session.query(Review.target_id, func.avg(Review.rating))
+        .filter(Review.target_type == "water_brand")
+        .group_by(Review.target_id)
+        .all()
+    )
+
+    if sort_column == "rating":
+        brands = query.all()
+        brands.sort(key=lambda b: float(avg_ratings.get(b.id, -1)), reverse=(sort_dir == "desc"))
+    else:
+        column = SORTABLE_COLUMNS[sort_column]
+        order_by = column.desc() if sort_dir == "desc" else column.asc()
+        brands = query.order_by(order_by).all()
 
     countries = [
         row[0]
@@ -45,22 +70,80 @@ def index():
         .all()
     ]
 
-    avg_ratings = dict(
-        db.session.query(Review.target_id, func.avg(Review.rating))
-        .filter(Review.target_type == "water_brand")
-        .group_by(Review.target_id)
-        .all()
-    )
-
     return render_template(
         "catalog/index.html",
         brands=brands,
-        sort=sort,
-        sort_options=SORT_OPTIONS,
+        sort_column=sort_column,
+        sort_dir=sort_dir,
         countries=countries,
         selected_country=country,
         avg_ratings=avg_ratings,
     )
+
+
+@bp.route("/add", methods=["GET", "POST"])
+@login_required
+def add():
+    if not current_user.email_confirmed:
+        flash("Сначала подтвердите email — так мы защищаем каталог от спама.", "error")
+        return redirect(url_for("catalog.index"))
+
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        water_type = (request.form.get("water_type") or "").strip()
+        volume_l = request.form.get("volume_l") or None
+        price = request.form.get("price") or None
+        currency = (request.form.get("currency") or "RUB").strip().upper()
+        country = (request.form.get("country") or "").strip()
+        origin = (request.form.get("origin") or "").strip()
+        mineralization_mg_l = request.form.get("mineralization_mg_l") or None
+        description = (request.form.get("description") or "").strip()
+
+        if not name or not water_type or not volume_l or not price:
+            flash("Заполните название, тип, объём и цену.", "error")
+            return render_template("catalog/add.html", currencies=WaterBrand.CURRENCY_SYMBOLS)
+
+        try:
+            volume_l = float(volume_l)
+            price = float(price)
+        except ValueError:
+            flash("Объём и цена должны быть числами.", "error")
+            return render_template("catalog/add.html", currencies=WaterBrand.CURRENCY_SYMBOLS)
+
+        try:
+            mineralization_mg_l = int(mineralization_mg_l) if mineralization_mg_l else None
+        except ValueError:
+            mineralization_mg_l = None
+
+        if currency not in WaterBrand.CURRENCY_SYMBOLS:
+            currency = "RUB"
+
+        used_slugs = {row[0] for row in db.session.query(WaterBrand.slug).all()}
+        brand = WaterBrand(
+            slug=unique_slug(name, used_slugs, "brand"),
+            name=name,
+            water_type=water_type,
+            mineralization_mg_l=mineralization_mg_l,
+            volume_l=volume_l,
+            price=price,
+            currency=currency,
+            country=country or None,
+            origin=origin or None,
+            description=description or None,
+            verified=False,
+            added_by_user_id=current_user.id,
+        )
+        db.session.add(brand)
+        db.session.commit()
+
+        flash(
+            "Марка добавлена и уже видна в каталоге с пометкой «не проверено» "
+            "— администрация проверит сведения и подтвердит их.",
+            "success",
+        )
+        return redirect(url_for("catalog.detail", slug=brand.slug))
+
+    return render_template("catalog/add.html", currencies=WaterBrand.CURRENCY_SYMBOLS)
 
 
 @bp.route("/<slug>")

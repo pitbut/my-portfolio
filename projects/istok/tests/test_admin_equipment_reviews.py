@@ -1,9 +1,42 @@
 from app import db
-from app.models import Equipment, Review
+from app.models import Equipment, Review, WaterBrand
 
 
 def _login_admin(client, app):
     return client.post("/admin/login", data={"password": app.config["ADMIN_PASSWORD"]}, follow_redirects=True)
+
+
+def test_admin_water_brands_requires_login(client):
+    resp = client.get("/admin/water-brands")
+    assert resp.status_code == 302
+    assert "/admin/login" in resp.headers["Location"]
+
+
+def test_admin_can_verify_water_brand(client, app):
+    with app.app_context():
+        brand = WaterBrand.query.filter_by(slug="test-water").first()
+        brand.verified = False
+        db.session.commit()
+        brand_id = brand.id
+
+    _login_admin(client, app)
+    resp = client.post(f"/admin/water-brands/{brand_id}/verify", follow_redirects=True)
+    assert resp.status_code == 200
+
+    detail = client.get("/catalog/test-water")
+    assert "не проверено".encode() not in detail.data
+
+
+def test_admin_can_delete_water_brand(client, app):
+    with app.app_context():
+        brand_id = WaterBrand.query.filter_by(slug="test-water-2").first().id
+
+    _login_admin(client, app)
+    resp = client.post(f"/admin/water-brands/{brand_id}/delete", follow_redirects=True)
+    assert resp.status_code == 200
+
+    with app.app_context():
+        assert db.session.get(WaterBrand, brand_id) is None
 
 
 def test_admin_equipment_requires_login(client):

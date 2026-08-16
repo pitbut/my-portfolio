@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Марки воды — модерация — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap">
+  {% with admin_title = "Марки воды" %}{% include "admin/_nav.html" %}{% endwith %}
+
+  <div class="sort-bar">
+    <a href="{{ url_for('admin.water_brands', status='unverified') }}" class="{{ 'is-active' if active_status == 'unverified' }}">Не проверенные ({{ unverified_count }})</a>
+    <a href="{{ url_for('admin.water_brands', status='verified') }}" class="{{ 'is-active' if active_status == 'verified' }}">Проверенные</a>
+    <a href="{{ url_for('admin.water_brands', status='all') }}" class="{{ 'is-active' if active_status == 'all' }}">Всё</a>
+  </div>
+
+  {% if items %}
+  <div class="admin-list">
+    {% for item in items %}
+    <article class="admin-item">
+      <div class="admin-item__meta">
+        <a href="{{ url_for('catalog.detail', slug=item.slug) }}" target="_blank">{{ item.water_type }}</a>
+        &middot; {{ item.created_at.strftime("%d.%m.%Y %H:%M") }}
+        {% if item.added_by %} &middot; добавил(а) {{ item.added_by.email }}{% endif %}
+        &middot; <span class="badge {{ 'badge--science' if item.verified else 'badge--myth' }}">{{ 'проверено' if item.verified else 'не проверено' }}</span>
+      </div>
+      <h3 style="margin: 6px 0;">{{ item.name }}</h3>
+      <p class="admin-item__meta">
+        {{ item.volume_l }} л &middot; {{ "%.2f"|format(item.price) }} {{ item.currency_symbol }}
+        {% if item.country %} &middot; {{ item.country }}{% endif %}
+      </p>
+      {% if item.description %}<p>{{ item.description | truncate(200) }}</p>{% endif %}
+
+      <div class="admin-item__actions">
+        {% if item.verified %}
+        <form method="post" action="{{ url_for('admin.unverify_water_brand', brand_id=item.id) }}">
+          <button type="submit" class="btn btn--reject">Снять отметку «проверено»</button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('admin.verify_water_brand', brand_id=item.id) }}">
+          <button type="submit" class="btn btn--approve">Отметить проверенной</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{{ url_for('admin.delete_water_brand', brand_id=item.id) }}" onsubmit="return confirm('Удалить эту марку воды?');">
+          <button type="submit" class="btn btn--reject">Удалить</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Здесь пока пусто.</div>
+  {% endif %}
+</section>
+{% endblock %}
