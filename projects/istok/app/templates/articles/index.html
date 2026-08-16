@@ -5,6 +5,9 @@
 <section class="section wrap">
   <div class="section__header">
     <h2>Статьи</h2>
+    {% if current_user.is_authenticated %}
+    <a class="see-all" href="{{ url_for('articles.add') }}">+ Добавить статью</a>
+    {% endif %}
   </div>
 
   {% if articles %}
@@ -15,7 +18,7 @@
       <img class="card-photo" src="{{ image_url(a.cover_url) }}" alt="{{ a.title }}" loading="lazy">
       {% endif %}
       <span class="meta">{{ a.category }} &middot; {{ a.published_at.strftime("%d.%m.%Y") }}</span>
-      <h3><a href="{{ url_for('articles.detail', slug=a.slug) }}">{{ a.title }}</a></h3>
+      <h3><a href="{{ url_for('articles.detail', slug=a.slug) }}">{{ a.title }}</a>{% if not a.verified %} <span class="badge badge--myth">не проверено</span>{% endif %}</h3>
       <p>{{ a.summary or (a.body | truncate(140)) }}</p>
     </article>
     {% endfor %}

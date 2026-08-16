@@ -5,6 +5,9 @@
 <section class="section wrap">
   <div class="section__header">
     <h2>Священные источники мира</h2>
+    {% if current_user.is_authenticated %}
+    <a class="see-all" href="{{ url_for('sacred.add') }}">+ Добавить источник</a>
+    {% endif %}
   </div>
 
   {% if country_counts %}
@@ -24,7 +27,7 @@
       <img class="card-photo" src="{{ image_url(s.image_url) }}" alt="{{ s.name }}" loading="lazy">
       {% endif %}
       <span class="meta">{{ s.country }}</span>
-      <h3><a href="{{ url_for('sacred.detail', slug=s.slug) }}">{{ s.name }}</a></h3>
+      <h3><a href="{{ url_for('sacred.detail', slug=s.slug) }}">{{ s.name }}</a>{% if not s.verified %} <span class="badge badge--myth">не проверено</span>{% endif %}</h3>
       <p>{{ s.location }}</p>
       <p>{{ s.belief | truncate(140) }}</p>
     </article>

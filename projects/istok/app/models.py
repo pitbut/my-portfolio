@@ -37,6 +37,10 @@ class Book(TimestampMixin, SlugMixin, db.Model):
     genre = db.Column(db.String(120), nullable=True)
     description = db.Column(db.Text, nullable=False)
     cover_url = db.Column(db.String(500), nullable=True)
+    verified = db.Column(db.Boolean, nullable=False, default=True)
+    added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    added_by = db.relationship("User")
 
     def __repr__(self):
         return f"<Book {self.title!r} ({self.author})>"
@@ -54,6 +58,10 @@ class Article(TimestampMixin, SlugMixin, db.Model):
     body = db.Column(db.Text, nullable=False)
     published_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     cover_url = db.Column(db.String(500), nullable=True)
+    verified = db.Column(db.Boolean, nullable=False, default=True)
+    added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    added_by = db.relationship("User")
 
     def __repr__(self):
         return f"<Article {self.title!r}>"
@@ -184,6 +192,10 @@ class SacredSource(TimestampMixin, SlugMixin, db.Model):
     image_url = db.Column(db.String(500), nullable=True)
     description = db.Column(db.Text, nullable=True)
     comment = db.Column(db.Text, nullable=True)  # произвольный комментарий редактора
+    verified = db.Column(db.Boolean, nullable=False, default=True)
+    added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    added_by = db.relationship("User")
 
     def __repr__(self):
         return f"<SacredSource {self.name!r} ({self.country})>"
@@ -219,6 +231,10 @@ class Experiment(TimestampMixin, SlugMixin, db.Model):
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)
     verdict = db.Column(db.String(20), nullable=False)  # 'наука' или 'миф'
+    verified = db.Column(db.Boolean, nullable=False, default=True)
+    added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    added_by = db.relationship("User")
 
     def __repr__(self):
         return f"<Experiment {self.title!r}: {self.verdict}>"
@@ -272,6 +288,10 @@ class DeliveryService(TimestampMixin, SlugMixin, db.Model):
     price_rub = db.Column(db.Numeric(10, 2), nullable=True)
     phone = db.Column(db.String(50), nullable=True)
     website = db.Column(db.String(255), nullable=True)
+    verified = db.Column(db.Boolean, nullable=False, default=True)
+    added_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    added_by = db.relationship("User")
 
     def __repr__(self):
         return f"<DeliveryService {self.name!r}>"
