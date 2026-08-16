@@ -79,6 +79,28 @@ def create_app(config_name=None):
             return {"pending_confirm_url": confirm_url_for(current_user)}
         return {}
 
+    @app.before_request
+    def _count_visit():
+        """Простой счётчик общего числа просмотров сайта для /admin.
+
+        Не считает статику и сам /admin, чтобы не раздувать счётчик
+        собственными переходами администратора по панели модерации.
+        Атомарный UPDATE (не read-then-write), т.к. под gunicorn запрос
+        могут обрабатывать несколько воркеров параллельно."""
+        from flask import request
+
+        if request.path.startswith("/static") or request.path.startswith("/admin"):
+            return
+
+        result = db.session.execute(
+            db.update(models.SiteStat)
+            .where(models.SiteStat.id == 1)
+            .values(total_views=models.SiteStat.total_views + 1)
+        )
+        if result.rowcount == 0:
+            db.session.add(models.SiteStat(id=1, total_views=1))
+        db.session.commit()
+
     @app.template_global()
     def image_url(value):
         """Разрешает значение поля image_url/cover_url в готовую ссылку.
