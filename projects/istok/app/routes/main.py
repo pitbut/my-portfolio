@@ -74,6 +74,8 @@ Disallow: /*?page=
 Disallow: /*?country=
 Disallow: /*?sort=
 Disallow: /*?q=
+
+Sitemap: {sitemap_url}
 """
 
 
@@ -83,7 +85,56 @@ def robots_txt():
     фильтров и сортировки каталога (/catalog/?page=..., ?country=...,
     ?sort=...) и по результатам поиска (?q=...) — они не имеют собственного
     контента и создают дубли уже проиндексированных страниц."""
-    return current_app.response_class(_ROBOTS_TXT, mimetype="text/plain")
+    body = _ROBOTS_TXT.format(sitemap_url=f"https://{request.host}/sitemap.xml")
+    return current_app.response_class(body, mimetype="text/plain")
+
+
+@bp.route("/sitemap.xml")
+def sitemap_xml():
+    """Строится напрямую по объектам из БД (не обходом ссылок на странице),
+    поэтому в нём никогда не окажется пагинации/фильтров/поиска — только
+    канонические URL карточек без query-параметров."""
+    base = f"https://{request.host}"
+    pages = [(base + "/", "weekly", "1.0")]
+
+    for endpoint, url_prefix in (
+        ("sacred.index", "/sacred/"),
+        ("catalog.index", "/catalog/"),
+        ("articles.index", "/articles/"),
+        ("library.index", "/library/"),
+    ):
+        pages.append((base + url_prefix, "weekly", "0.8"))
+
+    for slug, in db.session.query(SacredSource.slug).all():
+        pages.append((base + f"/sacred/{slug}", "monthly", "0.6"))
+    for slug, in db.session.query(WaterBrand.slug).all():
+        pages.append((base + f"/catalog/{slug}", "monthly", "0.6"))
+    for slug, in db.session.query(Article.slug).all():
+        pages.append((base + f"/articles/{slug}", "monthly", "0.5"))
+    for slug, in db.session.query(Book.slug).all():
+        pages.append((base + f"/library/{slug}", "monthly", "0.5"))
+    for slug, in db.session.query(Equipment.slug).all():
+        pages.append((base + f"/equipment/{slug}", "monthly", "0.5"))
+    for slug, in db.session.query(Experiment.slug).all():
+        pages.append((base + f"/experiments/{slug}", "monthly", "0.5"))
+    for slug, in db.session.query(DeliveryService.slug).all():
+        pages.append((base + f"/delivery/{slug}", "monthly", "0.5"))
+
+    pages.append((base + "/equipment", "weekly", "0.7"))
+    pages.append((base + "/experiments", "weekly", "0.6"))
+    pages.append((base + "/delivery", "weekly", "0.6"))
+    pages.append((base + "/contact", "yearly", "0.3"))
+
+    entries = "\n".join(
+        f"  <url><loc>{loc}</loc><changefreq>{freq}</changefreq><priority>{priority}</priority></url>"
+        for loc, freq, priority in pages
+    )
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{entries}\n</urlset>\n"
+    )
+    return current_app.response_class(xml, mimetype="application/xml")
 
 
 @bp.route("/equipment")
