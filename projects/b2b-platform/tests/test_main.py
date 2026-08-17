@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 
 from werkzeug.security import generate_password_hash
 
@@ -12,6 +13,28 @@ def _login_via_session(client, user_id):
     with client.session_transaction() as sess:
         sess["_user_id"] = str(user_id)
         sess["_fresh"] = True
+
+
+@contextmanager
+def _temp_static_file(path, content):
+    """static_folder — это реальная папка приложения (не отдельная для
+    тестов), поэтому нельзя просто затереть и os.remove() файл: если там
+    уже лежал настоящий загруженный видео/баннер, тест его безвозвратно
+    удалит. Сохраняем и восстанавливаем исходное содержимое, если оно было."""
+    original = None
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            original = f.read()
+    with open(path, "wb") as f:
+        f.write(content)
+    try:
+        yield
+    finally:
+        if original is None:
+            os.remove(path)
+        else:
+            with open(path, "wb") as f:
+                f.write(original)
 
 
 def test_homepage_shows_registration_stats_and_constructor_cta(client):
@@ -100,14 +123,10 @@ def test_home_page_shows_video_player_when_file_uploaded(client):
     video_dir = os.path.join(client.application.static_folder, "video")
     os.makedirs(video_dir, exist_ok=True)
     video_path = os.path.join(video_dir, "intro.mp4")
-    with open(video_path, "wb") as f:
-        f.write(b"fake video bytes")
-    try:
+    with _temp_static_file(video_path, b"fake video bytes"):
         resp = client.get("/")
         assert b"<video" in resp.data
         assert "Скоро здесь появится короткое видео".encode() not in resp.data
-    finally:
-        os.remove(video_path)
 
 
 def test_home_page_shows_admin_hint_for_ad_banner_upload(client):
@@ -128,28 +147,20 @@ def test_home_page_shows_ad_image_when_file_uploaded(client):
     ad_dir = os.path.join(client.application.static_folder, "ad")
     os.makedirs(ad_dir, exist_ok=True)
     banner_path = os.path.join(ad_dir, "banner.jpg")
-    with open(banner_path, "wb") as f:
-        f.write(b"fake image bytes")
-    try:
+    with _temp_static_file(banner_path, b"fake image bytes"):
         resp = client.get("/")
         assert 'src="/static/ad/banner.jpg"'.encode() in resp.data
         assert b"home-banner__ad-text" not in resp.data
-    finally:
-        os.remove(banner_path)
 
 
 def test_home_page_shows_ad_video_when_file_uploaded(client):
     ad_dir = os.path.join(client.application.static_folder, "ad")
     os.makedirs(ad_dir, exist_ok=True)
     banner_path = os.path.join(ad_dir, "banner.mp4")
-    with open(banner_path, "wb") as f:
-        f.write(b"fake video bytes")
-    try:
+    with _temp_static_file(banner_path, b"fake video bytes"):
         resp = client.get("/")
         assert 'src="/static/ad/banner.mp4"'.encode() in resp.data
         assert b"home-banner__ad-text" not in resp.data
-    finally:
-        os.remove(banner_path)
 
 
 def test_home_page_ad_video_takes_priority_over_image(client):
@@ -157,17 +168,10 @@ def test_home_page_ad_video_takes_priority_over_image(client):
     os.makedirs(ad_dir, exist_ok=True)
     video_path = os.path.join(ad_dir, "banner.mp4")
     image_path = os.path.join(ad_dir, "banner.jpg")
-    with open(video_path, "wb") as f:
-        f.write(b"fake video bytes")
-    with open(image_path, "wb") as f:
-        f.write(b"fake image bytes")
-    try:
+    with _temp_static_file(video_path, b"fake video bytes"), _temp_static_file(image_path, b"fake image bytes"):
         resp = client.get("/")
         assert 'src="/static/ad/banner.mp4"'.encode() in resp.data
         assert 'src="/static/ad/banner.jpg"'.encode() not in resp.data
-    finally:
-        os.remove(video_path)
-        os.remove(image_path)
 
 
 def test_page_view_counter_counts_html_pages_and_ignores_static(client):
