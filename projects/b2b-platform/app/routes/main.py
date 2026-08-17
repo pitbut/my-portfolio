@@ -73,6 +73,7 @@ def set_language(lang):
 
 _ROBOTS_TXT = """User-agent: *
 Disallow: /lang/
+Disallow: /*?auth_required=*
 Disallow: /auth/logout
 Disallow: /auth/confirm/
 Disallow: /auth/reset-password/

@@ -1,6 +1,6 @@
 """Главная страница и разделы без собственного блюпринта (оборудование,
 опыты, доставка, контакты)."""
-from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import func, or_
 
@@ -67,6 +67,23 @@ def index():
         banners=banners,
         delivery_services=delivery_services,
     )
+
+
+_ROBOTS_TXT = """User-agent: *
+Disallow: /*?page=
+Disallow: /*?country=
+Disallow: /*?sort=
+Disallow: /*?q=
+"""
+
+
+@bp.route("/robots.txt")
+def robots_txt():
+    """Без этого файла Googlebot ползает по всем комбинациям пагинации,
+    фильтров и сортировки каталога (/catalog/?page=..., ?country=...,
+    ?sort=...) и по результатам поиска (?q=...) — они не имеют собственного
+    контента и создают дубли уже проиндексированных страниц."""
+    return current_app.response_class(_ROBOTS_TXT, mimetype="text/plain")
 
 
 @bp.route("/equipment")
