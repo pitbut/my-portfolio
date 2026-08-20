@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#0a0d12"/>
+  <line x1="200" y1="30" x2="200" y2="270" stroke="#4fd1c5" stroke-width="10" stroke-linecap="round"/>
+  <g fill="none" stroke="#ffb238" stroke-width="6">
+    <ellipse cx="200" cy="55" rx="55" ry="16"/>
+    <ellipse cx="200" cy="95" rx="55" ry="16"/>
+    <ellipse cx="200" cy="135" rx="55" ry="16"/>
+    <ellipse cx="200" cy="175" rx="55" ry="16"/>
+    <ellipse cx="200" cy="215" rx="55" ry="16"/>
+    <ellipse cx="200" cy="255" rx="55" ry="16"/>
+  </g>
+  <text x="200" y="292" text-anchor="middle" font-family="monospace" font-size="14" fill="#7684a0">Auger Builder — КОМПАС-3D</text>
+</svg>
