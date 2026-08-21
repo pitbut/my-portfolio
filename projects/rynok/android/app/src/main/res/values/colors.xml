@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rynok_green">#2E7D32</color>
+    <color name="rynok_green_dark">#1B5E20</color>
+    <color name="rynok_amber">#F9A825</color>
+    <color name="rynok_red">#C62828</color>
+    <color name="rynok_background">#F7F7F2</color>
+    <color name="rynok_surface">#FFFFFF</color>
+</resources>

@@ -1,5 +1,14 @@
 services:
   - type: web
+    name: rynok-relay
+    env: node
+    rootDir: projects/rynok/server
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+
+  - type: web
     name: istok
     env: python
     rootDir: projects/istok

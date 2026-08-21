@@ -1,5 +1,22 @@
 [
   {
+    "id": "rynok",
+    "title": "🛒 Рынок — семейный список покупок",
+    "description": "Android-приложение для RuStore: жена диктует список покупок с ценами, муж отмечает купленное и слышит озвучку «что осталось» и итог бюджета (перерасход/экономия). Общий код семьи, чат (текст/голос/видео) во время похода за покупками, архив списков и статистика по неделям/месяцам. Kotlin + Jetpack Compose, Room, свой сервер-релей на Node.js/WebSocket (без Google Play Services — важно для RuStore).",
+    "image": "https://via.placeholder.com/400x300/2E7D32/ffffff?text=%F0%9F%9B%92%20%D0%A0%D1%8B%D0%BD%D0%BE%D0%BA",
+    "link": "projects/rynok/index.html",
+    "date": "2026-08-21",
+    "tags": [
+      "Kotlin",
+      "Jetpack Compose",
+      "Android",
+      "Room",
+      "Node.js",
+      "WebSocket",
+      "RuStore"
+    ]
+  },
+  {
     "id": "chat",
     "title": "Chat",
     "description": "Описание проекта скоро появится",

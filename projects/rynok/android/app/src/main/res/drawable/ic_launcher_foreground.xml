@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Упрощённый силуэт корзины покупок -->
+<vector xmlns:android="http://schemas.android.com/apk/res/vector"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,40 L74,40 L70,72 C69.6,75.3 66.8,78 63.4,78 L44.6,78 C41.2,78 38.4,75.3 38,72 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,40 L78,40 L78,46 L30,46 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,40 C44,31 49,26 54,26 C59,26 64,31 64,40 L58,40 C58,34 56,32 54,32 C52,32 50,34 50,40 Z" />
+</vector>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Рынок — семейный список покупок</title>
+<style>
+  :root {
+    --green: #2E7D32;
+    --green-dark: #1B5E20;
+    --amber: #F9A825;
+    --bg: #F7F7F2;
+    --surface: #FFFFFF;
+    --text: #222;
+    --muted: #666;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+    color: #fff;
+    padding: 64px 20px 72px;
+    text-align: center;
+  }
+  header .icon { font-size: 56px; }
+  header h1 { font-size: 40px; margin: 12px 0 8px; }
+  header p { font-size: 18px; opacity: .92; max-width: 640px; margin: 0 auto; }
+  .badge {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 8px 18px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.4);
+    border-radius: 999px;
+    font-size: 14px;
+  }
+  main { max-width: 980px; margin: -40px auto 0; padding: 0 20px 60px; }
+  .card {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  h2 { color: var(--green-dark); margin-top: 0; }
+  .flow {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  .flow-step {
+    flex: 1 1 200px;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+  }
+  .flow-step .n { font-size: 28px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+  }
+  .feature {
+    padding: 18px;
+    border-radius: 12px;
+    background: var(--bg);
+    border-left: 4px solid var(--amber);
+  }
+  .feature h3 { margin: 0 0 6px; font-size: 16px; }
+  .feature p { margin: 0; color: var(--muted); font-size: 14px; }
+  .stack {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    background: var(--green);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .note {
+    background: #FFF8E1;
+    border: 1px solid #F9A825;
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-size: 14px;
+    color: #6d4c00;
+  }
+  code {
+    background: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    padding: 20px;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="icon">🛒</div>
+  <h1>Рынок</h1>
+  <p>Семейное приложение для похода за покупками: жена диктует список, муж отмечает покупки — бюджет, архив и статистика синхронизируются между двумя телефонами в реальном времени.</p>
+  <div class="badge">Android · для RuStore</div>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Как это работает</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="n">🗣️</div>Жена надиктовывает или печатает список с ценами</div>
+      <div class="flow-step"><div class="n">📤</div>Список и плановый бюджет уходят мужу мгновенно</div>
+      <div class="flow-step"><div class="n">✅</div>Муж отмечает покупки и фактическую цену в магазине</div>
+      <div class="flow-step"><div class="n">🔊</div>«Что осталось?» и итог бюджета — озвучиваются вслух</div>
+      <div class="flow-step"><div class="n">📊</div>Список уходит в архив, статистика обновляется</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Функции</h2>
+    <div class="grid">
+      <div class="feature">
+        <h3>Голосовой ввод списка</h3>
+        <p>Товар, количество и цену можно продиктовать — распознавание речи разбирает фразу на составляющие.</p>
+      </div>
+      <div class="feature">
+        <h3>Бюджет и перерасход</h3>
+        <p>Плановая сумма считается автоматически, а по кнопке «Итоговый бюджет» приложение озвучивает перерасход или экономию.</p>
+      </div>
+      <div class="feature">
+        <h3>«Что осталось?» голосом</h3>
+        <p>Когда руки заняты пакетами, можно спросить голосом или нажать кнопку — приложение проговорит оставшиеся товары.</p>
+      </div>
+      <div class="feature">
+        <h3>Чат прямо во время похода</h3>
+        <p>Текстовые, голосовые и видео-сообщения между телефонами — например, чтобы уточнить, какой сорт сыра брать.</p>
+      </div>
+      <div class="feature">
+        <h3>Архив списков</h3>
+        <p>Каждый завершённый список сохраняется и доступен для просмотра — что купили и по какой цене.</p>
+      </div>
+      <div class="feature">
+        <h3>Статистика по неделям и месяцам</h3>
+        <p>План против факта, сколько потрачено за неделю и за месяц — простой график прямо в приложении.</p>
+      </div>
+      <div class="feature">
+        <h3>Общий код семьи</h3>
+        <p>Один телефон создаёт список и получает 6-значный код, второй вводит его — так пары находят друг друга в приложении, которым пользуются многие семьи одновременно.</p>
+      </div>
+      <div class="feature">
+        <h3>История хранится локально</h3>
+        <p>Сообщения и списки хранятся на каждом телефоне отдельно; сервер только передаёт их между устройствами, ничего не храня подолгу.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Технологии</h2>
+    <div class="stack">
+      <span class="pill">Kotlin</span>
+      <span class="pill">Jetpack Compose</span>
+      <span class="pill">Room</span>
+      <span class="pill">Android SpeechRecognizer / TextToSpeech</span>
+      <span class="pill">Node.js + WebSocket (сервер-релей)</span>
+    </div>
+    <p style="margin-top:16px; color: var(--muted); font-size: 14px;">
+      Сервер-релей (<code>projects/rynok/server</code>) не привязан к Google Play Services —
+      это важно, потому что многие устройства из RuStore не имеют GMS.
+      Он только создаёт код семьи и передаёт события между двумя телефонами,
+      не храня историю подолгу.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="note">
+      Это исходный код приложения (папка <code>projects/rynok/android</code>) и сервера
+      (<code>projects/rynok/server</code>) в репозитории портфолио — не опубликованное в RuStore
+      приложение. Чтобы собрать и протестировать APK, откройте папку <code>android/</code> в Android Studio;
+      чтобы опубликовать в RuStore, потребуется аккаунт разработчика RuStore и прохождение их модерации —
+      это отдельный шаг вне разработки.
+    </div>
+  </div>
+
+</main>
+
+<footer>Рынок — учебный проект в портфолио</footer>
+
+</body>
+</html>

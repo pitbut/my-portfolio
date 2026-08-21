@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Рынок</string>
+
+    <string name="family_setup_title">Семейный список покупок</string>
+    <string name="family_create_button">Создать список (я — тот, кто составляет)</string>
+    <string name="family_join_button">У меня есть код (я иду в магазин)</string>
+    <string name="family_code_label">Код для второго телефона</string>
+    <string name="family_code_hint">Введите код из 6 цифр</string>
+    <string name="family_code_share_hint">Продиктуйте или перешлите этот код второму участнику семьи</string>
+    <string name="family_join_error">Код не найден. Проверьте цифры и попробуйте снова</string>
+    <string name="family_role_wife">Составляю список</string>
+    <string name="family_role_husband">Иду за покупками</string>
+
+    <string name="list_title">Список покупок</string>
+    <string name="list_add_item">Добавить товар</string>
+    <string name="list_add_by_voice">Добавить голосом</string>
+    <string name="list_item_name_hint">Что купить</string>
+    <string name="list_item_qty_hint">Количество</string>
+    <string name="list_item_price_hint">Цена (не обязательно)</string>
+    <string name="list_total_planned">Плановый бюджет: %1$s</string>
+    <string name="list_send_button">Отправить список</string>
+    <string name="list_empty">Список пуст. Добавьте товары голосом или вручную</string>
+    <string name="list_sent_confirmation">Список отправлен</string>
+
+    <string name="shopping_title">Покупки</string>
+    <string name="shopping_mark_purchased">Куплено</string>
+    <string name="shopping_actual_price_hint">Фактическая цена</string>
+    <string name="shopping_whats_left_button">Что осталось?</string>
+    <string name="shopping_budget_button">Итоговый бюджет</string>
+    <string name="shopping_nothing_left">Всё куплено</string>
+    <string name="shopping_remaining_prefix">Осталось купить:</string>
+    <string name="shopping_overspend">Перерасход на %1$s</string>
+    <string name="shopping_underspend">Экономия %1$s</string>
+    <string name="shopping_on_budget">Уложились точно в бюджет</string>
+    <string name="shopping_finish_button">Завершить покупки</string>
+
+    <string name="chat_title">Чат</string>
+    <string name="chat_input_hint">Сообщение…</string>
+    <string name="chat_hold_to_record_voice">Удерживайте — голосовое сообщение</string>
+    <string name="chat_record_video">Видео</string>
+    <string name="chat_send">Отправить</string>
+
+    <string name="archive_title">Архив списков</string>
+    <string name="archive_empty">Пока нет завершённых списков</string>
+    <string name="archive_item_summary">%1$s · план %2$s · факт %3$s</string>
+
+    <string name="stats_title">Статистика</string>
+    <string name="stats_week">Эта неделя</string>
+    <string name="stats_month">Этот месяц</string>
+    <string name="stats_planned_vs_actual">План %1$s / факт %2$s</string>
+    <string name="stats_no_data">Пока нет данных для статистики</string>
+
+    <string name="nav_list">Список</string>
+    <string name="nav_shopping">Покупки</string>
+    <string name="nav_chat">Чат</string>
+    <string name="nav_archive">Архив</string>
+    <string name="nav_stats">Статистика</string>
+
+    <string name="permission_mic_needed">Нужен доступ к микрофону для голосового ввода</string>
+    <string name="permission_camera_needed">Нужен доступ к камере для видеосообщений</string>
+</resources>
