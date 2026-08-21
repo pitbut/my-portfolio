@@ -1,5 +1,6 @@
 package ru.rynok.app.ui.nav
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Chat
