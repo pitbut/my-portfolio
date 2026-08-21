@@ -1,0 +1,19 @@
+[Unit]
+Description=Rynok relay server
+After=network.target
+
+[Service]
+Type=simple
+# Поменяйте на реальный путь, куда вы склонировали/скопировали repo на VPS.
+WorkingDirectory=/opt/rynok/server
+ExecStart=/usr/bin/node src/server.js
+Restart=on-failure
+RestartSec=3
+Environment=PORT=3000
+Environment=NODE_ENV=production
+# Отдельный системный пользователь без прав входа — сервису не нужен root.
+User=rynok
+Group=rynok
+
+[Install]
+WantedBy=multi-user.target
