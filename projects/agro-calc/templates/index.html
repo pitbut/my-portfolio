@@ -27,11 +27,17 @@
         <h2>Исходные данные</h2>
 
         <label>Режим расчёта</label>
-        <select id="feed-mode">
-          <option value="forward">Прямой: у меня есть поголовье — сколько корма нужно</option>
-          <option value="reverse_budget">Обратный: у меня есть корм — сколько голов потяну</option>
-          <option value="reverse_target">Обратный: хочу получить результат — сколько голов и корма нужно</option>
-        </select>
+        <div class="mode-switch" id="feed-mode-switch">
+          <button type="button" class="mode-btn is-active" data-mode="forward">
+            Прямой<span>есть поголовье → сколько корма нужно</span>
+          </button>
+          <button type="button" class="mode-btn" data-mode="reverse_budget">
+            Обратный<span>есть корм → сколько голов потяну</span>
+          </button>
+          <button type="button" class="mode-btn" data-mode="reverse_target">
+            Обратный<span>нужен результат → сколько голов и корма нужно</span>
+          </button>
+        </div>
 
         <label>Животное</label>
         <select id="feed-animal"></select>
@@ -76,6 +82,14 @@
           <input type="number" id="feed-target" step="0.1">
         </div>
 
+        <details class="econ-details">
+          <summary>💰 Экономика (заполните, если знаете цены — необязательно)</summary>
+          <p class="hint-static">Цены — за кг корма; для обратного расчёта «по бюджету» экономика считается по факту прокормленного поголовья.</p>
+          <div id="feed-price-inputs" class="feed-type-grid"></div>
+          <label id="feed-output-price-label">Цена за единицу продукции, ₽</label>
+          <input type="number" id="feed-output-price" step="0.1">
+        </details>
+
         <div class="row">
           <div>
             <label>Автор (для отчёта, необязательно)</label>
@@ -108,10 +122,14 @@
         <h2>Исходные данные</h2>
 
         <label>Режим расчёта</label>
-        <select id="crop-mode">
-          <option value="forward">Прямой: у меня есть площадь — сколько нужно семян/удобрений/воды</option>
-          <option value="reverse_target">Обратный: хочу собрать урожай — сколько нужно площади</option>
-        </select>
+        <div class="mode-switch" id="crop-mode-switch">
+          <button type="button" class="mode-btn is-active" data-mode="forward">
+            Прямой<span>есть площадь → сколько нужно семян/удобрений/воды</span>
+          </button>
+          <button type="button" class="mode-btn" data-mode="reverse_target">
+            Обратный<span>хочу собрать урожай → сколько нужно площади</span>
+          </button>
+        </div>
 
         <label>Культура</label>
         <select id="crop-crop"></select>

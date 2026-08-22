@@ -86,8 +86,33 @@ def generate_feed_report(ctx, out_path):
     animal = ANIMALS[ctx["animal_id"]]
     _header(doc, f"кормление: {animal['label']}", ctx.get("author"), ctx.get("date"))
 
-    data = ctx["result"]
+    raw = ctx["result"]
+    budget_info = None
+    if "max_count" in raw:
+        # Обратный расчёт по бюджету корма — сам raw не содержит поголовья/
+        # раскладки по всему стаду напрямую, дальше отчёт строим по
+        # forward_check (расчёту на найденное поголовье), а сюда добавляем
+        # отдельный блок с самим выводом "хватит на N голов".
+        budget_info = raw
+        data = raw.get("forward_check")
+        if data is None:
+            _h1(doc, "Обратный расчёт по бюджету корма")
+            _p(doc, f"Имеющегося корма не хватает даже на одну голову на {raw['days']} суток.", bold=True)
+            _p(doc, f"Всего доступно: {_round(raw['total_efu_available'])} ЭКЕ; "
+                     f"нужно на голову за период: {_round(raw['efu_per_head_period'])} ЭКЕ.")
+            doc.add_paragraph()
+            _p(doc, DISCLAIMER, italic=True, size=10)
+            doc.save(out_path)
+            return
+    else:
+        data = raw
     per_head = data["per_head"]
+
+    if budget_info is not None:
+        _h1(doc, "0. Обратный расчёт — по имеющемуся корму")
+        _p(doc, f"Доступно корма на {_round(budget_info['total_efu_available'])} ЭКЕ.")
+        _p(doc, f"Хватит на {budget_info['max_count']} голов на {budget_info['days']} суток.", bold=True)
+        doc.add_paragraph()
 
     _h1(doc, "1. Исходные данные")
     _table(doc, ["Параметр", "Значение"], [
@@ -129,6 +154,22 @@ def generate_feed_report(ctx, out_path):
         _h1(doc, "5. Обратный расчёт — по желаемому результату")
         _p(doc, f"Желаемый суммарный результат за период: {data['target_total_output']}")
         _p(doc, f"Требуемое поголовье: {data['required_count']} гол.", bold=True)
+        doc.add_paragraph()
+
+    if ctx.get("econ"):
+        econ = ctx["econ"]
+        _h1(doc, "6. Экономика")
+        rows = [
+            [FEED_TYPES[f]["label"], _round(cost, 0)]
+            for f, cost in econ["feed_cost_breakdown"].items() if cost > 0
+        ]
+        if rows:
+            _table(doc, ["Вид корма", "Затраты"], rows)
+        _table(doc, ["Показатель", "Значение"], [
+            ["Затраты на корм всего", _round(econ["feed_cost"], 0)],
+            ["Выручка от продукции", _round(econ["revenue"], 0)],
+            ["Прибыль", _round(econ["profit"], 0)],
+        ])
         doc.add_paragraph()
 
     doc.add_paragraph()

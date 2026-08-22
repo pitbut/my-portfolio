@@ -74,12 +74,28 @@ def _run_feed_calc(data):
         raise ValueError("Неизвестный режим расчёта: " + str(mode))
 
 
+def _run_feed_econ(data, mode, result):
+    """Экономика необязательна: считаем, только если дали хоть одну цену.
+    Для reverse_budget считаем по факту прокормленного поголовья
+    (result['forward_check']), а не по абстрактному бюджету корма."""
+    feed_prices = {k: float(v or 0) for k, v in (data.get("feed_prices") or {}).items()}
+    output_price = float(data.get("output_price") or 0)
+    if not any(feed_prices.values()) and not output_price:
+        return None
+    basis = result.get("forward_check") if mode == "reverse_budget" else result
+    if not basis:
+        return None
+    return feed_calc.economics(basis, feed_prices, output_price)
+
+
 @app.route("/api/feed/calculate", methods=["POST"])
 def api_feed_calculate():
     data = request.get_json(force=True)
     try:
+        mode = data.get("mode", "forward")
         result = _run_feed_calc(data)
-        return jsonify({"ok": True, "result": result})
+        econ = _run_feed_econ(data, mode, result)
+        return jsonify({"ok": True, "result": result, "econ": econ})
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 400
@@ -89,8 +105,10 @@ def api_feed_calculate():
 def api_feed_report():
     data = request.get_json(force=True)
     try:
+        mode = data.get("mode", "forward")
         result = _run_feed_calc(data)
-        ctx = {"animal_id": data["animal_id"], "result": result,
+        econ = _run_feed_econ(data, mode, result)
+        ctx = {"animal_id": data["animal_id"], "result": result, "econ": econ,
                "author": data.get("author", ""), "date": data.get("date", "")}
         with tempfile.TemporaryDirectory() as tmp:
             out_path = os.path.join(tmp, "feed_report.docx")

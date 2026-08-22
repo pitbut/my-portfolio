@@ -59,6 +59,7 @@ def forward(animal_id, weight_kg, output_per_head, regime, count, days):
             feed_id: kg_per_head * days
             for feed_id, kg_per_head in per_head["feed_kg_per_head"].items()
         },
+        "total_output": output_per_head * count * days,
     }
 
 
@@ -98,3 +99,26 @@ def reverse_from_target_output(animal_id, weight_kg, regime, days, target_total_
     result["target_total_output"] = target_total_output
     result["required_count"] = required_count
     return result
+
+
+def economics(result, feed_prices, output_price=None):
+    """feed_prices: {feed_type_id: цена за кг}; output_price: цена за единицу
+    продукции (л молока / кг привеса и т.п.) — обе части необязательны, то,
+    что не указано (0/None), просто не учитывается."""
+    feed_cost_breakdown = {
+        feed_id: kg * (feed_prices.get(feed_id) or 0)
+        for feed_id, kg in result["feed_kg_period_all"].items()
+    }
+    feed_cost = sum(feed_cost_breakdown.values())
+
+    total_output = result.get("total_output") or 0
+    revenue = total_output * (output_price or 0)
+    profit = revenue - feed_cost
+
+    return {
+        "feed_cost": feed_cost,
+        "feed_cost_breakdown": feed_cost_breakdown,
+        "total_output": total_output,
+        "revenue": revenue,
+        "profit": profit,
+    }

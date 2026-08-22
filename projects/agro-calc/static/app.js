@@ -47,13 +47,35 @@
     populateCropUI();
   }
 
+  // ===================== переключатели режима (кнопки, не select) =====================
+  function setupModeSwitch(containerId, blockPrefix, onChange) {
+    const container = document.getElementById(containerId);
+    let current = container.querySelector(".mode-btn.is-active").dataset.mode;
+    function apply() {
+      container.querySelectorAll(".mode-btn").forEach((b) => {
+        const active = b.dataset.mode === current;
+        b.classList.toggle("is-active", active);
+        const block = document.getElementById(blockPrefix + b.dataset.mode);
+        if (block) block.style.display = active ? "" : "none";
+      });
+      if (onChange) onChange(current);
+    }
+    container.querySelectorAll(".mode-btn").forEach((b) => {
+      b.addEventListener("click", () => { current = b.dataset.mode; apply(); });
+    });
+    apply();
+    return { get: () => current };
+  }
+
   // ===================== КОРМ =====================
   const feedAnimalSel = document.getElementById("feed-animal");
-  const feedModeSel = document.getElementById("feed-mode");
   const feedWeight = document.getElementById("feed-weight");
   const feedOutput = document.getElementById("feed-output");
   const feedOutputLabel = document.getElementById("feed-output-label");
+  const feedOutputPriceLabel = document.getElementById("feed-output-price-label");
   const feedBudgetInputs = document.getElementById("feed-budget-inputs");
+  const feedPriceInputs = document.getElementById("feed-price-inputs");
+  const feedMode = setupModeSwitch("feed-mode-switch", "feed-mode-");
 
   function populateFeedUI() {
     feedAnimalSel.innerHTML = "";
@@ -61,12 +83,19 @@
       feedAnimalSel.appendChild(el("option", { value: id, text: a.label }));
     });
     feedBudgetInputs.innerHTML = "";
+    feedPriceInputs.innerHTML = "";
     Object.entries(DATA.feed_types).forEach(([id, f]) => {
       const wrap = el("div");
       wrap.appendChild(el("label", { text: f.label }));
       const input = el("input", { type: "number", step: "1", "data-feed": id, value: "0", min: "0" });
       wrap.appendChild(input);
       feedBudgetInputs.appendChild(wrap);
+
+      const pwrap = el("div");
+      pwrap.appendChild(el("label", { text: f.label + ", ₽/кг" }));
+      const pinput = el("input", { type: "number", step: "0.1", "data-feed-price": id, min: "0" });
+      pwrap.appendChild(pinput);
+      feedPriceInputs.appendChild(pwrap);
     });
     onFeedAnimalChange();
   }
@@ -78,19 +107,12 @@
     feedWeight.max = a.weight_max;
     feedOutput.value = a.production.default;
     feedOutputLabel.textContent = "Продуктивность на голову: " + a.production.unit_label;
+    feedOutputPriceLabel.textContent = "Цена за единицу продукции (" + a.production.unit_label + "), ₽";
   }
   feedAnimalSel.addEventListener("change", onFeedAnimalChange);
 
-  function onFeedModeChange() {
-    const mode = feedModeSel.value;
-    document.getElementById("feed-mode-forward").style.display = mode === "forward" ? "" : "none";
-    document.getElementById("feed-mode-reverse_budget").style.display = mode === "reverse_budget" ? "" : "none";
-    document.getElementById("feed-mode-reverse_target").style.display = mode === "reverse_target" ? "" : "none";
-  }
-  feedModeSel.addEventListener("change", onFeedModeChange);
-
   function collectFeedPayload() {
-    const mode = feedModeSel.value;
+    const mode = feedMode.get();
     const payload = {
       mode,
       animal_id: feedAnimalSel.value,
@@ -112,10 +134,14 @@
     } else if (mode === "reverse_target") {
       payload.target_total_output = document.getElementById("feed-target").value;
     }
+    const feed_prices = {};
+    feedPriceInputs.querySelectorAll("input").forEach((inp) => { feed_prices[inp.dataset.feedPrice] = inp.value || 0; });
+    payload.feed_prices = feed_prices;
+    payload.output_price = document.getElementById("feed-output-price").value || 0;
     return payload;
   }
 
-  function renderFeedResult(data) {
+  function renderFeedResult(data, econ) {
     const box = document.getElementById("feed-result");
     box.innerHTML = "";
     const animal = DATA.animals[data.animal_id || feedAnimalSel.value];
@@ -150,6 +176,19 @@
         .map(([f, kg]) => [DATA.feed_types[f].label, fmt(kg, 1) + " кг"]);
       box.appendChild(table(["Вид корма", "кг за период"], totalRows));
     }
+
+    if (econ) {
+      box.appendChild(el("h4", { text: "Экономика" }));
+      const costRows = Object.entries(econ.feed_cost_breakdown)
+        .filter(([, cost]) => cost > 0)
+        .map(([f, cost]) => [DATA.feed_types[f].label, fmt(cost, 0) + " ₽"]);
+      if (costRows.length) box.appendChild(table(["Вид корма", "Затраты"], costRows));
+      box.appendChild(table(["Показатель", "Значение"], [
+        ["Затраты на корм всего", fmt(econ.feed_cost, 0) + " ₽"],
+        ["Выручка от продукции", fmt(econ.revenue, 0) + " ₽"],
+        ["Прибыль", fmt(econ.profit, 0) + " ₽"],
+      ]));
+    }
   }
 
   document.getElementById("feed-calc-btn").addEventListener("click", async () => {
@@ -162,7 +201,7 @@
       });
       const data = await res.json();
       if (!data.ok) { errEl.textContent = data.error || "Ошибка расчёта"; return; }
-      renderFeedResult(data.result);
+      renderFeedResult(data.result, data.econ);
     } catch (e) {
       errEl.textContent = "Ошибка соединения.";
     }
@@ -187,10 +226,10 @@
 
   // ===================== ПОСЕВ =====================
   const cropCropSel = document.getElementById("crop-crop");
-  const cropModeSel = document.getElementById("crop-mode");
   const cropYield = document.getElementById("crop-yield");
   const cropFertInputs = document.getElementById("crop-fertilizer-inputs");
   const priceFertInputs = document.getElementById("price-fert-inputs");
+  const cropMode = setupModeSwitch("crop-mode-switch", "crop-mode-");
 
   const NUTRIENT_LABELS = { N: "Азот (N)", P2O5: "Фосфор (P₂O₅)", K2O: "Калий (K₂О)" };
 
@@ -225,15 +264,8 @@
   }
   cropCropSel.addEventListener("change", onCropChange);
 
-  function onCropModeChange() {
-    const mode = cropModeSel.value;
-    document.getElementById("crop-mode-forward").style.display = mode === "forward" ? "" : "none";
-    document.getElementById("crop-mode-reverse_target").style.display = mode === "reverse_target" ? "" : "none";
-  }
-  cropModeSel.addEventListener("change", onCropModeChange);
-
   function collectCropPayload() {
-    const mode = cropModeSel.value;
+    const mode = cropMode.get();
     const fertilizer_choice = {};
     cropFertInputs.querySelectorAll("select").forEach((s) => { fertilizer_choice[s.dataset.nutrient] = s.value; });
     const fert_price_per_kg = {};
@@ -344,7 +376,5 @@
     }
   });
 
-  onFeedModeChange();
-  onCropModeChange();
   loadData();
 })();
