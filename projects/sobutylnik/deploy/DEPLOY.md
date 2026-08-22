@@ -28,10 +28,13 @@ sudo ss -ltnp | grep 8014 || echo "порт свободен"
 sudo useradd --system --create-home --shell /usr/sbin/nologin sobutylnik
 
 # Клонируем репозиторий целиком (внутри — папка projects/sobutylnik,
-# ровно та, на которую смотрят systemd-юнит и nginx-конфиг ниже)
-sudo -u sobutylnik git clone https://github.com/pitbut/my-portfolio.git /opt/sobutylnik
+# ровно та, на которую смотрят systemd-юнит и nginx-конфиг ниже).
+# Код пока не влит в main — берём прямо ветку с изменениями; после того
+# как смержите PR, здесь можно будет переключиться на main и дальше
+# обновляться шагом «Обновление после новых коммитов» ниже.
+sudo -u sobutylnik git clone --branch claude/virtual-drinking-buddy-site-cmrfx6 \
+    https://github.com/pitbut/my-portfolio.git /opt/sobutylnik
 cd /opt/sobutylnik
-sudo -u sobutylnik git checkout main   # или нужную ветку, когда смержите PR
 
 cd /opt/sobutylnik/projects/sobutylnik
 sudo -u sobutylnik python3 -m venv venv
