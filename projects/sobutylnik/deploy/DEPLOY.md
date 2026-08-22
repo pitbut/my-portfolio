@@ -11,9 +11,9 @@
 # Бэкап текущих конфигов nginx, на всякий случай (можно потом удалить)
 sudo cp -r /etc/nginx/sites-available /etc/nginx/sites-available.backup-$(date +%F)
 
-# Убедитесь, что порт 8001 никем не занят (если занят — возьмите другой,
+# Убедитесь, что порт 8014 никем не занят (если занят — возьмите другой,
 # например 8002, и замените везде ниже, включая nginx-конфиг)
-sudo ss -ltnp | grep 8001 || echo "порт свободен"
+sudo ss -ltnp | grep 8014 || echo "порт свободен"
 ```
 
 ## 1. DNS
@@ -79,10 +79,10 @@ sudo -u postgres psql -c "CREATE DATABASE sobutylnik OWNER sobutylnik;"
 cd /opt/sobutylnik/projects/sobutylnik
 sudo -u sobutylnik ./venv/bin/flask db upgrade
 sudo -u sobutylnik ./venv/bin/python seed.py
-sudo -u sobutylnik ./venv/bin/gunicorn run:app --bind 127.0.0.1:8001
+sudo -u sobutylnik ./venv/bin/gunicorn run:app --bind 127.0.0.1:8014
 ```
 
-Откройте в другом терминале `curl -I http://127.0.0.1:8001/` — должен
+Откройте в другом терминале `curl -I http://127.0.0.1:8014/` — должен
 прийти `200 OK`. Остановите (Ctrl+C) — дальше это возьмёт на себя systemd.
 
 ## 5. systemd-юнит
@@ -160,7 +160,7 @@ sudo systemctl restart sobutylnik   # применит новый код + пр�
   проверить `.env` (особенно `DATABASE_URL`/`ANTHROPIC_API_KEY`).
 - **nginx не перезагружается / 502 Bad Gateway** — `sudo nginx -t`
   покажет синтаксическую ошибку; 502 обычно значит, что
-  `systemctl status sobutylnik` не `active` — юнит не слушает порт 8001.
+  `systemctl status sobutylnik` не `active` — юнит не слушает порт 8014.
 - **Откатить nginx** — удалить симлинк
   `sudo rm /etc/nginx/sites-enabled/sobutylnik.conf`, затем
   `sudo nginx -t && sudo systemctl reload nginx` — существующий сайт

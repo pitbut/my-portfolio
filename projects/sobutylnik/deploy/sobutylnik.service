@@ -1,7 +1,7 @@
 # systemd-юнит для «Собутыльника» на своём VPS.
 #
 # Изолирован от всего остального на сервере: свой linux-пользователь, свой
-# порт (127.0.0.1:8001 — слушает только локально, наружу отдаёт nginx),
+# порт (127.0.0.1:8014 — слушает только локально, наружу отдаёт nginx),
 # своя рабочая директория. Ничего общего с другими сайтами/сервисами на
 # машине не имеет — включение/выключение/падение этого юнита не может
 # затронуть остальные.
@@ -34,7 +34,7 @@ ExecStartPre=/opt/sobutylnik/projects/sobutylnik/venv/bin/flask db upgrade
 ExecStartPre=/opt/sobutylnik/projects/sobutylnik/venv/bin/python seed.py
 
 ExecStart=/opt/sobutylnik/projects/sobutylnik/venv/bin/gunicorn run:app \
-    --bind 127.0.0.1:8001 \
+    --bind 127.0.0.1:8014 \
     --workers 3 \
     --timeout 120
 
