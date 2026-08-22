@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Собутыльник — ИИ-компаньон для застолья{% endblock %}
+{% block content %}
+<header class="hero wrap">
+  <span class="eyebrow">18+ · голос · тосты · шутки · музыка</span>
+  <h1>🥂 Виртуальный собутыльник</h1>
+  <p>Не с кем выпить? ИИ-компаньон поддержит беседу, скажет тост, пошутит,
+     чокнется и подпоёт — голосом, прямо в браузере. Попробуйте прямо сейчас,
+     без регистрации.</p>
+</header>
+
+<div class="wrap">
+  <div class="card" style="max-width:640px; margin:0 auto;">
+    <div id="demo-messages" style="display:flex; flex-direction:column; gap:10px; min-height:120px; margin-bottom:14px;">
+      <div class="msg msg--companion">Привет! Наливай (или не наливай — не обязательно 😉) и расскажи, как дела?</div>
+    </div>
+    <form id="demo-form" style="display:flex; gap:8px;">
+      <input type="text" id="demo-input" placeholder="Напишите что-нибудь..." autocomplete="off">
+      <button class="btn" type="submit">Отправить</button>
+    </form>
+    <p id="demo-status" class="limit-note">Осталось реплик в демо: <span id="demo-turns-left">{{ turns_left }}</span></p>
+    <div id="demo-cta" style="display:none; text-align:center; margin-top:10px;">
+      <p style="color:var(--ink-dim)">Понравилось? Зарегистрируйтесь — и продолжим общаться по-настоящему.</p>
+      <a class="btn" href="{{ url_for('auth.register') }}">Зарегистрироваться</a>
+    </div>
+  </div>
+</div>
+
+<section class="wrap" style="padding-top:50px;">
+  <h2 style="text-align:center;">Кого выбрать в собеседники</h2>
+  <div class="companion-grid">
+    {% for c in companions %}
+    <div class="companion-card" style="border-color:{{ c.color }}55;">
+      <div class="companion-card__emoji">{{ c.emoji }}</div>
+      <div class="companion-card__name">{{ c.name }}</div>
+      <div class="companion-card__tagline">{{ c.tagline }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/demo.js') }}"></script>
+{% endblock %}

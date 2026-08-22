@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Подтвердите email — Собутыльник{% endblock %}
+{% block content %}
+<div class="wrap" style="max-width:520px; text-align:center;">
+  <h1>Проверьте почту 📬</h1>
+  <p style="color:var(--ink-dim)">
+    Мы отправили ссылку подтверждения на <strong>{{ current_user.email }}</strong>.
+    Перейдите по ней, чтобы открыть доступ к полноценной беседе с собутыльником.
+  </p>
+  <p><a class="btn btn--ghost" href="{{ url_for('auth.resend_confirmation') }}">Отправить письмо ещё раз</a></p>
+</div>
+{% endblock %}

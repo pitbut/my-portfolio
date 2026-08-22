@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Поддержка — Собутыльник{% endblock %}
+{% block content %}
+<div class="wrap" style="max-width:640px;">
+  <h1>Поддержка</h1>
+  <p style="color:var(--ink-dim); font-size:.9rem;">Вопросы по оплате, доступу или что-то не работает — пишите сюда, отвечает администратор лично. Можно приложить файл или фото.</p>
+
+  <div class="support-thread">
+    {% for m in messages %}
+      <div class="support-msg support-msg--{{ m.sender }}">
+        {% if m.body %}<div>{{ m.body }}</div>{% endif %}
+        {% if m.attachment_url %}
+          <div><a href="{{ m.attachment_url }}" target="_blank" rel="noopener">📎 {{ m.attachment_name or "вложение" }}</a></div>
+        {% elif m.attachment_name %}
+          <div style="opacity:.7;">📎 {{ m.attachment_name }} (не удалось сохранить)</div>
+        {% endif %}
+        <time>{{ m.created_at.strftime("%d.%m %H:%M") }} · {{ "вы" if m.sender == "user" else "администратор" }}</time>
+      </div>
+    {% else %}
+      <p style="color:var(--ink-dim)">Сообщений пока нет.</p>
+    {% endfor %}
+  </div>
+
+  <form class="stack" method="post" action="{{ url_for('support.send') }}" enctype="multipart/form-data">
+    <textarea name="body" placeholder="Ваше сообщение..."></textarea>
+    <div>
+      <label for="attachment">Файл или фото (необязательно)</label>
+      <input type="file" id="attachment" name="attachment">
+    </div>
+    <button class="btn" type="submit">Отправить</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>{% block title %}Админ-панель — Собутыльник{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="{{ url_for('admin.dashboard') }}"><span class="brand__mark">🔐</span><span class="brand__name">Админ-панель</span></a>
+    <div class="account-nav">
+      <a href="{{ url_for('admin.dashboard') }}">Обзор</a>
+      <a href="{{ url_for('admin.users') }}">Пользователи</a>
+      <a href="{{ url_for('admin.support_list') }}">Поддержка</a>
+      <a href="{{ url_for('main.index') }}">← На сайт</a>
+      <a href="{{ url_for('admin.logout') }}">Выйти</a>
+    </div>
+  </div>
+</header>
+<main class="site-main">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="wrap flash-messages">
+      {% for category, message in messages %}<div class="flash flash--{{ category }}">{{ message }}</div>{% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

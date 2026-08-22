@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Сервис недоступен — Собутыльник{% endblock %}
+{% block content %}
+<div class="wrap disabled-screen">
+  <h1>🥂💤</h1>
+  <p style="color:var(--ink-dim); font-size:1.1rem;">{{ message or "Сервис временно недоступен. Загляните позже." }}</p>
+</div>
+{% endblock %}

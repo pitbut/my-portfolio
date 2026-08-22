@@ -1,0 +1,47 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Обзор — админ-панель{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1>Обзор</h1>
+  <div class="grid" style="margin-bottom:30px;">
+    <div class="card"><div style="font-size:1.8rem; font-weight:700;">{{ stats.registered }}</div><div style="color:var(--ink-dim); font-size:.85rem;">Зарегистрировано</div></div>
+    <div class="card"><div style="font-size:1.8rem; font-weight:700;">{{ stats.confirmed }}</div><div style="color:var(--ink-dim); font-size:.85rem;">Подтвердили email</div></div>
+    <div class="card"><div style="font-size:1.8rem; font-weight:700;">{{ stats.blocked }}</div><div style="color:var(--ink-dim); font-size:.85rem;">Заблокировано</div></div>
+    <div class="card"><div style="font-size:1.8rem; font-weight:700;">{{ stats.paid }}</div><div style="color:var(--ink-dim); font-size:.85rem;">Оплатили</div></div>
+    <div class="card"><div style="font-size:1.8rem; font-weight:700;">{{ stats.unread_support }}</div><div style="color:var(--ink-dim); font-size:.85rem;">Непрочитано в поддержке</div></div>
+  </div>
+
+  <h2>Рубильник всей программы</h2>
+  <div class="card settings-panel">
+    <div class="settings-row">
+      <div>
+        <div class="settings-row__label">Приложение {{ "включено" if settings.app_enabled else "ПОЛНОСТЬЮ ОТКЛЮЧЕНО" }}</div>
+        <div class="settings-row__hint">Мгновенно закрывает доступ вообще всем пользователям (не админке) — экстренный предохранитель от расходов на API.</div>
+      </div>
+      <form method="post" action="{{ url_for('admin.toggle_kill_switch') }}" style="display:flex; gap:8px; align-items:center;">
+        <input type="text" name="disabled_message" placeholder="Сообщение при отключении" value="{{ settings.disabled_message or '' }}" style="width:220px;">
+        <button class="btn {{ 'btn--danger' if settings.app_enabled else '' }}" type="submit">
+          {{ "Отключить всё" if settings.app_enabled else "Включить обратно" }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <h2 style="margin-top:30px;">Лимиты сообщений</h2>
+  <div class="card">
+    <form method="post" action="{{ url_for('admin.update_limits') }}" class="stack">
+      <label class="check-row">
+        <input type="checkbox" name="limits_enabled" {{ "checked" if settings.limits_enabled }}>
+        <span>Лимиты включены (если снять галочку — расход на API становится неограниченным для всех пользователей)</span>
+      </label>
+      <div>
+        <label for="default_message_limit">Лимит сообщений по умолчанию (для пользователей без индивидуального лимита)</label>
+        <input type="text" id="default_message_limit" name="default_message_limit" value="{{ settings.default_message_limit }}">
+      </div>
+      <button class="btn" type="submit" style="width:fit-content;">Сохранить</button>
+    </form>
+  </div>
+
+  <p style="margin-top:24px;"><a href="{{ url_for('admin.users') }}">→ Управление пользователями (блокировка по одному / всех сразу)</a></p>
+</div>
+{% endblock %}

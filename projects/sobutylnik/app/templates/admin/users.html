@@ -1,0 +1,75 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Пользователи — админ-панель{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1>Пользователи</h1>
+
+  <div class="admin-toolbar">
+    <form method="post" action="{{ url_for('admin.block_all') }}" onsubmit="return confirm('Заблокировать ВСЕХ пользователей сразу?');">
+      <button class="btn btn--danger" type="submit">🚫 Заблокировать всех</button>
+    </form>
+    <form method="post" action="{{ url_for('admin.unblock_all') }}">
+      <button class="btn btn--ghost" type="submit">✅ Разблокировать всех</button>
+    </form>
+  </div>
+
+  <div style="overflow-x:auto;">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Пользователь</th><th>Email</th><th>Статус</th><th>Оплата</th>
+        <th>Сообщений</th><th>Лимит</th><th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}{% if not user.email_confirmed %} <span style="opacity:.6;">(email не подтверждён)</span>{% endif %}</td>
+        <td>
+          {% if user.is_blocked %}
+            <span class="badge badge--blocked">заблокирован{% if user.blocked_reason %}: {{ user.blocked_reason }}{% endif %}</span>
+          {% else %}
+            <span class="badge badge--ok">активен</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin.toggle_paid', user_id=user.id) }}">
+            <button type="submit" class="badge {{ 'badge--paid' if user.is_paid else '' }}" style="border:1px solid var(--border); cursor:pointer;">
+              {{ "оплачено" if user.is_paid else "не оплачено" }}
+            </button>
+          </form>
+        </td>
+        <td>{{ user.messages_used }}
+          <form method="post" action="{{ url_for('admin.reset_usage', user_id=user.id) }}" style="display:inline;">
+            <button type="submit" title="Сбросить счётчик" style="background:none; border:none; color:var(--ink-dim); cursor:pointer;">↺</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin.set_limit', user_id=user.id) }}" style="display:flex; gap:4px;">
+            <input type="text" name="message_limit" value="{{ user.message_limit if user.message_limit is not none else '' }}"
+                   placeholder="общий ({{ settings.default_message_limit }})" style="width:110px;">
+            <button class="btn btn--small" type="submit">✓</button>
+          </form>
+        </td>
+        <td style="white-space:nowrap;">
+          <form method="post" action="{{ url_for('admin.block_user', user_id=user.id) }}" style="display:inline;">
+            {% if not user.is_blocked %}<input type="hidden" name="reason" value="заблокирован администратором">{% endif %}
+            <button class="btn btn--small {{ 'btn--ghost' if user.is_blocked else 'btn--danger' }}" type="submit">
+              {{ "Разблокировать" if user.is_blocked else "Заблокировать" }}
+            </button>
+          </form>
+          <form method="post" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;"
+                onsubmit="return confirm('Удалить пользователя {{ user.email }} и все его данные безвозвратно?');">
+            <button class="btn btn--small btn--ghost" type="submit">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="color:var(--ink-dim);">Пока никто не зарегистрировался.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

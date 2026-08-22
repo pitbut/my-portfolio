@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Собутыльник</title>
+<meta name="description" content="Собутыльник — Flask-модуль виртуального ИИ-компаньона для застолья: голосовая беседа с barge-in, тосты, шутки, музыка, распознавание обстановки по фото, через Anthropic Claude.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1210; --bg-soft: #241816; --surface: #2b1c19; --surface-2: #35231f;
+    --border: rgba(255,255,255,0.09); --ink: #f6ede8; --ink-dim: #cbb3a8;
+    --accent: #ffb454; --gold: #ffb454;
+    --font-display: "Sora", sans-serif; --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: var(--font-body); color: var(--ink); line-height: 1.6;
+    background: var(--bg);
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-family: var(--font-display); color: #fff; font-weight: 600; }
+  a { color: var(--accent); }
+  a:hover { color: #f87171; }
+  header.hero { text-align: center; padding: 70px 0 30px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: .75rem; color: var(--gold); }
+  header.hero h1 { font-size: clamp(2rem, 5vw, 2.8rem); margin: .3em 0; }
+  header.hero p { color: var(--ink-dim); font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
+  .back-link { display: inline-block; margin: 30px 0 0; font-size: .9rem; color: var(--ink-dim); }
+  section { padding: 36px 0; border-top: 1px solid var(--border); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 18px; }
+  .card {
+    background: linear-gradient(160deg, var(--surface), var(--bg-soft));
+    border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+  }
+  .card h3 { font-size: 1.02rem; margin: 0 0 6px; }
+  .card p { color: var(--ink-dim); font-size: .92rem; margin: 0; }
+  .stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: center; }
+  .stack span {
+    font-size: .8rem; font-weight: 700; padding: 4px 12px; border-radius: 100px;
+    background: rgba(255,180,84,0.14); color: var(--accent);
+  }
+  .note {
+    margin-top: 24px; padding: 18px 20px; border-left: 3px solid var(--gold);
+    background: rgba(255,255,255,0.04); border-radius: 10px; color: var(--ink-dim); font-size: .95rem;
+  }
+  code { background: rgba(0,0,0,0.35); padding: 2px 6px; border-radius: 4px; font-size: .88em; }
+  pre {
+    background: rgba(0,0,0,0.35); padding: 16px 18px; border-radius: 10px; overflow-x: auto;
+    font-size: .85rem; color: var(--ink);
+  }
+  footer { text-align: center; padding: 40px 0 60px; color: var(--ink-dim); font-size: .85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">flask-модуль · 18+</span>
+    <h1>🥂 Собутыльник</h1>
+    <p>
+      Не с кем выпить? Виртуальный ИИ-собутыльник поддержит беседу голосом,
+      скажет тост, пошутит, чокнётся и подпоёт — через один мультимодальный
+      ИИ-API (Anthropic Claude).
+    </p>
+    <div class="stack">
+      <span>Flask</span><span>SQLAlchemy</span><span>Flask-Migrate</span>
+      <span>Anthropic Claude</span><span>SQLite → PostgreSQL</span><span>Web Speech API</span><span>pytest</span>
+    </div>
+    <p style="font-size:.82rem; color:var(--ink-dim); margin-top:20px;">
+      Проект пока не задеплоен на живой сервер — ниже описание архитектуры и как запустить исходники локально.
+    </p>
+  </header>
+
+  <div class="note">
+    Это не статичная страница, а полноценное серверное приложение (backend на
+    Flask + база данных + вызовы ИИ-API), поэтому оно не может работать
+    напрямую на GitHub Pages — здесь хостится только статика. Исходный код
+    целиком лежит в этой папке репозитория: <code>projects/sobutylnik/</code>.
+    <pre>cd projects/sobutylnik
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # укажите ANTHROPIC_API_KEY, ADMIN_PASSWORD
+flask db upgrade
+python seed.py
+python run.py</pre>
+    и откройте <code>http://localhost:5000</code>. Подробности — в
+    <code>README.md</code> этого проекта.
+  </div>
+
+  <section>
+    <h2>Что умеет модуль</h2>
+    <div class="grid">
+      <div class="card"><h3>Голосовая беседа с barge-in</h3><p>Распознавание речи и озвучка ответа в браузере (Web Speech API) — можно перебить собеседника в любой момент.</p></div>
+      <div class="card"><h3>Тост, шутка, чоканье, музыка</h3><p>Собеседник может произнести тост, пошутить, «чокнуться» или предложить застольную песню.</p></div>
+      <div class="card"><h3>Выбор личности и голоса</h3><p>Несколько собеседников с разным характером и любой голос из доступных в браузере.</p></div>
+      <div class="card"><h3>Распознавание обстановки</h3><p>Фото стола/компании анализируется мультимодальной моделью и обыгрывается в реплике.</p></div>
+      <div class="card"><h3>Регистрация с подтверждением email</h3><p>До регистрации доступна короткая демо-беседа на главной странице; полноценное общение — после подтверждения почты.</p></div>
+      <div class="card"><h3>Чат поддержки с админом</h3><p>Текст и файлы/фото — вопросы по оплате и доступу напрямую администратору.</p></div>
+      <div class="card"><h3>Админ-панель и предохранители расходов</h3><p>Блокировка пользователей по одному или всех сразу, общий рубильник всего приложения, лимиты сообщений с возможностью полностью их отключить.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Архитектура</h2>
+    <p style="color: var(--ink-dim)">
+      Application factory (<code>create_app</code>), блюпринты
+      (<code>auth</code>, <code>main</code>, <code>chat</code>,
+      <code>support</code>, <code>admin</code>), схема БД — миграциями
+      Flask-Migrate/Alembic. ИИ-провайдер вынесен в универсальный слой
+      <code>app/providers/</code> (интерфейс + адаптер Anthropic Claude) —
+      добавление другого провайдера не требует переписывания маршрутов.
+    </p>
+  </section>
+
+  <a class="back-link" href="../../index.html">← Назад в портфолио</a>
+  <footer>🥂 Собутыльник · Flask-модуль ИИ-компаньона для застолья · 18+</footer>
+</div>
+</body>
+</html>

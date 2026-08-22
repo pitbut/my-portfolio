@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Вход — Собутыльник{% endblock %}
+{% block content %}
+<div class="wrap" style="max-width:420px;">
+  <h1>Вход</h1>
+  <form class="stack" method="post">
+    <div>
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{ email }}" required>
+    </div>
+    <div>
+      <label for="password">Пароль</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button class="btn" type="submit">Войти</button>
+  </form>
+  <p style="margin-top:16px; color:var(--ink-dim); font-size:.9rem;">Ещё нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></p>
+</div>
+{% endblock %}

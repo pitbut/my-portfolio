@@ -1,0 +1,22 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Поддержка — админ-панель{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1>Обращения в поддержку</h1>
+  <table class="admin-table">
+    <thead><tr><th>Пользователь</th><th>Последнее сообщение</th><th>Непрочитано</th><th></th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.user.name }} <span style="color:var(--ink-dim);">({{ row.user.email }})</span></td>
+        <td>{{ (row.last.body or "📎 файл")[:80] if row.last else "" }}</td>
+        <td>{% if row.unread %}<span class="badge badge--blocked">{{ row.unread }}</span>{% else %}—{% endif %}</td>
+        <td><a class="btn btn--small" href="{{ url_for('admin.support_thread', user_id=row.user.id) }}">Открыть</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="color:var(--ink-dim);">Обращений пока нет.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

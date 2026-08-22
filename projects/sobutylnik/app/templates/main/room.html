@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ companion.name }} — Собутыльник{% endblock %}
+{% block content %}
+<div class="wrap room" id="room"
+     data-companion-name="{{ companion.name }}"
+     data-voice-name="{{ current_user.voice_name or '' }}"
+     data-limit-reached="{{ 'true' if limit_reached else 'false' }}">
+
+  <div class="room__avatar">
+    <span class="room__avatar-emoji" id="avatar-emoji">{{ companion.emoji }}</span>
+    <div class="room__status" id="room-status">Готов слушать</div>
+  </div>
+
+  <div class="room__messages" id="room-messages">
+    {% for m in messages %}
+      <div class="msg msg--{{ 'user' if m.sender == 'user' else 'companion' }}">
+        {{ m.content }}
+        {% if m.image_url %}<img src="{{ m.image_url }}" alt="Фото обстановки">{% endif %}
+      </div>
+    {% else %}
+      <div class="msg msg--companion">{{ companion.emoji }} Ну что, {{ current_user.name }}, за встречу? Рассказывай, как оно.</div>
+    {% endfor %}
+  </div>
+
+  {% if limit_reached %}
+    <p class="limit-note">Лимит сообщений исчерпан. Напишите в <a href="{{ url_for('support.inbox') }}">поддержку</a>, если нужно больше.</p>
+  {% elif limit is not none %}
+    <p class="limit-note">Сообщений использовано: {{ messages_used }} / {{ limit }}</p>
+  {% endif %}
+
+  <div class="room__actions">
+    <button class="btn btn--ghost" data-action="toast" {{ 'disabled' if limit_reached }}>🥂 Тост</button>
+    <button class="btn btn--ghost" data-action="joke" {{ 'disabled' if limit_reached }}>😂 Шутка</button>
+    <button class="btn btn--ghost" data-action="cheers" {{ 'disabled' if limit_reached }}>🍻 Чокнуться</button>
+    <button class="btn btn--ghost" data-action="music" {{ 'disabled' if limit_reached }}>🎵 Музыка</button>
+    <label class="btn btn--ghost" style="cursor:pointer;">
+      📷 Показать обстановку
+      <input type="file" id="scene-input" accept="image/*" capture="environment" style="display:none;" {{ 'disabled' if limit_reached }}>
+    </label>
+    <select id="voice-select" class="btn--ghost" style="border-radius:10px; padding:8px 10px;"></select>
+  </div>
+
+  <form class="room__composer" id="composer-form">
+    <button type="button" class="mic-btn" id="mic-btn" title="Голос" {{ 'disabled' if limit_reached }}>🎤</button>
+    <input type="text" id="composer-input" placeholder="Напишите реплику..." autocomplete="off" {{ 'disabled' if limit_reached }}>
+    <button class="btn" type="submit" {{ 'disabled' if limit_reached }}>➤</button>
+  </form>
+
+  <p style="text-align:center; margin-top:10px;">
+    <a href="{{ url_for('main.dashboard') }}" style="font-size:.85rem; color:var(--ink-dim);">← Сменить собеседника</a>
+    <form method="post" action="{{ url_for('chat.end_conversation') }}" style="display:inline; margin-left:14px;">
+      <button type="submit" style="background:none; border:none; color:var(--ink-dim); font-size:.85rem; cursor:pointer; text-decoration:underline;">Завершить беседу</button>
+    </form>
+  </p>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+{% endblock %}

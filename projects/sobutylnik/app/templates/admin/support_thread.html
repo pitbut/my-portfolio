@@ -1,0 +1,23 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Переписка с {{ support_user.name }} — админ-панель{% endblock %}
+{% block content %}
+<div class="wrap" style="max-width:640px;">
+  <p><a href="{{ url_for('admin.support_list') }}">← Все обращения</a></p>
+  <h1>{{ support_user.name }} <span style="color:var(--ink-dim); font-size:1rem;">({{ support_user.email }})</span></h1>
+
+  <div class="support-thread">
+    {% for m in messages %}
+      <div class="support-msg support-msg--{{ 'user' if m.sender == 'user' else 'admin' }}">
+        {% if m.body %}<div>{{ m.body }}</div>{% endif %}
+        {% if m.attachment_url %}<div><a href="{{ m.attachment_url }}" target="_blank" rel="noopener">📎 {{ m.attachment_name or "вложение" }}</a></div>{% endif %}
+        <time>{{ m.created_at.strftime("%d.%m %H:%M") }} · {{ "пользователь" if m.sender == "user" else "вы" }}</time>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form class="stack" method="post">
+    <textarea name="body" placeholder="Ваш ответ..." required></textarea>
+    <button class="btn" type="submit" style="width:fit-content;">Ответить</button>
+  </form>
+</div>
+{% endblock %}
