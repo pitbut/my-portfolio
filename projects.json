@@ -1,5 +1,21 @@
 [
   {
+    "id": "sobutylnik",
+    "title": "🥂 Собутыльник",
+    "description": "Виртуальный ИИ-собутыльник: голосовая беседа с barge-in (можно перебить), тосты, шутки, чоканье и музыка, выбор личности и голоса, распознавание обстановки по фото. Регистрация с подтверждением email, гостевое демо на главной, чат поддержки с админом (текст+файлы), админ-панель с блокировкой пользователей и управлением лимитами. Flask + SQLAlchemy + Anthropic Claude.",
+    "image": "projects/sobutylnik/preview.svg",
+    "link": "https://sobutylnik.robutpit.com",
+    "date": "2026-08-22",
+    "tags": [
+      "Flask",
+      "Python",
+      "SQLAlchemy",
+      "Anthropic Claude",
+      "PostgreSQL",
+      "Web Speech API"
+    ]
+  },
+  {
     "id": "chat",
     "title": "Chat",
     "description": "Описание проекта скоро появится",
@@ -243,7 +259,7 @@
     "title": "🎙️ Свободный Чат",
     "description": "AI собеседник с голосовым управлением и анимированным аватаром. Поддержка Groq, Google Gemini, OpenAI. 7 личностей включая Учителя. Голосовой ввод/вывод на русском языке.",
     "image": "projects/sobesednik/preview.jpg",
-    "link": "https://sobesednik.onrender.com",
+    "link": "https://sobesednik.robutpit.com",
     "date": "2026-01-10",
     "tags": [
       "AI",
