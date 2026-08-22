@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌾 Агро-калькулятор — корм и посев</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌾</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">🌾 Агро-калькулятор <span class="topbar-sub">корм для животных · посев и удобрения</span></div>
+</header>
+
+<nav class="tabs">
+  <button class="tab is-active" data-tab="feed">🐄 Корм для животных</button>
+  <button class="tab" data-tab="crop">🌱 Посев и удобрения</button>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===================== ВКЛАДКА: КОРМ ===================== -->
+  <section id="tab-feed" class="tab-panel is-active">
+    <div class="grid">
+      <div class="panel">
+        <h2>Исходные данные</h2>
+
+        <label>Режим расчёта</label>
+        <select id="feed-mode">
+          <option value="forward">Прямой: у меня есть поголовье — сколько корма нужно</option>
+          <option value="reverse_budget">Обратный: у меня есть корм — сколько голов потяну</option>
+          <option value="reverse_target">Обратный: хочу получить результат — сколько голов и корма нужно</option>
+        </select>
+
+        <label>Животное</label>
+        <select id="feed-animal"></select>
+
+        <div class="row">
+          <div>
+            <label>Живая масса, кг</label>
+            <input type="number" id="feed-weight" step="1">
+          </div>
+          <div>
+            <label>Режим кормления</label>
+            <select id="feed-regime">
+              <option value="winter">Стойловый (зима)</option>
+              <option value="summer">Пастбищный/смешанный (лето)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label id="feed-output-label">Продуктивность на голову</label>
+            <input type="number" id="feed-output" step="0.1">
+          </div>
+          <div>
+            <label>Период, суток</label>
+            <input type="number" id="feed-days" value="30" min="1">
+          </div>
+        </div>
+
+        <div id="feed-mode-forward" class="mode-block">
+          <label>Поголовье, гол.</label>
+          <input type="number" id="feed-count" value="10" min="1">
+        </div>
+
+        <div id="feed-mode-reverse_budget" class="mode-block" style="display:none;">
+          <label>Сколько корма у меня есть (кг за весь период)</label>
+          <div id="feed-budget-inputs" class="feed-type-grid"></div>
+        </div>
+
+        <div id="feed-mode-reverse_target" class="mode-block" style="display:none;">
+          <label>Желаемый суммарный результат за период</label>
+          <input type="number" id="feed-target" step="0.1">
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Автор (для отчёта, необязательно)</label>
+            <input type="text" id="feed-author">
+          </div>
+          <div>
+            <label>Дата отчёта</label>
+            <input type="date" id="feed-date">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="feed-calc-btn">Рассчитать</button>
+          <button class="btn btn--ghost" id="feed-report-btn">📄 Скачать отчёт (.docx)</button>
+        </div>
+        <p class="hint" id="feed-error"></p>
+      </div>
+
+      <div class="panel">
+        <h2>Результат</h2>
+        <div id="feed-result" class="result">Заполните данные слева и нажмите «Рассчитать».</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ВКЛАДКА: ПОСЕВ ===================== -->
+  <section id="tab-crop" class="tab-panel">
+    <div class="grid">
+      <div class="panel">
+        <h2>Исходные данные</h2>
+
+        <label>Режим расчёта</label>
+        <select id="crop-mode">
+          <option value="forward">Прямой: у меня есть площадь — сколько нужно семян/удобрений/воды</option>
+          <option value="reverse_target">Обратный: хочу собрать урожай — сколько нужно площади</option>
+        </select>
+
+        <label>Культура</label>
+        <select id="crop-crop"></select>
+
+        <div class="row">
+          <div id="crop-mode-forward" class="mode-block">
+            <label>Площадь, га</label>
+            <input type="number" id="crop-area" step="0.01" value="10">
+          </div>
+          <div id="crop-mode-reverse_target" class="mode-block" style="display:none;">
+            <label>Желаемый сбор, т</label>
+            <input type="number" id="crop-target" step="0.1">
+          </div>
+          <div>
+            <label>Урожайность, т/га (можно скорректировать)</label>
+            <input type="number" id="crop-yield" step="0.1">
+          </div>
+        </div>
+
+        <label>Дата посева (необязательно — для календаря созревания)</label>
+        <input type="date" id="crop-sowing-date">
+
+        <h3>Удобрения — какими марками закрыть потребность</h3>
+        <div id="crop-fertilizer-inputs" class="row"></div>
+
+        <details class="econ-details">
+          <summary>💰 Экономика (заполните, если знаете цены — необязательно)</summary>
+          <div class="row">
+            <div><label>Цена продукции, ₽/т</label><input type="number" id="price-per-t" step="1"></div>
+            <div><label>Цена семян, ₽/кг</label><input type="number" id="price-seed" step="0.1"></div>
+          </div>
+          <div class="row">
+            <div><label>Цена воды, ₽/м³</label><input type="number" id="price-water" step="0.1"></div>
+            <div><label>Оплата труда, ₽/чел.-день</label><input type="number" id="price-wage" step="10"></div>
+          </div>
+          <div class="row" id="price-fert-inputs"></div>
+        </details>
+
+        <div class="row">
+          <div>
+            <label>Автор (для отчёта, необязательно)</label>
+            <input type="text" id="crop-author">
+          </div>
+          <div>
+            <label>Дата отчёта</label>
+            <input type="date" id="crop-date">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="crop-calc-btn">Рассчитать</button>
+          <button class="btn btn--ghost" id="crop-report-btn">📄 Скачать отчёт (.docx)</button>
+        </div>
+        <p class="hint" id="crop-error"></p>
+      </div>
+
+      <div class="panel">
+        <h2>Результат</h2>
+        <div id="crop-result" class="result">Заполните данные слева и нажмите «Рассчитать».</div>
+      </div>
+    </div>
+  </section>
+
+  <p class="disclaimer">
+    Расчёт по типовым ориентировочным нормам. Точные значения зависят от породы/сорта,
+    зоны, погоды и качества кормов/почвы — перед применением в хозяйстве уточните нормы
+    у зоотехника/агронома. Все коэффициенты видны в результатах и открыты для собственной корректировки.
+  </p>
+</main>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
