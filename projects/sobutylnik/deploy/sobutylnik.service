@@ -1,0 +1,53 @@
+# systemd-юнит для «Собутыльника» на своём VPS.
+#
+# Изолирован от всего остального на сервере: свой linux-пользователь, свой
+# порт (127.0.0.1:8001 — слушает только локально, наружу отдаёт nginx),
+# своя рабочая директория. Ничего общего с другими сайтами/сервисами на
+# машине не имеет — включение/выключение/падение этого юнита не может
+# затронуть остальные.
+#
+# Установка (см. подробности в deploy/DEPLOY.md):
+#   sudo cp deploy/sobutylnik.service /etc/systemd/system/sobutylnik.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now sobutylnik
+
+[Unit]
+Description=Sobutylnik (Flask/gunicorn) — AI drinking-buddy companion
+After=network.target postgresql.service
+# Не блокируем старт, если postgresql на этой машине вообще не установлен
+# (можно использовать SQLite или БД на другом хосте) — но если он есть,
+# ждём его запуска.
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=sobutylnik
+Group=sobutylnik
+WorkingDirectory=/opt/sobutylnik/projects/sobutylnik
+EnvironmentFile=/opt/sobutylnik/projects/sobutylnik/.env
+
+# Прогоняет миграции и наполняет настройки по умолчанию перед каждым
+# стартом/рестартом — безопасно и идемпотентно (та же связка, что в
+# render.yaml: flask db upgrade всегда применяет только новые миграции;
+# seed.py создаёт запись настроек только если её ещё нет).
+ExecStartPre=/opt/sobutylnik/projects/sobutylnik/venv/bin/flask db upgrade
+ExecStartPre=/opt/sobutylnik/projects/sobutylnik/venv/bin/python seed.py
+
+ExecStart=/opt/sobutylnik/projects/sobutylnik/venv/bin/gunicorn run:app \
+    --bind 127.0.0.1:8001 \
+    --workers 3 \
+    --timeout 120
+
+Restart=on-failure
+RestartSec=5
+
+# Небольшое ужесточение песочницы — процесс не может писать за пределы
+# своей директории и /tmp, не видит остальную систему.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/sobutylnik
+
+[Install]
+WantedBy=multi-user.target
