@@ -99,18 +99,31 @@ echo "sdk.dir=/путь/к/android-sdk" > local.properties
 # результат: app/build/outputs/apk/release/app-release.apk
 ```
 
-Если в каталоге `keystore/release.keystore` есть подписывающий ключ, release-сборка
-будет подписана им автоматически (см. `app/build.gradle.kts`); без ключа release APK
-собирается неподписанным — тогда его нужно подписать вручную через `apksigner`
-или создать свой ключ:
+Если в каталоге `keystore/` лежат `release.keystore` и `keystore.properties`, release-сборка
+подписывается ими автоматически (см. `app/build.gradle.kts`); без них release APK собирается
+неподписанным. Оба файла в `.gitignore` — пароли никогда не попадают в репозиторий.
+
+Чтобы создать свой ключ:
 
 ```bash
 keytool -genkeypair -v -keystore keystore/release.keystore -alias dividinghead \
   -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-и указать пароли в `app/build.gradle.kts` (или вынести их в `local.properties`/переменные
-окружения при желании).
+и положить рядом `keystore/keystore.properties`:
+
+```properties
+storeFile=release.keystore
+storePassword=<пароль хранилища>
+keyAlias=dividinghead
+keyPassword=<пароль ключа>
+```
+
+**Важно:** этот файл ключа нужен для подписи *каждого* последующего обновления
+приложения в RuStore/Google Play — если его потерять, обновить уже опубликованное
+приложение будет невозможно (только публикация под новым именем пакета). Храните
+`release.keystore` и пароли из `keystore.properties` в надёжном месте (менеджер
+паролей, зашифрованный бэкап) отдельно от репозитория.
 
 ## Технический стек
 
