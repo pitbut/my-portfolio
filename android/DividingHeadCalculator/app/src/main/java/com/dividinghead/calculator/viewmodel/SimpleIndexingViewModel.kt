@@ -20,9 +20,12 @@ data class SimpleScreenState(
     val presetName: String = "",
     val preset: DividingHeadPreset? = null,
     val nText: String = "",
-    val result: SimpleIndexingResult? = null,
+    val alternatives: List<SimpleIndexingResult> = emptyList(),
+    val selectedIndex: Int = 0,
     val errorMessage: String? = null
-)
+) {
+    val result: SimpleIndexingResult? get() = alternatives.getOrNull(selectedIndex)
+}
 
 class SimpleIndexingViewModel(
     presetRepository: PresetRepository,
@@ -35,22 +38,27 @@ class SimpleIndexingViewModel(
     }
 
     private val nText = MutableStateFlow("")
-    private val result = MutableStateFlow<SimpleIndexingResult?>(null)
+    private val alternatives = MutableStateFlow<List<SimpleIndexingResult>>(emptyList())
+    private val selectedIndex = MutableStateFlow(0)
     private val error = MutableStateFlow<String?>(null)
 
-    val uiState: StateFlow<SimpleScreenState> = combine(currentPreset, nText, result, error) { preset, n, res, err ->
+    val uiState: StateFlow<SimpleScreenState> = combine(
+        currentPreset, nText, alternatives, selectedIndex, error
+    ) { preset, n, alts, index, err ->
         SimpleScreenState(
             presetName = preset?.name ?: "",
             preset = preset,
             nText = n,
-            result = res,
+            alternatives = alts,
+            selectedIndex = index,
             errorMessage = err
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SimpleScreenState())
 
     fun onNChanged(text: String) {
         nText.value = text.filter { it.isDigit() }
-        result.value = null
+        alternatives.value = emptyList()
+        selectedIndex.value = 0
         error.value = null
     }
 
@@ -61,22 +69,34 @@ class SimpleIndexingViewModel(
             error.value = "Введите положительное число делений"
             return
         }
-        runCatching { SimpleIndexing.calculate(n, preset.characteristicN, preset.plateSet) }
-            .onSuccess { r ->
-                result.value = r
+        runCatching { SimpleIndexing.calculateAlternatives(n, preset.characteristicN, preset.plateSet, maxResults = 6) }
+            .onSuccess { results ->
+                alternatives.value = results
+                selectedIndex.value = 0
                 error.value = null
-                viewModelScope.launch {
-                    historyRepository.record(
-                        mode = "Простое деление",
-                        summary = "n=$n, N=${preset.characteristicN}",
-                        details = if (r.hasFraction)
-                            "${r.wholeTurns} об. + ${r.holes} отв. на круге ${r.circleHoles} (${preset.name})"
-                        else
-                            "${r.wholeTurns} полных оборотов"
-                    )
-                }
+                recordHistory(preset.name, n, preset.characteristicN, results.first())
             }
-            .onFailure { error.value = it.message ?: "Ошибка расчёта" }
+            .onFailure {
+                alternatives.value = emptyList()
+                error.value = it.message ?: "Ошибка расчёта"
+            }
+    }
+
+    fun selectAlternative(index: Int) {
+        if (index in alternatives.value.indices) selectedIndex.value = index
+    }
+
+    private fun recordHistory(presetName: String, n: Int, characteristicN: Int, r: SimpleIndexingResult) {
+        viewModelScope.launch {
+            historyRepository.record(
+                mode = "Простое деление",
+                summary = "n=$n, N=$characteristicN",
+                details = if (r.hasFraction)
+                    "${r.wholeTurns} об. + ${r.holes} отв. на круге ${r.circleHoles} ($presetName)"
+                else
+                    "${r.wholeTurns} полных оборотов"
+            )
+        }
     }
 }
 

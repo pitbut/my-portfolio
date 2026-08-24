@@ -52,9 +52,7 @@ object HelicalIndexing {
         }
 
         val bestError = choices.firstOrNull { it.feasible }?.let { best ->
-            val achievedLead = characteristicN * leadScrewPitchMm / best.achievedRatio
-            val errorMm = achievedLead - requiredLeadMm
-            LeadError(achievedLead, errorMm, errorMm / requiredLeadMm * 100.0)
+            leadErrorFor(best, characteristicN, leadScrewPitchMm, requiredLeadMm)
         }
 
         return HelicalIndexingResult(
@@ -66,5 +64,17 @@ object HelicalIndexing {
             tableSwivelAngleDeg = angle,
             bestLeadError = bestError
         )
+    }
+
+    /** Computes the resulting lead and its error for a specific (e.g. user-selected) gear combination. */
+    fun leadErrorFor(
+        combination: GearCombination,
+        characteristicN: Int,
+        leadScrewPitchMm: Double,
+        requiredLeadMm: Double
+    ): LeadError {
+        val achievedLead = characteristicN * leadScrewPitchMm / combination.achievedRatio
+        val errorMm = achievedLead - requiredLeadMm
+        return LeadError(achievedLead, errorMm, errorMm / requiredLeadMm * 100.0)
     }
 }

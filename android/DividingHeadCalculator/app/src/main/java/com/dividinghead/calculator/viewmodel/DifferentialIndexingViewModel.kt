@@ -2,6 +2,7 @@ package com.dividinghead.calculator.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dividinghead.calc.DifferentialGearChoice
 import com.dividinghead.calc.DifferentialIndexing
 import com.dividinghead.calc.DifferentialIndexingResult
 import com.dividinghead.calc.model.DividingHeadPreset
@@ -22,8 +23,11 @@ data class DifferentialScreenState(
     val candidates: List<Int> = emptyList(),
     val selectedAux: Int? = null,
     val result: DifferentialIndexingResult? = null,
+    val selectedGearIndex: Int = 0,
     val errorMessage: String? = null
-)
+) {
+    val selectedGearChoice: DifferentialGearChoice? get() = result?.gearChoices?.getOrNull(selectedGearIndex)
+}
 
 class DifferentialIndexingViewModel(
     presetRepository: PresetRepository,
@@ -39,6 +43,7 @@ class DifferentialIndexingViewModel(
     private val candidates = MutableStateFlow<List<Int>>(emptyList())
     private val selectedAux = MutableStateFlow<Int?>(null)
     private val result = MutableStateFlow<DifferentialIndexingResult?>(null)
+    private val selectedGearIndex = MutableStateFlow(0)
     private val error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<DifferentialScreenState> = combine(
@@ -52,7 +57,8 @@ class DifferentialIndexingViewModel(
             selectedAux = aux,
             result = res
         )
-    }.combine(error) { state, err -> state.copy(errorMessage = err) }
+    }.combine(selectedGearIndex) { state, gearIndex -> state.copy(selectedGearIndex = gearIndex) }
+        .combine(error) { state, err -> state.copy(errorMessage = err) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DifferentialScreenState())
 
     fun onNChanged(text: String) {
@@ -60,6 +66,7 @@ class DifferentialIndexingViewModel(
         candidates.value = emptyList()
         selectedAux.value = null
         result.value = null
+        selectedGearIndex.value = 0
         error.value = null
     }
 
@@ -86,24 +93,33 @@ class DifferentialIndexingViewModel(
         val preset = uiState.value.preset ?: return
         val n = nText.value.toIntOrNull() ?: return
         selectedAux.value = aux
+        selectedGearIndex.value = 0
         runCatching {
             DifferentialIndexing.calculate(n, aux, preset.characteristicN, preset.plateSet, preset.gearSet)
         }.onSuccess { r ->
             result.value = r
             error.value = null
-            viewModelScope.launch {
-                val best = r.gearChoices.firstOrNull()
-                val gearText = best?.combination?.let { c ->
-                    if (c.isCompound) "${c.driver1}/${c.driven1} и ${c.driver2}/${c.driven2}" else "${c.driver1}/${c.driven1}"
-                } ?: "—"
-                historyRepository.record(
-                    mode = "Дифференциальное деление",
-                    summary = "n=$n, n'=$aux, N=${preset.characteristicN}",
-                    details = "Шестерни: $gearText"
-                )
-            }
+            recordHistory(preset.name, n, aux, preset.characteristicN, r.gearChoices.firstOrNull())
         }.onFailure {
+            result.value = null
             error.value = it.message ?: "Ошибка расчёта"
+        }
+    }
+
+    fun selectGear(index: Int) {
+        if (index in (result.value?.gearChoices?.indices ?: IntRange.EMPTY)) selectedGearIndex.value = index
+    }
+
+    private fun recordHistory(presetName: String, n: Int, aux: Int, characteristicN: Int, best: DifferentialGearChoice?) {
+        viewModelScope.launch {
+            val gearText = best?.combination?.let { c ->
+                if (c.isCompound) "${c.driver1}/${c.driven1} и ${c.driver2}/${c.driven2}" else "${c.driver1}/${c.driven1}"
+            } ?: "—"
+            historyRepository.record(
+                mode = "Дифференциальное деление",
+                summary = "n=$n, n'=$aux, N=$characteristicN",
+                details = "Шестерни: $gearText"
+            )
         }
     }
 }

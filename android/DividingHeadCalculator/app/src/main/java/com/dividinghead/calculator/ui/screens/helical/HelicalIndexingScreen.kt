@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -98,23 +100,31 @@ fun HelicalIndexingScreen(factory: AppViewModelFactory, onBack: () -> Unit) {
             state.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             state.result?.let { result ->
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        result.tableSwivelAngleDeg?.let {
+                result.tableSwivelAngleDeg?.let {
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp)) {
                             Text("Угол разворота стола: ${"%.2f".format(it)}°", style = MaterialTheme.typography.headlineSmall)
                         }
-                        result.bestLeadError?.let { err ->
-                            Text(
-                                "Достигаемый шаг: ${"%.4f".format(err.achievedLeadMm)} " +
-                                    "(ошибка ${"%.4f".format(err.errorMm)}, ${"%.3f".format(err.errorPercent)}%)",
-                                style = MaterialTheme.typography.bodyMedium
+                    }
+                }
+
+                if (result.gearChoices.size > 1) {
+                    Text("Варианты шестерён гитары:", style = MaterialTheme.typography.titleSmall)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(result.gearChoices.size) { index ->
+                            val c = result.gearChoices[index]
+                            val label = (if (c.isCompound) "${c.driver1}/${c.driven1}·${c.driver2}/${c.driven2}" else "${c.driver1}/${c.driven1}") +
+                                if (c.exact) " ✓" else " (${"%.2f".format(c.errorPercent)}%)"
+                            FilterChip(
+                                selected = index == state.selectedGearIndex,
+                                onClick = { viewModel.selectGear(index) },
+                                label = { Text(label) }
                             )
                         }
                     }
                 }
 
-                Text("Шестерни гитары:", style = MaterialTheme.typography.titleMedium)
-                result.gearChoices.forEachIndexed { index, combo ->
+                state.selectedGear?.let { combo ->
                     Card(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(16.dp)) {
                             val gearText = if (combo.isCompound)
@@ -126,6 +136,13 @@ fun HelicalIndexingScreen(factory: AppViewModelFactory, onBack: () -> Unit) {
                                 "Погрешность передаточного отношения: ${"%.3f".format(combo.errorPercent)}%",
                                 style = MaterialTheme.typography.bodySmall
                             )
+                            state.selectedLeadError?.let { err ->
+                                Text(
+                                    "Достигаемый шаг: ${"%.4f".format(err.achievedLeadMm)} " +
+                                        "(ошибка ${"%.4f".format(err.errorMm)}, ${"%.3f".format(err.errorPercent)}%)",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                             if (!combo.feasible) {
                                 Text(
                                     "⚠ Возможна коллизия шестерён на общей оси",
@@ -141,13 +158,11 @@ fun HelicalIndexingScreen(factory: AppViewModelFactory, onBack: () -> Unit) {
                             )
                         }
                     }
-                    if (index == 0) {
-                        AccuracyBadge(
-                            exact = combo.exact,
-                            errorDescription = if (!combo.exact)
-                                "Ошибка шага спирали: ${"%.3f".format(result.bestLeadError?.errorPercent ?: 0.0)}%" else null
-                        )
-                    }
+                    AccuracyBadge(
+                        exact = combo.exact,
+                        errorDescription = if (!combo.exact)
+                            "Ошибка шага спирали: ${"%.3f".format(state.selectedLeadError?.errorPercent ?: 0.0)}%" else null
+                    )
                 }
             }
         }

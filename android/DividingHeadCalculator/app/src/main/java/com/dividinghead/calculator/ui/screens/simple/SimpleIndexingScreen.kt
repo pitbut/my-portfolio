@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +75,23 @@ fun SimpleIndexingScreen(factory: AppViewModelFactory, onBack: () -> Unit) {
 
             state.errorMessage?.let {
                 Text(it, color = MaterialTheme.colorScheme.error)
+            }
+
+            if (state.alternatives.size > 1) {
+                Text("Варианты круга:", style = MaterialTheme.typography.titleSmall)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(state.alternatives.size) { index ->
+                        val alt = state.alternatives[index]
+                        val label = if (alt.hasFraction)
+                            "${alt.circleHoles}" + if (alt.exact) " ✓" else " (${"%.2f".format(alt.errorPercentOfStep)}%)"
+                        else "без дроби"
+                        FilterChip(
+                            selected = index == state.selectedIndex,
+                            onClick = { viewModel.selectAlternative(index) },
+                            label = { Text(label) }
+                        )
+                    }
+                }
             }
 
             state.result?.let { result ->

@@ -2,8 +2,10 @@ package com.dividinghead.calculator.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dividinghead.calc.GearCombination
 import com.dividinghead.calc.HelicalIndexing
 import com.dividinghead.calc.HelicalIndexingResult
+import com.dividinghead.calc.LeadError
 import com.dividinghead.calc.model.DividingHeadPreset
 import com.dividinghead.calculator.data.HistoryRepository
 import com.dividinghead.calculator.data.PresetRepository
@@ -23,8 +25,17 @@ data class HelicalScreenState(
     val diameterText: String = "",
     val useInches: Boolean = false,
     val result: HelicalIndexingResult? = null,
+    val selectedGearIndex: Int = 0,
     val errorMessage: String? = null
-)
+) {
+    val selectedGear: GearCombination? get() = result?.gearChoices?.getOrNull(selectedGearIndex)
+    val selectedLeadError: LeadError?
+        get() {
+            val r = result ?: return null
+            val g = selectedGear ?: return null
+            return HelicalIndexing.leadErrorFor(g, r.characteristicN, r.leadScrewPitchMm, r.requiredLeadMm)
+        }
+}
 
 class HelicalIndexingViewModel(
     presetRepository: PresetRepository,
@@ -41,6 +52,7 @@ class HelicalIndexingViewModel(
     private val diameterText = MutableStateFlow("")
     private val useInches = MutableStateFlow(false)
     private val result = MutableStateFlow<HelicalIndexingResult?>(null)
+    private val selectedGearIndex = MutableStateFlow(0)
     private val error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<HelicalScreenState> = combine(
@@ -55,6 +67,7 @@ class HelicalIndexingViewModel(
             useInches = inches
         )
     }.combine(result) { s, r -> s.copy(result = r) }
+        .combine(selectedGearIndex) { s, i -> s.copy(selectedGearIndex = i) }
         .combine(error) { s, e -> s.copy(errorMessage = e) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HelicalScreenState())
 
@@ -66,6 +79,10 @@ class HelicalIndexingViewModel(
     fun onPitchChanged(text: String) { pitchText.value = text; result.value = null; error.value = null }
     fun onDiameterChanged(text: String) { diameterText.value = text; result.value = null; error.value = null }
     fun onUnitToggle(inches: Boolean) { useInches.value = inches; result.value = null; error.value = null }
+
+    fun selectGear(index: Int) {
+        if (index in (result.value?.gearChoices?.indices ?: IntRange.EMPTY)) selectedGearIndex.value = index
+    }
 
     fun calculate() {
         val preset = uiState.value.preset ?: return
@@ -92,13 +109,14 @@ class HelicalIndexingViewModel(
             )
         }.onSuccess { r ->
             result.value = r
+            selectedGearIndex.value = 0
             error.value = null
+            val unit = if (useInches.value) "in" else "мм"
+            val best = r.gearChoices.firstOrNull()
+            val gearText = best?.let { c ->
+                if (c.isCompound) "${c.driver1}/${c.driven1} и ${c.driver2}/${c.driven2}" else "${c.driver1}/${c.driven1}"
+            } ?: "—"
             viewModelScope.launch {
-                val unit = if (useInches.value) "in" else "мм"
-                val best = r.gearChoices.firstOrNull()
-                val gearText = best?.let { c ->
-                    if (c.isCompound) "${c.driver1}/${c.driven1} и ${c.driver2}/${c.driven2}" else "${c.driver1}/${c.driven1}"
-                } ?: "—"
                 historyRepository.record(
                     mode = "Винтовое деление",
                     summary = "T=$lead $unit, Pв=$pitch, N=${preset.characteristicN}",
@@ -106,6 +124,7 @@ class HelicalIndexingViewModel(
                 )
             }
         }.onFailure {
+            result.value = null
             error.value = it.message ?: "Ошибка расчёта"
         }
     }

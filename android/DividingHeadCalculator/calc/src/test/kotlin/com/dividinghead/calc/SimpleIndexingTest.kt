@@ -73,4 +73,35 @@ class SimpleIndexingTest {
         assertEquals(12, result.wholeTurns)
         assertTrue(result.exact)
     }
+
+    @Test
+    fun `calculate returns the first of calculateAlternatives`() {
+        val single = SimpleIndexing.calculate(n = 6, characteristicN = 40, plateSet = plateSet)
+        val alternatives = SimpleIndexing.calculateAlternatives(n = 6, characteristicN = 40, plateSet = plateSet)
+        assertEquals(single, alternatives.first())
+    }
+
+    @Test
+    fun `calculateAlternatives returns several distinct circles sorted by error, exact first`() {
+        val alternatives = SimpleIndexing.calculateAlternatives(n = 6, characteristicN = 40, plateSet = plateSet, maxResults = 4)
+        assertTrue(alternatives.size > 1)
+        assertTrue(alternatives.first().exact)
+        val circles = alternatives.map { it.circleHoles }
+        assertEquals(circles.distinct(), circles)
+        val errors = alternatives.map { it.errorArcSeconds }
+        assertEquals(errors.sorted(), errors)
+    }
+
+    @Test
+    fun `calculateAlternatives respects maxResults`() {
+        val alternatives = SimpleIndexing.calculateAlternatives(n = 127, characteristicN = 40, plateSet = plateSet, maxResults = 3)
+        assertTrue(alternatives.size <= 3)
+    }
+
+    @Test
+    fun `calculateAlternatives for an exact whole-turn n yields a single result`() {
+        val alternatives = SimpleIndexing.calculateAlternatives(n = 8, characteristicN = 40, plateSet = plateSet, maxResults = 5)
+        assertEquals(1, alternatives.size)
+        assertTrue(alternatives.first().exact)
+    }
 }

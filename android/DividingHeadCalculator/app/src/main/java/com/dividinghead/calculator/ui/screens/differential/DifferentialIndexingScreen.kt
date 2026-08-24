@@ -2,7 +2,6 @@ package com.dividinghead.calculator.ui.screens.differential
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dividinghead.calc.PlateRotationDirection
 import com.dividinghead.calculator.ui.components.AccuracyBadge
 import com.dividinghead.calculator.ui.components.GearTrainCanvas
+import com.dividinghead.calculator.ui.components.IndexPlateCanvas
 import com.dividinghead.calculator.viewmodel.AppViewModelFactory
 import com.dividinghead.calculator.viewmodel.DifferentialIndexingViewModel
 
@@ -92,7 +92,7 @@ fun DifferentialIndexingScreen(factory: AppViewModelFactory, onBack: () -> Unit)
             state.result?.let { result ->
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Диск (по n'=${result.auxiliaryDivisions}):", style = MaterialTheme.typography.titleMedium)
+                        Text("Раствор циркуля (по n'=${result.auxiliaryDivisions}):", style = MaterialTheme.typography.titleMedium)
                         val plate = result.plateIndexing
                         val plateText = if (plate.hasFraction)
                             "${plate.wholeTurns} об. + ${plate.holes} отв. на круге ${plate.circleHoles}"
@@ -109,8 +109,27 @@ fun DifferentialIndexingScreen(factory: AppViewModelFactory, onBack: () -> Unit)
                     }
                 }
 
-                Text("Шестерни гитары:", style = MaterialTheme.typography.titleMedium)
-                result.gearChoices.forEachIndexed { index, choice ->
+                if (result.plateIndexing.hasFraction) {
+                    IndexPlateCanvas(circleHoles = result.plateIndexing.circleHoles, holes = result.plateIndexing.holes)
+                }
+
+                if (result.gearChoices.size > 1) {
+                    Text("Варианты шестерён гитары:", style = MaterialTheme.typography.titleSmall)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(result.gearChoices.size) { index ->
+                            val c = result.gearChoices[index].combination
+                            val label = (if (c.isCompound) "${c.driver1}/${c.driven1}·${c.driver2}/${c.driven2}" else "${c.driver1}/${c.driven1}") +
+                                if (c.exact) " ✓" else " (${"%.2f".format(c.errorPercent)}%)"
+                            FilterChip(
+                                selected = index == state.selectedGearIndex,
+                                onClick = { viewModel.selectGear(index) },
+                                label = { Text(label) }
+                            )
+                        }
+                    }
+                }
+
+                state.selectedGearChoice?.let { choice ->
                     val combo = choice.combination
                     Card(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(16.dp)) {
@@ -139,12 +158,10 @@ fun DifferentialIndexingScreen(factory: AppViewModelFactory, onBack: () -> Unit)
                             )
                         }
                     }
-                    if (index == 0) {
-                        AccuracyBadge(
-                            exact = combo.exact,
-                            errorDescription = if (!combo.exact) "Погрешность передаточного отношения: ${"%.3f".format(combo.errorPercent)}%" else null
-                        )
-                    }
+                    AccuracyBadge(
+                        exact = combo.exact,
+                        errorDescription = if (!combo.exact) "Погрешность передаточного отношения: ${"%.3f".format(combo.errorPercent)}%" else null
+                    )
                 }
             }
         }

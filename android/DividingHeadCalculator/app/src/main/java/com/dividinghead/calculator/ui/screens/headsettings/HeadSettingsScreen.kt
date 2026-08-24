@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -20,6 +21,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -36,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dividinghead.calculator.data.IdentifiedPreset
 import com.dividinghead.calculator.data.datastore.ThemeMode
 import com.dividinghead.calculator.data.datastore.UnitSystem
 import com.dividinghead.calculator.viewmodel.AppViewModelFactory
@@ -53,7 +56,7 @@ fun HeadSettingsScreen(
     val presetState by presetViewModel.uiState.collectAsState()
     val settings by settingsViewModel.settings.collectAsState()
 
-    var showNewPresetForm by remember { mutableStateOf(false) }
+    var showForm by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -72,6 +75,15 @@ fun HeadSettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item { Text("Пресет головки", style = MaterialTheme.typography.titleMedium) }
+            item {
+                Text(
+                    "Текущий выбранный пресет используется во всех расчётах. Чтобы убрать круг или " +
+                        "шестерню — нажмите «Редактировать» у нужного пресета, измените список и сохраните: " +
+                        "он станет активным сразу после сохранения.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
             items(presetState.allPresets) { identified ->
                 Card(
                     onClick = { presetViewModel.selectPreset(identified.id) },
@@ -93,11 +105,24 @@ fun HeadSettingsScreen(
                                 "N=${identified.preset.characteristicN}, кругов: ${identified.preset.plateSet.allCircles.size}, шестерён: ${identified.preset.gearSet.gears.size}",
                                 style = MaterialTheme.typography.bodySmall
                             )
+                            if (identified.isBuiltIn) {
+                                Text(
+                                    "Встроенный (изменения сохранятся как копия)",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
                         }
                         RadioButton(
                             selected = identified.id == presetState.selectedId,
                             onClick = { presetViewModel.selectPreset(identified.id) }
                         )
+                        IconButton(onClick = {
+                            presetViewModel.startEditing(identified)
+                            showForm = true
+                        }) {
+                            Icon(Icons.Filled.Edit, contentDescription = "Редактировать пресет")
+                        }
                         if (!identified.isBuiltIn) {
                             IconButton(onClick = { presetViewModel.deleteCustomPreset(identified) }) {
                                 Icon(Icons.Filled.Delete, contentDescription = "Удалить пресет")
@@ -107,16 +132,34 @@ fun HeadSettingsScreen(
                 }
             }
             item {
-                Button(onClick = { showNewPresetForm = !showNewPresetForm }, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (showNewPresetForm) "Скрыть форму" else "Создать свой пресет")
+                Button(
+                    onClick = {
+                        if (showForm) {
+                            presetViewModel.cancelEditing()
+                            showForm = false
+                        } else {
+                            presetViewModel.startCreating()
+                            showForm = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (showForm) "Скрыть форму" else "Создать свой пресет")
                 }
             }
-            if (showNewPresetForm) {
+            if (showForm) {
                 item {
-                    NewPresetForm(onSave = { name, n, circles, gears, pitch, metric ->
-                        presetViewModel.saveCustomPreset(name, n, circles, gears, pitch, metric)
-                        showNewPresetForm = false
-                    })
+                    PresetForm(
+                        editing = presetState.editingTarget,
+                        onSave = { name, n, circles, gears, pitch, metric ->
+                            presetViewModel.saveCustomPreset(name, n, circles, gears, pitch, metric)
+                            showForm = false
+                        },
+                        onCancel = {
+                            presetViewModel.cancelEditing()
+                            showForm = false
+                        }
+                    )
                 }
             }
 
@@ -176,18 +219,38 @@ fun HeadSettingsScreen(
 }
 
 @Composable
-private fun NewPresetForm(
-    onSave: (name: String, n: Int, circles: List<Int>, gears: List<Int>, pitch: Double, metric: Boolean) -> Unit
+private fun PresetForm(
+    editing: IdentifiedPreset?,
+    onSave: (name: String, n: Int, circles: List<Int>, gears: List<Int>, pitch: Double, metric: Boolean) -> Unit,
+    onCancel: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var n by remember { mutableStateOf("40") }
-    var circles by remember { mutableStateOf("15,16,17,18,19,20,21,23,27,29,31,33") }
-    var gears by remember { mutableStateOf("24,28,32,40,44,48,56,64,72,86,100") }
-    var pitch by remember { mutableStateOf("6.0") }
-    var metric by remember { mutableStateOf(true) }
+    var name by remember(editing?.id) {
+        mutableStateOf(editing?.preset?.name?.let { if (editing.isBuiltIn) "$it (копия)" else it } ?: "")
+    }
+    var n by remember(editing?.id) { mutableStateOf((editing?.preset?.characteristicN ?: 40).toString()) }
+    var circles by remember(editing?.id) {
+        mutableStateOf(
+            editing?.preset?.plateSet?.allCircles?.joinToString(",")
+                ?: "15,16,17,18,19,20,21,23,27,29,31,33"
+        )
+    }
+    var gears by remember(editing?.id) {
+        mutableStateOf(
+            editing?.preset?.gearSet?.gears?.joinToString(",")
+                ?: "24,28,32,40,44,48,56,64,72,86,100"
+        )
+    }
+    var pitch by remember(editing?.id) { mutableStateOf((editing?.preset?.leadScrewPitchMm ?: 6.0).toString()) }
+    var metric by remember(editing?.id) { mutableStateOf(editing?.preset?.isMetric ?: true) }
 
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                if (editing == null) "Новый пресет"
+                else if (editing.isBuiltIn) "Копия встроенного пресета «${editing.preset.name}»"
+                else "Редактирование «${editing.preset.name}»",
+                style = MaterialTheme.typography.titleSmall
+            )
             OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Название пресета") }, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(value = n, onValueChange = { n = it.filter(Char::isDigit) }, label = { Text("Характеристика головки N") }, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(value = circles, onValueChange = { circles = it }, label = { Text("Круги отверстий (через запятую)") }, modifier = Modifier.fillMaxWidth())
@@ -197,19 +260,24 @@ private fun NewPresetForm(
                 Text("Метрическая головка")
                 Switch(checked = metric, onCheckedChange = { metric = it })
             }
-            Button(
-                onClick = {
-                    val nInt = n.toIntOrNull() ?: 40
-                    val circleList = circles.split(",").mapNotNull { it.trim().toIntOrNull() }
-                    val gearList = gears.split(",").mapNotNull { it.trim().toIntOrNull() }
-                    val pitchVal = pitch.toDoubleOrNull() ?: 6.0
-                    if (name.isNotBlank() && circleList.isNotEmpty() && gearList.isNotEmpty()) {
-                        onSave(name, nInt, circleList, gearList, pitchVal, metric)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Сохранить пресет")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
+                    Text("Отмена")
+                }
+                Button(
+                    onClick = {
+                        val nInt = n.toIntOrNull() ?: 40
+                        val circleList = circles.split(",").mapNotNull { it.trim().toIntOrNull() }
+                        val gearList = gears.split(",").mapNotNull { it.trim().toIntOrNull() }
+                        val pitchVal = pitch.toDoubleOrNull() ?: 6.0
+                        if (name.isNotBlank() && circleList.isNotEmpty() && gearList.isNotEmpty()) {
+                            onSave(name, nInt, circleList, gearList, pitchVal, metric)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Сохранить")
+                }
             }
         }
     }
