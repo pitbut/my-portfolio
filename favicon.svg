@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1730"/>
+      <stop offset="100%" stop-color="#132a52"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#2f6fed"/>
+      <stop offset="100%" stop-color="#5ea1ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#bg)"/>
+
+  <!-- ascending growth bars -->
+  <rect x="14" y="38" width="7" height="14" rx="1.5" fill="url(#bar)"/>
+  <rect x="25" y="30" width="7" height="22" rx="1.5" fill="url(#bar)"/>
+  <rect x="36" y="20" width="7" height="32" rx="1.5" fill="url(#bar)"/>
+
+  <!-- upward arrow above the bars -->
+  <path d="M17 30 L34 15 L47 15" stroke="#5ea1ff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M47 15 L47 25" stroke="#5ea1ff" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  <path d="M17 30 L20 30" stroke="#5ea1ff" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+</svg>
