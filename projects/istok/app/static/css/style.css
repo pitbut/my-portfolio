@@ -441,6 +441,15 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
   border-color: var(--gold);
 }
 
+/* Сам <select> красим под тёмную тему, но выпадающий список опций браузер
+   рисует со своим (обычно белым) фоном независимо от этого — если не
+   задать option цвет отдельно, светлый текст на белом фоне не читается,
+   кроме подсвеченной при наведении строки. */
+.sort-bar select option {
+  color: var(--abyss);
+  background: #fff;
+}
+
 /* ---------- Detail pages ---------- */
 
 .detail-hero {
@@ -627,6 +636,11 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
 .field input:focus, .field select:focus, .field textarea:focus {
   outline: none;
   border-color: var(--gold);
+}
+
+.field select option {
+  color: var(--abyss);
+  background: #fff;
 }
 
 .honeypot-field { position: absolute; left: -9999px; top: -9999px; }
