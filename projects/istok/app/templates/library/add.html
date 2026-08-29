@@ -30,7 +30,15 @@
 
     <div class="field">
       <label for="genre">{{ _('Жанр (необязательно)') }}</label>
-      <input type="text" id="genre" name="genre" maxlength="120">
+      <input type="text" id="genre" name="genre" maxlength="120" list="genre-list" autocomplete="off">
+      <datalist id="genre-list">
+        {% for g in genres %}
+        <option value="{{ g }}">
+        {% endfor %}
+      </datalist>
+      <p style="font-size: .85rem; color: var(--shallow); margin-top: .35rem;">
+        {{ _('Начните вводить — предложим уже существующие жанры, чтобы не плодить дубли (например «Роман» и «роман»).') }}
+      </p>
     </div>
 
     <div class="field">
@@ -41,6 +49,15 @@
     <div class="field">
       <label for="cover">{{ _('Обложка (необязательно)') }}</label>
       <input type="file" id="cover" name="cover" accept="image/*">
+    </div>
+
+    <div class="field">
+      <label for="book_files">{{ _('Файлы книги для скачивания (необязательно)') }}</label>
+      <input type="file" id="book_files" name="book_files" multiple
+             accept=".pdf,.epub,.fb2,.djvu,.doc,.docx,.txt,.rtf,.mobi">
+      <p style="font-size: .85rem; color: var(--shallow); margin-top: .35rem;">
+        {{ _('Можно выбрать сразу несколько файлов в разных форматах (PDF, EPUB, FB2 и т.д.) — до 100 МБ каждый.') }}
+      </p>
     </div>
 
     <button type="submit" class="btn btn--primary">{{ _('Добавить') }}</button>

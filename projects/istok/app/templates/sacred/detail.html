@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ source.name }} — священные источники — Исток{% endblock %}
-{% block description %}{{ source.belief | truncate(150) }}{% endblock %}
+{% block title %}{{ source.name }} — {{ source.location }} — Исток{% endblock %}
+{% block description %}{{ source.name }} ({{ source.location }}). {{ source.belief | truncate(110) }}{% endblock %}
 
 {% block extra_head %}
 {% if source.latitude and source.longitude %}

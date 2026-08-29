@@ -54,6 +54,22 @@ class Config:
     # загрузка фото просто недоступна (поле формы игнорируется).
     IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY")
 
+    # Вход через Google (OAuth 2.0). Если не заданы — кнопка "Войти через
+    # Google" на страницах входа/регистрации просто не показывается.
+    GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+
+    # Telegram-бот: уведомления о новых личных сообщениях и привязка
+    # аккаунта (страница «Сообщения → Telegram»). Без TELEGRAM_BOT_TOKEN
+    # бот не отправляет ничего по-настоящему — сайт продолжает работать
+    # как раньше, только через личный кабинет. См. .env.example.
+    TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME")
+    TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET")
+    # Если задан — сообщения в «Администрацию» (Message с recipient=NULL)
+    # тоже дублируются в этот чат, т.к. у администрации нет своего user_id.
+    ADMIN_TELEGRAM_CHAT_ID = os.environ.get("ADMIN_TELEGRAM_CHAT_ID")
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

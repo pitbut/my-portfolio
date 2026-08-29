@@ -7,8 +7,13 @@ from app.models import Article
 from app.photos import upload_photo
 from app.routes.reviews import reviews_for
 from app.slugify import unique_slug
+from app.text_choices import match_existing
 
 bp = Blueprint("articles", __name__)
+
+
+def _existing_categories():
+    return sorted({row[0] for row in Article.query.with_entities(Article.category).distinct() if row[0]})
 
 
 @bp.route("/")
@@ -28,15 +33,17 @@ def add():
         flash("Сначала подтвердите email — так мы защищаем каталог от спама.", "error")
         return redirect(url_for("articles.index"))
 
+    categories = _existing_categories()
+
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
-        category = (request.form.get("category") or "").strip()
+        category = match_existing(request.form.get("category"), categories)
         summary = (request.form.get("summary") or "").strip()
         body = (request.form.get("body") or "").strip()
 
         if not title or not category or not body:
             flash("Заполните название, рубрику и текст статьи.", "error")
-            return render_template("articles/add.html")
+            return render_template("articles/add.html", categories=categories)
 
         cover_url, photo_error = upload_photo(request.files.get("cover"))
         if photo_error:
@@ -63,7 +70,7 @@ def add():
         )
         return redirect(url_for("articles.detail", slug=article.slug))
 
-    return render_template("articles/add.html")
+    return render_template("articles/add.html", categories=categories)
 
 
 @bp.route("/<slug>")

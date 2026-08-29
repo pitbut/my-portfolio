@@ -21,6 +21,19 @@
     <p>{{ book.description }}</p>
   </div>
 
+  {% if book.files %}
+  <div class="prose">
+    <h3>{{ _('Скачать') }}</h3>
+    <div class="meta-row">
+      {% for file in book.files %}
+      <a class="btn btn--approve" href="{{ url_for('library.download', slug=book.slug, file_id=file.id) }}">
+        {{ file.format | upper }} ({{ (file.size_bytes / 1024 / 1024) | round(1) }} {{ _('МБ') }})
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   {% include "_reviews.html" %}
 </section>
 {% endblock %}

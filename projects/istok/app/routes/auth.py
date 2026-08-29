@@ -7,7 +7,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import db
+from app import db, oauth
 from app.email import send_email
 from app.models import User
 
@@ -96,7 +96,10 @@ def login():
         password = request.form.get("password") or ""
 
         user = User.query.filter_by(email=email).first()
-        if user is None or not check_password_hash(user.password_hash, password):
+        if user is None or user.password_hash is None:
+            flash("Неверный email или пароль.", "error")
+            return render_template("auth/login.html", email=email)
+        if not check_password_hash(user.password_hash, password):
             flash("Неверный email или пароль.", "error")
             return render_template("auth/login.html", email=email)
 
@@ -113,6 +116,53 @@ def logout():
     logout_user()
     flash("Вы вышли из аккаунта.", "info")
     return redirect(url_for("main.index"))
+
+
+@bp.route("/google/login")
+def google_login():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index"))
+    if not current_app.config.get("GOOGLE_CLIENT_ID"):
+        flash("Вход через Google сейчас недоступен.", "error")
+        return redirect(url_for("auth.login"))
+
+    redirect_uri = url_for("auth.google_callback", _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@bp.route("/google/callback")
+def google_callback():
+    if not current_app.config.get("GOOGLE_CLIENT_ID"):
+        flash("Вход через Google сейчас недоступен.", "error")
+        return redirect(url_for("auth.login"))
+
+    token = oauth.google.authorize_access_token()
+    userinfo = token.get("userinfo") or oauth.google.userinfo(token=token)
+    email = (userinfo.get("email") or "").strip().lower()
+    google_id = userinfo.get("sub")
+
+    if not email or not google_id:
+        flash("Google не передал email аккаунта. Попробуйте войти другим способом.", "error")
+        return redirect(url_for("auth.login"))
+
+    user = User.query.filter_by(google_id=google_id).first()
+    if user is None:
+        # Тот же email уже мог быть зарегистрирован через пароль — просто
+        # привязываем Google к существующему аккаунту, а не заводим дубль.
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            user = User(email=email, google_id=google_id)
+            db.session.add(user)
+        else:
+            user.google_id = google_id
+        if userinfo.get("email_verified") and not user.email_confirmed:
+            user.email_confirmed = True
+            user.confirmed_at = datetime.utcnow()
+        db.session.commit()
+
+    login_user(user)
+    flash("Вы вошли через Google.", "success")
+    return redirect(request.args.get("next") or url_for("main.index"))
 
 
 @bp.route("/confirm/<token>")

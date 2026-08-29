@@ -20,7 +20,15 @@
 
     <div class="field">
       <label for="category">{{ _('Рубрика') }}</label>
-      <input type="text" id="category" name="category" maxlength="120" required>
+      <input type="text" id="category" name="category" maxlength="120" required list="category-list" autocomplete="off">
+      <datalist id="category-list">
+        {% for c in categories %}
+        <option value="{{ c }}">
+        {% endfor %}
+      </datalist>
+      <p style="font-size: .85rem; color: var(--shallow); margin-top: .35rem;">
+        {{ _('Начните вводить — предложим уже существующие рубрики, чтобы не плодить дубли.') }}
+      </p>
     </div>
 
     <div class="field">

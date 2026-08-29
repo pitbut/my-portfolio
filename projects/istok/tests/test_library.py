@@ -73,3 +73,120 @@ def test_add_book_after_confirmation(client, app):
         assert book is not None
         assert book.verified is False
         assert book.added_by_user_id is not None
+
+
+def test_add_book_with_files_and_download(client, app):
+    from io import BytesIO
+
+    _register_and_confirm(client, app, "bookfiles@user.example")
+
+    resp = client.post(
+        "/library/add",
+        data={
+            "title": "Книга с файлами",
+            "author": "Автор",
+            "description": "Описание.",
+            "book_files": [
+                (BytesIO(b"%PDF-1.4 fake pdf"), "book.pdf"),
+                (BytesIO(b"fake epub"), "book.epub"),
+            ],
+        },
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    assert "PDF".encode() in resp.data
+    assert "EPUB".encode() in resp.data
+
+    with app.app_context():
+        from app.models import Book
+
+        book = Book.query.filter_by(title="Книга с файлами").first()
+        assert len(book.files) == 2
+        formats = {f.format for f in book.files}
+        assert formats == {"pdf", "epub"}
+        file_id = book.files[0].id
+        slug = book.slug
+
+    download_resp = client.get(f"/library/{slug}/download/{file_id}")
+    assert download_resp.status_code == 200
+    assert download_resp.headers["Content-Disposition"].startswith("attachment")
+
+
+def _login_admin(client, app):
+    password = app.config["ADMIN_PASSWORD"]
+    return client.post("/admin/login", data={"password": password}, follow_redirects=True)
+
+
+def test_admin_can_add_and_remove_book_file(client, app):
+    from io import BytesIO
+
+    _register_and_confirm(client, app, "bookmanage@user.example")
+    client.post(
+        "/library/add",
+        data={"title": "Книга для управления", "author": "Автор", "description": "Описание."},
+        follow_redirects=True,
+    )
+    with app.app_context():
+        from app.models import Book
+
+        book_id = Book.query.filter_by(title="Книга для управления").first().id
+
+    client.get("/auth/logout")
+    _login_admin(client, app)
+
+    resp = client.post(
+        f"/admin/content/book/{book_id}/files/add",
+        data={"book_files": [(BytesIO(b"fake fb2 content"), "book.fb2")]},
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    assert "FB2".encode() in resp.data
+
+    with app.app_context():
+        from app.models import Book
+
+        book = Book.query.get(book_id)
+        assert len(book.files) == 1
+        file_id = book.files[0].id
+
+    resp = client.post(
+        f"/admin/content/book/{book_id}/files/{file_id}/delete",
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    assert "Файл удалён".encode() in resp.data
+
+    with app.app_context():
+        from app.models import Book
+
+        book = Book.query.get(book_id)
+        assert len(book.files) == 0
+
+
+def test_add_book_rejects_unsupported_file_format(client, app):
+    from io import BytesIO
+
+    _register_and_confirm(client, app, "bookbadfile@user.example")
+
+    resp = client.post(
+        "/library/add",
+        data={
+            "title": "Книга с плохим файлом",
+            "author": "Автор",
+            "description": "Описание.",
+            "book_files": [(BytesIO(b"malicious"), "virus.exe")],
+        },
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    assert "не поддерживается".encode() in resp.data
+
+    with app.app_context():
+        from app.models import Book
+
+        book = Book.query.filter_by(title="Книга с плохим файлом").first()
+        assert book is not None
+        assert len(book.files) == 0

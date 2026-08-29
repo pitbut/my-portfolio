@@ -46,6 +46,43 @@ class Book(TimestampMixin, SlugMixin, db.Model):
         return f"<Book {self.title!r} ({self.author})>"
 
 
+class BookFile(TimestampMixin, db.Model):
+    """Файл книги для скачивания (pdf/epub/fb2/...) — у книги их может быть несколько."""
+
+    __tablename__ = "book_files"
+
+    id = db.Column(db.Integer, primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey("books.id"), nullable=False)
+    format = db.Column(db.String(10), nullable=False)  # расширение файла: pdf, epub, fb2...
+    filename = db.Column(db.String(255), nullable=False)  # имя файла на диске (уникальное)
+    original_filename = db.Column(db.String(255), nullable=False)  # имя для скачивания
+    size_bytes = db.Column(db.Integer, nullable=False)
+
+    book = db.relationship(
+        "Book",
+        backref=db.backref("files", cascade="all, delete-orphan", order_by="BookFile.format"),
+    )
+
+    def __repr__(self):
+        return f"<BookFile {self.original_filename!r} ({self.format})>"
+
+
+@db.event.listens_for(BookFile, "after_delete")
+def _delete_book_file_from_disk(mapper, connection, target):
+    """Удаляет файл с диска вместе с записью — при явном удалении файла и
+    при каскадном удалении книги, к которой он привязан."""
+    import os
+
+    from flask import current_app
+
+    try:
+        path = os.path.join(current_app.instance_path, "book_files", target.filename)
+    except RuntimeError:
+        return  # нет контекста приложения (например, скрипт вне Flask)
+    if os.path.exists(path):
+        os.remove(path)
+
+
 class Article(TimestampMixin, SlugMixin, db.Model):
     """Статья — раздел «Статьи»."""
 
@@ -110,7 +147,10 @@ class User(TimestampMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    # Nullable — у пользователей, зарегистрировавшихся через Google, своего
+    # пароля на сайте нет.
+    password_hash = db.Column(db.String(255), nullable=True)
+    google_id = db.Column(db.String(255), unique=True, nullable=True, index=True)
     email_confirmed = db.Column(db.Boolean, nullable=False, default=False)
     confirmed_at = db.Column(db.DateTime, nullable=True)
 
@@ -182,6 +222,44 @@ class Supplier(TimestampMixin, db.Model):
 
     def __repr__(self):
         return f"<Supplier {self.name!r} for water_brand_id={self.water_brand_id}>"
+
+
+class TelegramLink(TimestampMixin, db.Model):
+    """Привязка аккаунта сайта к чату Telegram-бота — один пользователь,
+    один чат. Через неё боту известно, куда слать уведомления о новых
+    сообщениях (см. app/telegram_bot.py)."""
+
+    __tablename__ = "telegram_links"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+    telegram_chat_id = db.Column(db.BigInteger, unique=True, nullable=False)
+    telegram_username = db.Column(db.String(255), nullable=True)
+    notifications_enabled = db.Column(db.Boolean, nullable=False, default=True)
+    linked_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", backref=db.backref("telegram_link", uselist=False))
+
+    def __repr__(self):
+        return f"<TelegramLink user_id={self.user_id} chat_id={self.telegram_chat_id}>"
+
+
+class TelegramLinkCode(TimestampMixin, db.Model):
+    """Короткий код для ручной привязки — запасной путь на случай, если
+    deep-link (https://t.me/bot?start=...) откроется в уже существующем
+    чате и Telegram обрежет start-параметр. Показывается на странице
+    «Сообщения → Telegram» вместе с самой ссылкой."""
+
+    __tablename__ = "telegram_link_codes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+    code = db.Column(db.String(16), unique=True, nullable=False)
+
+    user = db.relationship("User")
+
+    def __repr__(self):
+        return f"<TelegramLinkCode {self.code} for user_id={self.user_id}>"
 
 
 class ContactMessage(TimestampMixin, db.Model):

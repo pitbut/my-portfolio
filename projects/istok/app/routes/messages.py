@@ -3,12 +3,12 @@
 У администратора нет своего аккаунта в users (вход по общему паролю), поэтому
 "переписка с администрацией" — это сообщения, где sender/recipient_user_id
 для стороны администрации равен NULL (см. app/models.py:Message)."""
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import and_, or_
 
-from app import db
-from app.models import Message, User
+from app import db, telegram_bot
+from app.models import Message, TelegramLink, User
 
 bp = Blueprint("messages", __name__)
 
@@ -78,6 +78,14 @@ def _send(recipient_id, redirect_endpoint, **redirect_kwargs):
         db.session.add(Message(sender_user_id=current_user.id, recipient_user_id=recipient_id, body=body))
         db.session.commit()
 
+        if recipient_id is None:
+            telegram_bot.notify_admin(current_user.email, body, url_for("admin.user_detail", user_id=current_user.id))
+        else:
+            recipient = db.session.get(User, recipient_id)
+            telegram_bot.notify_new_message(
+                recipient, current_user.email, body, url_for("messages.thread_user", user_id=current_user.id)
+            )
+
     return redirect(url_for(redirect_endpoint, **redirect_kwargs))
 
 
@@ -96,6 +104,30 @@ def inbox():
 def directory():
     users = User.query.filter(User.id != current_user.id).order_by(User.email).all()
     return render_template("messages/directory.html", users=users)
+
+
+@bp.route("/telegram")
+@login_required
+def telegram_settings():
+    link = TelegramLink.query.filter_by(user_id=current_user.id).first()
+    deep_link = telegram_bot.bot_deep_link(current_user) if link is None else None
+    link_code = telegram_bot.link_code_for(current_user) if link is None else None
+    return render_template(
+        "messages/telegram.html",
+        link=link,
+        deep_link=deep_link,
+        link_code=link_code,
+        bot_configured=bool(current_app.config.get("TELEGRAM_BOT_USERNAME")),
+    )
+
+
+@bp.route("/telegram/unlink", methods=["POST"])
+@login_required
+def telegram_unlink():
+    TelegramLink.query.filter_by(user_id=current_user.id).delete()
+    db.session.commit()
+    flash("Telegram отвязан — уведомления снова приходят только на сайт.", "info")
+    return redirect(url_for("messages.telegram_settings"))
 
 
 @bp.route("/admin")

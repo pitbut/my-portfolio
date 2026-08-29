@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 # останется пустым.
 load_dotenv()
 
+from authlib.integrations.flask_client import OAuth
 from flask import Flask, request, session
 from flask_babel import Babel
 from flask_login import LoginManager
@@ -22,6 +23,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 babel = Babel()
+oauth = OAuth()
 
 # Три языка интерфейса — переводится только "обвязка" сайта (меню, кнопки,
 # подписи форм), контент (статьи, источники, марки воды и т.д.) остаётся
@@ -54,6 +56,16 @@ def create_app(config_name=None):
     login_manager.login_message = "Войдите, чтобы продолжить."
     login_manager.login_message_category = "info"
 
+    oauth.init_app(app)
+    if app.config.get("GOOGLE_CLIENT_ID") and app.config.get("GOOGLE_CLIENT_SECRET"):
+        oauth.register(
+            name="google",
+            client_id=app.config["GOOGLE_CLIENT_ID"],
+            client_secret=app.config["GOOGLE_CLIENT_SECRET"],
+            server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+            client_kwargs={"scope": "openid email profile"},
+        )
+
     from app.routes.main import bp as main_bp
     from app.routes.sacred import bp as sacred_bp
     from app.routes.catalog import bp as catalog_bp
@@ -63,6 +75,7 @@ def create_app(config_name=None):
     from app.routes.auth import bp as auth_bp
     from app.routes.reviews import bp as reviews_bp
     from app.routes.messages import bp as messages_bp
+    from app.routes.telegram import bp as telegram_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(sacred_bp, url_prefix="/sacred")
@@ -73,6 +86,7 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(reviews_bp, url_prefix="/reviews")
     app.register_blueprint(messages_bp, url_prefix="/messages")
+    app.register_blueprint(telegram_bp)
 
     from app import models  # noqa: F401 — регистрирует модели в metadata для миграций
 
@@ -122,6 +136,10 @@ def create_app(config_name=None):
     @app.context_processor
     def inject_language_switcher():
         return {"LANGUAGES": LANGUAGES, "current_lang": get_locale()}
+
+    @app.context_processor
+    def inject_google_login_enabled():
+        return {"google_login_enabled": bool(app.config.get("GOOGLE_CLIENT_ID"))}
 
     @app.context_processor
     def inject_unread_messages():

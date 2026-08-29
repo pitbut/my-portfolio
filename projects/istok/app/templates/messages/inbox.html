@@ -7,6 +7,7 @@
     <h2>{{ _('Сообщения') }}</h2>
     <a class="see-all" href="{{ url_for('messages.directory') }}">{{ _('Написать пользователю') }}</a>
   </div>
+  <p class="prose"><a href="{{ url_for('messages.telegram_settings') }}">🔔 {{ _('Получать уведомления о сообщениях в Telegram') }}</a></p>
 
   <div class="admin-list">
     <article class="admin-item">

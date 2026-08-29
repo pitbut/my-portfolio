@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Telegram — Сообщения — Исток{% endblock %}
+
+{% block content %}
+<section class="section wrap" style="max-width: 560px;">
+  <div class="breadcrumb"><a href="{{ url_for('messages.inbox') }}">{{ _('Сообщения') }}</a> / Telegram</div>
+  <div class="section__header">
+    <h2>{{ _('Уведомления в Telegram') }}</h2>
+  </div>
+
+  {% if not bot_configured %}
+  <div class="empty-state">{{ _('Telegram-бот сайта пока не подключён администрацией — попробуйте позже.') }}</div>
+
+  {% elif link %}
+  <p class="prose">
+    ✅ {{ _('Привязан Telegram') }}{% if link.telegram_username %} <strong>@{{ link.telegram_username }}</strong>{% endif %}.
+    {{ _('Новые сообщения будут дублироваться сюда.') }}
+  </p>
+  <form method="post" action="{{ url_for('messages.telegram_unlink') }}">
+    <button type="submit" class="btn btn--secondary">{{ _('Отвязать') }}</button>
+  </form>
+
+  {% else %}
+  <p class="prose">
+    {{ _('Подключите Telegram, чтобы получать уведомления о новых личных сообщениях сразу в мессенджер, не заходя на сайт.') }}
+  </p>
+  <p>
+    <a class="btn btn--primary" href="{{ deep_link }}" target="_blank" rel="noopener">{{ _('Подключить в Telegram') }}</a>
+  </p>
+  <p class="prose">
+    {{ _('Если кнопка открыла уже существующий чат с ботом и привязка не сработала, отправьте боту вручную этот код:') }}
+  </p>
+  <p><code style="font-size:1.2rem; letter-spacing:2px;">{{ link_code }}</code></p>
+  {% endif %}
+</section>
+{% endblock %}

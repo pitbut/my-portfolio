@@ -15,11 +15,13 @@ from flask import (
     url_for,
 )
 
-from app import db
+from app import db, telegram_bot
+from app.book_files import upload_book_files
 from app.models import (
     Article,
     Banner,
     Book,
+    BookFile,
     ContactMessage,
     DeliveryService,
     EditSuggestion,
@@ -35,6 +37,7 @@ from app.models import (
 )
 from app.photos import upload_photo
 from app.routes.reviews import REVIEW_TARGETS
+from app.text_choices import match_existing
 
 BANNER_SLOTS = (1, 2, 3)
 
@@ -418,6 +421,8 @@ def message_user(user_id):
     if body:
         db.session.add(Message(sender_user_id=None, recipient_user_id=user_id, body=body))
         db.session.commit()
+        recipient = db.session.get(User, user_id)
+        telegram_bot.notify_new_message(recipient, "Администрации", body, url_for("messages.thread_admin"))
         flash("Сообщение отправлено.", "success")
     return redirect(url_for("admin.user_detail", user_id=user_id))
 
@@ -464,6 +469,16 @@ def edit_content(content_type, item_id):
         abort(404)
     item = spec["model"].query.get_or_404(item_id)
 
+    # Поля "жанр"/"рубрика" — подсказываем уже существующие значения, чтобы
+    # не плодить дубли, отличающиеся только регистром/опечаткой.
+    choice_field = {"book": "genre", "article": "category"}.get(content_type)
+    extra_choices = {}
+    if choice_field:
+        column = getattr(spec["model"], choice_field)
+        extra_choices[choice_field] = sorted(
+            {row[0] for row in spec["model"].query.with_entities(column).distinct() if row[0]}
+        )
+
     if request.method == "POST":
         for field_name, _label, field_type in spec["fields"]:
             raw = request.form.get(field_name)
@@ -472,6 +487,8 @@ def edit_content(content_type, item_id):
                     value = float(raw) if raw not in (None, "") else None
                 except ValueError:
                     value = getattr(item, field_name)
+            elif field_name in extra_choices:
+                value = match_existing(raw, extra_choices[field_name])
             else:
                 value = (raw or "").strip() or None
             setattr(item, field_name, value)
@@ -481,7 +498,34 @@ def edit_content(content_type, item_id):
             return redirect(url_for("admin.user_detail", user_id=item.added_by_user_id))
         return redirect(url_for("admin.users"))
 
-    return render_template("admin/edit_content.html", item=item, spec=spec, content_type=content_type)
+    return render_template(
+        "admin/edit_content.html", item=item, spec=spec, content_type=content_type, extra_choices=extra_choices
+    )
+
+
+@bp.route("/content/book/<int:book_id>/files/add", methods=["POST"])
+@login_required
+def add_book_files(book_id):
+    book = Book.query.get_or_404(book_id)
+    saved_files, errors = upload_book_files(request.files.getlist("book_files"))
+    for info in saved_files:
+        db.session.add(BookFile(book_id=book.id, **info))
+    if saved_files:
+        db.session.commit()
+        flash(f"Добавлено файлов: {len(saved_files)}.", "success")
+    for error in errors:
+        flash(error, "info")
+    return redirect(url_for("admin.edit_content", content_type="book", item_id=book.id))
+
+
+@bp.route("/content/book/<int:book_id>/files/<int:file_id>/delete", methods=["POST"])
+@login_required
+def delete_book_file(book_id, file_id):
+    book_file = BookFile.query.filter_by(id=file_id, book_id=book_id).first_or_404()
+    db.session.delete(book_file)
+    db.session.commit()
+    flash("Файл удалён.", "info")
+    return redirect(url_for("admin.edit_content", content_type="book", item_id=book_id))
 
 
 @bp.route("/banners")

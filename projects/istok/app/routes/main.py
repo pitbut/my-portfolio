@@ -4,7 +4,7 @@ from flask import Blueprint, abort, current_app, flash, redirect, render_templat
 from flask_login import current_user, login_required
 from sqlalchemy import func, or_
 
-from app import LANGUAGES, db
+from app import LANGUAGES, db, telegram_bot
 from app.models import (
     Article,
     Banner,
@@ -74,6 +74,7 @@ Disallow: /*?page=
 Disallow: /*?country=
 Disallow: /*?sort=
 Disallow: /*?q=
+Disallow: /lang/
 
 Sitemap: {sitemap_url}
 """
@@ -428,6 +429,9 @@ def contact():
 
         db.session.add(ContactMessage(name=name or None, email=email or None, message=message))
         db.session.commit()
+
+        sender_label = name or email or "аноним"
+        telegram_bot.notify_admin(sender_label, message, url_for("admin.messages"))
 
         flash("Спасибо! Сообщение отправлено.", "success")
         return redirect(url_for("main.contact"))
