@@ -25,7 +25,8 @@
     <nav class="main-nav">
       <a href="{{ url_for('sacred.index') }}" class="{{ 'is-active' if request.blueprint == 'sacred' }}">{{ _('Источники') }}</a>
       <a href="{{ url_for('articles.index') }}" class="{{ 'is-active' if request.blueprint == 'articles' }}">{{ _('Статьи') }}</a>
-      <a href="{{ url_for('catalog.index') }}" class="{{ 'is-active' if request.blueprint == 'catalog' }}">{{ _('Каталог') }}</a>
+      <a href="{{ url_for('catalog.index') }}" class="{{ 'is-active' if request.blueprint == 'catalog' and request.endpoint != 'catalog.suppliers_map' }}">{{ _('Каталог') }}</a>
+      <a href="{{ url_for('catalog.suppliers_map') }}" class="{{ 'is-active' if request.endpoint == 'catalog.suppliers_map' }}">{{ _('Точки рядом') }}</a>
       <a href="{{ url_for('library.index') }}" class="{{ 'is-active' if request.blueprint == 'library' }}">{{ _('Библиотека') }}</a>
       <a href="{{ url_for('main.equipment_list') }}" class="{{ 'is-active' if request.endpoint == 'main.equipment_list' }}">{{ _('Оборудование') }}</a>
       <a href="{{ url_for('main.experiments_list') }}" class="{{ 'is-active' if request.endpoint == 'main.experiments_list' }}">{{ _('Опыты') }}</a>
@@ -44,6 +45,7 @@
     <div class="account-nav">
       {% if current_user.is_authenticated %}
         <a href="{{ url_for('messages.inbox') }}" class="{{ 'is-active' if request.blueprint == 'messages' }}">{{ _('Сообщения') }}{% if unread_messages_count %} <span class="unread-badge">{{ unread_messages_count }}</span>{% endif %}</a>
+        <a href="{{ url_for('messages.telegram_settings') }}" title="{{ _('Уведомления в Telegram') }}">Telegram</a>
         <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">({{ _('email не подтверждён — отправить письмо ещё раз') }})</a>{% endif %}</span>
         <a href="{{ url_for('auth.logout') }}">{{ _('Выйти') }}</a>
       {% else %}

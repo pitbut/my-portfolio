@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ brand.name }} — каталог — Исток{% endblock %}
-{% block description %}{{ brand.description or (brand.name ~ ": " ~ brand.water_type) }}{% endblock %}
+{% block title %}Точки продажи воды рядом — Исток{% endblock %}
+{% block description %}Все точки продажи питьевой воды на одной карте: поиск по названию, фильтры по типу и объёму.{% endblock %}
 
 {% block extra_head %}
 {% if suppliers %}
@@ -9,70 +9,75 @@
 {% endblock %}
 
 {% block content %}
-<section class="detail-hero wrap">
-  <div class="breadcrumb"><a href="{{ url_for('catalog.index') }}">Каталог</a> / {{ brand.name }}</div>
-  <h1>{{ brand.name }}</h1>
-  <div class="meta-row">
-    <span>{{ brand.water_type }}</span>
-    <span>{{ brand.volume_l }} л &middot; {{ "%.2f"|format(brand.price) }} {{ brand.currency_symbol }}</span>
-    {% if brand.mineralization_mg_l %}<span>{{ brand.mineralization_mg_l }} мг/л</span>{% endif %}
-    {% if brand.origin %}<span>📍 {{ brand.origin }}</span>{% endif %}
-    {% if not brand.verified %}<span class="badge badge--myth">{{ _('не проверено') }}</span>{% endif %}
-  </div>
-
-  {% if brand.description %}
-  <div class="prose"><p>{{ brand.description }}</p></div>
-  {% endif %}
-
-  <div class="form-block" style="border-top:none; margin-top:34px; padding-top:0;">
-    <div class="section__header" style="border-bottom-color: rgba(233,247,248,0.12);">
-      <h3 style="margin:0;">Где купить оптом и в розницу</h3>
-      {% if suppliers %}
-      <button type="button" id="locate-btn" class="btn btn--primary">📍 Показать ближайшие ко мне</button>
-      {% endif %}
-    </div>
-    <p id="locate-status" class="admin-item__meta" style="display:none;"></p>
-
+<section class="section wrap">
+  <div class="section__header">
+    <h2>{{ _('Точки продажи воды') }}</h2>
     {% if suppliers %}
-    <div class="grid" id="suppliers-list">
-      {% for s in suppliers %}
-      <article class="card" data-lat="{{ s.latitude or '' }}" data-lng="{{ s.longitude or '' }}">
-        {% if image_url(s.image_url) %}
-        <img class="card-photo" src="{{ image_url(s.image_url) }}" alt="{{ s.name }}" loading="lazy">
-        {% endif %}
-        <span class="badge {{ 'badge--science' if s.verified else 'badge--myth' }}">{{ _('проверено') if s.verified else _('не проверено') }}</span>
-        <h3>{{ s.name }}</h3>
-        {% if s.supplier_type %}<span class="meta">{{ s.supplier_type }}</span>{% endif %}
-        <p>{{ s.address }}</p>
-        <p class="supplier-distance" style="display:none;"></p>
-        {% if s.phone %}<p>{{ s.phone }}</p>{% endif %}
-        {% if s.website %}<p><a href="{{ s.website }}" target="_blank" rel="noopener">{{ s.website }}</a></p>{% endif %}
-        {% if current_user.is_authenticated and s.added_by_user_id and s.added_by_user_id != current_user.id %}
-        <p><a href="{{ url_for('messages.thread_user', user_id=s.added_by_user_id) }}">✉️ {{ _('Написать') }}</a></p>
-        {% endif %}
-      </article>
-      {% endfor %}
-    </div>
+    <button type="button" id="locate-btn" class="btn btn--primary">📍 {{ _('Показать ближайшие ко мне') }}</button>
+    {% endif %}
+  </div>
+  <p id="locate-status" class="admin-item__meta" style="display:none;"></p>
 
-    <div class="map-block">
-      <div id="suppliers-map"></div>
-    </div>
-    {% else %}
-    <div class="empty-state">Точек продажи для этой марки пока не добавлено.</div>
+  <form method="get" class="sort-bar" style="margin-top:8px; flex-wrap:wrap;">
+    <input type="text" name="q" value="{{ q }}" placeholder="{{ _('Название точки или марки…') }}" style="min-width:200px;">
+
+    <select name="water_type" onchange="this.form.submit()">
+      <option value="">{{ _('Любой тип воды') }}</option>
+      {% for wt in water_types %}
+      <option value="{{ wt }}" {{ "selected" if wt == selected_water_type }}>{{ wt }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="volume" onchange="this.form.submit()">
+      <option value="">{{ _('Любой объём') }}</option>
+      {% for v in volumes %}
+      <option value="{{ v }}" {{ "selected" if selected_volume and v == selected_volume }}>{{ v }} л</option>
+      {% endfor %}
+    </select>
+
+    {% if countries %}
+    <select name="country" onchange="this.form.submit()">
+      <option value="">{{ _('Любая страна') }}</option>
+      {% for c in countries %}
+      <option value="{{ c }}" {{ "selected" if c == selected_country }}>{{ c }}</option>
+      {% endfor %}
+    </select>
     {% endif %}
 
-    <p style="margin-top:20px; font-size:.9rem; color: var(--ink-dim);">
-      Знаете точку продажи этой воды?
-      {% if current_user.is_authenticated %}
-        <a href="{{ url_for('catalog.add_supplier', slug=brand.slug) }}">Добавить точку продажи</a>
-      {% else %}
-        <a href="{{ url_for('auth.register') }}">Зарегистрируйтесь</a>, чтобы добавить точку продажи
+    <button type="submit" class="btn btn--secondary">{{ _('Найти') }}</button>
+    {% if q or selected_water_type or selected_volume or selected_country %}
+    <a href="{{ url_for('catalog.suppliers_map') }}">{{ _('Сбросить') }}</a>
+    {% endif %}
+  </form>
+
+  {% if suppliers %}
+  <div class="grid" id="suppliers-list" style="margin-top:24px;">
+    {% for s in suppliers %}
+    <article class="card" data-lat="{{ s.latitude or '' }}" data-lng="{{ s.longitude or '' }}">
+      {% if image_url(s.image_url) %}
+      <img class="card-photo" src="{{ image_url(s.image_url) }}" alt="{{ s.name }}" loading="lazy">
       {% endif %}
-      .
-    </p>
+      <span class="badge {{ 'badge--science' if s.verified else 'badge--myth' }}">{{ _('проверено') if s.verified else _('не проверено') }}</span>
+      <h3><a href="{{ url_for('catalog.detail', slug=s.water_brand.slug) }}">{{ s.name }}</a></h3>
+      <span class="meta">{{ s.water_brand.name }} &middot; {{ s.water_brand.water_type }} &middot; {{ s.water_brand.volume_l }} л</span>
+      {% if s.supplier_type %}<span class="meta">{{ s.supplier_type }}</span>{% endif %}
+      <p>{{ s.address }}</p>
+      <p class="supplier-distance" style="display:none;"></p>
+      {% if s.phone %}<p>{{ s.phone }}</p>{% endif %}
+      {% if s.website %}<p><a href="{{ s.website }}" target="_blank" rel="noopener">{{ s.website }}</a></p>{% endif %}
+      {% if current_user.is_authenticated and s.added_by_user_id and s.added_by_user_id != current_user.id %}
+      <p><a href="{{ url_for('messages.thread_user', user_id=s.added_by_user_id) }}">✉️ {{ _('Написать') }}</a></p>
+      {% endif %}
+    </article>
+    {% endfor %}
   </div>
 
-  {% include "_reviews.html" %}
+  <div class="map-block">
+    <div id="suppliers-map"></div>
+  </div>
+  {% else %}
+  <div class="empty-state">{{ _('По этому фильтру ничего не нашлось.') }}</div>
+  {% endif %}
 </section>
 {% endblock %}
 
@@ -105,6 +110,8 @@
         if (points.length > 1) {
           map.fitBounds(L.latLngBounds(points.map(function (p) { return [p[0], p[1]]; })), { padding: [30, 30] });
         }
+      } else {
+        mapEl.closest(".map-block").style.display = "none";
       }
     }
 

@@ -19,6 +19,32 @@ def test_catalog_country_filter(client):
     assert "Тестовая вода</a>".encode() not in resp.data
 
 
+def test_suppliers_map_lists_all_suppliers(client):
+    resp = client.get("/catalog/suppliers")
+    assert resp.status_code == 200
+    assert "Тестовый поставщик".encode() in resp.data
+
+
+def test_suppliers_map_filters_by_water_type(client):
+    resp = client.get("/catalog/suppliers?water_type=питьевая")
+    assert resp.status_code == 200
+    assert "Тестовый поставщик".encode() in resp.data
+
+    resp_none = client.get("/catalog/suppliers?water_type=не-существует")
+    assert resp_none.status_code == 200
+    assert "Тестовый поставщик".encode() not in resp_none.data
+
+
+def test_suppliers_map_filters_by_name_search(client):
+    resp = client.get("/catalog/suppliers?q=Тестовый")
+    assert resp.status_code == 200
+    assert "Тестовый поставщик".encode() in resp.data
+
+    resp_none = client.get("/catalog/suppliers?q=совсемдругоеназвание")
+    assert resp_none.status_code == 200
+    assert "Тестовый поставщик".encode() not in resp_none.data
+
+
 def test_catalog_shows_currency(client):
     resp = client.get("/catalog/")
     assert "сум".encode() in resp.data

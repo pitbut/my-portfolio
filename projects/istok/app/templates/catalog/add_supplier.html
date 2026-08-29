@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Добавить точку продажи — {{ brand.name }} — Исток{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
 {% block content %}
 <section class="section wrap" style="max-width: 520px;">
   <div class="breadcrumb"><a href="{{ url_for('catalog.detail', slug=brand.slug) }}">{{ brand.name }}</a> / {{ _('Добавить точку продажи') }}</div>
@@ -26,15 +30,14 @@
     <div class="field">
       <label for="address">{{ _('Адрес') }}</label>
       <input type="text" id="address" name="address" maxlength="500" required>
+      <button type="button" id="geocodeAddressBtn" class="btn btn--secondary" style="align-self:flex-start;">{{ _('Найти на карте') }}</button>
     </div>
 
     <div class="field">
-      <label for="latitude">{{ _('Широта (необязательно, для карты)') }}</label>
-      <input type="text" id="latitude" name="latitude" placeholder="55.7522">
-    </div>
-    <div class="field">
-      <label for="longitude">{{ _('Долгота (необязательно, для карты)') }}</label>
-      <input type="text" id="longitude" name="longitude" placeholder="37.6156">
+      <label>{{ _('Точка на карте (необязательно: кликните по карте или перетащите метку, чтобы уточнить место)') }}</label>
+      <div id="location-map" data-lat="" data-lng=""></div>
+      <input type="hidden" id="latitude" name="latitude">
+      <input type="hidden" id="longitude" name="longitude">
     </div>
 
     <div class="field">
@@ -55,4 +58,14 @@
     <button type="submit" class="btn btn--primary">{{ _('Добавить') }}</button>
   </form>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var mapController = initLocationMap("location-map", "latitude", "longitude");
+  initAddressGeocode("geocodeAddressBtn", "address", mapController);
+});
+</script>
 {% endblock %}

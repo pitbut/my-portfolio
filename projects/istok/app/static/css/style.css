@@ -500,7 +500,8 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
 .map-block__header a { font-size: .88rem; font-weight: 600; }
 
 #source-map,
-#suppliers-map {
+#suppliers-map,
+#location-map {
   height: 340px;
   width: 100%;
   border-radius: var(--radius);
@@ -643,6 +644,7 @@ table.data-table tr:hover td { background: rgba(58, 166, 168, 0.08); }
 .btn--primary { background: var(--gold); color: var(--abyss); }
 .btn--approve { background: #3aa6a8; color: var(--abyss); }
 .btn--reject { background: rgba(217, 120, 120, 0.85); color: var(--abyss); }
+.btn--google { background: #fff; color: #3c4043; border: 1px solid #dadce0; }
 .btn:hover { filter: brightness(1.08); }
 
 .admin-list { display: flex; flex-direction: column; gap: 18px; }

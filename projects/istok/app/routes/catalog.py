@@ -1,7 +1,7 @@
 """Раздел «Каталог цен на питьевую воду»."""
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from app import db
 from app.models import Review, Supplier, WaterBrand
@@ -165,6 +165,58 @@ def detail(slug):
         avg_rating=avg_rating,
         target_type="water_brand",
         target_id=brand.id,
+    )
+
+
+@bp.route("/suppliers")
+def suppliers_map():
+    """Все точки продажи сразу, на одной карте/списке — с поиском по
+    названию и фильтрами по типу и объёму воды (в отличие от
+    catalog.detail, где точки видны только в рамках одной марки)."""
+    q = (request.args.get("q") or "").strip()
+    water_type = (request.args.get("water_type") or "").strip()
+    volume = request.args.get("volume", type=float)
+    country = (request.args.get("country") or "").strip()
+
+    query = Supplier.query.join(WaterBrand, Supplier.water_brand_id == WaterBrand.id)
+
+    if q:
+        like = f"%{q}%"
+        query = query.filter(or_(Supplier.name.ilike(like), WaterBrand.name.ilike(like)))
+    if water_type:
+        query = query.filter(WaterBrand.water_type == water_type)
+    if volume:
+        query = query.filter(WaterBrand.volume_l == volume)
+    if country:
+        query = query.filter(WaterBrand.country == country)
+
+    suppliers = query.order_by(Supplier.verified.desc(), Supplier.name).all()
+
+    water_types = [
+        row[0] for row in db.session.query(WaterBrand.water_type).distinct().order_by(WaterBrand.water_type).all()
+    ]
+    volumes = [
+        row[0] for row in db.session.query(WaterBrand.volume_l).distinct().order_by(WaterBrand.volume_l).all()
+    ]
+    countries = [
+        row[0]
+        for row in db.session.query(WaterBrand.country)
+        .filter(WaterBrand.country.isnot(None))
+        .distinct()
+        .order_by(WaterBrand.country)
+        .all()
+    ]
+
+    return render_template(
+        "catalog/suppliers.html",
+        suppliers=suppliers,
+        water_types=water_types,
+        volumes=volumes,
+        countries=countries,
+        q=q,
+        selected_water_type=water_type,
+        selected_volume=volume,
+        selected_country=country,
     )
 
 
