@@ -105,10 +105,11 @@ def test_user_to_user_chat(client, app):
 
     resp = client.get("/messages/directory")
     # chatuserb (текущий пользователь) в своей же справочной странице не должен
-    # предлагаться сам себе как собеседник — email появляется только в шапке сайта
-    # (текущая сессия), а не в списке карточек-пользователей.
-    assert resp.data.count("chatuserb@user.example".encode()) == 1
-    assert "chatusera@user.example".encode() in resp.data
+    # предлагаться сам себе как собеседник — email в шапке сайта (текущая сессия)
+    # не в счёт, важно, что его нет именно в списке карточек-пользователей.
+    directory_list = resp.data.split(b'<div class="admin-list">', 1)[1]
+    assert b"chatuserb@user.example" not in directory_list
+    assert "chatusera@user.example".encode() in directory_list
 
     resp = client.post(
         f"/messages/user/{user_a_id}/send",

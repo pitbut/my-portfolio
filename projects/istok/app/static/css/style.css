@@ -90,8 +90,11 @@ p { color: var(--ink-dim); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  gap: 24px;
+  flex-wrap: nowrap;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  gap: 14px;
 }
 
 .brand {
@@ -102,21 +105,25 @@ p { color: var(--ink-dim); }
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--foam) !important;
+  flex-shrink: 0;
 }
 
 .brand__drop { font-size: 1.3rem; filter: drop-shadow(0 0 6px rgba(58,166,168,.6)); }
 
 .main-nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 22px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: 4px 9px;
 }
 
 .main-nav a {
+  display: inline-block;
   color: var(--ink-dim);
-  font-size: .95rem;
+  font-size: .78rem;
   font-weight: 500;
-  padding: 6px 2px;
+  padding: 6px 1px;
+  white-space: nowrap;
   border-bottom: 2px solid transparent;
   transition: color .2s, border-color .2s;
 }
@@ -131,17 +138,20 @@ p { color: var(--ink-dim); }
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 1;
 }
 
 .site-search input {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(233, 247, 248, 0.18);
   border-radius: 100px;
-  padding: 6px 14px;
+  padding: 6px 12px;
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: .85rem;
-  width: 160px;
+  font-size: .82rem;
+  width: 120px;
+  min-width: 50px;
+  flex-shrink: 1;
 }
 
 .site-search input:focus { outline: none; border-color: var(--gold); }
@@ -153,19 +163,21 @@ p { color: var(--ink-dim); }
   font-size: 1rem;
   padding: 4px;
   color: var(--ink-dim);
+  flex-shrink: 0;
 }
 
 .site-search button:hover { color: var(--gold); }
 
 .lang-switch {
   display: flex;
-  gap: 6px;
-  font-size: .78rem;
+  flex-shrink: 0;
+  gap: 3px;
+  font-size: .76rem;
 }
 
 .lang-switch a {
   color: var(--ink-dim);
-  padding: 3px 7px;
+  padding: 2px 5px;
   border-radius: 6px;
 }
 
@@ -180,9 +192,13 @@ p { color: var(--ink-dim); }
 .account-nav {
   display: flex;
   align-items: center;
-  gap: 14px;
-  font-size: .85rem;
+  flex-shrink: 0;
+  gap: 8px;
+  font-size: .76rem;
+  white-space: nowrap;
 }
+
+.nav-label-compact { display: none; }
 
 .account-nav a { color: var(--gold-soft); }
 .account-nav a:hover { color: var(--gold); }
@@ -196,8 +212,41 @@ p { color: var(--ink-dim); }
   font-size: .72rem;
   font-weight: 700;
 }
-.account-nav__email { color: var(--ink-dim); }
+.account-nav__email {
+  display: inline-block;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  color: var(--ink-dim);
+}
 .account-nav__unconfirmed { font-size: .78rem; }
+
+/* ---------- Узкий десктоп/планшет в альбомной ориентации (901–1360px) ----------
+   Ряд шапки уже не сворачивается в гамбургер (это только с 900px и ниже), но
+   9 пунктов меню + поиск + языки + блок аккаунта в полную ширину сюда не
+   помещаются — переносить строку нельзя, поэтому уплотняем: у пунктов меню
+   меньше шрифт/отступы, «Сообщения»/Telegram сжимаются до иконки/аббревиатуры,
+   email обрезается короче. 1360 — там, где обычный (не уплотнённый) ряд уже
+   помещается сам по себе; выше этой ширины всё остаётся как обычно. */
+@media (max-width: 1360px) and (min-width: 901px) {
+  .site-header__inner { padding: 14px 14px; gap: 8px; }
+
+  .main-nav { gap: 4px 3px; }
+  .main-nav a { font-size: .6rem; }
+
+  .site-search input { width: 50px; padding: 5px 8px; }
+
+  .lang-switch { gap: 1px; }
+  .lang-switch a { padding: 2px 3px; }
+
+  .account-nav { gap: 4px; font-size: .64rem; }
+  .account-nav__email { max-width: 40px; }
+
+  .nav-label-full { display: none; }
+  .nav-label-compact { display: inline; }
+}
 
 /* ---------- Мобильное меню (гамбургер) ---------- */
 

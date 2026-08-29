@@ -17,7 +17,7 @@
 <div class="ripple-backdrop" aria-hidden="true"></div>
 
 <header class="site-header">
-  <div class="wrap site-header__inner">
+  <div class="site-header__inner">
     <a class="brand" href="{{ url_for('main.index') }}">
       <span class="brand__drop">💧</span>
       <span class="brand__name">Исток</span>
@@ -52,9 +52,9 @@
       </div>
       <div class="account-nav">
         {% if current_user.is_authenticated %}
-          <a href="{{ url_for('messages.inbox') }}" class="{{ 'is-active' if request.blueprint == 'messages' }}">{{ _('Сообщения') }}{% if unread_messages_count %} <span class="unread-badge">{{ unread_messages_count }}</span>{% endif %}</a>
-          <a href="{{ url_for('messages.telegram_settings') }}" title="{{ _('Уведомления в Telegram') }}">Telegram</a>
-          <span class="account-nav__email">{{ current_user.email }}{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">({{ _('email не подтверждён — отправить письмо ещё раз') }})</a>{% endif %}</span>
+          <a href="{{ url_for('messages.inbox') }}" class="{{ 'is-active' if request.blueprint == 'messages' }}" title="{{ _('Сообщения') }}"><span class="nav-label-full">{{ _('Сообщения') }}</span><span class="nav-label-compact" aria-hidden="true">✉</span>{% if unread_messages_count %} <span class="unread-badge">{{ unread_messages_count }}</span>{% endif %}</a>
+          <a href="{{ url_for('messages.telegram_settings') }}" title="{{ _('Уведомления в Telegram') }}"><span class="nav-label-full">Telegram</span><span class="nav-label-compact" aria-hidden="true">TG</span></a>
+          <span class="account-nav__email" title="{{ current_user.email }}">{{ current_user.email }}</span>{% if not current_user.email_confirmed %} <a href="{{ url_for('auth.resend_confirmation') }}" class="account-nav__unconfirmed">({{ _('email не подтверждён — отправить письмо ещё раз') }})</a>{% endif %}
           <a href="{{ url_for('auth.logout') }}">{{ _('Выйти') }}</a>
         {% else %}
           <a href="{{ url_for('auth.login') }}">{{ _('Войти') }}</a>
