@@ -199,6 +199,100 @@ p { color: var(--ink-dim); }
 .account-nav__email { color: var(--ink-dim); }
 .account-nav__unconfirmed { font-size: .78rem; }
 
+/* ---------- Мобильное меню (гамбургер) ---------- */
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nav-toggle__bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--foam);
+  border-radius: 2px;
+  transition: transform .3s ease, opacity .2s ease;
+}
+
+.nav-toggle.is-open .nav-toggle__bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.is-open .nav-toggle__bar:nth-child(2) { opacity: 0; }
+.nav-toggle.is-open .nav-toggle__bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* На десктопе .nav-drawer не создаёт собственного бокса — его дети
+   (main-nav, site-search, lang-switch, account-nav) остаются прямыми
+   flex-элементами .site-header__inner, как было до разбивки на секции,
+   и вид шапки не меняется. */
+.nav-drawer { display: contents; }
+
+@media (max-width: 900px) {
+  .nav-toggle { display: flex; }
+
+  .nav-drawer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 8px 24px 24px;
+    background: rgba(4, 28, 44, 0.97);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(233, 247, 248, 0.08);
+    box-shadow: var(--shadow-deep);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-height .3s ease, opacity .25s ease;
+  }
+
+  .nav-drawer.is-open {
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-drawer .main-nav {
+    flex-direction: column;
+    gap: 0;
+    padding-top: 8px;
+  }
+
+  .nav-drawer .main-nav a {
+    padding: 12px 4px;
+    border-bottom: 1px solid rgba(233, 247, 248, 0.08);
+  }
+
+  .nav-drawer .site-search,
+  .nav-drawer .lang-switch,
+  .nav-drawer .account-nav {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(233, 247, 248, 0.08);
+  }
+
+  .nav-drawer .site-search input { flex: 1; width: auto; }
+
+  .nav-drawer .account-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
 /* ---------- Hero ---------- */
 
 .hero {

@@ -120,3 +120,47 @@ document.addEventListener("DOMContentLoaded", () => {
     observer.observe(card);
   });
 });
+
+// Мобильное меню шапки: гамбургер разворачивает нав/поиск/язык/аккаунт в
+// выпадающую панель (на десктопе .nav-drawer — display:contents, эта
+// логика там не влияет на вид, кнопка скрыта через CSS).
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("navToggle");
+  const drawer = document.getElementById("navDrawer");
+  if (!toggle || !drawer) return;
+
+  const closeDrawer = () => {
+    drawer.classList.remove("is-open");
+    toggle.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+  };
+
+  const openDrawer = () => {
+    drawer.classList.add("is-open");
+    toggle.classList.add("is-open");
+    toggle.setAttribute("aria-expanded", "true");
+  };
+
+  toggle.addEventListener("click", () => {
+    if (drawer.classList.contains("is-open")) closeDrawer();
+    else openDrawer();
+  });
+
+  drawer.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", closeDrawer);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!drawer.classList.contains("is-open")) return;
+    if (drawer.contains(e.target) || toggle.contains(e.target)) return;
+    closeDrawer();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDrawer();
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900) closeDrawer();
+  });
+});
