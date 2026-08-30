@@ -107,18 +107,27 @@ class BtRaceLink(private val appContext: Context) {
     @SuppressLint("MissingPermission")
     fun startHosting() {
         val a = adapter ?: run { state.value = LinkState.Failed("Bluetooth недоступен"); return }
+        if (!a.isEnabled) { state.value = LinkState.Failed("Bluetooth выключен"); return }
         closing = false
         state.value = LinkState.Listening
         acceptThread = Thread {
             try {
                 val server = a.listenUsingInsecureRfcommWithServiceRecord("RoachRace", APP_UUID)
                 serverSocket = server
-                val s = server.accept()
+                val s = server.accept(120_000)
                 serverSocket = null
                 try { server.close() } catch (_: IOException) {}
                 onConnected(s)
             } catch (e: IOException) {
-                if (!closing) state.value = LinkState.Failed(e.message ?: "Ошибка подключения")
+                if (!closing) {
+                    val timedOut = e.message?.contains("time", ignoreCase = true) == true
+                    state.value = LinkState.Failed(
+                        if (timedOut) "Никто не подключился за 2 минуты — проверь, что на втором телефоне тоже включён Bluetooth и нажато «Присоединиться»"
+                        else (e.message ?: "Ошибка подключения"),
+                    )
+                }
+            } catch (e: SecurityException) {
+                if (!closing) state.value = LinkState.Failed("Нет разрешения на Bluetooth — проверь разрешения приложения в настройках телефона")
             }
         }
         acceptThread?.start()
@@ -126,6 +135,8 @@ class BtRaceLink(private val appContext: Context) {
 
     @SuppressLint("MissingPermission")
     fun connectTo(device: BluetoothDevice) {
+        val a = adapter ?: run { state.value = LinkState.Failed("Bluetooth недоступен"); return }
+        if (!a.isEnabled) { state.value = LinkState.Failed("Bluetooth выключен"); return }
         closing = false
         state.value = LinkState.Connecting
         stopDiscovery()
@@ -135,7 +146,14 @@ class BtRaceLink(private val appContext: Context) {
                 s.connect()
                 onConnected(s)
             } catch (e: IOException) {
-                if (!closing) state.value = LinkState.Failed(e.message ?: "Не удалось подключиться")
+                if (!closing) {
+                    state.value = LinkState.Failed(
+                        "Не удалось подключиться (${e.message ?: "нет ответа"}). " +
+                            "Убедись, что на телефоне-хосте открыт экран «Создать игру» и он ждёт подключения.",
+                    )
+                }
+            } catch (e: SecurityException) {
+                if (!closing) state.value = LinkState.Failed("Нет разрешения на Bluetooth — проверь разрешения приложения в настройках телефона")
             }
         }.start()
     }

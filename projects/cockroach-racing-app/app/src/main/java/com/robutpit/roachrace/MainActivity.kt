@@ -39,10 +39,12 @@ class MainActivity : ComponentActivity() {
     private lateinit var micPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>
     private lateinit var btPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>
     private lateinit var enableBtLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
+    private lateinit var discoverableLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
 
     private var onMicGranted: (() -> Unit)? = null
     private var onBtPermsGranted: (() -> Unit)? = null
     private var onBtEnabled: (() -> Unit)? = null
+    private var onDiscoverableDone: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +58,13 @@ class MainActivity : ComponentActivity() {
         enableBtLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             onBtEnabled?.invoke()
         }
+        // The system discoverability dialog always returns a result (either the
+        // chosen duration or RESULT_CANCELED if the user dismissed it) — either
+        // way we move on, since RFCOMM itself doesn't strictly require it when
+        // the phones are already paired, only when relying on live scanning.
+        discoverableLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            onDiscoverableDone?.invoke()
+        }
 
         setContent {
             RoachRaceTheme {
@@ -68,7 +77,7 @@ class MainActivity : ComponentActivity() {
                         requestBtPermissions = { onGranted ->
                             onBtPermsGranted = onGranted
                             val perms = if (Build.VERSION.SDK_INT >= 31) {
-                                arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN)
+                                arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_ADVERTISE)
                             } else {
                                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
                             }
@@ -77,6 +86,12 @@ class MainActivity : ComponentActivity() {
                         requestEnableBluetooth = { onEnabled ->
                             onBtEnabled = onEnabled
                             enableBtLauncher.launch(android.content.Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+                        },
+                        requestDiscoverable = { onDone ->
+                            onDiscoverableDone = onDone
+                            val intent = android.content.Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+                                .putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
+                            discoverableLauncher.launch(intent)
                         },
                     )
                 }
@@ -90,6 +105,7 @@ fun AppRoot(
     requestMicPermission: (onGranted: () -> Unit) -> Unit,
     requestBtPermissions: (onGranted: () -> Unit) -> Unit,
     requestEnableBluetooth: (onEnabled: () -> Unit) -> Unit,
+    requestDiscoverable: (onDone: () -> Unit) -> Unit,
 ) {
     val context = LocalContext.current
     val repo = remember { SaveRepository(context) }
@@ -385,8 +401,10 @@ fun AppRoot(
                 onPickHost = {
                     requestBtPermissions {
                         requestEnableBluetooth {
-                            mpRole = MpRole.HOST
-                            btLink.startHosting()
+                            requestDiscoverable {
+                                mpRole = MpRole.HOST
+                                btLink.startHosting()
+                            }
                         }
                     }
                 },
