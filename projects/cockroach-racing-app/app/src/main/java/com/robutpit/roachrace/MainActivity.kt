@@ -132,6 +132,11 @@ fun AppRoot(
     var remoteRoster by remember { mutableStateOf<List<RaceProtocol.Hello>>(emptyList()) }
     var helloSent by remember { mutableStateOf(false) }
 
+    // Tournament mode: several heats in a row (Bluetooth caps one heat at
+    // MAX_PEERS+1 players), placements accumulate into a shared points table.
+    var tournamentMode by remember { mutableStateOf(false) }
+    val tournamentBoard = remember { mutableStateListOf<TournamentEntry>() }
+
     // "Combined field" mode: host picks it in the lobby, joiners learn it from
     // the START message. mySegmentIndex/totalSegments describe which slice of
     // the track this phone renders (host is always segment 0).
@@ -311,7 +316,28 @@ fun AppRoot(
                 btLink.sendToAll(RaceProtocol.state(eng))
             }
             if (eng.done.value) {
-                if (isMultiplayer && mpRole == MpRole.HOST) btLink.sendToAll(RaceProtocol.state(eng))
+                if (isMultiplayer && mpRole == MpRole.HOST) {
+                    btLink.sendToAll(RaceProtocol.state(eng))
+                    if (tournamentMode) {
+                        val ranking = eng.racers.sortedBy { it.finishOrder ?: Int.MAX_VALUE }
+                        ranking.forEachIndexed { i, r ->
+                            val place = i + 1
+                            val existing = tournamentBoard.find { it.name == r.name }
+                            if (existing != null) {
+                                tournamentBoard.remove(existing)
+                                tournamentBoard.add(
+                                    existing.copy(
+                                        points = existing.points + pointsForPlace(place),
+                                        heats = existing.heats + 1,
+                                        bestPlace = minOf(existing.bestPlace, place),
+                                    ),
+                                )
+                            } else {
+                                tournamentBoard.add(TournamentEntry(r.name, pointsForPlace(place), 1, place))
+                            }
+                        }
+                    }
+                }
                 screen = Screen.RESULTS
                 break
             }
@@ -468,6 +494,8 @@ fun AppRoot(
                 onRescan = { btLink.startDiscovery() },
                 stitchedMode = stitchedModeChoice,
                 onStitchedModeChange = { stitchedModeChoice = it },
+                tournamentMode = tournamentMode,
+                onTournamentModeChange = { tournamentMode = it },
                 onStartRace = {
                     btLink.stopAcceptingNewPeers()
                     val orderedPeers = btLink.hostPeers.filter { remoteHellos.containsKey(it.id) }.sortedBy { it.id }
@@ -523,8 +551,27 @@ fun AppRoot(
                         if (isMultiplayer) btLink.close()
                         screen = Screen.TRAIN
                     },
+                    showTournamentButton = isMultiplayer && tournamentMode,
+                    onShowTournament = { screen = Screen.TOURNAMENT },
                 )
             }
+            Screen.TOURNAMENT -> TournamentScreen(
+                entries = tournamentBoard,
+                onNextHeat = {
+                    stopRaceSensors()
+                    btLink.close()
+                    mpRole = MpRole.NONE
+                    screen = Screen.TRACK
+                },
+                onFinish = {
+                    stopRaceSensors()
+                    btLink.close()
+                    mpRole = MpRole.NONE
+                    tournamentMode = false
+                    tournamentBoard.clear()
+                    screen = Screen.TRACK
+                },
+            )
         }
 
         Spacer(Modifier.height(16.dp))

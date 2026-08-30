@@ -38,6 +38,8 @@ fun MultiplayerScreen(
     onRescan: () -> Unit,
     stitchedMode: Boolean,
     onStitchedModeChange: (Boolean) -> Unit,
+    tournamentMode: Boolean,
+    onTournamentModeChange: (Boolean) -> Unit,
     onStartRace: () -> Unit,
     onRetry: () -> Unit,
     onBack: () -> Unit,
@@ -55,6 +57,13 @@ fun MultiplayerScreen(
 
             when (role) {
                 MpRole.NONE -> {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
+                        Checkbox(checked = tournamentMode, onCheckedChange = onTournamentModeChange, colors = CheckboxDefaults.colors(checkedColor = Amber))
+                        Column {
+                            Text("Это турнир из нескольких заездов", fontSize = 12.sp, color = TextMain)
+                            Text("Больше $MAX_PEERS человек? Гоняйте заездами по ${MAX_PEERS + 1} — очки за места сложатся в общую таблицу", fontSize = 10.sp, color = TextDim)
+                        }
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         PrimaryButton("Создать игру (хост)", onClick = onPickHost)
                         SecondaryButton("Присоединиться", onClick = onPickJoin)

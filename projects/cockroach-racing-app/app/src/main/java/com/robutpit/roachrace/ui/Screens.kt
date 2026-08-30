@@ -21,7 +21,7 @@ import com.robutpit.roachrace.data.SaveState
 import com.robutpit.roachrace.model.*
 import com.robutpit.roachrace.ui.theme.*
 
-enum class Screen { SELECT, TRAIN, TRACK, MULTIPLAYER, RACE, RESULTS }
+enum class Screen { SELECT, TRAIN, TRACK, MULTIPLAYER, RACE, RESULTS, TOURNAMENT }
 
 @Composable
 fun StepNav(current: Screen, canGoTrain: Boolean, canGoTrack: Boolean, canGoRace: Boolean, canGoResults: Boolean, onNav: (Screen) -> Unit) {
@@ -244,7 +244,15 @@ fun TrackScreen(selectedTrackId: String?, onPick: (String) -> Unit, onSolo: () -
 }
 
 @Composable
-fun ResultsScreen(rows: List<Triple<Int, String, String>>, playerPlace: Int, total: Int, onAnotherTrack: () -> Unit, onTrainMore: () -> Unit) {
+fun ResultsScreen(
+    rows: List<Triple<Int, String, String>>,
+    playerPlace: Int,
+    total: Int,
+    onAnotherTrack: () -> Unit,
+    onTrainMore: () -> Unit,
+    showTournamentButton: Boolean = false,
+    onShowTournament: () -> Unit = {},
+) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         CardBox {
             Text("Результаты", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = TextMain, modifier = Modifier.padding(bottom = 10.dp))
@@ -274,6 +282,10 @@ fun ResultsScreen(rows: List<Triple<Int, String, String>>, playerPlace: Int, tot
         CardBox {
             val medal = if (playerPlace == 1) " Победа! 🏆" else ""
             Text("Твой таракан финишировал на $playerPlace месте из $total.$medal", fontSize = 13.sp, color = TextDim, modifier = Modifier.padding(bottom = 10.dp))
+            if (showTournamentButton) {
+                PrimaryButton("🏆 Турнирная таблица →", modifier = Modifier.fillMaxWidth(), onClick = onShowTournament)
+                Spacer(Modifier.height(10.dp))
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 PrimaryButton("Другая трасса", onClick = onAnotherTrack)
                 SecondaryButton("Ещё потренировать", onClick = onTrainMore)
