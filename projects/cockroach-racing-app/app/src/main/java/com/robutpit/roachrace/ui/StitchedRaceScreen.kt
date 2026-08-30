@@ -26,10 +26,13 @@ import com.robutpit.roachrace.engine.RaceEngine
 import com.robutpit.roachrace.ui.theme.*
 
 /** "Combined field" race screen: phones are placed in a row and each shows
- * only its own slice of the track — [mySegmentIndex] of [totalSegments] —
- * so a roach visually runs off the right edge of one phone and appears at
- * the left edge of the next. Reuses the same [RaceEngine] and Bluetooth
- * state-sync as the shared-field [RaceScreen]; only the drawing differs. */
+ * only its own slice of the track — [mySegmentIndex] of [totalSegments].
+ * Motion is vertical (bottom-to-top), the same "along the phone" direction
+ * as the shared-field [RaceScreen], just cropped to one segment — so laying
+ * the phones out continues the same track instead of switching orientation.
+ * Segments are a hard cut with no overlap: a roach is visible on exactly one
+ * phone at a time, and should appear at the bottom of the next phone the
+ * same instant it leaves the top of this one. */
 @Composable
 fun StitchedRaceScreen(
     engine: RaceEngine,
@@ -57,7 +60,7 @@ fun StitchedRaceScreen(
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Text("${engine.track.emoji} ${engine.track.displayName} — экран ${mySegmentIndex + 1} из $totalSegments", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = TextMain)
-                Text("Сложенное поле — телефоны стоят в ряд слева направо", fontSize = 10.sp, color = Amber)
+                Text("Сложенное поле — телефоны стоят в ряд, счёт идёт снизу вверх по каждому", fontSize = 10.sp, color = Amber)
             }
             PrimaryButton(if (engine.running.value) "Идёт…" else "🏁 Старт", enabled = !engine.running.value && !engine.done.value, onClick = onStart)
         }
@@ -74,53 +77,53 @@ fun StitchedRaceScreen(
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
+                val laneW = w / engine.racers.size
                 val segLen = engine.track.distance / totalSegments
                 val segStart = mySegmentIndex * segLen
                 val segEnd = segStart + segLen
-                val margin = segLen * 0.18f
-                val viewStart = segStart - margin
-                val viewEnd = segEnd + margin
-                val viewSpan = viewEnd - viewStart
 
-                fun xOf(progress: Float) = ((progress - viewStart) / viewSpan) * w
+                // Hard cut, no overlap: progress maps straight to this segment's
+                // 0..h range and racers outside [segStart, segEnd] simply aren't drawn.
+                fun yOf(progress: Float) = h - ((progress - segStart) / segLen) * h
 
                 if (mySegmentIndex == 0) {
-                    val startX = xOf(0f)
-                    drawRect(Amber.copy(alpha = 0.5f), topLeft = Offset(startX - 2f, 0f), size = Size(4f, h))
+                    drawRect(Amber.copy(alpha = 0.5f), topLeft = Offset(0f, h - 2f), size = Size(w, 4f))
                 }
                 if (mySegmentIndex == totalSegments - 1) {
-                    val finishX = xOf(engine.track.distance)
-                    drawRect(Amber.copy(alpha = 0.7f), topLeft = Offset(finishX - 2f, 0f), size = Size(4f, h))
+                    drawRect(Amber.copy(alpha = 0.7f), topLeft = Offset(0f, -2f), size = Size(w, 4f))
                 }
 
                 engine.track.obstacles.forEach { o ->
                     val opos = o.pos * engine.track.distance
-                    if (opos in viewStart..viewEnd) {
-                        val x = xOf(opos)
-                        drawRect(Red.copy(alpha = 0.45f), topLeft = Offset(x - 3f, 0f), size = Size(6f, h))
+                    if (opos in segStart..segEnd) {
+                        val y = yOf(opos)
+                        drawRect(Red.copy(alpha = 0.45f), topLeft = Offset(0f, y - 3f), size = Size(w, 6f))
                     }
                 }
 
-                val laneH = h / engine.racers.size
+                // Half-open range [segStart, segEnd) so the exact boundary value
+                // belongs to only one phone (the next segment's start) — the
+                // last segment includes its end too, so reaching the finish
+                // line doesn't vanish a frame early.
+                val includeEnd = mySegmentIndex == totalSegments - 1
                 engine.racers.forEachIndexed { i, r ->
-                    val x = xOf(r.progress.floatValue)
-                    if (x < -60f || x > w + 60f) return@forEachIndexed
-                    val y = i * laneH + laneH / 2 + r.wobbleCur.value * (laneH * 0.28f)
-                    val roachSize = r.sizeDp * 1.7f
+                    val progress = r.progress.floatValue
+                    val outOfRange = progress < segStart || if (includeEnd) progress > segEnd else progress >= segEnd
+                    if (outOfRange) return@forEachIndexed
+                    val x = i * laneW + laneW / 2 + r.wobbleCur.value * (laneW * 0.28f)
+                    val y = yOf(progress)
+                    val roachSize = r.sizeDp * 2.1f
                     if (r.spookTimer.value > 0f) {
                         drawCircle(Red.copy(alpha = 0.35f), radius = roachSize * 1.9f, center = Offset(x, y))
                     }
-                    drawRoach(Offset(x, y), roachSize, Color(r.colorLong), r.legPhase, r.wobbleCur.value, headingDegrees = 180f)
+                    drawRoach(Offset(x, y), roachSize, Color(r.colorLong), r.legPhase, r.wobbleCur.value, headingDegrees = 90f)
                     if (r.isPlayer) {
                         drawCircle(Amber, radius = roachSize * 2f, center = Offset(x, y), style = androidx.compose.ui.graphics.drawscope.Stroke(3f))
                     }
                 }
-
-                if (mySegmentIndex > 0) drawRect(Color.White.copy(alpha = 0.05f), topLeft = Offset(0f, 0f), size = Size(w * 0.06f, h))
-                if (mySegmentIndex < totalSegments - 1) drawRect(Color.White.copy(alpha = 0.05f), topLeft = Offset(w * 0.94f, 0f), size = Size(w * 0.06f, h))
             }
-            if (mySegmentIndex > 0) Text("←", fontSize = 20.sp, color = TextDim, modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp))
-            if (mySegmentIndex < totalSegments - 1) Text("→", fontSize = 20.sp, color = TextDim, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 4.dp))
+            if (mySegmentIndex < totalSegments - 1) Text("↑ дальше", fontSize = 12.sp, color = TextDim, modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp))
+            if (mySegmentIndex > 0) Text("↓ отсюда", fontSize = 12.sp, color = TextDim, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp))
         }
 
         Column(
