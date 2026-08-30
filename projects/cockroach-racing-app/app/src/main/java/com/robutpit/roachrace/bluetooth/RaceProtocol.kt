@@ -72,7 +72,15 @@ object RaceProtocol {
         return if (p.size == 2 && p[0] == "TRACK") p[1] else null
     }
 
-    fun start() = "START"
+    /** [stitched] = true means "combined long field" mode: each phone shows
+     * only its own slice of the track (assigned by racer index), phones
+     * placed in a row so the roach visually crosses from one screen to the
+     * next. false is the existing "same field mirrored on every screen" mode. */
+    fun start(stitched: Boolean) = "START|${if (stitched) "1" else "0"}"
+    fun parseStart(line: String): Boolean? {
+        val p = line.split("|")
+        return if (p.size == 2 && p[0] == "START") p[1] == "1" else null
+    }
 
     fun spook(label: String) = "SPOOK|$label"
     fun parseSpook(line: String): String? {

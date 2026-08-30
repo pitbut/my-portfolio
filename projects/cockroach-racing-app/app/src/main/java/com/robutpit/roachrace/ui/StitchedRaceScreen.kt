@@ -25,12 +25,16 @@ import androidx.compose.ui.unit.sp
 import com.robutpit.roachrace.engine.RaceEngine
 import com.robutpit.roachrace.ui.theme.*
 
-/** Full-bleed race screen: the track runs the long (vertical) way, using
- * nearly the whole screen height, with lanes side by side as columns —
- * requested instead of the old small horizontal strip. */
+/** "Combined field" race screen: phones are placed in a row and each shows
+ * only its own slice of the track — [mySegmentIndex] of [totalSegments] —
+ * so a roach visually runs off the right edge of one phone and appears at
+ * the left edge of the next. Reuses the same [RaceEngine] and Bluetooth
+ * state-sync as the shared-field [RaceScreen]; only the drawing differs. */
 @Composable
-fun RaceScreen(
+fun StitchedRaceScreen(
     engine: RaceEngine,
+    mySegmentIndex: Int,
+    totalSegments: Int,
     onStart: () -> Unit,
     onBackToTrack: () -> Unit,
     micActive: Boolean,
@@ -43,7 +47,6 @@ fun RaceScreen(
     onToggleMotion: () -> Unit,
     hardcore: Boolean,
     onHardcoreChange: (Boolean) -> Unit,
-    multiplayerHint: String? = null,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -53,8 +56,8 @@ fun RaceScreen(
             SecondaryButton("←", onClick = onBackToTrack)
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Text("${engine.track.emoji} ${engine.track.displayName}", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextMain)
-                multiplayerHint?.let { Text(it, fontSize = 10.sp, color = Amber) }
+                Text("${engine.track.emoji} ${engine.track.displayName} — экран ${mySegmentIndex + 1} из $totalSegments", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = TextMain)
+                Text("Сложенное поле — телефоны стоят в ряд слева направо", fontSize = 10.sp, color = Amber)
             }
             PrimaryButton(if (engine.running.value) "Идёт…" else "🏁 Старт", enabled = !engine.running.value && !engine.done.value, onClick = onStart)
         }
@@ -71,45 +74,53 @@ fun RaceScreen(
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
-                val laneW = w / engine.racers.size
-                val padTop = 46f
-                val padBottom = 40f
-                val travel = h - padTop - padBottom
+                val segLen = engine.track.distance / totalSegments
+                val segStart = mySegmentIndex * segLen
+                val segEnd = segStart + segLen
+                val margin = segLen * 0.18f
+                val viewStart = segStart - margin
+                val viewEnd = segEnd + margin
+                val viewSpan = viewEnd - viewStart
 
-                engine.racers.forEachIndexed { i, _ ->
-                    val x0 = i * laneW
-                    drawRect(
-                        color = if (i % 2 == 0) Color.White.copy(alpha = 0.02f) else Color.White.copy(alpha = 0.045f),
-                        topLeft = Offset(x0, 0f), size = Size(laneW, h),
-                    )
+                fun xOf(progress: Float) = ((progress - viewStart) / viewSpan) * w
+
+                if (mySegmentIndex == 0) {
+                    val startX = xOf(0f)
+                    drawRect(Amber.copy(alpha = 0.5f), topLeft = Offset(startX - 2f, 0f), size = Size(4f, h))
+                }
+                if (mySegmentIndex == totalSegments - 1) {
+                    val finishX = xOf(engine.track.distance)
+                    drawRect(Amber.copy(alpha = 0.7f), topLeft = Offset(finishX - 2f, 0f), size = Size(4f, h))
                 }
 
                 engine.track.obstacles.forEach { o ->
-                    val y = (h - padBottom) - o.pos * travel
-                    drawRect(Red.copy(alpha = 0.5f), topLeft = Offset(0f, y - 3f), size = Size(w, 6f))
+                    val opos = o.pos * engine.track.distance
+                    if (opos in viewStart..viewEnd) {
+                        val x = xOf(opos)
+                        drawRect(Red.copy(alpha = 0.45f), topLeft = Offset(x - 3f, 0f), size = Size(6f, h))
+                    }
                 }
 
-                val finishY = padTop
-                drawRect(Amber.copy(alpha = 0.6f), topLeft = Offset(0f, finishY - 2f), size = Size(w, 4f))
-
+                val laneH = h / engine.racers.size
                 engine.racers.forEachIndexed { i, r ->
-                    val x = i * laneW + laneW / 2 + r.wobbleCur.value * (laneW * 0.28f)
-                    val y = (h - padBottom) - (r.progress.floatValue / engine.track.distance) * travel
-                    val roachSize = r.sizeDp * 2.1f
+                    val x = xOf(r.progress.floatValue)
+                    if (x < -60f || x > w + 60f) return@forEachIndexed
+                    val y = i * laneH + laneH / 2 + r.wobbleCur.value * (laneH * 0.28f)
+                    val roachSize = r.sizeDp * 1.7f
                     if (r.spookTimer.value > 0f) {
                         drawCircle(Red.copy(alpha = 0.35f), radius = roachSize * 1.9f, center = Offset(x, y))
                     }
-                    drawRoach(Offset(x, y), roachSize, Color(r.colorLong), r.legPhase, r.wobbleCur.value, headingDegrees = 90f)
+                    drawRoach(Offset(x, y), roachSize, Color(r.colorLong), r.legPhase, r.wobbleCur.value, headingDegrees = 180f)
                     if (r.isPlayer) {
                         drawCircle(Amber, radius = roachSize * 2f, center = Offset(x, y), style = androidx.compose.ui.graphics.drawscope.Stroke(3f))
                     }
                 }
-            }
 
-            Text(
-                "🏁 финиш", fontSize = 10.sp, color = Amber,
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp),
-            )
+                if (mySegmentIndex > 0) drawRect(Color.White.copy(alpha = 0.05f), topLeft = Offset(0f, 0f), size = Size(w * 0.06f, h))
+                if (mySegmentIndex < totalSegments - 1) drawRect(Color.White.copy(alpha = 0.05f), topLeft = Offset(w * 0.94f, 0f), size = Size(w * 0.06f, h))
+            }
+            if (mySegmentIndex > 0) Text("←", fontSize = 20.sp, color = TextDim, modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp))
+            if (mySegmentIndex < totalSegments - 1) Text("→", fontSize = 20.sp, color = TextDim, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 4.dp))
         }
 
         Column(
@@ -150,39 +161,5 @@ fun RaceScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun SensorRow(label: String, level: Float, status: String, active: Boolean, onToggle: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(BgFaint)
-            .border(1.dp, LineColor, RoundedCornerShape(12.dp))
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, fontSize = 12.sp, color = TextMain, modifier = Modifier.width(150.dp))
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(8.dp)
-                .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(BgDeep)
-                .border(1.dp, LineColor, RoundedCornerShape(6.dp)),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(level.coerceIn(0f, 1f))
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(if (level > 0.5f) Red else Green),
-            )
-        }
-        Text(status, fontSize = 10.sp, color = TextDim, modifier = Modifier.width(64.dp))
-        SecondaryButton(if (active) "Выключить" else "Включить", onClick = onToggle)
     }
 }

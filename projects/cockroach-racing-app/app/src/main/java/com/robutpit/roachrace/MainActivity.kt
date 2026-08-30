@@ -132,6 +132,14 @@ fun AppRoot(
     var remoteRoster by remember { mutableStateOf<List<RaceProtocol.Hello>>(emptyList()) }
     var helloSent by remember { mutableStateOf(false) }
 
+    // "Combined field" mode: host picks it in the lobby, joiners learn it from
+    // the START message. mySegmentIndex/totalSegments describe which slice of
+    // the track this phone renders (host is always segment 0).
+    var stitchedModeChoice by remember { mutableStateOf(false) }
+    var isStitchedRace by remember { mutableStateOf(false) }
+    var mySegmentIndex by remember { mutableStateOf(0) }
+    var totalSegments by remember { mutableStateOf(1) }
+
     val btLink = remember { BtRaceLink(context.applicationContext) }
     var micActive by remember { mutableStateOf(false) }
     var micLevel by remember { mutableStateOf(0f) }
@@ -240,7 +248,8 @@ fun AppRoot(
             if (mpRole == MpRole.JOIN) persist(save.copy(trackId = trackId))
             return
         }
-        if (line == RaceProtocol.start() && mpRole == MpRole.JOIN) {
+        RaceProtocol.parseStart(line)?.let { stitched ->
+            if (mpRole != MpRole.JOIN) return
             val myIdx = myAssignedIndex
             if (myIdx == null || remoteRoster.isEmpty()) return
             val track = trackById(save.trackId ?: "table")
@@ -251,6 +260,9 @@ fun AppRoot(
             eng.start()
             engine = eng
             isMultiplayer = true
+            isStitchedRace = stitched
+            mySegmentIndex = myIdx
+            totalSegments = remoteRoster.size
             screen = Screen.RACE
             return
         }
@@ -308,46 +320,57 @@ fun AppRoot(
 
     if (screen == Screen.RACE && engine != null) {
         val eng = engine!!
-        RaceScreen(
-            engine = eng,
-            onStart = { eng.start() },
-            onBackToTrack = {
-                stopRaceSensors()
-                if (isMultiplayer) btLink.close()
-                screen = Screen.TRACK
-            },
-            micActive = micActive,
-            micLevel = micLevel,
-            micStatus = micStatus,
-            onToggleMic = {
-                if (micActive) {
-                    micListener.stop(); micActive = false; micStatus = "выкл"
-                } else if (micListener.hasPermission()) {
+        val onBackToTrack: () -> Unit = {
+            stopRaceSensors()
+            if (isMultiplayer) btLink.close()
+            screen = Screen.TRACK
+        }
+        val onToggleMic: () -> Unit = {
+            if (micActive) {
+                micListener.stop(); micActive = false; micStatus = "выкл"
+            } else if (micListener.hasPermission()) {
+                micActive = micListener.start(); micStatus = if (micActive) "слушаю" else "ошибка"
+            } else {
+                requestMicPermission {
                     micActive = micListener.start(); micStatus = if (micActive) "слушаю" else "ошибка"
-                } else {
-                    requestMicPermission {
-                        micActive = micListener.start(); micStatus = if (micActive) "слушаю" else "ошибка"
-                    }
                 }
-            },
-            motionActive = motionActive,
-            motionLevel = motionLevel,
-            motionStatus = motionStatus,
-            onToggleMotion = {
-                if (motionActive) {
-                    motionListener.stop(); motionActive = false; motionStatus = "выкл"
-                } else if (motionListener.hasSensor()) {
-                    motionActive = motionListener.start(); motionStatus = if (motionActive) "слушаю" else "ошибка"
-                } else {
-                    motionStatus = "нет датчика"
-                }
-            },
-            hardcore = hardcore,
-            onHardcoreChange = { hardcore = it; eng.hardcore = it },
-            multiplayerHint = if (isMultiplayer) {
-                if (mpRole == MpRole.HOST) "Bluetooth: ты хост, гонка синхронизируется на все телефоны (${eng.racers.size} игроков)" else "Bluetooth: ты подключился, поле зеркалится с телефона хоста"
-            } else null,
-        )
+            }
+        }
+        val onToggleMotion: () -> Unit = {
+            if (motionActive) {
+                motionListener.stop(); motionActive = false; motionStatus = "выкл"
+            } else if (motionListener.hasSensor()) {
+                motionActive = motionListener.start(); motionStatus = if (motionActive) "слушаю" else "ошибка"
+            } else {
+                motionStatus = "нет датчика"
+            }
+        }
+        val onHardcoreChange: (Boolean) -> Unit = { hardcore = it; eng.hardcore = it }
+
+        if (isMultiplayer && isStitchedRace) {
+            StitchedRaceScreen(
+                engine = eng,
+                mySegmentIndex = mySegmentIndex,
+                totalSegments = totalSegments,
+                onStart = { eng.start() },
+                onBackToTrack = onBackToTrack,
+                micActive = micActive, micLevel = micLevel, micStatus = micStatus, onToggleMic = onToggleMic,
+                motionActive = motionActive, motionLevel = motionLevel, motionStatus = motionStatus, onToggleMotion = onToggleMotion,
+                hardcore = hardcore, onHardcoreChange = onHardcoreChange,
+            )
+        } else {
+            RaceScreen(
+                engine = eng,
+                onStart = { eng.start() },
+                onBackToTrack = onBackToTrack,
+                micActive = micActive, micLevel = micLevel, micStatus = micStatus, onToggleMic = onToggleMic,
+                motionActive = motionActive, motionLevel = motionLevel, motionStatus = motionStatus, onToggleMotion = onToggleMotion,
+                hardcore = hardcore, onHardcoreChange = onHardcoreChange,
+                multiplayerHint = if (isMultiplayer) {
+                    if (mpRole == MpRole.HOST) "Bluetooth: ты хост, гонка синхронизируется на все телефоны (${eng.racers.size} игроков)" else "Bluetooth: ты подключился, поле зеркалится с телефона хоста"
+                } else null,
+            )
+        }
         return
     }
 
@@ -403,6 +426,7 @@ fun AppRoot(
                 onSolo = {
                     val track = trackById(save.trackId ?: return@TrackScreen)
                     isMultiplayer = false
+                    isStitchedRace = false
                     mpRole = MpRole.NONE
                     engine = buildSoloEngine(track)
                     screen = Screen.RACE
@@ -413,6 +437,7 @@ fun AppRoot(
                     peerIdToRacerIndex = emptyMap()
                     myAssignedIndex = null
                     remoteRoster = emptyList()
+                    stitchedModeChoice = false
                     screen = Screen.MULTIPLAYER
                 },
             )
@@ -441,6 +466,8 @@ fun AppRoot(
                 },
                 onDeviceSelected = { device -> btLink.connectTo(device) },
                 onRescan = { btLink.startDiscovery() },
+                stitchedMode = stitchedModeChoice,
+                onStitchedModeChange = { stitchedModeChoice = it },
                 onStartRace = {
                     btLink.stopAcceptingNewPeers()
                     val orderedPeers = btLink.hostPeers.filter { remoteHellos.containsKey(it.id) }.sortedBy { it.id }
@@ -454,9 +481,12 @@ fun AppRoot(
                     orderedPeers.forEachIndexed { i, peer -> btLink.sendToPeer(peer.id, RaceProtocol.welcome(i + 1)) }
                     btLink.sendToAll(RaceProtocol.roster(fullRoster))
                     btLink.sendToAll(RaceProtocol.track(track.id))
-                    btLink.sendToAll(RaceProtocol.start())
+                    btLink.sendToAll(RaceProtocol.start(stitchedModeChoice))
                     val eng = RaceEngine(track, racers)
                     isMultiplayer = true
+                    isStitchedRace = stitchedModeChoice
+                    mySegmentIndex = 0
+                    totalSegments = racers.size
                     engine = eng
                     eng.start()
                     screen = Screen.RACE
@@ -499,9 +529,9 @@ fun AppRoot(
 
         Spacer(Modifier.height(16.dp))
         Text(
-            "Прототип механик, собранный как настоящее Android-приложение. Bluetooth-турнир (общее поле на всех экранах, до " +
-                "${com.robutpit.roachrace.bluetooth.MAX_PEERS + 1} игроков) реализован через классический RFCOMM. Режим «сложить " +
-                "телефоны в одно большое поле» пока не реализован — есть только общее поле на всех экранах сразу.",
+            "Прототип механик, собранный как настоящее Android-приложение. Bluetooth-турнир до " +
+                "${com.robutpit.roachrace.bluetooth.MAX_PEERS + 1} игроков реализован через классический RFCOMM, в двух режимах: " +
+                "общее поле на всех экранах сразу, и «сложить телефоны в ряд» — у каждого свой участок трассы.",
             fontSize = 10.sp, color = TextDim, lineHeight = 14.sp,
         )
     }

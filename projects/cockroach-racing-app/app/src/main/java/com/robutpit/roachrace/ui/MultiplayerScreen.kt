@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +36,8 @@ fun MultiplayerScreen(
     onPickJoin: () -> Unit,
     onDeviceSelected: (BluetoothDevice) -> Unit,
     onRescan: () -> Unit,
+    stitchedMode: Boolean,
+    onStitchedModeChange: (Boolean) -> Unit,
     onStartRace: () -> Unit,
     onRetry: () -> Unit,
     onBack: () -> Unit,
@@ -55,7 +60,7 @@ fun MultiplayerScreen(
                         SecondaryButton("Присоединиться", onClick = onPickJoin)
                     }
                 }
-                MpRole.HOST -> HostPanel(state, hostPeerNames, onStartRace, onRetry)
+                MpRole.HOST -> HostPanel(state, hostPeerNames, stitchedMode, onStitchedModeChange, onStartRace, onRetry)
                 MpRole.JOIN -> JoinPanel(state, bondedDevices, discoveredDevices, onDeviceSelected, onRescan, onRetry)
             }
         }
@@ -64,7 +69,14 @@ fun MultiplayerScreen(
 }
 
 @Composable
-private fun HostPanel(state: LinkState, peerNames: List<String>, onStartRace: () -> Unit, onRetry: () -> Unit) {
+private fun HostPanel(
+    state: LinkState,
+    peerNames: List<String>,
+    stitchedMode: Boolean,
+    onStitchedModeChange: (Boolean) -> Unit,
+    onStartRace: () -> Unit,
+    onRetry: () -> Unit,
+) {
     when (state) {
         is LinkState.Failed -> Column {
             Text("Ошибка: ${state.reason}", fontSize = 12.sp, color = Red, modifier = Modifier.padding(bottom = 8.dp))
@@ -80,6 +92,19 @@ private fun HostPanel(state: LinkState, peerNames: List<String>, onStartRace: ()
                 }
                 Spacer(Modifier.height(10.dp))
             }
+
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 4.dp)) {
+                Checkbox(checked = stitchedMode, onCheckedChange = onStitchedModeChange, colors = CheckboxDefaults.colors(checkedColor = Amber))
+                Text("Сложить экраны в одно длинное поле", fontSize = 12.sp, color = TextMain)
+            }
+            if (stitchedMode) {
+                Text(
+                    "Перед стартом расставьте телефоны в ряд слева направо в том же порядке, в котором подключались: " +
+                        "хост (ты) — самый левый, дальше по очереди присоединения. Каждый увидит только свой участок трассы.",
+                    fontSize = 10.sp, color = Amber, modifier = Modifier.padding(bottom = 10.dp),
+                )
+            }
+
             PrimaryButton(
                 if (peerNames.isEmpty()) "Ждём хотя бы одного игрока…" else "🏁 Начать гонку с ${peerNames.size} игроками",
                 enabled = peerNames.isNotEmpty(),
