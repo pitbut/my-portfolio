@@ -17,6 +17,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.util.UUID
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * Two-phone "individual mode" link over classic Bluetooth RFCOMM: one phone
@@ -58,6 +59,8 @@ class BtRaceLink(private val appContext: Context) {
     private var output: OutputStream? = null
     private var readThread: Thread? = null
     private var acceptThread: Thread? = null
+    private var writeThread: Thread? = null
+    private val writeQueue = LinkedBlockingQueue<String>()
     @Volatile private var closing = false
 
     private val discoveryReceiver = object : BroadcastReceiver() {
@@ -176,19 +179,39 @@ class BtRaceLink(private val appContext: Context) {
             }
         }
         readThread?.start()
+
+        // Writing to a BluetoothSocket is a blocking I/O call — during a race
+        // the host sends a state snapshot several times a second, so doing
+        // this on the caller's thread (Compose's main/UI thread) stalled the
+        // whole app and could tear down the connection. All actual socket
+        // writes now happen serially on this dedicated thread instead.
+        writeQueue.clear()
+        writeThread = Thread {
+            try {
+                while (!closing) {
+                    val line = writeQueue.take()
+                    if (closing) break
+                    output?.write((line + "\n").toByteArray(Charsets.UTF_8))
+                    output?.flush()
+                }
+            } catch (_: InterruptedException) {
+            } catch (e: IOException) {
+                if (!closing) state.value = LinkState.Failed("Соединение прервано при отправке")
+            }
+        }
+        writeThread?.start()
     }
 
+    /** Non-blocking: queues the line for the writer thread instead of doing
+     * socket I/O on the calling thread. */
     fun send(line: String) {
-        val out = output ?: return
-        try {
-            out.write((line + "\n").toByteArray(Charsets.UTF_8))
-            out.flush()
-        } catch (_: IOException) {
-        }
+        if (output == null) return
+        writeQueue.offer(line)
     }
 
     fun close() {
         closing = true
+        writeThread?.interrupt()
         try { serverSocket?.close() } catch (_: IOException) {}
         try { socket?.close() } catch (_: IOException) {}
         if (receiverRegistered) {
@@ -198,6 +221,7 @@ class BtRaceLink(private val appContext: Context) {
         stopDiscovery()
         socket = null
         output = null
+        writeQueue.clear()
         state.value = LinkState.Idle
     }
 }

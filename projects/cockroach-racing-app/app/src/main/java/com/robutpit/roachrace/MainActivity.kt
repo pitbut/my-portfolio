@@ -200,7 +200,7 @@ fun AppRoot(
 
     fun buildSoloEngine(track: Track): RaceEngine {
         val playerBreed = save.breed ?: Breed.BLACK
-        val player = Racer("Ты", isPlayer = true, isRemote = false, breed = playerBreed, colorLong = colorById(save.colorId).colorLong, levels = save.levels)
+        val player = Racer(save.displayName(), isPlayer = true, isRemote = false, breed = playerBreed, colorLong = colorById(save.colorId).colorLong, levels = save.levels)
         val botNames = listOf("Сосед по опенспейсу", "Бухгалтерия", "HR-чемпион")
         val usedColors = ROACH_COLORS.filter { it.id != save.colorId }
         val bots = (0 until 3).map { i ->
@@ -229,7 +229,7 @@ fun AppRoot(
                 levels = hostHello?.levels ?: Levels(),
             )
             val meRacer = Racer(
-                "Ты", isPlayer = true, isRemote = true,
+                save.displayName(), isPlayer = true, isRemote = true,
                 breed = save.breed ?: Breed.BLACK, colorLong = colorById(save.colorId).colorLong, levels = save.levels,
             )
             val eng = RaceEngine(track, listOf(hostRacer, meRacer))
@@ -258,7 +258,7 @@ fun AppRoot(
         val st = btLink.state.value
         if (st is LinkState.Connected && !helloSent) {
             helloSent = true
-            btLink.send(RaceProtocol.hello("Игрок", save.breed ?: Breed.BLACK, colorById(save.colorId).colorLong, save.levels))
+            btLink.send(RaceProtocol.hello(save.displayName(), save.breed ?: Breed.BLACK, colorById(save.colorId).colorLong, save.levels))
         }
         if (st !is LinkState.Connected) helloSent = false
     }
@@ -364,6 +364,7 @@ fun AppRoot(
                 save = save,
                 onBreed = { persist(save.copy(breed = it)) },
                 onColor = { persist(save.copy(colorId = it)) },
+                onName = { persist(save.copy(name = it)) },
                 onConfirm = { screen = Screen.TRAIN },
             )
             Screen.TRAIN -> TrainGymScreen(
@@ -421,7 +422,7 @@ fun AppRoot(
                     val hello = remoteHello ?: return@MultiplayerScreen
                     val track = trackById(save.trackId ?: "table")
                     val hostRacer = Racer(
-                        "Ты", isPlayer = true, isRemote = false,
+                        save.displayName(), isPlayer = true, isRemote = false,
                         breed = save.breed ?: Breed.BLACK, colorLong = colorById(save.colorId).colorLong, levels = save.levels,
                     )
                     val joinRacer = Racer(

@@ -75,7 +75,8 @@ fun RoachBadge(save: SaveState) {
         RoachPreview(44, Color(colorById(save.colorId).colorLong))
         Spacer(Modifier.width(10.dp))
         Column {
-            Text(breed.displayName, fontWeight = FontWeight.SemiBold, color = TextMain)
+            val title = if (save.name.isBlank()) breed.displayName else "${save.name} · ${breed.displayName}"
+            Text(title, fontWeight = FontWeight.SemiBold, color = TextMain)
             Text(
                 "Скорость ${save.levels.speed} · Выносливость ${save.levels.stamina} · Стресс ${save.levels.stress} · Сытость ${save.satiety}%",
                 fontSize = 11.sp, color = TextDim,
@@ -120,8 +121,25 @@ fun SecondaryButton(text: String, modifier: Modifier = Modifier, onClick: () -> 
 }
 
 @Composable
-fun SelectScreen(save: SaveState, onBreed: (Breed) -> Unit, onColor: (String) -> Unit, onConfirm: () -> Unit) {
+fun SelectScreen(save: SaveState, onBreed: (Breed) -> Unit, onColor: (String) -> Unit, onName: (String) -> Unit, onConfirm: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        CardBox {
+            Text("Имя таракана", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = TextMain)
+            Text("Необязательно — без имени будет называться по породе.", fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(bottom = 10.dp))
+            OutlinedTextField(
+                value = save.name,
+                onValueChange = { if (it.length <= 16) onName(it) },
+                placeholder = { Text(save.breed?.displayName ?: "Таракан", color = TextDim) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = TextMain, unfocusedTextColor = TextMain,
+                    focusedBorderColor = Amber, unfocusedBorderColor = LineColor,
+                    cursorColor = Amber, focusedContainerColor = BgFaint, unfocusedContainerColor = BgFaint,
+                ),
+            )
+        }
+
         CardBox {
             Text("Выбери породу", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = TextMain)
             Text("Порода задаёт базовые характеристики, тренировка меняет их дальше.", fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(bottom = 10.dp))
