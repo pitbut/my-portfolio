@@ -8,3 +8,14 @@ captures/
 .externalNativeBuild/
 .cxx/
 .kotlin/
+
+# Release signing secrets — never commit these. See PUBLISHING.md.
+keystore-DO-NOT-COMMIT/
+*.jks
+*.keystore
+keystore.properties
+
+# Signed release build outputs — regenerate from the keystore instead of
+# tracking binaries in git; delivered directly to the developer instead.
+store/*.apk
+store/*.aab

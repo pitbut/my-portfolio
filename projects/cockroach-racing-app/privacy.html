@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Тараканьи бега — политика конфиденциальности</title>
+<style>
+  :root{
+    --bg-0:#14120f; --card:#2b261e; --bg-2:#26221b;
+    --amber:#e0a458; --amber-dark:#a97a3c;
+    --text:#f1ead9; --text-dim:#b3a892; --line:#3d362a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% -10%, #3a2f1e 0%, transparent 55%),
+      radial-gradient(circle at 100% 10%, #24301f 0%, transparent 45%),
+      var(--bg-0);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding-bottom:50px;
+  }
+  a{color:var(--amber);}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 18px;}
+  .back-home{
+    display:inline-block;margin-bottom:14px;font-size:.8rem;color:var(--text-dim);
+    text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:20px;
+  }
+  .back-home:hover{color:var(--amber);border-color:var(--amber-dark);}
+  h1{font-size:1.5rem;margin:6px 0 4px;}
+  .updated{color:var(--text-dim);margin:0 0 20px;font-size:.85rem;}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:18px 20px;margin-bottom:16px;
+  }
+  .card h2{margin:0 0 8px;font-size:1.05rem;color:var(--amber);}
+  .card p, .card li{color:var(--text-dim);font-size:.9rem;line-height:1.6;}
+  .card ul{margin:0;padding-left:20px;}
+  code{background:var(--bg-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:.85em;color:var(--text);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-home" href="index.html">← к странице приложения</a>
+  <h1>🪳 Тараканьи бега — политика конфиденциальности</h1>
+  <p class="updated">Действует с 30 августа 2026 года</p>
+
+  <div class="card">
+    <h2>Коротко</h2>
+    <p>Приложение не собирает, не хранит и не передаёт куда-либо личные данные. Всё, что оно делает с микрофоном, Bluetooth и датчиками телефона, происходит только локально на устройстве, во время игры, и нигде не сохраняется за пределами вашего телефона.</p>
+  </div>
+
+  <div class="card">
+    <h2>Какие разрешения запрашивает приложение и зачем</h2>
+    <ul>
+      <li><b>Микрофон (<code>RECORD_AUDIO</code>)</b> — используется только во время гонки, чтобы определить громкий звук (хлопок, крик) и напугать таракана соперника. Аудио не записывается, не сохраняется и никуда не отправляется — приложение измеряет только громкость в реальном времени и тут же забывает её.</li>
+      <li><b>Bluetooth (<code>BLUETOOTH_CONNECT</code>, <code>BLUETOOTH_SCAN</code>, <code>BLUETOOTH_ADVERTISE</code>)</b> — нужен только для прямого подключения телефонов друг к другу для совместной игры (без интернета и без серверов). Игровые данные (позиции тараканов на трассе) передаются напрямую между телефонами игроков и никуда больше.</li>
+      <li><b>Акселерометр</b> — не требует отдельного разрешения в Android; используется, чтобы почувствовать удар/стук по столу во время гонки.</li>
+      <li><b>Вибрация (<code>VIBRATE</code>)</b> — для игровых эффектов на самом устройстве.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Что хранится на телефоне</h2>
+    <p>Прогресс игры (порода и имя таракана, уровни характеристик, статистика побед, история тренировок) сохраняется только локально на вашем телефоне и не покидает его. Приложение не использует аналитику, рекламные SDK или сторонние трекеры.</p>
+  </div>
+
+  <div class="card">
+    <h2>Данные третьих лиц</h2>
+    <p>Приложение не передаёт никакие данные третьим лицам, потому что оно ни с кем не соединяется через интернет — вся сетевая активность ограничена прямым Bluetooth-соединением между телефонами играющих рядом людей.</p>
+  </div>
+
+  <div class="card">
+    <h2>Дети</h2>
+    <p>Приложение не собирает данные ни от кого, включая детей, поскольку не собирает данные вообще.</p>
+  </div>
+
+  <div class="card">
+    <h2>Изменения политики</h2>
+    <p>Если политика изменится, обновлённая версия будет опубликована на этой же странице с новой датой.</p>
+  </div>
+
+  <div class="card">
+    <h2>Контакты</h2>
+    <p>По вопросам — через страницу проекта в портфолио: <a href="https://www.robutpit.com/">www.robutpit.com</a>.</p>
+  </div>
+</div>
+</body>
+</html>

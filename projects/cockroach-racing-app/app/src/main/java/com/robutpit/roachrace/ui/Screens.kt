@@ -21,7 +21,7 @@ import com.robutpit.roachrace.data.SaveState
 import com.robutpit.roachrace.model.*
 import com.robutpit.roachrace.ui.theme.*
 
-enum class Screen { SELECT, TRAIN, TRACK, MULTIPLAYER, RACE, RESULTS, TOURNAMENT }
+enum class Screen { SELECT, TRAIN, TRACK, MULTIPLAYER, RACE, RESULTS, TOURNAMENT, BREED_STATS }
 
 @Composable
 fun StepNav(current: Screen, canGoTrain: Boolean, canGoTrack: Boolean, canGoRace: Boolean, canGoResults: Boolean, onNav: (Screen) -> Unit) {
@@ -273,7 +273,7 @@ fun TrackScreen(selectedTrackId: String?, onPick: (String) -> Unit, onSolo: () -
             }
         }
         PrimaryButton("Гонка соло (3 бота) →", modifier = Modifier.fillMaxWidth(), enabled = selectedTrackId != null, onClick = onSolo)
-        SecondaryButton("🔵 Гонка по Bluetooth вдвоём →", modifier = Modifier.fillMaxWidth(), onClick = onMultiplayer)
+        SecondaryButton("🔵 Гонка по Bluetooth →", modifier = Modifier.fillMaxWidth(), onClick = onMultiplayer)
     }
 }
 
@@ -286,6 +286,7 @@ fun ResultsScreen(
     onTrainMore: () -> Unit,
     showTournamentButton: Boolean = false,
     onShowTournament: () -> Unit = {},
+    onShowBreedStats: () -> Unit = {},
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         CardBox {
@@ -320,6 +321,8 @@ fun ResultsScreen(
                 PrimaryButton("🏆 Турнирная таблица →", modifier = Modifier.fillMaxWidth(), onClick = onShowTournament)
                 Spacer(Modifier.height(10.dp))
             }
+            SecondaryButton("📊 Статистика побед по видам →", modifier = Modifier.fillMaxWidth(), onClick = onShowBreedStats)
+            Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 PrimaryButton("Другая трасса", onClick = onAnotherTrack)
                 SecondaryButton("Ещё потренировать", onClick = onTrainMore)

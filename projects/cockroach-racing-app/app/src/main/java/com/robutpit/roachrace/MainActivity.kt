@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.robutpit.roachrace.bluetooth.BtRaceLink
 import com.robutpit.roachrace.bluetooth.LinkState
 import com.robutpit.roachrace.bluetooth.RaceProtocol
+import com.robutpit.roachrace.data.BreedStatsRepository
 import com.robutpit.roachrace.data.SaveRepository
 import com.robutpit.roachrace.data.SaveState
 import com.robutpit.roachrace.engine.RaceEngine
@@ -114,6 +115,7 @@ fun AppRoot(
         save = newSave
         repo.save(newSave)
     }
+    val breedStatsRepo = remember { BreedStatsRepository(context) }
 
     // Ticks once a second so satiety decay / cooldown countdowns / the
     // starvation check visibly move even though nothing else changed —
@@ -332,6 +334,7 @@ fun AppRoot(
                 btLink.sendToAll(RaceProtocol.state(eng))
             }
             if (eng.done.value) {
+                breedStatsRepo.recordRaceResult(eng.racers)
                 if (isMultiplayer && mpRole == MpRole.HOST) {
                     btLink.sendToAll(RaceProtocol.state(eng))
                     if (tournamentMode) {
@@ -587,8 +590,13 @@ fun AppRoot(
                     },
                     showTournamentButton = isMultiplayer && tournamentMode,
                     onShowTournament = { screen = Screen.TOURNAMENT },
+                    onShowBreedStats = { screen = Screen.BREED_STATS },
                 )
             }
+            Screen.BREED_STATS -> BreedStatsScreen(
+                stats = breedStatsRepo.loadAll(),
+                onBack = { screen = Screen.RESULTS },
+            )
             Screen.TOURNAMENT -> TournamentScreen(
                 entries = tournamentBoard,
                 onNextHeat = {
