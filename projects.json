@@ -475,5 +475,18 @@
       "Мотивация",
       "JavaScript"
     ]
+  },
+  {
+    "id": "cockroach-racing",
+    "title": "🪳 Тараканьи бега",
+    "description": "Прототип механик мобильной игры: своя порода и окрас таракана, кормёжка и тренировка, выбор трассы, «живой» хаотичный бег и реакция на крик в микрофон или стук по столу.",
+    "image": "projects/cockroach-racing/preview.svg",
+    "link": "projects/cockroach-racing/index.html",
+    "date": "2026-08-30",
+    "tags": [
+      "Игра",
+      "JavaScript",
+      "Прототип"
+    ]
   }
 ]
