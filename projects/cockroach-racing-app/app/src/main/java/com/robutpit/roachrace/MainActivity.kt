@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -119,7 +118,18 @@ fun AppRoot(
     var engine by remember { mutableStateOf<RaceEngine?>(null) }
     var isMultiplayer by remember { mutableStateOf(false) }
     var mpRole by remember { mutableStateOf(MpRole.NONE) }
-    var remoteHello by remember { mutableStateOf<RaceProtocol.Hello?>(null) }
+
+    // Host-side lobby bookkeeping: each joiner's HELLO as it arrives, keyed by
+    // their (stable, gap-tolerant) connection id.
+    var remoteHellos by remember { mutableStateOf<Map<Int, RaceProtocol.Hello>>(emptyMap()) }
+    // Set once the race actually starts, mapping a joiner's connection id to
+    // the *final* contiguous racer index it was assigned (these can differ if
+    // someone connected then left before the host pressed start).
+    var peerIdToRacerIndex by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
+
+    // Join-side: who am I in the roster, and what does the whole roster look like.
+    var myAssignedIndex by remember { mutableStateOf<Int?>(null) }
+    var remoteRoster by remember { mutableStateOf<List<RaceProtocol.Hello>>(emptyList()) }
     var helloSent by remember { mutableStateOf(false) }
 
     val btLink = remember { BtRaceLink(context.applicationContext) }
@@ -133,12 +143,11 @@ fun AppRoot(
 
     fun spookFromLocalSensor(sourceLabel: String) {
         val eng = engine ?: return
+        eng.hardcore = hardcore
         if (!isMultiplayer) {
-            eng.hardcore = hardcore
-            eng.spookRandomRacer(sourceLabel)
+            eng.spookRandomRacer(sourceLabel, sourceIndex = 0)
         } else if (mpRole == MpRole.HOST) {
-            eng.hardcore = hardcore
-            eng.spookRandomRacer(sourceLabel, targetIdOverride = 1)
+            eng.spookRandomRacer(sourceLabel, sourceIndex = 0)
         } else if (mpRole == MpRole.JOIN) {
             btLink.send(RaceProtocol.spook(sourceLabel))
         }
@@ -214,25 +223,31 @@ fun AppRoot(
         return RaceEngine(track, listOf(player) + bots)
     }
 
-    fun handleIncomingLine(line: String) {
-        RaceProtocol.parseHello(line)?.let { hello -> remoteHello = hello; return }
+    fun handleIncomingLine(peerId: Int, line: String) {
+        RaceProtocol.parseHello(line)?.let { hello ->
+            if (mpRole == MpRole.HOST) remoteHellos = remoteHellos + (peerId to hello)
+            return
+        }
+        RaceProtocol.parseWelcome(line)?.let { idx ->
+            if (mpRole == MpRole.JOIN) myAssignedIndex = idx
+            return
+        }
+        RaceProtocol.parseRoster(line)?.let { roster ->
+            if (mpRole == MpRole.JOIN) remoteRoster = roster
+            return
+        }
         RaceProtocol.parseTrack(line)?.let { trackId ->
             if (mpRole == MpRole.JOIN) persist(save.copy(trackId = trackId))
             return
         }
         if (line == RaceProtocol.start() && mpRole == MpRole.JOIN) {
-            val hostHello = remoteHello
+            val myIdx = myAssignedIndex
+            if (myIdx == null || remoteRoster.isEmpty()) return
             val track = trackById(save.trackId ?: "table")
-            val hostRacer = Racer(
-                hostHello?.name ?: "Хост", isPlayer = false, isRemote = true,
-                breed = hostHello?.breed ?: Breed.BLACK, colorLong = hostHello?.colorLong ?: 0xFFB5541EL,
-                levels = hostHello?.levels ?: Levels(),
-            )
-            val meRacer = Racer(
-                save.displayName(), isPlayer = true, isRemote = true,
-                breed = save.breed ?: Breed.BLACK, colorLong = colorById(save.colorId).colorLong, levels = save.levels,
-            )
-            val eng = RaceEngine(track, listOf(hostRacer, meRacer))
+            val racers = remoteRoster.mapIndexed { i, h ->
+                Racer(h.name, isPlayer = (i == myIdx), isRemote = true, breed = h.breed, colorLong = h.colorLong, levels = h.levels)
+            }
+            val eng = RaceEngine(track, racers)
             eng.start()
             engine = eng
             isMultiplayer = true
@@ -246,17 +261,21 @@ fun AppRoot(
         }
         RaceProtocol.parseSpook(line)?.let { label ->
             if (mpRole == MpRole.HOST) {
-                engine?.spookRandomRacer("Соперник: $label", targetIdOverride = 0)
+                val racerIndex = peerIdToRacerIndex[peerId] ?: return
+                engine?.spookRandomRacer("Игрок $racerIndex: $label", sourceIndex = racerIndex)
             }
             return
         }
     }
 
-    btLink.onLine = { line -> handleIncomingLine(line) }
+    btLink.onLine = { peerId, line -> handleIncomingLine(peerId, line) }
 
-    LaunchedEffect(btLink.state.value) {
+    // Joiner sends its own HELLO once connected, so the host can add it to
+    // the roster. The host doesn't need this — it builds its own racer entry
+    // from local `save` directly, no round trip needed.
+    LaunchedEffect(btLink.state.value, mpRole) {
         val st = btLink.state.value
-        if (st is LinkState.Connected && !helloSent) {
+        if (mpRole == MpRole.JOIN && st is LinkState.Connected && !helloSent) {
             helloSent = true
             btLink.send(RaceProtocol.hello(save.displayName(), save.breed ?: Breed.BLACK, colorById(save.colorId).colorLong, save.levels))
         }
@@ -264,8 +283,8 @@ fun AppRoot(
     }
 
     // Main simulation loop: advances the active race engine every frame and,
-    // when hosting a Bluetooth race, streams a state snapshot to the joined
-    // phone a few times a second.
+    // when hosting a Bluetooth race, streams a state snapshot to every
+    // connected phone a few times a second.
     LaunchedEffect(engine) {
         val eng = engine ?: return@LaunchedEffect
         var frame = 0
@@ -277,10 +296,10 @@ fun AppRoot(
             eng.step(dt)
             frame++
             if (isMultiplayer && mpRole == MpRole.HOST && frame % 3 == 0) {
-                btLink.send(RaceProtocol.state(eng))
+                btLink.sendToAll(RaceProtocol.state(eng))
             }
             if (eng.done.value) {
-                if (isMultiplayer && mpRole == MpRole.HOST) btLink.send(RaceProtocol.state(eng))
+                if (isMultiplayer && mpRole == MpRole.HOST) btLink.sendToAll(RaceProtocol.state(eng))
                 screen = Screen.RESULTS
                 break
             }
@@ -326,7 +345,7 @@ fun AppRoot(
             hardcore = hardcore,
             onHardcoreChange = { hardcore = it; eng.hardcore = it },
             multiplayerHint = if (isMultiplayer) {
-                if (mpRole == MpRole.HOST) "Bluetooth: ты хост, гонка синхронизируется на оба телефона" else "Bluetooth: ты подключился, поле зеркалится с телефона хоста"
+                if (mpRole == MpRole.HOST) "Bluetooth: ты хост, гонка синхронизируется на все телефоны (${eng.racers.size} игроков)" else "Bluetooth: ты подключился, поле зеркалится с телефона хоста"
             } else null,
         )
         return
@@ -390,13 +409,17 @@ fun AppRoot(
                 },
                 onMultiplayer = {
                     mpRole = MpRole.NONE
-                    remoteHello = null
+                    remoteHellos = emptyMap()
+                    peerIdToRacerIndex = emptyMap()
+                    myAssignedIndex = null
+                    remoteRoster = emptyList()
                     screen = Screen.MULTIPLAYER
                 },
             )
             Screen.MULTIPLAYER -> MultiplayerScreen(
                 role = mpRole,
                 state = btLink.state.value,
+                hostPeerNames = btLink.hostPeers.map { it.displayName },
                 bondedDevices = btLink.bondedDevices(),
                 discoveredDevices = btLink.discoveredDevices,
                 onPickHost = {
@@ -418,28 +441,29 @@ fun AppRoot(
                 },
                 onDeviceSelected = { device -> btLink.connectTo(device) },
                 onRescan = { btLink.startDiscovery() },
-                onProceed = {
-                    val hello = remoteHello ?: return@MultiplayerScreen
+                onStartRace = {
+                    btLink.stopAcceptingNewPeers()
+                    val orderedPeers = btLink.hostPeers.filter { remoteHellos.containsKey(it.id) }.sortedBy { it.id }
                     val track = trackById(save.trackId ?: "table")
-                    val hostRacer = Racer(
-                        save.displayName(), isPlayer = true, isRemote = false,
-                        breed = save.breed ?: Breed.BLACK, colorLong = colorById(save.colorId).colorLong, levels = save.levels,
-                    )
-                    val joinRacer = Racer(
-                        hello.name, isPlayer = false, isRemote = false,
-                        breed = hello.breed, colorLong = hello.colorLong, levels = hello.levels,
-                    )
-                    val eng = RaceEngine(track, listOf(hostRacer, joinRacer))
+                    val hostHello = RaceProtocol.Hello(save.displayName(), save.breed ?: Breed.BLACK, colorById(save.colorId).colorLong, save.levels)
+                    val fullRoster = listOf(hostHello) + orderedPeers.map { remoteHellos.getValue(it.id) }
+                    val racers = fullRoster.mapIndexed { i, h ->
+                        Racer(h.name, isPlayer = (i == 0), isRemote = false, breed = h.breed, colorLong = h.colorLong, levels = h.levels)
+                    }
+                    peerIdToRacerIndex = orderedPeers.mapIndexed { i, peer -> peer.id to (i + 1) }.toMap()
+                    orderedPeers.forEachIndexed { i, peer -> btLink.sendToPeer(peer.id, RaceProtocol.welcome(i + 1)) }
+                    btLink.sendToAll(RaceProtocol.roster(fullRoster))
+                    btLink.sendToAll(RaceProtocol.track(track.id))
+                    btLink.sendToAll(RaceProtocol.start())
+                    val eng = RaceEngine(track, racers)
                     isMultiplayer = true
                     engine = eng
-                    btLink.send(RaceProtocol.track(track.id))
-                    btLink.send(RaceProtocol.start())
                     eng.start()
                     screen = Screen.RACE
                 },
                 onRetry = {
                     btLink.close()
-                    remoteHello = null
+                    remoteHellos = emptyMap()
                     mpRole = MpRole.NONE
                 },
                 onBack = {
@@ -475,9 +499,9 @@ fun AppRoot(
 
         Spacer(Modifier.height(16.dp))
         Text(
-            "Прототип механик, собранный как настоящее Android-приложение. Bluetooth-режим вдвоём (общее поле на обоих экранах) " +
-                "реализован через классический RFCOMM и проверен по коду, но не тестировался на живой паре телефонов — " +
-                "первый запуск считайте бета-тестом. Режим «сложить телефоны в одно большое поле» пока не реализован.",
+            "Прототип механик, собранный как настоящее Android-приложение. Bluetooth-турнир (общее поле на всех экранах, до " +
+                "${com.robutpit.roachrace.bluetooth.MAX_PEERS + 1} игроков) реализован через классический RFCOMM. Режим «сложить " +
+                "телефоны в одно большое поле» пока не реализован — есть только общее поле на всех экранах сразу.",
             fontSize = 10.sp, color = TextDim, lineHeight = 14.sp,
         )
     }

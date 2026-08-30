@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.robutpit.roachrace.bluetooth.LinkState
+import com.robutpit.roachrace.bluetooth.MAX_PEERS
 import com.robutpit.roachrace.bluetooth.deviceLabel
 import com.robutpit.roachrace.ui.theme.*
 
@@ -25,23 +26,25 @@ enum class MpRole { NONE, HOST, JOIN }
 fun MultiplayerScreen(
     role: MpRole,
     state: LinkState,
+    hostPeerNames: List<String>,
     bondedDevices: List<BluetoothDevice>,
     discoveredDevices: List<BluetoothDevice>,
     onPickHost: () -> Unit,
     onPickJoin: () -> Unit,
     onDeviceSelected: (BluetoothDevice) -> Unit,
     onRescan: () -> Unit,
-    onProceed: () -> Unit,
+    onStartRace: () -> Unit,
     onRetry: () -> Unit,
     onBack: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         CardBox {
-            Text("Bluetooth-гонка вдвоём", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = TextMain)
+            Text("Bluetooth-турнир", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = TextMain)
             Text(
-                "Сначала жми «Создать игру» на одном телефоне — он спросит разрешение стать видимым по Bluetooth на 5 минут, обязательно разреши. " +
-                    "Потом на втором телефоне жми «Присоединиться» и «🔍 Искать», пока хост не появится в списке. " +
-                    "Если телефоны уже спарены в системных настройках Bluetooth, хост появится сразу в «сопряжённых устройствах» — искать не нужно.",
+                "Один телефон создаёт игру — он же и хост. Остальные (до $MAX_PEERS человек) подключаются к нему. " +
+                    "Хост запросит разрешение стать видимым по Bluetooth на 5 минут — обязательно разреши. " +
+                    "Присоединяющиеся жмут «Присоединиться» и «🔍 Искать», пока хост не появится в списке " +
+                    "(если телефоны уже спарены в системных настройках Bluetooth — хост сразу в «сопряжённых устройствах»).",
                 fontSize = 11.sp, color = TextDim, modifier = Modifier.padding(top = 6.dp, bottom = 10.dp),
             )
 
@@ -52,7 +55,7 @@ fun MultiplayerScreen(
                         SecondaryButton("Присоединиться", onClick = onPickJoin)
                     }
                 }
-                MpRole.HOST -> HostPanel(state, onProceed, onRetry)
+                MpRole.HOST -> HostPanel(state, hostPeerNames, onStartRace, onRetry)
                 MpRole.JOIN -> JoinPanel(state, bondedDevices, discoveredDevices, onDeviceSelected, onRescan, onRetry)
             }
         }
@@ -61,18 +64,27 @@ fun MultiplayerScreen(
 }
 
 @Composable
-private fun HostPanel(state: LinkState, onProceed: () -> Unit, onRetry: () -> Unit) {
+private fun HostPanel(state: LinkState, peerNames: List<String>, onStartRace: () -> Unit, onRetry: () -> Unit) {
     when (state) {
-        is LinkState.Idle -> Text("Запуск…", fontSize = 12.sp, color = TextDim)
-        is LinkState.Listening -> Text("Ожидание подключения второго телефона…", fontSize = 12.sp, color = TextDim)
-        is LinkState.Connecting -> Text("Подключение…", fontSize = 12.sp, color = TextDim)
-        is LinkState.Connected -> Column {
-            Text("Подключено: ${state.peerName}", fontSize = 13.sp, color = Green, modifier = Modifier.padding(bottom = 8.dp))
-            PrimaryButton("Дальше → выбрать трассу и начать", onClick = onProceed)
-        }
         is LinkState.Failed -> Column {
             Text("Ошибка: ${state.reason}", fontSize = 12.sp, color = Red, modifier = Modifier.padding(bottom = 8.dp))
             SecondaryButton("Повторить", onClick = onRetry)
+        }
+        else -> Column {
+            if (peerNames.isEmpty()) {
+                Text("Ожидание подключений…", fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(bottom = 10.dp))
+            } else {
+                Text("Подключились (${peerNames.size}/$MAX_PEERS):", fontSize = 12.sp, color = Green, modifier = Modifier.padding(bottom = 6.dp))
+                peerNames.forEach { name ->
+                    Text("🪳 $name", fontSize = 13.sp, color = TextMain, modifier = Modifier.padding(vertical = 2.dp))
+                }
+                Spacer(Modifier.height(10.dp))
+            }
+            PrimaryButton(
+                if (peerNames.isEmpty()) "Ждём хотя бы одного игрока…" else "🏁 Начать гонку с ${peerNames.size} игроками",
+                enabled = peerNames.isNotEmpty(),
+                onClick = onStartRace,
+            )
         }
     }
 }
@@ -88,7 +100,7 @@ private fun JoinPanel(
 ) {
     when (state) {
         is LinkState.Connecting -> Text("Подключение…", fontSize = 12.sp, color = TextDim)
-        is LinkState.Connected -> Text("Подключено к ${state.peerName}. Ждём, когда хост выберет трассу и запустит гонку…", fontSize = 12.sp, color = Green)
+        is LinkState.Connected -> Text("Подключено к ${state.peerName}. Ждём, когда хост запустит гонку… (другие тоже могут ещё подключаться)", fontSize = 12.sp, color = Green)
         is LinkState.Failed -> Column {
             Text("Ошибка: ${state.reason}", fontSize = 12.sp, color = Red, modifier = Modifier.padding(bottom = 8.dp))
             SecondaryButton("Повторить поиск", onClick = onRetry)

@@ -37,18 +37,19 @@ class RaceEngine(
 
     /** Always leaves a visible trace in [log] — even when there is nobody left
      * to spook — so a mic/motion trigger is never silent: the player gets
-     * proof the sensor actually fired, whether or not it had an effect. */
-    fun spookRandomRacer(sourceLabel: String, targetIdOverride: Int? = null) {
-        val pool = racers.filter { !it.finished.value && (hardcore || !it.isPlayer) }
+     * proof the sensor actually fired, whether or not it had an effect.
+     * [sourceIndex] is the racer whose player made the noise — excluded from
+     * the target pool unless [hardcore] is on, so shouting never (accidentally)
+     * spooks your own roach. Works the same whether it's solo play (index 0),
+     * a 2-phone Bluetooth race, or a host relaying a joiner's mic/motion event
+     * in a bigger lobby — the pool logic doesn't care how many racers there are. */
+    fun spookRandomRacer(sourceLabel: String, sourceIndex: Int = -1) {
+        val pool = racers.withIndex().filter { (i, r) -> !r.finished.value && (hardcore || i != sourceIndex) }
         if (pool.isEmpty()) {
             log.add("$sourceLabel: сигнал услышан, но пугать уже некого — все финишировали")
             return
         }
-        val target = if (targetIdOverride != null && targetIdOverride < racers.size) {
-            racers[targetIdOverride]
-        } else {
-            pool[Random.nextInt(pool.size)]
-        }
+        val (_, target) = pool[Random.nextInt(pool.size)]
         val baseDur = 1.1f
         target.spookTimer.value = maxOf(target.spookTimer.value, baseDur / target.stressBase)
         target.wobbleTarget = if (Random.nextBoolean()) -1f else 1f

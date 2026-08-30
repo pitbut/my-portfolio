@@ -15,19 +15,20 @@ import androidx.compose.runtime.mutableStateOf
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
- * Two-phone "individual mode" link over classic Bluetooth RFCOMM: one phone
- * hosts (authoritative race simulation), the other joins and only renders
- * the state the host streams to it, so both screens show the same shared
- * field. This is real Android Bluetooth API usage, but it has only been
- * exercised in code review here — it has not been paired-tested on two
- * physical phones, so treat first runs as a beta and report anything odd.
+ * Bluetooth Classic RFCOMM link for the "individual mode" tournament: one
+ * phone hosts (authoritative race simulation), and any number of other
+ * phones join — a star topology, since RFCOMM has no direct joiner-to-joiner
+ * link. The host keeps accepting new connections (up to [MAX_PEERS]) until
+ * it starts the race, then streams state to everyone. This is real Android
+ * Bluetooth API usage, exercised in code review and on real hardware for
+ * the 2-phone case; 3+ phones is new and unverified — report anything odd.
  */
 private val APP_UUID: UUID = UUID.fromString("7a2c5b6e-2f36-4b7a-9b6d-3b2f6f0b7a11")
+const val MAX_PEERS = 5
 
 sealed class LinkState {
     data object Idle : LinkState()
@@ -35,6 +36,56 @@ sealed class LinkState {
     data object Connecting : LinkState()
     data class Connected(val peerName: String) : LinkState()
     data class Failed(val reason: String) : LinkState()
+}
+
+/** One connected peer, from the host's point of view. [id] is also that
+ * peer's assigned racer index (1..N; the host itself is always racer 0). */
+class HostPeer(val id: Int, val displayName: String, private val socket: BluetoothSocket, private val onLine: (Int, String) -> Unit, private val onFail: (Int) -> Unit) {
+    private val output = socket.outputStream
+    private val writeQueue = LinkedBlockingQueue<String>()
+    @Volatile private var closing = false
+    private var readThread: Thread? = null
+    private var writeThread: Thread? = null
+
+    fun start() {
+        readThread = Thread {
+            try {
+                val reader = BufferedReader(InputStreamReader(socket.inputStream))
+                while (!closing) {
+                    val line = reader.readLine() ?: break
+                    onLine(id, line)
+                }
+                if (!closing) onFail(id)
+            } catch (e: IOException) {
+                if (!closing) onFail(id)
+            }
+        }
+        writeThread = Thread {
+            try {
+                while (!closing) {
+                    val line = writeQueue.take()
+                    if (closing) break
+                    output.write((line + "\n").toByteArray(Charsets.UTF_8))
+                    output.flush()
+                }
+            } catch (_: InterruptedException) {
+            } catch (e: IOException) {
+                if (!closing) onFail(id)
+            }
+        }
+        readThread?.start()
+        writeThread?.start()
+    }
+
+    fun send(line: String) {
+        writeQueue.offer(line)
+    }
+
+    fun close() {
+        closing = true
+        writeThread?.interrupt()
+        try { socket.close() } catch (_: IOException) {}
+    }
 }
 
 @SuppressLint("MissingPermission")
@@ -50,18 +101,26 @@ class BtRaceLink(private val appContext: Context) {
     private val btManager = appContext.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
     val adapter: BluetoothAdapter? = btManager?.adapter
 
+    /** Idle/Listening/Failed while hosting; Connecting/Connected/Failed while joining. */
     val state = mutableStateOf<LinkState>(LinkState.Idle)
     val discoveredDevices = mutableStateListOf<BluetoothDevice>()
-    var onLine: ((String) -> Unit)? = null
+
+    /** Host-side: everyone currently connected, in join order. Empty when
+     * acting as a joiner (a joiner only ever talks to the host). */
+    val hostPeers = mutableStateListOf<HostPeer>()
+
+    /** line callback: (peerId, line). peerId is always 0 for a joiner's
+     * single connection to the host; on the host it's the sender's assigned
+     * racer index (1..N). */
+    var onLine: ((Int, String) -> Unit)? = null
 
     private var serverSocket: BluetoothServerSocket? = null
-    private var socket: BluetoothSocket? = null
-    private var output: OutputStream? = null
-    private var readThread: Thread? = null
     private var acceptThread: Thread? = null
-    private var writeThread: Thread? = null
-    private val writeQueue = LinkedBlockingQueue<String>()
-    @Volatile private var closing = false
+    @Volatile private var accepting = false
+    private var nextPeerId = 1
+
+    // Joiner-side single connection
+    private var joinPeer: HostPeer? = null
 
     private val discoveryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -107,121 +166,118 @@ class BtRaceLink(private val appContext: Context) {
         }
     }
 
+    /** Starts listening and keeps accepting new joiners (up to [MAX_PEERS])
+     * until [stopAcceptingNewPeers] is called — e.g. when the host presses
+     * "start race". Existing connections are unaffected by that call. */
     @SuppressLint("MissingPermission")
     fun startHosting() {
         val a = adapter ?: run { state.value = LinkState.Failed("Bluetooth недоступен"); return }
         if (!a.isEnabled) { state.value = LinkState.Failed("Bluetooth выключен"); return }
-        closing = false
+        hostPeers.clear()
+        nextPeerId = 1
+        accepting = true
         state.value = LinkState.Listening
         acceptThread = Thread {
             try {
                 val server = a.listenUsingInsecureRfcommWithServiceRecord("RoachRace", APP_UUID)
                 serverSocket = server
-                val s = server.accept(120_000)
-                serverSocket = null
-                try { server.close() } catch (_: IOException) {}
-                onConnected(s)
-            } catch (e: IOException) {
-                if (!closing) {
-                    val timedOut = e.message?.contains("time", ignoreCase = true) == true
-                    state.value = LinkState.Failed(
-                        if (timedOut) "Никто не подключился за 2 минуты — проверь, что на втором телефоне тоже включён Bluetooth и нажато «Присоединиться»"
-                        else (e.message ?: "Ошибка подключения"),
-                    )
+                while (accepting && hostPeers.size < MAX_PEERS) {
+                    val s = try {
+                        server.accept(120_000)
+                    } catch (e: IOException) {
+                        if (accepting) {
+                            val timedOut = e.message?.contains("time", ignoreCase = true) == true
+                            if (hostPeers.isEmpty()) {
+                                state.value = LinkState.Failed(
+                                    if (timedOut) "Никто не подключился за 2 минуты — проверь, что на втором телефоне тоже включён Bluetooth и нажато «Присоединиться»"
+                                    else (e.message ?: "Ошибка подключения"),
+                                )
+                            }
+                        }
+                        break
+                    }
+                    val id = nextPeerId++
+                    val name = try { s.remoteDevice.name ?: "Игрок $id" } catch (_: SecurityException) { "Игрок $id" }
+                    val peer = HostPeer(id, name, s, onLine = { pid, line -> onLine?.invoke(pid, line) }, onFail = { pid -> onPeerFailed(pid) })
+                    hostPeers.add(peer)
+                    peer.start()
+                    peer.send(RaceProtocol.welcome(id))
                 }
+            } catch (e: IOException) {
+                if (accepting && hostPeers.isEmpty()) state.value = LinkState.Failed(e.message ?: "Ошибка подключения")
             } catch (e: SecurityException) {
-                if (!closing) state.value = LinkState.Failed("Нет разрешения на Bluetooth — проверь разрешения приложения в настройках телефона")
+                if (accepting && hostPeers.isEmpty()) state.value = LinkState.Failed("Нет разрешения на Bluetooth — проверь разрешения приложения в настройках телефона")
             }
         }
         acceptThread?.start()
+    }
+
+    private fun onPeerFailed(id: Int) {
+        hostPeers.removeAll { it.id == id }
+    }
+
+    /** Stops accepting *new* joiners (called once the host starts the race)
+     * without touching peers already connected. */
+    fun stopAcceptingNewPeers() {
+        accepting = false
+        try { serverSocket?.close() } catch (_: IOException) {}
+    }
+
+    fun sendToAll(line: String) {
+        hostPeers.forEach { it.send(line) }
+    }
+
+    fun sendToPeer(id: Int, line: String) {
+        hostPeers.find { it.id == id }?.send(line)
     }
 
     @SuppressLint("MissingPermission")
     fun connectTo(device: BluetoothDevice) {
         val a = adapter ?: run { state.value = LinkState.Failed("Bluetooth недоступен"); return }
         if (!a.isEnabled) { state.value = LinkState.Failed("Bluetooth выключен"); return }
-        closing = false
         state.value = LinkState.Connecting
         stopDiscovery()
         Thread {
             try {
                 val s = device.createInsecureRfcommSocketToServiceRecord(APP_UUID)
                 s.connect()
-                onConnected(s)
+                val peerName = try { s.remoteDevice.name ?: "Хост" } catch (_: SecurityException) { "Хост" }
+                val peer = HostPeer(
+                    0, peerName, s,
+                    onLine = { _, line -> onLine?.invoke(0, line) },
+                    onFail = { state.value = LinkState.Failed("Соединение прервано") },
+                )
+                joinPeer = peer
+                peer.start()
+                state.value = LinkState.Connected(peerName)
             } catch (e: IOException) {
-                if (!closing) {
-                    state.value = LinkState.Failed(
-                        "Не удалось подключиться (${e.message ?: "нет ответа"}). " +
-                            "Убедись, что на телефоне-хосте открыт экран «Создать игру» и он ждёт подключения.",
-                    )
-                }
+                state.value = LinkState.Failed(
+                    "Не удалось подключиться (${e.message ?: "нет ответа"}). " +
+                        "Убедись, что на телефоне-хосте открыт экран «Создать игру» и он ждёт подключения.",
+                )
             } catch (e: SecurityException) {
-                if (!closing) state.value = LinkState.Failed("Нет разрешения на Bluetooth — проверь разрешения приложения в настройках телефона")
+                state.value = LinkState.Failed("Нет разрешения на Bluetooth — проверь разрешения приложения в настройках телефона")
             }
         }.start()
     }
 
-    @SuppressLint("MissingPermission")
-    private fun onConnected(s: BluetoothSocket) {
-        socket = s
-        output = s.outputStream
-        val peerName = try { s.remoteDevice.name ?: "Соперник" } catch (_: SecurityException) { "Соперник" }
-        state.value = LinkState.Connected(peerName)
-        readThread = Thread {
-            try {
-                val reader = BufferedReader(InputStreamReader(s.inputStream))
-                while (!closing) {
-                    val line = reader.readLine() ?: break
-                    onLine?.invoke(line)
-                }
-            } catch (e: IOException) {
-                if (!closing) state.value = LinkState.Failed("Соединение прервано")
-            }
-        }
-        readThread?.start()
-
-        // Writing to a BluetoothSocket is a blocking I/O call — during a race
-        // the host sends a state snapshot several times a second, so doing
-        // this on the caller's thread (Compose's main/UI thread) stalled the
-        // whole app and could tear down the connection. All actual socket
-        // writes now happen serially on this dedicated thread instead.
-        writeQueue.clear()
-        writeThread = Thread {
-            try {
-                while (!closing) {
-                    val line = writeQueue.take()
-                    if (closing) break
-                    output?.write((line + "\n").toByteArray(Charsets.UTF_8))
-                    output?.flush()
-                }
-            } catch (_: InterruptedException) {
-            } catch (e: IOException) {
-                if (!closing) state.value = LinkState.Failed("Соединение прервано при отправке")
-            }
-        }
-        writeThread?.start()
-    }
-
-    /** Non-blocking: queues the line for the writer thread instead of doing
-     * socket I/O on the calling thread. */
+    /** Non-blocking: queues the line on the joiner's single connection to the host. */
     fun send(line: String) {
-        if (output == null) return
-        writeQueue.offer(line)
+        joinPeer?.send(line)
     }
 
     fun close() {
-        closing = true
-        writeThread?.interrupt()
+        accepting = false
         try { serverSocket?.close() } catch (_: IOException) {}
-        try { socket?.close() } catch (_: IOException) {}
+        hostPeers.forEach { it.close() }
+        hostPeers.clear()
+        joinPeer?.close()
+        joinPeer = null
         if (receiverRegistered) {
             try { appContext.unregisterReceiver(discoveryReceiver) } catch (_: IllegalArgumentException) {}
             receiverRegistered = false
         }
         stopDiscovery()
-        socket = null
-        output = null
-        writeQueue.clear()
         state.value = LinkState.Idle
     }
 }

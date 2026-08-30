@@ -4,13 +4,18 @@ import com.robutpit.roachrace.engine.RaceEngine
 import com.robutpit.roachrace.model.Breed
 import com.robutpit.roachrace.model.Levels
 
-/** Tiny line-based text protocol for the 2-phone Bluetooth link. Nothing
- * fancy — one message per line, fields pipe-separated — kept hand-rolled
- * instead of pulling in a serialization library for a handful of fields. */
+/** Tiny line-based text protocol for the Bluetooth link, host-authoritative
+ * for any number of players: each joiner talks only to the host (a star
+ * topology — real Bluetooth Classic has no direct joiner-to-joiner link),
+ * and the host relays state to everyone. Nothing fancy — one message per
+ * line, fields pipe-separated — kept hand-rolled instead of pulling in a
+ * serialization library for a handful of fields. */
 object RaceProtocol {
 
+    private fun sanitize(s: String) = s.filter { it != '|' && it != ':' && it != ';' && it != '\n' }
+
     fun hello(name: String, breed: Breed, colorLong: Long, levels: Levels): String =
-        "HELLO|$name|${breed.name}|$colorLong|${levels.speed}|${levels.stamina}|${levels.stress}"
+        "HELLO|${sanitize(name)}|${breed.name}|$colorLong|${levels.speed}|${levels.stamina}|${levels.stress}"
 
     data class Hello(val name: String, val breed: Breed, val colorLong: Long, val levels: Levels)
 
@@ -28,6 +33,37 @@ object RaceProtocol {
                 stress = p[6].toIntOrNull() ?: 0,
             ),
         )
+    }
+
+    /** Sent by the host to one specific joiner right after accepting them,
+     * so that phone learns which racer index in the (later) roster is it. */
+    fun welcome(assignedIndex: Int) = "WELCOME|$assignedIndex"
+    fun parseWelcome(line: String): Int? {
+        val p = line.split("|")
+        return if (p.size == 2 && p[0] == "WELCOME") p[1].toIntOrNull() else null
+    }
+
+    /** Broadcast by the host to everyone right before the race starts: the
+     * full, ordered racer list (index 0 is always the host) so every phone
+     * builds an identical roster regardless of how many joiners there are. */
+    fun roster(entries: List<Hello>): String =
+        "ROSTER|" + entries.joinToString(";") { h ->
+            "${sanitize(h.name)}:${h.breed.name}:${h.colorLong}:${h.levels.speed}:${h.levels.stamina}:${h.levels.stress}"
+        }
+
+    fun parseRoster(line: String): List<Hello>? {
+        val p = line.split("|")
+        if (p.size != 2 || p[0] != "ROSTER") return null
+        if (p[1].isBlank()) return emptyList()
+        return p[1].split(";").mapNotNull { chunk ->
+            val f = chunk.split(":")
+            if (f.size != 6) return@mapNotNull null
+            val breed = Breed.entries.firstOrNull { it.name == f[1] } ?: return@mapNotNull null
+            Hello(
+                name = f[0], breed = breed, colorLong = f[2].toLongOrNull() ?: 0xFFB5541EL,
+                levels = Levels(f[3].toIntOrNull() ?: 0, f[4].toIntOrNull() ?: 0, f[5].toIntOrNull() ?: 0),
+            )
+        }
     }
 
     fun track(trackId: String) = "TRACK|$trackId"
