@@ -477,16 +477,17 @@
     ]
   },
   {
-    "id": "cockroach-racing",
-    "title": "🪳 Тараканьи бега",
-    "description": "Прототип механик мобильной игры: своя порода и окрас таракана, кормёжка и тренировка, выбор трассы, «живой» хаотичный бег и реакция на крик в микрофон или стук по столу.",
-    "image": "projects/cockroach-racing/preview.svg",
-    "link": "projects/cockroach-racing/index.html",
+    "id": "cockroach-racing-app",
+    "title": "🪳 Тараканьи бега (Android APK)",
+    "description": "Нативное Android-приложение на Kotlin + Jetpack Compose: порода и окрас таракана, кормёжка и тренировка, выбор трассы, «живой» нелинейный бег, реакция на звук и стук по столу, гонка по Bluetooth вдвоём. Скачивается как APK.",
+    "image": "projects/cockroach-racing-app/preview.svg",
+    "link": "projects/cockroach-racing-app/index.html",
     "date": "2026-08-30",
     "tags": [
       "Игра",
-      "JavaScript",
-      "Прототип"
+      "Android",
+      "Kotlin",
+      "Bluetooth"
     ]
   }
 ]

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Тараканьи бега — Android APK</title>
+<style>
+  :root{
+    --bg-0:#14120f; --card:#2b261e; --bg-2:#26221b;
+    --amber:#e0a458; --amber-dark:#a97a3c; --green:#7c9473; --red:#c25b4a;
+    --text:#f1ead9; --text-dim:#b3a892; --line:#3d362a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% -10%, #3a2f1e 0%, transparent 55%),
+      radial-gradient(circle at 100% 10%, #24301f 0%, transparent 45%),
+      var(--bg-0);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding-bottom:50px;
+  }
+  a{color:inherit;}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 18px;}
+  .back-home{
+    display:inline-block;margin-bottom:14px;font-size:.8rem;color:var(--text-dim);
+    text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:20px;
+  }
+  .back-home:hover{color:var(--amber);border-color:var(--amber-dark);}
+  h1{font-size:1.7rem;margin:6px 0 4px;}
+  .sub{color:var(--text-dim);margin:0 0 20px;font-size:.92rem;}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:18px 20px;margin-bottom:16px;
+  }
+  .card h2{margin:0 0 8px;font-size:1.05rem;}
+  .card p{color:var(--text-dim);font-size:.9rem;line-height:1.6;margin:0 0 8px;}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+  .badge{
+    font-size:.72rem;color:var(--amber);border:1px solid var(--amber-dark);
+    border-radius:20px;padding:4px 10px;
+  }
+  .download{
+    display:inline-flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--amber),var(--amber-dark));
+    color:#241a0c;text-decoration:none;font-weight:700;
+    padding:14px 22px;border-radius:14px;font-size:1rem;
+  }
+  ul{color:var(--text-dim);font-size:.88rem;line-height:1.7;padding-left:20px;margin:0;}
+  li.limit{color:#d9a37e;}
+  .steps{counter-reset:s;list-style:none;padding:0;margin:0;}
+  .steps li{
+    counter-increment:s;position:relative;padding-left:30px;margin-bottom:10px;
+    color:var(--text-dim);font-size:.88rem;line-height:1.5;
+  }
+  .steps li::before{
+    content:counter(s);position:absolute;left:0;top:0;
+    width:20px;height:20px;border-radius:50%;background:var(--bg-2);
+    border:1px solid var(--line);color:var(--amber);font-size:.72rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  code{background:var(--bg-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:.85em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-home" href="../../index.html">← в портфолио</a>
+  <h1>🪳 Тараканьи бега</h1>
+  <p class="sub">Нативное Android-приложение (Kotlin + Jetpack Compose), собранное и подписанное debug-сборкой прямо в этой сессии.</p>
+
+  <div class="card">
+    <h2>Скачать APK</h2>
+    <p>Тестовая (debug) сборка. Google Play / RuStore пока не публиковалась — устанавливается напрямую как обычный APK.</p>
+    <a class="download" href="dist/roach-race-debug.apk">⬇ Скачать roach-race-debug.apk (8.9 МБ)</a>
+    <div class="badges">
+      <span class="badge">Android 8.0+</span>
+      <span class="badge">Kotlin</span>
+      <span class="badge">Jetpack Compose</span>
+      <span class="badge">Bluetooth Classic</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Установка</h2>
+    <ol class="steps">
+      <li>Откройте эту страницу на Android-телефоне и нажмите «Скачать».</li>
+      <li>Разрешите установку из неизвестных источников для браузера, если система попросит.</li>
+      <li>Откройте скачанный файл и подтвердите установку.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Что уже работает</h2>
+    <ul>
+      <li>4 породы таракана (прусак, чёрный, мадагаскарский шипящий, альбинос) с разными характеристиками + окрас отдельно как косметика</li>
+      <li>Кормёжка и тренировка (скорость / выносливость / стрессоустойчивость), прогресс сохраняется на телефоне</li>
+      <li>4 трассы с разными модификаторами (стол, кухня, коридор с препятствиями, марафон)</li>
+      <li>Гонка с «живым» нелинейным движением — тараканы не бегут по прямой, тренировка снижает хаотичность</li>
+      <li>🎤 реакция на громкий звук с микрофона и 📳 на удар/стук по столу через акселерометр — пугают соперника</li>
+      <li>🔵 гонка по Bluetooth вдвоём (RFCOMM): один телефон создаёт игру, второй подключается, оба видят одно общее поле</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Известные ограничения</h2>
+    <ul>
+      <li class="limit">Bluetooth-режим реализован по стандартному Android API и собирается без ошибок, но не тестировался на паре живых телефонов — считайте первый запуск бета-тестом</li>
+      <li class="limit">Режим «сложить телефоны в одно большое поле» (экран каждого — свой участок трассы) пока не реализован — сделан только режим «одно общее поле на обоих экранах»</li>
+      <li class="limit">Турнир заявлен на 2 игрока по Bluetooth; N-игроков и итоговая публикация в RuStore/Google Play — следующие шаги</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Исходный код</h2>
+    <p>Полный проект (Kotlin, Gradle) лежит рядом в <code>projects/cockroach-racing-app/</code> этого репозитория — открывается в Android Studio как обычный Gradle-проект.</p>
+  </div>
+</div>
+</body>
+</html>

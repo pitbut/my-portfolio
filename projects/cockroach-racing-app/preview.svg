@@ -24,7 +24,7 @@
   </g>
   <line x1="720" y1="120" x2="720" y2="480" stroke="#e0a458" stroke-width="3" stroke-dasharray="10 10" opacity="0.6"/>
 
-  <g id="roach-rust" transform="translate(300,150) scale(1.4)">
+  <g transform="translate(300,150) scale(1.4)">
     <ellipse cx="0" cy="0" rx="26" ry="16" fill="#b5541e" stroke="#1a140d" stroke-width="2"/>
     <ellipse cx="-15" cy="0" rx="11" ry="10" fill="#b5541e" stroke="#1a140d" stroke-width="1.6"/>
     <g stroke="#1a140d" stroke-width="2" stroke-linecap="round">
@@ -39,7 +39,7 @@
     </g>
   </g>
 
-  <g id="roach-olive" transform="translate(430,270) scale(1.7)">
+  <g transform="translate(430,270) scale(1.7)">
     <ellipse cx="0" cy="0" rx="26" ry="16" fill="#5c6b3a" stroke="#1a140d" stroke-width="2"/>
     <ellipse cx="-15" cy="0" rx="11" ry="10" fill="#5c6b3a" stroke="#1a140d" stroke-width="1.6"/>
     <g stroke="#1a140d" stroke-width="2" stroke-linecap="round">
@@ -54,7 +54,7 @@
     </g>
   </g>
 
-  <g id="roach-sand" transform="translate(230,390) scale(1.1)">
+  <g transform="translate(230,390) scale(1.1)">
     <ellipse cx="0" cy="0" rx="26" ry="16" fill="#c9a869" stroke="#1a140d" stroke-width="2"/>
     <ellipse cx="-15" cy="0" rx="11" ry="10" fill="#c9a869" stroke="#1a140d" stroke-width="1.6"/>
     <g stroke="#1a140d" stroke-width="2" stroke-linecap="round">
@@ -70,14 +70,18 @@
   </g>
 
   <text x="60" y="90" font-family="Georgia, 'Times New Roman', serif" font-size="46" fill="#f1ead9" font-weight="700">Тараканьи бега</text>
-  <text x="60" y="128" font-family="Arial, sans-serif" font-size="20" fill="#b3a892">порода · тренировка · трассы · звук и вибрация</text>
+  <text x="60" y="128" font-family="Arial, sans-serif" font-size="20" fill="#b3a892">Android APK · Kotlin + Jetpack Compose</text>
 
   <g transform="translate(60,500)">
     <rect x="0" y="0" width="170" height="40" rx="20" fill="none" stroke="url(#amber)" stroke-width="2"/>
     <text x="85" y="26" font-family="Arial, sans-serif" font-size="15" fill="#e0a458" text-anchor="middle">🎤 звук</text>
   </g>
   <g transform="translate(250,500)">
-    <rect x="0" y="0" width="190" height="40" rx="20" fill="none" stroke="url(#amber)" stroke-width="2"/>
-    <text x="95" y="26" font-family="Arial, sans-serif" font-size="15" fill="#e0a458" text-anchor="middle">📳 вибрация стола</text>
+    <rect x="0" y="0" width="150" height="40" rx="20" fill="none" stroke="url(#amber)" stroke-width="2"/>
+    <text x="75" y="26" font-family="Arial, sans-serif" font-size="15" fill="#e0a458" text-anchor="middle">📳 стук</text>
+  </g>
+  <g transform="translate(420,500)">
+    <rect x="0" y="0" width="170" height="40" rx="20" fill="none" stroke="url(#amber)" stroke-width="2"/>
+    <text x="85" y="26" font-family="Arial, sans-serif" font-size="15" fill="#e0a458" text-anchor="middle">🔵 Bluetooth</text>
   </g>
 </svg>

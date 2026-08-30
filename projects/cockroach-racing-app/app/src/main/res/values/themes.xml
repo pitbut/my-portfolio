@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.RoachRace" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#14120F</item>
+        <item name="android:navigationBarColor">#14120F</item>
+        <item name="android:windowBackground">#14120F</item>
+    </style>
+</resources>
