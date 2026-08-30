@@ -10,6 +10,10 @@ data class Track(
     val friction: Float,
     val obstacles: List<Obstacle>,
     val tags: List<String>,
+    /** Background tint so each track is visually unmistakable on the race
+     * screen, not just numerically different. */
+    val themeColor: Long,
+    val emoji: String,
 )
 
 val TRACKS = listOf(
@@ -21,6 +25,8 @@ val TRACKS = listOf(
         friction = 1.00f,
         obstacles = emptyList(),
         tags = listOf("Баланс"),
+        themeColor = 0xFF20241C,
+        emoji = "🗂️",
     ),
     Track(
         id = "kitchen",
@@ -30,6 +36,8 @@ val TRACKS = listOf(
         friction = 1.35f,
         obstacles = listOf(Obstacle(0.5f, 0.35f)),
         tags = listOf("Стрессоустойчивость", "Контроль"),
+        themeColor = 0xFF2A2013,
+        emoji = "☕",
     ),
     Track(
         id = "corridor",
@@ -39,6 +47,8 @@ val TRACKS = listOf(
         friction = 1.05f,
         obstacles = listOf(Obstacle(0.22f, 0.5f), Obstacle(0.5f, 0.5f), Obstacle(0.78f, 0.5f)),
         tags = listOf("Скорость", "Манёвр"),
+        themeColor = 0xFF1C2430,
+        emoji = "📎",
     ),
     Track(
         id = "gym",
@@ -48,6 +58,8 @@ val TRACKS = listOf(
         friction = 1.00f,
         obstacles = listOf(Obstacle(0.6f, 0.3f)),
         tags = listOf("Выносливость"),
+        themeColor = 0xFF241C2A,
+        emoji = "🏃",
     ),
 )
 

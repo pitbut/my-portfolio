@@ -26,6 +26,7 @@ import com.robutpit.roachrace.bluetooth.RaceProtocol
 import com.robutpit.roachrace.data.SaveRepository
 import com.robutpit.roachrace.data.SaveState
 import com.robutpit.roachrace.engine.RaceEngine
+import com.robutpit.roachrace.engine.TrainGymEngine
 import com.robutpit.roachrace.model.*
 import com.robutpit.roachrace.sensors.MicListener
 import com.robutpit.roachrace.sensors.MotionListener
@@ -137,9 +138,35 @@ fun AppRoot(
     val motionListener = remember {
         MotionListener(
             context = context,
-            onLevel = { motionLevel = (it / 12f).coerceIn(0f, 1f) },
+            onLevel = { motionLevel = it },
             onPeak = { spookFromLocalSensor("Ты (стук)") },
         )
+    }
+
+    val gymEngine = remember {
+        TrainGymEngine().apply {
+            setCallbacks(
+                onFeed = {
+                    val newStamina = if (save.levels.stamina < 10 && Random.nextFloat() < 0.7f) save.levels.stamina + 1 else save.levels.stamina
+                    persist(save.copy(satiety = (save.satiety + 25).coerceIn(0, 100), levels = save.levels.copy(stamina = newStamina)))
+                },
+                onTrain = {
+                    val newSpeed = if (save.levels.speed < 10) save.levels.speed + 1 else save.levels.speed
+                    val newStress = if (save.levels.stress < 10 && Random.nextFloat() < 0.4f) save.levels.stress + 1 else save.levels.stress
+                    persist(save.copy(satiety = (save.satiety - 20).coerceIn(0, 100), levels = save.levels.copy(speed = newSpeed, stress = newStress)))
+                },
+            )
+        }
+    }
+    LaunchedEffect(screen) {
+        if (screen != Screen.TRAIN) return@LaunchedEffect
+        var last = withFrameNanos { it }
+        while (true) {
+            val now = withFrameNanos { it }
+            val dt = ((now - last) / 1_000_000_000.0).toFloat().coerceAtMost(0.05f)
+            last = now
+            gymEngine.step(dt)
+        }
     }
 
     DisposableEffect(Unit) {
@@ -244,6 +271,51 @@ fun AppRoot(
         }
     }
 
+    if (screen == Screen.RACE && engine != null) {
+        val eng = engine!!
+        RaceScreen(
+            engine = eng,
+            onStart = { eng.start() },
+            onBackToTrack = {
+                stopRaceSensors()
+                if (isMultiplayer) btLink.close()
+                screen = Screen.TRACK
+            },
+            micActive = micActive,
+            micLevel = micLevel,
+            micStatus = micStatus,
+            onToggleMic = {
+                if (micActive) {
+                    micListener.stop(); micActive = false; micStatus = "выкл"
+                } else if (micListener.hasPermission()) {
+                    micActive = micListener.start(); micStatus = if (micActive) "слушаю" else "ошибка"
+                } else {
+                    requestMicPermission {
+                        micActive = micListener.start(); micStatus = if (micActive) "слушаю" else "ошибка"
+                    }
+                }
+            },
+            motionActive = motionActive,
+            motionLevel = motionLevel,
+            motionStatus = motionStatus,
+            onToggleMotion = {
+                if (motionActive) {
+                    motionListener.stop(); motionActive = false; motionStatus = "выкл"
+                } else if (motionListener.hasSensor()) {
+                    motionActive = motionListener.start(); motionStatus = if (motionActive) "слушаю" else "ошибка"
+                } else {
+                    motionStatus = "нет датчика"
+                }
+            },
+            hardcore = hardcore,
+            onHardcoreChange = { hardcore = it; eng.hardcore = it },
+            multiplayerHint = if (isMultiplayer) {
+                if (mpRole == MpRole.HOST) "Bluetooth: ты хост, гонка синхронизируется на оба телефона" else "Bluetooth: ты подключился, поле зеркалится с телефона хоста"
+            } else null,
+        )
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -278,18 +350,9 @@ fun AppRoot(
                 onColor = { persist(save.copy(colorId = it)) },
                 onConfirm = { screen = Screen.TRAIN },
             )
-            Screen.TRAIN -> TrainScreen(
+            Screen.TRAIN -> TrainGymScreen(
                 save = save,
-                onFeed = {
-                    val newStamina = if (save.levels.stamina < 10 && Random.nextFloat() < 0.6f) save.levels.stamina + 1 else save.levels.stamina
-                    persist(save.copy(satiety = (save.satiety + 25).coerceIn(0, 100), levels = save.levels.copy(stamina = newStamina)))
-                },
-                onDrill = {
-                    if (save.satiety < 20) return@TrainScreen
-                    val newSpeed = if (save.levels.speed < 10) save.levels.speed + 1 else save.levels.speed
-                    val newStress = if (save.levels.stress < 10 && Random.nextFloat() < 0.35f) save.levels.stress + 1 else save.levels.stress
-                    persist(save.copy(satiety = (save.satiety - 20).coerceIn(0, 100), levels = save.levels.copy(speed = newSpeed, stress = newStress)))
-                },
+                engine = gymEngine,
                 onResetRoach = {
                     repo.reset()
                     save = repo.load()
@@ -366,48 +429,7 @@ fun AppRoot(
                     screen = Screen.TRACK
                 },
             )
-            Screen.RACE -> engine?.let { eng ->
-                RaceScreen(
-                    engine = eng,
-                    onStart = { eng.start() },
-                    onBackToTrack = {
-                        stopRaceSensors()
-                        if (isMultiplayer) btLink.close()
-                        screen = Screen.TRACK
-                    },
-                    micActive = micActive,
-                    micLevel = micLevel,
-                    micStatus = micStatus,
-                    onToggleMic = {
-                        if (micActive) {
-                            micListener.stop(); micActive = false; micStatus = "выкл"
-                        } else if (micListener.hasPermission()) {
-                            micActive = micListener.start(); micStatus = if (micActive) "слушаю" else "ошибка"
-                        } else {
-                            requestMicPermission {
-                                micActive = micListener.start(); micStatus = if (micActive) "слушаю" else "ошибка"
-                            }
-                        }
-                    },
-                    motionActive = motionActive,
-                    motionLevel = motionLevel,
-                    motionStatus = motionStatus,
-                    onToggleMotion = {
-                        if (motionActive) {
-                            motionListener.stop(); motionActive = false; motionStatus = "выкл"
-                        } else if (motionListener.hasSensor()) {
-                            motionActive = motionListener.start(); motionStatus = if (motionActive) "слушаю" else "ошибка"
-                        } else {
-                            motionStatus = "нет датчика"
-                        }
-                    },
-                    hardcore = hardcore,
-                    onHardcoreChange = { hardcore = it; eng.hardcore = it },
-                    multiplayerHint = if (isMultiplayer) {
-                        if (mpRole == MpRole.HOST) "Bluetooth: ты хост, гонка синхронизируется на оба телефона" else "Bluetooth: ты подключился, поле зеркалится с телефона хоста"
-                    } else null,
-                )
-            }
+            Screen.RACE -> Unit
             Screen.RESULTS -> engine?.let { eng ->
                 val ranking = eng.racers.sortedBy { it.finishOrder ?: Int.MAX_VALUE }
                 val rows = ranking.mapIndexed { i, r ->

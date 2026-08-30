@@ -17,11 +17,14 @@ private val outline = Color(0xFF1A140D)
 
 /** Draws one stylised roach: an oval body, a smaller head, three pairs of
  * legs and two antennae, all scaled by [sizePx]. Shared by the breed/colour
- * picker preview and the live race canvas so the same silhouette is used
- * everywhere. [legPhase] animates the legs; [wobble] tilts the body. */
-fun DrawScope.drawRoach(center: Offset, sizePx: Float, color: Color, legPhase: Float, wobble: Float) {
+ * picker preview, the training gym and the live race canvas so the same
+ * silhouette is used everywhere. [legPhase] animates the legs; [wobble]
+ * tilts the body; [headingDegrees] points the head in the direction of
+ * travel — 0 faces left (the gym's default), 90 faces up (the vertical
+ * race track). */
+fun DrawScope.drawRoach(center: Offset, sizePx: Float, color: Color, legPhase: Float, wobble: Float, headingDegrees: Float = 0f) {
     val s = sizePx
-    rotate(degrees = wobble * 12f, pivot = center) {
+    rotate(degrees = wobble * 12f + headingDegrees, pivot = center) {
         val legWave = sin(legPhase) * (s * 0.16f)
         val legOffsets = floatArrayOf(-0.15f, 0.25f, 0.6f)
         legOffsets.forEachIndexed { idx, lx ->

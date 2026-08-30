@@ -177,40 +177,7 @@ fun SelectScreen(save: SaveState, onBreed: (Breed) -> Unit, onColor: (String) ->
 }
 
 @Composable
-fun TrainScreen(save: SaveState, onFeed: () -> Unit, onDrill: () -> Unit, onResetRoach: () -> Unit, onNext: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        CardBox {
-            Text("Тренировка", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = TextMain)
-            Text(
-                "Кормление поднимает выносливость и восполняет сытость. Тренировка поднимает скорость и понемногу стрессоустойчивость, но тратит сытость (нужно ≥ 20%).",
-                fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(bottom = 10.dp),
-            )
-            StatBar("Сытость", "${save.satiety}%", save.satiety / 100f, Amber)
-            StatBar("Скорость", "${save.levels.speed}/10", save.levels.speed / 10f, Amber)
-            StatBar("Выносливость", "${save.levels.stamina}/10", save.levels.stamina / 10f, Green)
-            StatBar("Стрессоустойчивость", "${save.levels.stress}/10", save.levels.stress / 10f, Color(0xFF8FB3C9))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 8.dp)) {
-                Button(
-                    onClick = onFeed,
-                    colors = ButtonDefaults.buttonColors(containerColor = Green, contentColor = Color(0xFF132313)),
-                    shape = RoundedCornerShape(12.dp),
-                ) { Text("🍞 Кормить") }
-                Button(
-                    onClick = onDrill,
-                    enabled = save.satiety >= 20,
-                    colors = ButtonDefaults.buttonColors(containerColor = Amber, contentColor = Color(0xFF241A0C), disabledContainerColor = Amber.copy(alpha = 0.35f)),
-                    shape = RoundedCornerShape(12.dp),
-                ) { Text("💪 Тренировать") }
-            }
-            SecondaryButton("Сменить таракана", modifier = Modifier.padding(top = 8.dp), onClick = onResetRoach)
-        }
-        PrimaryButton("Дальше → выбор трассы", modifier = Modifier.fillMaxWidth(), onClick = onNext)
-    }
-}
-
-@Composable
-private fun StatBar(label: String, displayValue: String, progress: Float, color: Color) {
+fun StatBar(label: String, displayValue: String, progress: Float, color: Color) {
     Column(modifier = Modifier.padding(bottom = 10.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(label, fontSize = 12.sp, color = TextDim)

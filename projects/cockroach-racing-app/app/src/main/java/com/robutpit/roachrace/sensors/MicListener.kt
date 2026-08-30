@@ -12,8 +12,11 @@ import kotlin.math.sqrt
 
 /**
  * Samples microphone RMS level on a background thread and reports peaks
- * above [threshold] no more often than [cooldownMs], mirroring the Web
- * Audio API amplitude-peak trick used by the browser prototype.
+ * no more often than [cooldownMs]. Instead of one fixed magnitude threshold
+ * (unreliable across phones — mic gain/AGC varies a lot), it tracks a
+ * rolling ambient-noise floor and fires when the level spikes well above
+ * *that phone's own* recent baseline, mirroring the Web Audio API
+ * amplitude-peak trick used by the browser prototype but adaptive.
  */
 class MicListener(
     private val context: Context,
@@ -24,8 +27,8 @@ class MicListener(
     private var thread: Thread? = null
     @Volatile private var running = false
     private var lastPeakAt = 0L
-    private val threshold = 0.28f
-    private val cooldownMs = 1400L
+    private var ambient = 0.01f
+    private val cooldownMs = 1000L
 
     fun hasPermission(): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
@@ -50,6 +53,7 @@ class MicListener(
         }
         record = rec
         running = true
+        ambient = 0.01f
         rec.startRecording()
         thread = Thread {
             val buf = ShortArray(bufSize / 2)
@@ -62,11 +66,15 @@ class MicListener(
                         sum += v * v
                     }
                     val rms = sqrt(sum / n).toFloat()
-                    onLevel(rms)
+                    onLevel((rms / 0.35f).coerceIn(0f, 1f))
                     val now = System.currentTimeMillis()
-                    if (rms > threshold && now - lastPeakAt > cooldownMs) {
+                    val isPeak = rms > ambient * 2.4f + 0.018f
+                    if (isPeak && now - lastPeakAt > cooldownMs) {
                         lastPeakAt = now
                         onPeak()
+                    }
+                    if (!isPeak) {
+                        ambient = ambient * 0.97f + rms * 0.03f
                     }
                 }
             }

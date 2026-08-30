@@ -35,9 +35,15 @@ class RaceEngine(
         running.value = true
     }
 
+    /** Always leaves a visible trace in [log] — even when there is nobody left
+     * to spook — so a mic/motion trigger is never silent: the player gets
+     * proof the sensor actually fired, whether or not it had an effect. */
     fun spookRandomRacer(sourceLabel: String, targetIdOverride: Int? = null) {
         val pool = racers.filter { !it.finished.value && (hardcore || !it.isPlayer) }
-        if (pool.isEmpty()) return
+        if (pool.isEmpty()) {
+            log.add("$sourceLabel: сигнал услышан, но пугать уже некого — все финишировали")
+            return
+        }
         val target = if (targetIdOverride != null && targetIdOverride < racers.size) {
             racers[targetIdOverride]
         } else {
@@ -46,7 +52,11 @@ class RaceEngine(
         val baseDur = 1.1f
         target.spookTimer.value = maxOf(target.spookTimer.value, baseDur / target.stressBase)
         target.wobbleTarget = if (Random.nextBoolean()) -1f else 1f
-        val msg = "$sourceLabel → «${target.name}» испугался и сбился с курса!"
+        // Nudge the visible wobble immediately instead of waiting for the next
+        // step() tick, so the reaction is visible even before the race starts.
+        target.wobbleCur.value = lerp(target.wobbleCur.value, target.wobbleTarget, 0.6f)
+        val runningNote = if (!running.value) " (нажми «Старт», чтобы это было видно в забеге)" else ""
+        val msg = "$sourceLabel → «${target.name}» испугался и сбился с курса!$runningNote"
         log.add(msg)
         onSpook?.invoke(sourceLabel, target.name)
     }
