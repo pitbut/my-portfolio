@@ -27,6 +27,7 @@ import com.robutpit.roachrace.data.SaveState
 import com.robutpit.roachrace.engine.RaceEngine
 import com.robutpit.roachrace.engine.TrainGymEngine
 import com.robutpit.roachrace.model.*
+import com.robutpit.roachrace.sensors.GameAudio
 import com.robutpit.roachrace.sensors.MicListener
 import com.robutpit.roachrace.sensors.MotionListener
 import com.robutpit.roachrace.ui.*
@@ -114,6 +115,17 @@ fun AppRoot(
         repo.save(newSave)
     }
 
+    // Ticks once a second so satiety decay / cooldown countdowns / the
+    // starvation check visibly move even though nothing else changed —
+    // wall-clock time isn't observable state on its own.
+    var nowMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(1000)
+            nowMillis = System.currentTimeMillis()
+        }
+    }
+
     var screen by remember { mutableStateOf(if (save.breed == null) Screen.SELECT else Screen.TRAIN) }
     var engine by remember { mutableStateOf<RaceEngine?>(null) }
     var isMultiplayer by remember { mutableStateOf(false) }
@@ -180,19 +192,14 @@ fun AppRoot(
             onPeak = { spookFromLocalSensor("Ты (стук)") },
         )
     }
+    val gameAudio = remember { GameAudio(context) }
+    val onRacerSpooked: (Racer) -> Unit = { r -> if (r.breed == Breed.MADAGASCAR) gameAudio.playHiss() }
 
     val gymEngine = remember {
         TrainGymEngine().apply {
             setCallbacks(
-                onFeed = {
-                    val newStamina = if (save.levels.stamina < 10 && Random.nextFloat() < 0.7f) save.levels.stamina + 1 else save.levels.stamina
-                    persist(save.copy(satiety = (save.satiety + 25).coerceIn(0, 100), levels = save.levels.copy(stamina = newStamina)))
-                },
-                onTrain = {
-                    val newSpeed = if (save.levels.speed < 10) save.levels.speed + 1 else save.levels.speed
-                    val newStress = if (save.levels.stress < 10 && Random.nextFloat() < 0.4f) save.levels.stress + 1 else save.levels.stress
-                    persist(save.copy(satiety = (save.satiety - 20).coerceIn(0, 100), levels = save.levels.copy(speed = newSpeed, stress = newStress)))
-                },
+                onFeed = { persist(RoachEconomy.applyFeed(save, save.trait())) },
+                onTrain = { persist(RoachEconomy.applyTrain(save, save.trait())) },
             )
         }
     }
@@ -211,6 +218,7 @@ fun AppRoot(
         onDispose {
             micListener.stop()
             motionListener.stop()
+            gameAudio.release()
             btLink.close()
         }
     }
@@ -233,7 +241,7 @@ fun AppRoot(
                 levels = Levels(Random.nextInt(0, peak + 1), Random.nextInt(0, peak + 1), Random.nextInt(0, peak + 1)),
             )
         }
-        return RaceEngine(track, listOf(player) + bots)
+        return RaceEngine(track, listOf(player) + bots, onSpook = onRacerSpooked)
     }
 
     fun handleIncomingLine(peerId: Int, line: String) {
@@ -261,7 +269,7 @@ fun AppRoot(
             val racers = remoteRoster.mapIndexed { i, h ->
                 Racer(h.name, isPlayer = (i == myIdx), isRemote = true, breed = h.breed, colorLong = h.colorLong, levels = h.levels)
             }
-            val eng = RaceEngine(track, racers)
+            val eng = RaceEngine(track, racers, onSpook = onRacerSpooked)
             eng.start()
             engine = eng
             isMultiplayer = true
@@ -306,12 +314,20 @@ fun AppRoot(
         val eng = engine ?: return@LaunchedEffect
         var frame = 0
         var last = withFrameNanos { it }
+        var tapAccum = 0f
         while (true) {
             val now = withFrameNanos { it }
             val dt = ((now - last) / 1_000_000_000.0).toFloat().coerceAtMost(0.05f)
             last = now
             eng.step(dt)
             frame++
+            if (eng.running.value) {
+                tapAccum -= dt
+                if (tapAccum <= 0f) {
+                    tapAccum = 0.22f + Random.nextFloat() * 0.2f
+                    gameAudio.playTap()
+                }
+            }
             if (isMultiplayer && mpRole == MpRole.HOST && frame % 3 == 0) {
                 btLink.sendToAll(RaceProtocol.state(eng))
             }
@@ -342,6 +358,22 @@ fun AppRoot(
                 break
             }
         }
+    }
+
+    // Starvation is checked against real elapsed time, so it can happen while
+    // the app was closed entirely — caught the moment you come back, unless
+    // a race is already in progress (don't yank other players' screens).
+    if (screen != Screen.RACE && RoachEconomy.isDead(save, nowMillis)) {
+        RoachDiedScreen(
+            save = save,
+            onNewRoach = {
+                repo.reset()
+                save = repo.load()
+                engine = null
+                screen = Screen.SELECT
+            },
+        )
+        return
     }
 
     if (screen == Screen.RACE && engine != null) {
@@ -423,21 +455,23 @@ fun AppRoot(
 
         if (save.breed != null) {
             Spacer(Modifier.height(4.dp))
-            RoachBadge(save)
+            RoachBadge(save, nowMillis)
             Spacer(Modifier.height(10.dp))
         }
 
         when (screen) {
             Screen.SELECT -> SelectScreen(
                 save = save,
-                onBreed = { persist(save.copy(breed = it)) },
+                onBreed = { persist(save.copy(breed = it, traitId = Trait.random().name)) },
                 onColor = { persist(save.copy(colorId = it)) },
                 onName = { persist(save.copy(name = it)) },
+                onRerollTrait = { persist(save.copy(traitId = Trait.random().name)) },
                 onConfirm = { screen = Screen.TRAIN },
             )
             Screen.TRAIN -> TrainGymScreen(
                 save = save,
                 engine = gymEngine,
+                now = nowMillis,
                 onResetRoach = {
                     repo.reset()
                     save = repo.load()
@@ -510,7 +544,7 @@ fun AppRoot(
                     btLink.sendToAll(RaceProtocol.roster(fullRoster))
                     btLink.sendToAll(RaceProtocol.track(track.id))
                     btLink.sendToAll(RaceProtocol.start(stitchedModeChoice))
-                    val eng = RaceEngine(track, racers)
+                    val eng = RaceEngine(track, racers, onSpook = onRacerSpooked)
                     isMultiplayer = true
                     isStitchedRace = stitchedModeChoice
                     mySegmentIndex = 0

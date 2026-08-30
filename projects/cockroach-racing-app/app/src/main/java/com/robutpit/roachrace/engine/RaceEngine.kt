@@ -18,7 +18,11 @@ private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 class RaceEngine(
     val track: Track,
     val racers: List<Racer>,
-    private val onSpook: ((sourceLabel: String, targetName: String) -> Unit)? = null,
+    /** Fired the instant a racer transitions from calm to spooked — whether
+     * that's decided locally (spookRandomRacer) or arrives over Bluetooth
+     * (applyRemoteSnapshot) — so the UI layer can react (e.g. play that
+     * breed's sound) without polling every racer every frame. */
+    private val onSpook: ((Racer) -> Unit)? = null,
 ) {
     var running = mutableStateOf(false)
     var done = mutableStateOf(false)
@@ -50,6 +54,7 @@ class RaceEngine(
             return
         }
         val (_, target) = pool[Random.nextInt(pool.size)]
+        val wasCalm = target.spookTimer.value <= 0f
         val baseDur = 1.1f
         target.spookTimer.value = maxOf(target.spookTimer.value, baseDur / target.stressBase)
         target.wobbleTarget = if (Random.nextBoolean()) -1f else 1f
@@ -59,7 +64,7 @@ class RaceEngine(
         val runningNote = if (!running.value) " (нажми «Старт», чтобы это было видно в забеге)" else ""
         val msg = "$sourceLabel → «${target.name}» испугался и сбился с курса!$runningNote"
         log.add(msg)
-        onSpook?.invoke(sourceLabel, target.name)
+        if (wasCalm) onSpook?.invoke(target)
     }
 
     private fun updateWobble(r: Racer, dt: Float, frictionMult: Float) {
@@ -130,9 +135,11 @@ class RaceEngine(
      * same shared field. */
     fun applyRemoteSnapshot(index: Int, progress: Float, wobble: Float, spook: Float, finished: Boolean) {
         val r = racers.getOrNull(index) ?: return
+        val justSpooked = r.spookTimer.value <= 0f && spook > 0f
         r.progress.floatValue = progress
         r.wobbleCur.value = wobble
         r.spookTimer.value = spook
+        if (justSpooked) onSpook?.invoke(r)
         if (finished && !r.finished.value) {
             r.finished.value = true
             r.finishTimeSec = elapsed

@@ -41,6 +41,13 @@ class TrainGymEngine {
         private set
     var lastResult = mutableStateOf(GymResult.NONE)
 
+    /** A careless direct tap on the roach (not the wider push-drag zone)
+     * has a chance of squishing it for good — set once and stays set. */
+    var squished = mutableStateOf(false)
+        private set
+    private val directHitRadius = 0.075f
+    private val squishChance = 0.3f
+
     val obstacles = mutableStateListOf<Offset>()
     private val maxObstacles = 6
 
@@ -53,16 +60,18 @@ class TrainGymEngine {
     }
 
     fun startFeeding() {
-        if (mode.value != GymMode.WANDER) return
+        if (mode.value != GymMode.WANDER || squished.value) return
         foodPos = Offset(0.15f + Random.nextFloat() * 0.7f, 0.2f + Random.nextFloat() * 0.6f)
         eatingArrived.value = false
-        sessionDuration = 3.2f
+        // A real cockroach spends a good while at a food source, not a
+        // couple of seconds — long enough here to actually feel unhurried.
+        sessionDuration = 55f + Random.nextFloat() * 20f
         sessionTimer.floatValue = sessionDuration
         mode.value = GymMode.EATING
     }
 
     fun startTraining() {
-        if (mode.value != GymMode.WANDER) return
+        if (mode.value != GymMode.WANDER || squished.value) return
         sessionDuration = 7f
         sessionTimer.floatValue = sessionDuration
         mode.value = GymMode.TRAINING
@@ -70,10 +79,17 @@ class TrainGymEngine {
 
     /** Tap on empty ground drops/removes an obstacle peg; tapping an existing
      * one removes it, so the player can freely redesign the little obstacle
-     * course. */
+     * course. A tap that lands *directly* on the roach (tighter than the
+     * push-drag zone) is an accidental press — real risk of squishing it,
+     * same as bumping a real bug with your finger. */
     fun handleTap(normPos: Offset) {
-        val nearRoach = hypot((normPos.x - pos.x).toDouble(), (normPos.y - pos.y).toDouble()) < 0.12
-        if (nearRoach) return
+        if (squished.value) return
+        val distToRoach = hypot((normPos.x - pos.x).toDouble(), (normPos.y - pos.y).toDouble())
+        if (distToRoach < directHitRadius) {
+            if (Random.nextFloat() < squishChance) squished.value = true
+            return
+        }
+        if (distToRoach < 0.12) return
         val hit = obstacles.firstOrNull { hypot((it.x - normPos.x).toDouble(), (it.y - normPos.y).toDouble()) < 0.06 }
         if (hit != null) {
             obstacles.remove(hit)
@@ -92,6 +108,7 @@ class TrainGymEngine {
         hypot((normPos.x - pos.x).toDouble(), (normPos.y - pos.y).toDouble()) < 0.14
 
     fun step(dt: Float) {
+        if (squished.value) return
         legPhase += dt * (6f + hypot(vel.x.toDouble(), vel.y.toDouble()).toFloat() * 20f)
 
         when (mode.value) {

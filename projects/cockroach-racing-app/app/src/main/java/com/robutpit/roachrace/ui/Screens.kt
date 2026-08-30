@@ -61,8 +61,9 @@ fun StepNav(current: Screen, canGoTrain: Boolean, canGoTrack: Boolean, canGoRace
 }
 
 @Composable
-fun RoachBadge(save: SaveState) {
+fun RoachBadge(save: SaveState, now: Long) {
     val breed = save.breed ?: return
+    val satiety = RoachEconomy.currentSatiety(save, now, save.trait())
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -78,10 +79,34 @@ fun RoachBadge(save: SaveState) {
             val title = if (save.name.isBlank()) breed.displayName else "${save.name} · ${breed.displayName}"
             Text(title, fontWeight = FontWeight.SemiBold, color = TextMain)
             Text(
-                "Скорость ${save.levels.speed} · Выносливость ${save.levels.stamina} · Стресс ${save.levels.stress} · Сытость ${save.satiety}%",
+                "Скорость ${save.levels.speed} · Выносливость ${save.levels.stamina} · Стресс ${save.levels.stress} · Сытость $satiety%",
                 fontSize = 11.sp, color = TextDim,
             )
+            save.trait()?.let { Text(it.displayName, fontSize = 10.sp, color = Amber) }
         }
+    }
+}
+
+@Composable
+fun RoachDiedScreen(save: SaveState, onNewRoach: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("💀", fontSize = 48.sp)
+        Spacer(Modifier.height(12.dp))
+        Text("${save.displayName()} не пережил голод", fontWeight = FontWeight.SemiBold, fontSize = 18.sp, color = TextMain)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Таракана слишком долго не кормили — реальное время шло, даже пока приложение было закрыто. " +
+                "В следующий раз загляни покормить почаще.",
+            fontSize = 12.sp, color = TextDim, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+        Spacer(Modifier.height(20.dp))
+        PrimaryButton("Завести нового таракана", onClick = onNewRoach)
     }
 }
 
@@ -121,7 +146,7 @@ fun SecondaryButton(text: String, modifier: Modifier = Modifier, onClick: () -> 
 }
 
 @Composable
-fun SelectScreen(save: SaveState, onBreed: (Breed) -> Unit, onColor: (String) -> Unit, onName: (String) -> Unit, onConfirm: () -> Unit) {
+fun SelectScreen(save: SaveState, onBreed: (Breed) -> Unit, onColor: (String) -> Unit, onName: (String) -> Unit, onRerollTrait: () -> Unit, onConfirm: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         CardBox {
             Text("Имя таракана", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = TextMain)
@@ -168,6 +193,15 @@ fun SelectScreen(save: SaveState, onBreed: (Breed) -> Unit, onColor: (String) ->
                         }
                     }
                     if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+            save.trait()?.let { trait ->
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Характер: ${trait.displayName}", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Amber)
+                        Text(trait.description, fontSize = 10.sp, color = TextDim)
+                    }
+                    SecondaryButton("🎲 Другой", onClick = onRerollTrait)
                 }
             }
         }
