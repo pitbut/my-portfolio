@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🪆 Замри! — кукла-судья для «Свет-стоп»</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #101418 0%, #1b2127 50%, #101418 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #43A047, #2e7d32);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 160, 71, 0.35);
+        }
+
+        .back-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 160, 71, 0.5);
+        }
+
+        .content {
+            background: #fff;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #E53935, #FFC107);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.4em;
+            margin-bottom: 20px;
+            font-weight: 900;
+        }
+
+        h2 {
+            color: #E53935;
+            margin-top: 32px;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+
+        p {
+            margin-bottom: 18px;
+            font-size: 1.05em;
+            color: #444;
+        }
+
+        .hero {
+            width: 100%;
+            border-radius: 15px;
+            margin: 20px 0 30px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 18px 0 8px;
+        }
+
+        .badge {
+            background: #101418;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+
+        ul {
+            margin-left: 24px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, rgba(229, 57, 53, 0.08), rgba(255, 193, 7, 0.12));
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #E53935;
+            margin: 24px 0;
+        }
+
+        .cta {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #E53935, #c62828);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.35);
+        }
+
+        .screens {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .screen-placeholder {
+            aspect-ratio: 9 / 16;
+            background: linear-gradient(135deg, #37474F, #101418);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            font-size: 0.85em;
+            text-align: center;
+            padding: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .content { padding: 30px 20px; }
+            h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../../index.html" class="back-link">← Вернуться к портфолио</a>
+
+        <div class="content">
+            <h1>🪆 Замри! — кукла-судья для «Свет-стоп»</h1>
+
+            <img class="hero" src="preview.svg" alt="Замри! — превью приложения">
+
+            <div class="badges">
+                <span class="badge">Kotlin</span>
+                <span class="badge">Jetpack Compose</span>
+                <span class="badge">CameraX</span>
+                <span class="badge">Room</span>
+                <span class="badge">MVVM</span>
+                <span class="badge">Android 16 (SDK 36)</span>
+            </div>
+
+            <p>
+                «Замри!» — Android-приложение, которое превращает телефон в полностью автономного
+                судью дворовой игры «Свет-стоп» (в духе «Красный свет, зелёный свет»): кукла на
+                экране поворачивается спиной и лицом, командует голосом, а фронтальная камера
+                следит за игроками во время красного света и ловит любое движение.
+            </p>
+
+            <h2>🎮 Как это работает</h2>
+            <ul>
+                <li>Кладёте телефон на стол экраном и камерой к игрокам, жмёте «Начать игру»;</li>
+                <li>Отсчёт 3‑2‑1 даёт время отойти;</li>
+                <li>Кукла отворачивается — можно двигаться (зелёный свет, случайная длительность);</li>
+                <li>Кукла поворачивается и говорит «Стоп!» — все замирают, включается детектор движения;</li>
+                <li>Если кто-то шевельнулся — приложение делает снимок, обводит область движения
+                    красным крестом, голосом называет сектор («Слева, второй!») и сохраняет
+                    фото в архив;</li>
+                <li>По окончании игры — статистика нарушений и архив-галерея всех снимков сессии.</li>
+            </ul>
+
+            <div class="highlight">
+                <p><strong>Компьютерное зрение без тяжёлых моделей:</strong> CameraX ImageAnalysis +
+                    покадровое дифференцирование (frame differencing) в оттенках серого, пороговая
+                    бинаризация и лёгкая морфология (erode/dilate) — работает в реальном времени на
+                    любом современном телефоне, детектор активен только во время красного света.</p>
+                <p><strong>Голос и звук:</strong> Android TextToSpeech озвучивает положение
+                    нарушителя динамически по номеру сектора, плюс короткие оригинальные
+                    звуковые сигналы старта/стопа фаз.</p>
+                <p><strong>Архитектура:</strong> MVVM, ViewModel + StateFlow, Room для метаданных
+                    нарушений, снимки — в MediaStore (Pictures/DollGame).</p>
+            </div>
+
+            <h2>📱 Скриншоты</h2>
+            <div class="screens">
+                <div class="screen-placeholder">Стартовый экран</div>
+                <div class="screen-placeholder">Зелёный свет</div>
+                <div class="screen-placeholder">Красный свет + детектор</div>
+                <div class="screen-placeholder">Оверлей нарушения</div>
+                <div class="screen-placeholder">Архив нарушений</div>
+                <div class="screen-placeholder">Настройки</div>
+            </div>
+
+            <h2>⬇️ Установка APK</h2>
+            <p>
+                APK собирается автоматически через GitHub Actions при каждом обновлении проекта
+                и прикладывается к релизам репозитория.
+            </p>
+            <a class="cta" href="https://github.com/pitbut/my-portfolio/releases" target="_blank" rel="noopener">
+                Скачать APK из GitHub Releases
+            </a>
+            <p style="margin-top: 16px;">
+                После скачивания откройте APK на Android-устройстве и разрешите установку из
+                неизвестных источников для браузера/файлового менеджера, которым вы его открыли.
+            </p>
+
+            <h2>🔐 Разрешения</h2>
+            <ul>
+                <li><strong>Камера</strong> — обязательно, для отслеживания движения игроков;</li>
+                <li><strong>Запись звука</strong> — зарезервировано под будущий анализ звука;</li>
+                <li><strong>Доступ к медиа (запись изображений)</strong> — только на Android 9 и
+                    ниже, где сохранение в галерею требует классического разрешения; на
+                    современных версиях используется MediaStore без дополнительных разрешений.</li>
+            </ul>
+
+            <p>Исходный код проекта: <code>projects/zamri/</code> в этом репозитории —
+                стандартный Gradle Kotlin DSL проект (модуль <code>app/</code>), подробности сборки
+                и архитектуры — в <a href="https://github.com/pitbut/my-portfolio/tree/main/projects/zamri" target="_blank" rel="noopener">README проекта</a>.</p>
+
+            <div style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #f0f0f0; text-align: center;">
+                <p style="color: #999;">Все звуки и образ куклы — оригинальные, без использования
+                    материалов из фильмов и сериалов.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">Замри!</string>
+
+    <!-- Start screen -->
+    <string name="start_title">Замри!</string>
+    <string name="start_subtitle">Кукла-судья для игры «Свет‑стоп»</string>
+    <string name="start_play">Начать игру</string>
+    <string name="start_settings">Настройки</string>
+    <string name="start_archive">Архив нарушений</string>
+    <string name="start_hint">Положи телефон на стол экраном и камерой к игрокам</string>
+
+    <!-- Permissions -->
+    <string name="permission_camera_rationale">Нужен доступ к камере, чтобы судья видел игроков и ловил движение на красном свете</string>
+    <string name="permission_grant">Дать разрешение</string>
+    <string name="permission_denied">Без камеры игра невозможна. Разрешите доступ в настройках приложения</string>
+
+    <!-- Countdown -->
+    <string name="countdown_title">Приготовьтесь!</string>
+    <string name="countdown_hint">Отойдите от телефона</string>
+
+    <!-- Game phases -->
+    <string name="phase_green">Зелёный свет</string>
+    <string name="phase_red">Красный свет</string>
+    <string name="phase_green_hint">Можно двигаться</string>
+    <string name="phase_red_hint">Замрите на месте!</string>
+    <string name="finish_button">Финиш</string>
+
+    <!-- Voice phrases (also generated dynamically in code) -->
+    <string name="voice_green">Зелёный свет!</string>
+    <string name="voice_red">Красный свет! Не двигаться!</string>
+    <string name="voice_center">По центру!</string>
+    <string name="voice_side_left">Слева</string>
+    <string name="voice_side_right">Справа</string>
+    <string name="voice_lane_format">%1$s, %2$d!</string>
+
+    <!-- Result / finish -->
+    <string name="result_title">Игра окончена</string>
+    <string name="result_violations">Нарушений: %1$d</string>
+    <string name="result_rounds">Раундов сыграно: %1$d</string>
+    <string name="result_new_game">Новая игра</string>
+    <string name="result_to_archive">Открыть архив</string>
+    <string name="voice_finish">Игра окончена! Спасибо за игру!</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_round_duration">Длительность игры, сек</string>
+    <string name="settings_green_range">Диапазон зелёного света, сек</string>
+    <string name="settings_red_duration">Длительность неподвижности на красном, сек</string>
+    <string name="settings_sectors">Количество секторов кадра</string>
+    <string name="settings_sound_enabled">Звук и голос</string>
+    <string name="settings_volume">Громкость</string>
+    <string name="settings_sensitivity">Чувствительность детектора движения</string>
+    <string name="settings_back">Готово</string>
+
+    <!-- Archive -->
+    <string name="archive_title">Архив нарушений</string>
+    <string name="archive_empty">Пока нет ни одного нарушения</string>
+    <string name="archive_round_filter">Раунд</string>
+    <string name="archive_round_all">Все</string>
+    <string name="archive_item_format">Раунд %1$d · %2$s · %3$s</string>
+
+    <!-- Violation overlay -->
+    <string name="violation_caught">Нарушение!</string>
+
+    <string name="side_left">Слева</string>
+    <string name="side_right">Справа</string>
+    <string name="side_center">По центру</string>
+
+    <string name="cd_photo_thumbnail">Снимок нарушения</string>
+    <string name="cd_back">Назад</string>
+    <string name="cd_doll">Кукла-судья</string>
+</resources>
