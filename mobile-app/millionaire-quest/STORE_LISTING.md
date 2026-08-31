@@ -88,7 +88,7 @@ your own unique quest.
 - Privacy policy: `https://www.robutpit.com/projects/millionaire-quest/privacy-policy.html`
   (после деплоя сайта / after the site is deployed)
 - Website: `https://www.robutpit.com`
-- Support email: укажите свой контактный email / provide your contact email
+- Support email: gtnz1071980@gmail.com
 - Данные пользователей: приложение не собирает и не передаёт данные —
   весь прогресс хранится локально на устройстве (localStorage), сеть не
   используется / The app collects and transmits no user data — all
