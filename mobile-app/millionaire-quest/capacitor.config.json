@@ -1,0 +1,9 @@
+{
+  "appId": "com.robutpit.millionairequest",
+  "appName": "Как стать миллиардером",
+  "webDir": "www",
+  "backgroundColor": "#1a1a2e",
+  "android": {
+    "backgroundColor": "#1a1a2e"
+  }
+}

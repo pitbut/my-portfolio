@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Как стать миллиардером</string>
+    <string name="title_activity_main">Как стать миллиардером</string>
+    <string name="package_name">com.robutpit.millionairequest</string>
+    <string name="custom_url_scheme">com.robutpit.millionairequest</string>
+</resources>

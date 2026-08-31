@@ -1,0 +1,22 @@
+{
+  "name": "millionaire-quest",
+  "version": "1.0.0",
+  "description": "Mobile (Android) wrapper for the 'How to Become a Billionaire' puzzle quest, RU/EN.",
+  "main": "index.js",
+  "scripts": {
+    "sync": "cap sync android",
+    "open:android": "cap open android",
+    "build:debug": "cap sync android && cd android && ./gradlew assembleDebug",
+    "build:release": "cap sync android && cd android && ./gradlew bundleRelease"
+  },
+  "keywords": ["quest", "puzzle", "capacitor", "android"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0"
+  }
+}
