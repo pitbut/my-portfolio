@@ -37,4 +37,9 @@
 
     <!-- This app works fully offline (all data is stored on-device via localStorage),
          so no network permission is requested. -->
+
+    <!-- Lets players take a photo directly (in addition to picking one from the
+         gallery) when building a quest level or the treasure photo. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

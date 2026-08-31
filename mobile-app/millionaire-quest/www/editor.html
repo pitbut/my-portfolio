@@ -89,15 +89,23 @@
         .upload-area {
             border: 3px dashed #FFD700;
             border-radius: 10px;
-            padding: 40px 20px;
+            padding: 25px 20px;
             text-align: center;
-            cursor: pointer;
             transition: all 0.3s;
             background: #fffef8;
         }
 
-        .upload-area:hover { background: #fff8dc; border-color: #FFA500; }
         .upload-area.has-image { border-style: solid; border-color: #4CAF50; padding: 20px; }
+
+        .upload-btn-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .upload-btn-row .btn { flex: 1 1 160px; max-width: 220px; }
 
         .preview-container {
             position: relative;
@@ -288,10 +296,15 @@
         <div class="section">
             <div class="section-title" data-i18n="treasureSectionTitle">🏆 Финальное сокровище</div>
 
-            <div class="upload-area" id="treasureUpload" onclick="document.getElementById('treasureInput').click()">
-                <p style="font-size: 1.2em;" data-i18n="treasureUploadText">📸 Загрузите фото места с сокровищем</p>
+            <div class="upload-area" id="treasureUpload">
+                <p style="font-size: 1.2em;" data-i18n="treasureUploadText">Добавьте фото места с сокровищем</p>
+                <div class="upload-btn-row">
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('treasureInputCamera').click()" data-i18n="takePhotoBtn">📷 Сделать фото</button>
+                    <button type="button" class="btn" style="background: #e0e0e0;" onclick="document.getElementById('treasureInputGallery').click()" data-i18n="chooseGalleryBtn">🖼️ Из галереи</button>
+                </div>
             </div>
-            <input type="file" id="treasureInput" accept="image/*" style="display: none;" onchange="handleTreasureUpload(event)">
+            <input type="file" id="treasureInputCamera" accept="image/*" capture="environment" style="display: none;" onchange="handleTreasureUpload(event)">
+            <input type="file" id="treasureInputGallery" accept="image/*" style="display: none;" onchange="handleTreasureUpload(event)">
 
             <div class="preview-container" id="treasurePreview">
                 <img class="preview-img" id="treasureImg" onclick="setTreasureMarker(event)">
@@ -464,11 +477,16 @@
 
                     <div style="margin-bottom: 15px;">
                         <label>${t('levelImageLabel')}</label>
-                        <div class="upload-area ${level.image ? 'has-image' : ''}"
-                             onclick="document.getElementById('imageInput-${index}').click()">
+                        <div class="upload-area ${level.image ? 'has-image' : ''}">
                             <p>${level.image ? t('uploadedText') : t('uploadText')}</p>
+                            <div class="upload-btn-row">
+                                <button type="button" class="btn btn-primary" onclick="document.getElementById('imageInputCamera-${index}').click()">${t('takePhotoBtn')}</button>
+                                <button type="button" class="btn" style="background: #e0e0e0;" onclick="document.getElementById('imageInputGallery-${index}').click()">${t('chooseGalleryBtn')}</button>
+                            </div>
                         </div>
-                        <input type="file" id="imageInput-${index}" accept="image/*"
+                        <input type="file" id="imageInputCamera-${index}" accept="image/*" capture="environment"
+                               style="display: none;" onchange="handleImageUpload(event, ${index})">
+                        <input type="file" id="imageInputGallery-${index}" accept="image/*"
                                style="display: none;" onchange="handleImageUpload(event, ${index})">
                     </div>
 
