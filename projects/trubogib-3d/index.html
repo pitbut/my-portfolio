@@ -224,6 +224,11 @@
         <span id="diameterValue">16 мм</span>
       </div>
       <div class="control-group">
+        <label for="thicknessInput">Толщина стенки:</label>
+        <input type="range" id="thicknessInput" min="0" max="15" step="0.5" value="2">
+        <span id="thicknessValue">2 мм</span>
+      </div>
+      <div class="control-group">
         <label for="endSelect">Торцы:</label>
         <select id="endSelect">
           <option value="flat">Прямые</option>
@@ -253,7 +258,7 @@
           <canvas id="sketchCanvas"></canvas>
           <div class="empty-hint" id="sketchHint">Проведи пальцем линию —<br>дрожание руки уберётся само</div>
         </div>
-        <p class="hint">Клетка сетки = 20 мм</p>
+        <p class="hint">Клетка сетки = 20 мм · точку можно тащить, тап по точке — удалить, тап по линии — добавить точку</p>
       </div>
       <div class="panel">
         <h3 id="viewportTitleBend">3D просмотр</h3>
@@ -346,7 +351,13 @@ let cw = 0, ch = 0, sdpr = 1;
 let rawStroke = [];
 let smoothedStroke = [];
 let finalPoints = [];  // упрощённые точки текущего черновика (координаты холста)
-let drawing = false;
+let editMode = null;   // null | 'draw' (новая линия) | 'node' (двигаем/вставляем точку)
+let editingNodeIndex = -1;
+let editDownPoint = null;
+let nodeWasInserted = false;
+const NODE_HIT_RADIUS = 14;   // px — попадание в существующую точку
+const SEGMENT_HIT_RADIUS = 10; // px — попадание в отрезок между точками (вставка новой точки)
+const TAP_MAX_MOVE = 4;       // px — тап (без сдвига) на точке = удалить
 
 function resizeSketchCanvas() {
   sdpr = window.devicePixelRatio || 1;
@@ -387,15 +398,50 @@ function strokeLine(points, color, width) {
 
 function drawSketch() {
   drawGrid();
-  if (drawing && smoothedStroke.length > 1) {
+  if (editMode === 'draw' && smoothedStroke.length > 1) {
     strokeLine(smoothedStroke, '#FFA500', 3);
   } else if (finalPoints.length > 1) {
     strokeLine(finalPoints, '#FFD700', 3);
-    sketchCtx.fillStyle = '#FFD700';
-    finalPoints.forEach(p => {
-      sketchCtx.beginPath(); sketchCtx.arc(p.x, p.y, 3, 0, Math.PI * 2); sketchCtx.fill();
+    finalPoints.forEach((p, i) => {
+      const active = editMode === 'node' && i === editingNodeIndex;
+      sketchCtx.fillStyle = active ? '#ffffff' : '#FFD700';
+      sketchCtx.beginPath(); sketchCtx.arc(p.x, p.y, active ? 7 : 5, 0, Math.PI * 2); sketchCtx.fill();
+      if (active) {
+        sketchCtx.strokeStyle = '#FFA500';
+        sketchCtx.lineWidth = 2;
+        sketchCtx.beginPath(); sketchCtx.arc(p.x, p.y, 11, 0, Math.PI * 2); sketchCtx.stroke();
+      }
     });
   }
+}
+
+function nearestNodeIndex(p) {
+  let best = -1, bestDist = NODE_HIT_RADIUS;
+  finalPoints.forEach((fp, i) => {
+    const d = Math.hypot(p.x - fp.x, p.y - fp.y);
+    if (d < bestDist) { bestDist = d; best = i; }
+  });
+  return best;
+}
+
+function projectPointOnSegment(p, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len2 = dx * dx + dy * dy;
+  let t = len2 === 0 ? 0 : ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  return { point: { x: a.x + t * dx, y: a.y + t * dy }, t };
+}
+
+function nearestSegmentInsertion(p) {
+  let best = null, bestDist = SEGMENT_HIT_RADIUS;
+  for (let i = 0; i < finalPoints.length - 1; i++) {
+    const proj = projectPointOnSegment(p, finalPoints[i], finalPoints[i + 1]);
+    if (proj.t > 0.04 && proj.t < 0.96) {
+      const d = Math.hypot(p.x - proj.point.x, p.y - proj.point.y);
+      if (d < bestDist) { bestDist = d; best = { index: i, point: proj.point }; }
+    }
+  }
+  return best;
 }
 
 function canvasPointFromEvent(e) {
@@ -409,17 +455,50 @@ const MIN_POINT_DIST = 2;
 
 sketchCanvas.addEventListener('pointerdown', (e) => {
   sketchCanvas.setPointerCapture(e.pointerId);
-  drawing = true;
   const p = canvasPointFromEvent(e);
-  rawStroke = [p];
-  smoothedStroke = [p];
+  editDownPoint = p;
+
+  if (finalPoints.length >= 2) {
+    const nodeIdx = nearestNodeIndex(p);
+    if (nodeIdx !== -1) {
+      editMode = 'node';
+      editingNodeIndex = nodeIdx;
+      nodeWasInserted = false;
+      drawSketch();
+      return;
+    }
+    const seg = nearestSegmentInsertion(p);
+    if (seg) {
+      finalPoints.splice(seg.index + 1, 0, seg.point);
+      editMode = 'node';
+      editingNodeIndex = seg.index + 1;
+      nodeWasInserted = true;
+      rebuildDraft();
+      drawSketch();
+      return;
+    }
+  }
+
+  // ничего не задели — рисуем новую линию с нуля
+  editMode = 'draw';
+  const startP = p;
+  rawStroke = [startP];
+  smoothedStroke = [startP];
   sketchHint.style.display = 'none';
   drawSketch();
 });
 
 sketchCanvas.addEventListener('pointermove', (e) => {
-  if (!drawing) return;
   const p = canvasPointFromEvent(e);
+
+  if (editMode === 'node') {
+    finalPoints[editingNodeIndex] = p;
+    drawSketch();
+    rebuildDraft();
+    return;
+  }
+
+  if (editMode !== 'draw') return;
   const last = rawStroke[rawStroke.length - 1];
   if (Math.hypot(p.x - last.x, p.y - last.y) < MIN_POINT_DIST) return;
   rawStroke.push(p);
@@ -428,9 +507,22 @@ sketchCanvas.addEventListener('pointermove', (e) => {
   drawSketch();
 });
 
-function finishStroke() {
-  if (!drawing) return;
-  drawing = false;
+function finishStroke(e) {
+  if (editMode === 'node') {
+    const p = canvasPointFromEvent(e);
+    const moved = editDownPoint ? Math.hypot(p.x - editDownPoint.x, p.y - editDownPoint.y) : 999;
+    if (moved < TAP_MAX_MOVE && !nodeWasInserted && finalPoints.length > 2) {
+      finalPoints.splice(editingNodeIndex, 1); // тап без сдвига — удалить точку
+    }
+    editMode = null;
+    editingNodeIndex = -1;
+    rebuildDraft();
+    drawSketch();
+    return;
+  }
+
+  if (editMode !== 'draw') return;
+  editMode = null;
   if (smoothedStroke.length >= 2) {
     finalPoints = simplify(smoothedStroke, SIMPLIFY_EPS);
     rebuildDraft();
@@ -445,7 +537,8 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   finalPoints = [];
   smoothedStroke = [];
   rawStroke = [];
-  drawing = false;
+  editMode = null;
+  editingNodeIndex = -1;
   sketchHint.style.display = 'flex';
   drawSketch();
   clearDraft();
@@ -466,37 +559,48 @@ function profileGeomParams(profile, size) {
     : { radius: size / 2, radialSegments: 24 };
 }
 
-function addCaps(group, curve, radius, radialSegments, endStyle, material) {
+function addCaps(group, curve, outerRadius, innerRadius, hasWall, radialSegments, endStyle, material) {
   if (endStyle === 'open') return;
   const pStart = curve.getPointAt(0), pEnd = curve.getPointAt(1);
   const tStart = curve.getTangentAt(0), tEnd = curve.getTangentAt(1);
 
   if (endStyle === 'round') {
-    const capGeo = new THREE.SphereGeometry(radius, Math.max(radialSegments, 8), Math.max(radialSegments, 8));
+    const capGeo = new THREE.SphereGeometry(outerRadius, Math.max(radialSegments, 8), Math.max(radialSegments, 8));
     const capA = new THREE.Mesh(capGeo, material); capA.position.copy(pStart); group.add(capA);
     const capB = new THREE.Mesh(capGeo, material); capB.position.copy(pEnd); group.add(capB);
   } else {
-    const discGeo = new THREE.CircleGeometry(radius, radialSegments);
-    const capA = new THREE.Mesh(discGeo, material);
+    // при заданной толщине стенки торец — кольцо (видна сама стенка), иначе сплошной диск
+    const capGeo = hasWall
+      ? new THREE.RingGeometry(innerRadius, outerRadius, radialSegments)
+      : new THREE.CircleGeometry(outerRadius, radialSegments);
+    const capA = new THREE.Mesh(capGeo, material);
     capA.position.copy(pStart); capA.lookAt(pStart.clone().add(tStart));
     group.add(capA);
-    const capB = new THREE.Mesh(discGeo, material);
+    const capB = new THREE.Mesh(capGeo, material);
     capB.position.copy(pEnd); capB.lookAt(pEnd.clone().add(tEnd));
     group.add(capB);
   }
 }
 
 // worldPoints: THREE.Vector3[] в мм. Возвращает { group, length, bbox }
-function createPartGroup(worldPoints, profile, size, endStyle, color) {
+function createPartGroup(worldPoints, profile, size, thickness, endStyle, color) {
   const curve = new THREE.CatmullRomCurve3(worldPoints, false, 'catmullrom', 0.5);
-  const { radius, radialSegments } = profileGeomParams(profile, size);
+  const { radius: outerRadius, radialSegments } = profileGeomParams(profile, size);
+  const hasWall = thickness > 0.3;
+  const innerRadius = hasWall ? Math.max(outerRadius - thickness, outerRadius * 0.15) : 0;
   const tubularSegments = Math.max(worldPoints.length * 8, 64);
-  const geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, false);
   const material = new THREE.MeshStandardMaterial({ color: color || 0xff9a1e, metalness: 0.6, roughness: 0.35, side: THREE.DoubleSide });
 
   const group = new THREE.Group();
-  group.add(new THREE.Mesh(geometry, material));
-  addCaps(group, curve, radius, radialSegments, endStyle, material);
+  const outerGeo = new THREE.TubeGeometry(curve, tubularSegments, outerRadius, radialSegments, false);
+  group.add(new THREE.Mesh(outerGeo, material));
+  if (hasWall) {
+    // внутренняя стенка: та же труба меньшего радиуса — DoubleSide-материал
+    // сам разворачивает освещение при взгляде изнутри
+    const innerGeo = new THREE.TubeGeometry(curve, tubularSegments, innerRadius, radialSegments, false);
+    group.add(new THREE.Mesh(innerGeo, material));
+  }
+  addCaps(group, curve, outerRadius, innerRadius, hasWall, radialSegments, endStyle, material);
 
   let length = 0;
   for (let i = 1; i < worldPoints.length; i++) length += worldPoints[i].distanceTo(worldPoints[i - 1]);
@@ -504,7 +608,7 @@ function createPartGroup(worldPoints, profile, size, endStyle, color) {
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
   worldPoints.forEach(p => { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); });
 
-  return { group, length: Math.round(length), bbox: { width: Math.round(maxX - minX + radius * 2), depth: Math.round(maxZ - minZ + radius * 2) } };
+  return { group, length: Math.round(length), bbox: { width: Math.round(maxX - minX + outerRadius * 2), depth: Math.round(maxZ - minZ + outerRadius * 2) } };
 }
 
 function disposeGroup(group) {
@@ -632,6 +736,7 @@ function resizeViewport() {
 
 let currentProfile = 'round';
 let currentSize = 16;
+let currentThickness = 2;
 let currentEndStyle = 'flat';
 let draftGroup = null;
 let draftWorldPoints = null; // THREE.Vector3[] последнего построенного черновика
@@ -651,7 +756,7 @@ function clearDraft() {
 function rebuildDraft() {
   if (finalPoints.length < 2) return;
   draftWorldPoints = canvasPointsToWorld(finalPoints);
-  const { group, length, bbox } = createPartGroup(draftWorldPoints, currentProfile, currentSize, currentEndStyle);
+  const { group, length, bbox } = createPartGroup(draftWorldPoints, currentProfile, currentSize, currentThickness, currentEndStyle);
   if (draftGroup) { bendViewer.scene.remove(draftGroup); disposeGroup(draftGroup); }
   draftGroup = group;
   bendViewer.scene.add(draftGroup);
@@ -677,6 +782,12 @@ document.getElementById('sizeInput').addEventListener('input', (e) => {
   if (draftWorldPoints) rebuildDraft();
 });
 
+document.getElementById('thicknessInput').addEventListener('input', (e) => {
+  currentThickness = Number(e.target.value);
+  document.getElementById('thicknessValue').textContent = currentThickness > 0 ? (currentThickness + ' мм') : 'сплошная';
+  if (draftWorldPoints) rebuildDraft();
+});
+
 document.getElementById('endSelect').addEventListener('change', (e) => {
   currentEndStyle = e.target.value;
   if (draftWorldPoints) rebuildDraft();
@@ -694,7 +805,7 @@ document.getElementById('saveCancelBtn').addEventListener('click', () => saveRow
 document.getElementById('saveConfirmBtn').addEventListener('click', () => {
   if (!draftWorldPoints) return;
   const name = document.getElementById('saveNameInput').value.trim() || ('Деталь ' + (savedParts.length + 1));
-  const { length, bbox } = createPartGroup(draftWorldPoints, currentProfile, currentSize, currentEndStyle);
+  const { length, bbox } = createPartGroup(draftWorldPoints, currentProfile, currentSize, currentThickness, currentEndStyle);
   const idx = savedParts.length;
   // центрируем точки относительно собственного bounding box детали,
   // чтобы положение/поворот в сборке считались от геометрического центра, а не от точки старта рисования
@@ -707,6 +818,7 @@ document.getElementById('saveConfirmBtn').addEventListener('click', () => {
     name,
     profile: currentProfile,
     size: currentSize,
+    thickness: currentThickness,
     endStyle: currentEndStyle,
     points: centeredPoints,
     length, bbox,
@@ -795,7 +907,7 @@ function rebuildAssemblyScene() {
   assemblyGroupById = {};
   savedParts.forEach(part => {
     const pts = part.points.map(p => new THREE.Vector3(p.x, p.y, p.z));
-    const { group } = createPartGroup(pts, part.profile, part.size, part.endStyle);
+    const { group } = createPartGroup(pts, part.profile, part.size, part.thickness || 0, part.endStyle);
     group.position.set(part.assembly.x, part.assembly.y || 0, part.assembly.z);
     group.rotation.y = (part.assembly.rotY || 0) * Math.PI / 180;
     assemblyViewer.scene.add(group);
@@ -861,9 +973,10 @@ function renderPartsList() {
     const card = document.createElement('div');
     card.className = 'part-card' + (part.id === selectedPartId ? ' selected' : '');
     const profileLabel = part.profile === 'square' ? 'квадрат ' + part.size + ' мм' : 'труба Ø' + part.size + ' мм';
+    const wallLabel = part.thickness > 0.3 ? ('стенка ' + part.thickness + ' мм') : 'сплошная';
     card.innerHTML =
       '<div class="name">' + escapeHtml(part.name) + '</div>' +
-      '<div class="meta">' + profileLabel + ' · длина ' + part.length + ' мм · габариты ' + part.bbox.width + '×' + part.bbox.depth + ' мм</div>' +
+      '<div class="meta">' + profileLabel + ' · ' + wallLabel + ' · длина ' + part.length + ' мм · габариты ' + part.bbox.width + '×' + part.bbox.depth + ' мм</div>' +
       '<div class="actions"><button class="selectBtn">Выбрать</button><button class="danger deleteBtn">Удалить</button></div>';
     card.querySelector('.selectBtn').addEventListener('click', () => selectPart(part.id));
     card.querySelector('.deleteBtn').addEventListener('click', () => {
