@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Трубогиб 3D — гибка профиля по траектории</title>
+<title>Трубогиб 3D — гибка профиля и сборка деталей</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
@@ -43,12 +43,29 @@
     margin-bottom: 6px;
   }
 
-  .subtitle { color: #9aa5c0; margin-bottom: 20px; font-size: 0.95em; }
+  .subtitle { color: #9aa5c0; margin-bottom: 18px; font-size: 0.95em; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab-btn {
+    background: rgba(255,255,255,0.05);
+    color: #9aa5c0;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.92em;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #FFA500, #FFD700);
+    color: #000;
+    border-color: transparent;
+  }
 
   .controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 14px 22px;
+    gap: 12px 20px;
     align-items: center;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.08);
@@ -57,13 +74,13 @@
     margin-bottom: 20px;
   }
 
-  .control-group { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: #c7cee3; }
-  .control-group input[type="range"] { width: 130px; accent-color: #FFA500; }
+  .control-group { display: flex; align-items: center; gap: 8px; font-size: 0.88em; color: #c7cee3; }
+  .control-group input[type="range"] { width: 110px; accent-color: #FFA500; }
   .control-group select {
     background: #1a2340; color: #e8ecf5; border: 1px solid rgba(255,255,255,0.15);
     border-radius: 8px; padding: 6px 10px; font-size: 0.9em;
   }
-  #diameterValue, #lengthInfo { color: #FFD700; font-weight: 600; min-width: 60px; }
+  #diameterValue, #lengthInfo, #bboxInfo { color: #FFD700; font-weight: 600; }
 
   button {
     background: rgba(255,255,255,0.08);
@@ -71,16 +88,36 @@
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 10px;
     padding: 9px 18px;
-    font-size: 0.9em;
+    font-size: 0.88em;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s ease, transform 0.1s ease;
   }
   button:hover { background: rgba(255,255,255,0.16); }
   button:active { transform: scale(0.96); }
+  button:disabled { opacity: 0.4; cursor: default; }
   button.primary {
     background: linear-gradient(135deg, #FFA500, #FFD700);
     color: #000; border: none;
+  }
+  button.danger { border-color: rgba(255,100,100,0.4); color: #ff9797; }
+  button.toggle-on { background: rgba(255,165,0,0.25); border-color: #FFA500; color: #FFD700; }
+
+  .save-row {
+    display: none;
+    gap: 8px;
+    align-items: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+  }
+  .save-row.open { display: flex; }
+  .save-row input[type="text"] {
+    flex: 1; min-width: 120px;
+    background: #1a2340; color: #e8ecf5; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 8px 12px; font-size: 0.9em;
   }
 
   .panels {
@@ -104,9 +141,6 @@
     color: #9aa5c0;
     font-weight: 600;
     margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
 
   .canvas-wrap {
@@ -139,42 +173,123 @@
     font-size: 0.9em;
     pointer-events: none;
   }
+
+  .parts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+
+  .part-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .part-card.selected { border-color: #FFA500; background: rgba(255,165,0,0.1); }
+  .part-card .name { font-weight: 600; font-size: 0.92em; margin-bottom: 3px; }
+  .part-card .meta { font-size: 0.78em; color: #8b93b3; margin-bottom: 8px; }
+  .part-card .actions { display: flex; gap: 6px; }
+  .part-card .actions button { padding: 6px 12px; font-size: 0.8em; }
+
+  .empty-list { color: #4d577a; font-size: 0.88em; text-align: center; padding: 30px 10px; }
 </style>
 </head>
 <body>
 <div class="container">
   <a class="back-link" href="../../index.html">← Назад к проектам</a>
   <h1>Трубогиб 3D</h1>
-  <p class="subtitle">Рисуешь траекторию гиба — труба выгибается по ней. Прототип для будущего мобильного 3D-конструктора мебели.</p>
+  <p class="subtitle">Гнёшь профиль по нарисованной траектории, сохраняешь деталь и вставляешь в сборку. Прототип мобильного 3D-конструктора мебели.</p>
 
-  <div class="controls">
-    <div class="control-group">
-      <label for="diameterInput">Диаметр трубы:</label>
-      <input type="range" id="diameterInput" min="6" max="40" step="1" value="16">
-      <span id="diameterValue">16 мм</span>
-    </div>
-    <div class="control-group">
-      <span>Заготовка:</span>
-      <span id="lengthInfo">— мм</span>
-    </div>
-    <button id="clearBtn">Очистить</button>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabBend">Гибка</button>
+    <button class="tab-btn" id="tabAssembly">Сборка<span id="partsCountBadge"></span></button>
   </div>
 
-  <div class="panels">
-    <div class="panel">
-      <h3>Траектория гиба (вид сверху)</h3>
-      <div class="canvas-wrap">
-        <canvas id="sketchCanvas"></canvas>
-        <div class="empty-hint" id="sketchHint">Проведи пальцем линию —<br>дрожание руки уберётся само</div>
+  <!-- ===================== ВКЛАДКА "ГИБКА" ===================== -->
+  <div id="bendView">
+    <div class="controls">
+      <div class="control-group">
+        <label for="profileSelect">Профиль:</label>
+        <select id="profileSelect">
+          <option value="round">Труба (круг)</option>
+          <option value="square">Профиль (квадрат)</option>
+        </select>
       </div>
-      <p class="hint">Клетка сетки = 20 мм</p>
+      <div class="control-group">
+        <label for="sizeInput" id="sizeLabel">Диаметр:</label>
+        <input type="range" id="sizeInput" min="6" max="40" step="1" value="16">
+        <span id="diameterValue">16 мм</span>
+      </div>
+      <div class="control-group">
+        <label for="endSelect">Торцы:</label>
+        <select id="endSelect">
+          <option value="flat">Прямые</option>
+          <option value="round">Закруглённые</option>
+          <option value="open">Открытые</option>
+        </select>
+      </div>
+      <button id="clearBtn">Очистить</button>
     </div>
-    <div class="panel">
-      <h3>3D просмотр</h3>
-      <div class="canvas-wrap">
-        <canvas id="three-canvas"></canvas>
+
+    <div class="controls">
+      <div class="control-group">Длина: <span id="lengthInfo">— мм</span></div>
+      <div class="control-group">Габариты: <span id="bboxInfo">— мм</span></div>
+      <button id="saveBtn" class="primary" disabled>Сохранить деталь</button>
+    </div>
+
+    <div class="save-row" id="saveRow">
+      <input type="text" id="saveNameInput" placeholder="Название детали">
+      <button id="saveConfirmBtn" class="primary">Ок</button>
+      <button id="saveCancelBtn">Отмена</button>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <h3>Траектория гиба (вид сверху)</h3>
+        <div class="canvas-wrap">
+          <canvas id="sketchCanvas"></canvas>
+          <div class="empty-hint" id="sketchHint">Проведи пальцем линию —<br>дрожание руки уберётся само</div>
+        </div>
+        <p class="hint">Клетка сетки = 20 мм</p>
       </div>
-      <p class="hint">Вращай пальцем/мышью, зум — колесо или щипок двумя пальцами</p>
+      <div class="panel">
+        <h3 id="viewportTitleBend">3D просмотр</h3>
+        <div class="canvas-wrap">
+          <canvas id="viewportCanvas"></canvas>
+        </div>
+        <p class="hint">Вращай пальцем/мышью, зум — колесо или щипок двумя пальцами</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ВКЛАДКА "СБОРКА" ===================== -->
+  <div id="assemblyView" style="display:none">
+    <div class="controls">
+      <button id="moveModeBtn">Двигать деталь</button>
+      <div class="control-group" id="rotateGroup" style="display:none">
+        <label for="rotateInput">Поворот:</label>
+        <input type="range" id="rotateInput" min="0" max="359" step="1" value="0">
+      </div>
+      <div class="control-group" id="selectedNameInfo" style="display:none"></div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <h3>Сохранённые детали</h3>
+        <div class="parts-list" id="partsList">
+          <p class="empty-list">Пока пусто. Согни деталь на вкладке «Гибка» и сохрани её.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Сборка (3D)</h3>
+        <div class="canvas-wrap">
+          <canvas id="assemblyCanvas"></canvas>
+        </div>
+        <p class="hint">Выбери деталь в списке или тапни по ней в 3D. «Двигать деталь» + перетаскивание — переместить.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -184,14 +299,10 @@
 //  СГЛАЖИВАНИЕ КАРАНДАША (шумоподавление) + УПРОЩЕНИЕ ЛИНИИ
 // ======================================================================
 
-// Экспоненциальное сглаживание в реальном времени, пока рисуем —
-// каждая новая точка "тянется" к сглаженной, дрожь руки гасится на лету.
 function emaPoint(prev, raw, alpha) {
   return { x: prev.x + (raw.x - prev.x) * alpha, y: prev.y + (raw.y - prev.y) * alpha };
 }
 
-// Упрощение полилинии (алгоритм Дугласа-Пекера) — убирает лишние
-// точки после того, как линия дорисована, оставляя только опорные.
 function simplify(points, epsilon) {
   if (points.length < 3) return points.slice();
 
@@ -231,19 +342,19 @@ const sketchCtx = sketchCanvas.getContext('2d');
 const sketchHint = document.getElementById('sketchHint');
 const GRID_STEP = 20; // px, соответствует 20 мм
 
-let cw = 0, ch = 0, dpr = 1;
-let rawStroke = [];       // точки как есть (для отладки, не используются напрямую)
-let smoothedStroke = [];  // точки после сглаживания в реальном времени
-let finalPoints = [];     // упрощённые точки после отпускания пальца (в координатах холста)
+let cw = 0, ch = 0, sdpr = 1;
+let rawStroke = [];
+let smoothedStroke = [];
+let finalPoints = [];  // упрощённые точки текущего черновика (координаты холста)
 let drawing = false;
 
 function resizeSketchCanvas() {
-  dpr = window.devicePixelRatio || 1;
+  sdpr = window.devicePixelRatio || 1;
   cw = sketchCanvas.clientWidth;
   ch = sketchCanvas.clientHeight;
-  sketchCanvas.width = Math.round(cw * dpr);
-  sketchCanvas.height = Math.round(ch * dpr);
-  sketchCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sketchCanvas.width = Math.round(cw * sdpr);
+  sketchCanvas.height = Math.round(ch * sdpr);
+  sketchCtx.setTransform(sdpr, 0, 0, sdpr, 0, 0);
   drawSketch();
 }
 
@@ -257,7 +368,6 @@ function drawGrid() {
   for (let y = 0; y <= ch; y += GRID_STEP) {
     sketchCtx.beginPath(); sketchCtx.moveTo(0, y + 0.5); sketchCtx.lineTo(cw, y + 0.5); sketchCtx.stroke();
   }
-  // оси через центр
   sketchCtx.strokeStyle = 'rgba(255,255,255,0.14)';
   sketchCtx.beginPath(); sketchCtx.moveTo(cw / 2 + 0.5, 0); sketchCtx.lineTo(cw / 2 + 0.5, ch); sketchCtx.stroke();
   sketchCtx.beginPath(); sketchCtx.moveTo(0, ch / 2 + 0.5); sketchCtx.lineTo(cw, ch / 2 + 0.5); sketchCtx.stroke();
@@ -281,7 +391,6 @@ function drawSketch() {
     strokeLine(smoothedStroke, '#FFA500', 3);
   } else if (finalPoints.length > 1) {
     strokeLine(finalPoints, '#FFD700', 3);
-    // узловые точки
     sketchCtx.fillStyle = '#FFD700';
     finalPoints.forEach(p => {
       sketchCtx.beginPath(); sketchCtx.arc(p.x, p.y, 3, 0, Math.PI * 2); sketchCtx.fill();
@@ -294,9 +403,9 @@ function canvasPointFromEvent(e) {
   return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
-const EMA_ALPHA = 0.35;      // сила сглаживания "на лету"
-const SIMPLIFY_EPS = 3;      // px — насколько сильно упрощаем после отпускания
-const MIN_POINT_DIST = 2;    // px — не пишем точки чаще этого расстояния
+const EMA_ALPHA = 0.35;
+const SIMPLIFY_EPS = 3;
+const MIN_POINT_DIST = 2;
 
 sketchCanvas.addEventListener('pointerdown', (e) => {
   sketchCanvas.setPointerCapture(e.pointerId);
@@ -324,7 +433,7 @@ function finishStroke() {
   drawing = false;
   if (smoothedStroke.length >= 2) {
     finalPoints = simplify(smoothedStroke, SIMPLIFY_EPS);
-    buildTubeFrom(finalPoints);
+    rebuildDraft();
   }
   drawSketch();
 }
@@ -339,155 +448,485 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   drawing = false;
   sketchHint.style.display = 'flex';
   drawSketch();
-  clearTube();
+  clearDraft();
 });
 
 window.addEventListener('resize', resizeSketchCanvas);
 
 // ======================================================================
-//  3D ПРОСМОТР — TRUBA ПО ТРАЕКТОРИИ + ОРБИТАЛЬНАЯ КАМЕРА
+//  ОБЩАЯ ГЕОМЕТРИЯ ДЕТАЛИ (труба/профиль + торцы) — переиспользуется
+//  и черновиком на вкладке "Гибка", и деталями в "Сборке"
 // ======================================================================
 
-const threeCanvas = document.getElementById('three-canvas');
-const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, 1, 1, 5000);
-
-scene.add(new THREE.AmbientLight(0x556080, 0.9));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-dirLight.position.set(150, 220, 150);
-scene.add(dirLight);
-const dirLight2 = new THREE.DirectionalLight(0x88aaff, 0.4);
-dirLight2.position.set(-150, 100, -150);
-scene.add(dirLight2);
-
-const gridHelper = new THREE.GridHelper(400, 20, 0x2a3559, 0x1c2340);
-scene.add(gridHelper);
-const axesHelper = new THREE.AxesHelper(60);
-scene.add(axesHelper);
-
-let tubeMesh = null;
-let capA = null, capB = null;
-let pipeRadius = 8; // мм
-
-function clearTube() {
-  if (tubeMesh) { scene.remove(tubeMesh); tubeMesh.geometry.dispose(); tubeMesh.material.dispose(); tubeMesh = null; }
-  if (capA) { scene.remove(capA); capA.geometry.dispose(); capA = null; }
-  if (capB) { scene.remove(capB); capB.geometry.dispose(); capB = null; }
-  document.getElementById('lengthInfo').textContent = '— мм';
+function profileGeomParams(profile, size) {
+  // radialSegments=4 у THREE.TubeGeometry даёт ровно квадратное сечение
+  // (4 точки по кругу), radialSegments=24 — гладкий круг.
+  return profile === 'square'
+    ? { radius: size * 0.70711, radialSegments: 4 }
+    : { radius: size / 2, radialSegments: 24 };
 }
 
-// Переводим точки холста (px) в мировые координаты 3D (мм), плоскость XZ (вид сверху)
+function addCaps(group, curve, radius, radialSegments, endStyle, material) {
+  if (endStyle === 'open') return;
+  const pStart = curve.getPointAt(0), pEnd = curve.getPointAt(1);
+  const tStart = curve.getTangentAt(0), tEnd = curve.getTangentAt(1);
+
+  if (endStyle === 'round') {
+    const capGeo = new THREE.SphereGeometry(radius, Math.max(radialSegments, 8), Math.max(radialSegments, 8));
+    const capA = new THREE.Mesh(capGeo, material); capA.position.copy(pStart); group.add(capA);
+    const capB = new THREE.Mesh(capGeo, material); capB.position.copy(pEnd); group.add(capB);
+  } else {
+    const discGeo = new THREE.CircleGeometry(radius, radialSegments);
+    const capA = new THREE.Mesh(discGeo, material);
+    capA.position.copy(pStart); capA.lookAt(pStart.clone().add(tStart));
+    group.add(capA);
+    const capB = new THREE.Mesh(discGeo, material);
+    capB.position.copy(pEnd); capB.lookAt(pEnd.clone().add(tEnd));
+    group.add(capB);
+  }
+}
+
+// worldPoints: THREE.Vector3[] в мм. Возвращает { group, length, bbox }
+function createPartGroup(worldPoints, profile, size, endStyle, color) {
+  const curve = new THREE.CatmullRomCurve3(worldPoints, false, 'catmullrom', 0.5);
+  const { radius, radialSegments } = profileGeomParams(profile, size);
+  const tubularSegments = Math.max(worldPoints.length * 8, 64);
+  const geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, false);
+  const material = new THREE.MeshStandardMaterial({ color: color || 0xff9a1e, metalness: 0.6, roughness: 0.35, side: THREE.DoubleSide });
+
+  const group = new THREE.Group();
+  group.add(new THREE.Mesh(geometry, material));
+  addCaps(group, curve, radius, radialSegments, endStyle, material);
+
+  let length = 0;
+  for (let i = 1; i < worldPoints.length; i++) length += worldPoints[i].distanceTo(worldPoints[i - 1]);
+
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  worldPoints.forEach(p => { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); });
+
+  return { group, length: Math.round(length), bbox: { width: Math.round(maxX - minX + radius * 2), depth: Math.round(maxZ - minZ + radius * 2) } };
+}
+
+function disposeGroup(group) {
+  group.traverse(obj => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) obj.material.dispose();
+  });
+}
+
+// ======================================================================
+//  ОБЩИЙ 3D-ВЬЮПОРТ (используется и вкладкой "Гибка", и "Сборка")
+//  один canvas + renderer, между вкладками переключается активная сцена
+// ======================================================================
+
+function createOrbitViewer(canvas, opts) {
+  opts = opts || {};
+  const scene = new THREE.Scene();
+  scene.add(new THREE.AmbientLight(0x556080, 0.9));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  dirLight.position.set(150, 220, 150);
+  scene.add(dirLight);
+  const dirLight2 = new THREE.DirectionalLight(0x88aaff, 0.4);
+  dirLight2.position.set(-150, 100, -150);
+  scene.add(dirLight2);
+  scene.add(new THREE.GridHelper(400, 20, 0x2a3559, 0x1c2340));
+  scene.add(new THREE.AxesHelper(60));
+
+  const camera = new THREE.PerspectiveCamera(45, 1, 1, 5000);
+  const orbit = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: opts.radius || 320, target: new THREE.Vector3(0, 0, 0) };
+
+  function updateCamera() {
+    const s = Math.sin(orbit.phi);
+    camera.position.set(
+      orbit.target.x + orbit.radius * s * Math.sin(orbit.theta),
+      orbit.target.y + orbit.radius * Math.cos(orbit.phi),
+      orbit.target.z + orbit.radius * s * Math.cos(orbit.theta)
+    );
+    camera.lookAt(orbit.target);
+  }
+  updateCamera();
+
+  const pointers = new Map();
+  let pressStart = null;
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (!viewerIsActive(canvas)) return;
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    pressStart = { x: e.clientX, y: e.clientY };
+    if (opts.onPointerDown) opts.onPointerDown(e);
+  });
+
+  canvas.addEventListener('pointermove', (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    const prev = pointers.get(e.pointerId);
+    const curr = { x: e.clientX, y: e.clientY };
+
+    const handled = opts.onDrag && opts.onDrag(e, curr, prev);
+    if (!handled) {
+      if (pointers.size === 1) {
+        const dx = curr.x - prev.x, dy = curr.y - prev.y;
+        orbit.theta -= dx * 0.008;
+        orbit.phi = Math.min(Math.max(orbit.phi - dy * 0.008, 0.15), Math.PI - 0.15);
+        updateCamera();
+      } else if (pointers.size === 2) {
+        pointers.set(e.pointerId, curr);
+        const pts = Array.from(pointers.values());
+        const prevPts = Array.from(pointers.entries()).map(([id, v]) => id === e.pointerId ? prev : v);
+        const distNow = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        const distPrev = Math.hypot(prevPts[0].x - prevPts[1].x, prevPts[0].y - prevPts[1].y);
+        orbit.radius = Math.min(Math.max(orbit.radius * (distPrev / Math.max(distNow, 1)), 60), 1200);
+        updateCamera();
+        pointers.set(e.pointerId, curr);
+        return;
+      }
+    }
+    pointers.set(e.pointerId, curr);
+  });
+
+  function release(e) {
+    pointers.delete(e.pointerId);
+    if (opts.onPointerUp) {
+      const moved = pressStart ? Math.hypot(e.clientX - pressStart.x, e.clientY - pressStart.y) : 999;
+      opts.onPointerUp(e, moved < 6);
+    }
+    pressStart = null;
+  }
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+  canvas.addEventListener('pointerleave', (e) => { if (pointers.size < 2) pointers.delete(e.pointerId); });
+
+  canvas.addEventListener('wheel', (e) => {
+    if (!viewerIsActive(canvas)) return;
+    e.preventDefault();
+    orbit.radius = Math.min(Math.max(orbit.radius * (1 + e.deltaY * 0.001), 60), 1200);
+    updateCamera();
+  }, { passive: false });
+
+  return { scene, camera, orbit, updateCamera };
+}
+
+function viewerIsActive(canvas) { return canvas.offsetParent !== null; }
+
+const viewportCanvas = document.getElementById('viewportCanvas');
+const assemblyCanvas = document.getElementById('assemblyCanvas');
+
+const renderer = new THREE.WebGLRenderer({ canvas: viewportCanvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const assemblyRenderer = new THREE.WebGLRenderer({ canvas: assemblyCanvas, antialias: true, alpha: true });
+assemblyRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+const bendViewer = createOrbitViewer(viewportCanvas);
+
+function resizeViewport() {
+  const w = viewportCanvas.clientWidth, h = viewportCanvas.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  bendViewer.camera.aspect = w / h;
+  bendViewer.camera.updateProjectionMatrix();
+}
+
+// ======================================================================
+//  ВКЛАДКА "ГИБКА" — состояние черновика
+// ======================================================================
+
+let currentProfile = 'round';
+let currentSize = 16;
+let currentEndStyle = 'flat';
+let draftGroup = null;
+let draftWorldPoints = null; // THREE.Vector3[] последнего построенного черновика
+
 function canvasPointsToWorld(points) {
   return points.map(p => new THREE.Vector3(p.x - cw / 2, 0, p.y - ch / 2));
 }
 
-function buildTubeFrom(points2d) {
-  if (points2d.length < 2) return;
-  const worldPoints = canvasPointsToWorld(points2d);
-
-  const curve = new THREE.CatmullRomCurve3(worldPoints, false, 'catmullrom', 0.5);
-  const tubularSegments = Math.max(worldPoints.length * 8, 64);
-  const geometry = new THREE.TubeGeometry(curve, tubularSegments, pipeRadius, 16, false);
-  const material = new THREE.MeshStandardMaterial({ color: 0xffa500, metalness: 0.6, roughness: 0.35 });
-
-  clearTube();
-  tubeMesh = new THREE.Mesh(geometry, material);
-  scene.add(tubeMesh);
-
-  // круглые "заглушки" на концах, чтобы труба смотрелась цельным стержнем
-  const capGeo = new THREE.SphereGeometry(pipeRadius, 16, 16);
-  capA = new THREE.Mesh(capGeo, material);
-  capA.position.copy(worldPoints[0]);
-  capB = new THREE.Mesh(capGeo, material);
-  capB.position.copy(worldPoints[worldPoints.length - 1]);
-  scene.add(capA, capB);
-
-  // длина заготовки — сумма длин отрезков по мировым точкам
-  let length = 0;
-  for (let i = 1; i < worldPoints.length; i++) length += worldPoints[i].distanceTo(worldPoints[i - 1]);
-  document.getElementById('lengthInfo').textContent = Math.round(length) + ' мм';
+function clearDraft() {
+  if (draftGroup) { bendViewer.scene.remove(draftGroup); disposeGroup(draftGroup); draftGroup = null; }
+  draftWorldPoints = null;
+  document.getElementById('lengthInfo').textContent = '— мм';
+  document.getElementById('bboxInfo').textContent = '— мм';
+  document.getElementById('saveBtn').disabled = true;
 }
 
-document.getElementById('diameterInput').addEventListener('input', (e) => {
-  pipeRadius = Number(e.target.value) / 2;
-  document.getElementById('diameterValue').textContent = e.target.value + ' мм';
-  if (finalPoints.length >= 2) buildTubeFrom(finalPoints);
-});
-
-// --- простая орбитальная камера (вращение пальцем/мышью, зум колесом/щипком) ---
-const orbit = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: 320, target: new THREE.Vector3(0, 0, 0) };
-const pointers = new Map();
-
-function updateCameraFromOrbit() {
-  const sinPhi = Math.sin(orbit.phi);
-  camera.position.set(
-    orbit.target.x + orbit.radius * sinPhi * Math.sin(orbit.theta),
-    orbit.target.y + orbit.radius * Math.cos(orbit.phi),
-    orbit.target.z + orbit.radius * sinPhi * Math.cos(orbit.theta)
-  );
-  camera.lookAt(orbit.target);
+function rebuildDraft() {
+  if (finalPoints.length < 2) return;
+  draftWorldPoints = canvasPointsToWorld(finalPoints);
+  const { group, length, bbox } = createPartGroup(draftWorldPoints, currentProfile, currentSize, currentEndStyle);
+  if (draftGroup) { bendViewer.scene.remove(draftGroup); disposeGroup(draftGroup); }
+  draftGroup = group;
+  bendViewer.scene.add(draftGroup);
+  document.getElementById('lengthInfo').textContent = length + ' мм';
+  document.getElementById('bboxInfo').textContent = bbox.width + ' × ' + bbox.depth + ' мм';
+  document.getElementById('saveBtn').disabled = false;
 }
 
-threeCanvas.addEventListener('pointerdown', (e) => {
-  threeCanvas.setPointerCapture(e.pointerId);
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+document.getElementById('profileSelect').addEventListener('change', (e) => {
+  currentProfile = e.target.value;
+  document.getElementById('sizeLabel').textContent = currentProfile === 'square' ? 'Сторона:' : 'Диаметр:';
+  if (currentProfile === 'square' && currentEndStyle === 'round') {
+    currentEndStyle = 'flat';
+    document.getElementById('endSelect').value = 'flat';
+  }
+  document.querySelector('#endSelect option[value="round"]').disabled = (currentProfile === 'square');
+  if (draftWorldPoints) rebuildDraft();
 });
 
-threeCanvas.addEventListener('pointermove', (e) => {
-  if (!pointers.has(e.pointerId)) return;
-  const prev = pointers.get(e.pointerId);
-  const curr = { x: e.clientX, y: e.clientY };
+document.getElementById('sizeInput').addEventListener('input', (e) => {
+  currentSize = Number(e.target.value);
+  document.getElementById('diameterValue').textContent = currentSize + ' мм';
+  if (draftWorldPoints) rebuildDraft();
+});
 
-  if (pointers.size === 1) {
-    const dx = curr.x - prev.x, dy = curr.y - prev.y;
-    orbit.theta -= dx * 0.008;
-    orbit.phi = Math.min(Math.max(orbit.phi - dy * 0.008, 0.15), Math.PI - 0.15);
-    updateCameraFromOrbit();
-  } else if (pointers.size === 2) {
-    pointers.set(e.pointerId, curr);
-    const pts = Array.from(pointers.values());
-    const prevPts = Array.from(pointers.entries()).map(([id, v]) => id === e.pointerId ? prev : v);
-    const distNow = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-    const distPrev = Math.hypot(prevPts[0].x - prevPts[1].x, prevPts[0].y - prevPts[1].y);
-    orbit.radius = Math.min(Math.max(orbit.radius * (distPrev / Math.max(distNow, 1)), 60), 1200);
-    updateCameraFromOrbit();
+document.getElementById('endSelect').addEventListener('change', (e) => {
+  currentEndStyle = e.target.value;
+  if (draftWorldPoints) rebuildDraft();
+});
+
+// --- сохранение детали ---
+const saveRow = document.getElementById('saveRow');
+document.getElementById('saveBtn').addEventListener('click', () => {
+  if (!draftWorldPoints) return;
+  document.getElementById('saveNameInput').value = 'Деталь ' + (savedParts.length + 1);
+  saveRow.classList.add('open');
+  document.getElementById('saveNameInput').focus();
+});
+document.getElementById('saveCancelBtn').addEventListener('click', () => saveRow.classList.remove('open'));
+document.getElementById('saveConfirmBtn').addEventListener('click', () => {
+  if (!draftWorldPoints) return;
+  const name = document.getElementById('saveNameInput').value.trim() || ('Деталь ' + (savedParts.length + 1));
+  const { length, bbox } = createPartGroup(draftWorldPoints, currentProfile, currentSize, currentEndStyle);
+  const idx = savedParts.length;
+  // центрируем точки относительно собственного bounding box детали,
+  // чтобы положение/поворот в сборке считались от геометрического центра, а не от точки старта рисования
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  draftWorldPoints.forEach(p => { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); });
+  const centerX = (minX + maxX) / 2, centerZ = (minZ + maxZ) / 2;
+  const centeredPoints = draftWorldPoints.map(p => ({ x: p.x - centerX, y: p.y, z: p.z - centerZ }));
+  savedParts.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name,
+    profile: currentProfile,
+    size: currentSize,
+    endStyle: currentEndStyle,
+    points: centeredPoints,
+    length, bbox,
+    assembly: { x: (idx % 4) * 160 - 240, y: 0, z: Math.floor(idx / 4) * 160, rotY: 0 }
+  });
+  persistParts();
+  saveRow.classList.remove('open');
+  renderPartsList();
+});
+
+// ======================================================================
+//  ВКЛАДКА "СБОРКА"
+// ======================================================================
+
+const STORAGE_KEY = 'trubogib3d_parts_v1';
+let savedParts = [];
+try { savedParts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { savedParts = []; }
+
+function persistParts() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(savedParts));
+  const badge = document.getElementById('partsCountBadge');
+  badge.textContent = savedParts.length ? ' (' + savedParts.length + ')' : '';
+}
+
+const assemblyViewer = createOrbitViewer(assemblyCanvas, {
+  radius: 500,
+  onDrag: (e, curr, prev) => {
+    if (!moveMode || !selectedPartId) return false;
+    const pt = raycastGround(curr.x, curr.y, assemblyCanvas, assemblyViewer.camera);
+    if (!pt) return true;
+    const part = savedParts.find(p => p.id === selectedPartId);
+    const group = assemblyGroupById[selectedPartId];
+    if (part && group) {
+      group.position.x = pt.x;
+      group.position.z = pt.z;
+      part.assembly.x = pt.x;
+      part.assembly.z = pt.z;
+      if (selectionRing) { selectionRing.position.x = pt.x; selectionRing.position.z = pt.z; }
+    }
+    return true; // блокируем орбиту камеры пока двигаем деталь
+  },
+  onPointerUp: (e, wasClick) => {
+    if (wasClick && !moveMode) {
+      const picked = pickPart(e);
+      if (picked) selectPart(picked);
+    }
+    if (moveMode && selectedPartId) persistParts();
+  }
+});
+
+function resizeAssembly() {
+  const w = assemblyCanvas.clientWidth, h = assemblyCanvas.clientHeight;
+  if (!w || !h) return;
+  assemblyRenderer.setSize(w, h, false);
+  assemblyViewer.camera.aspect = w / h;
+  assemblyViewer.camera.updateProjectionMatrix();
+}
+
+const raycaster = new THREE.Raycaster();
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+function raycastGround(clientX, clientY, canvas, camera) {
+  const rect = canvas.getBoundingClientRect();
+  const ndc = new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  const pt = new THREE.Vector3();
+  return raycaster.ray.intersectPlane(groundPlane, pt) ? pt : null;
+}
+
+function pickPart(e) {
+  const rect = assemblyCanvas.getBoundingClientRect();
+  const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, assemblyViewer.camera);
+  const meshes = [];
+  Object.entries(assemblyGroupById).forEach(([id, g]) => g.traverse(o => { if (o.isMesh) { o.userData.partId = id; meshes.push(o); } }));
+  const hits = raycaster.intersectObjects(meshes);
+  return hits.length ? hits[0].object.userData.partId : null;
+}
+
+let assemblyGroupById = {};
+let selectionRing = null;
+let selectedPartId = null;
+let moveMode = false;
+
+function rebuildAssemblyScene() {
+  Object.values(assemblyGroupById).forEach(g => { assemblyViewer.scene.remove(g); disposeGroup(g); });
+  assemblyGroupById = {};
+  savedParts.forEach(part => {
+    const pts = part.points.map(p => new THREE.Vector3(p.x, p.y, p.z));
+    const { group } = createPartGroup(pts, part.profile, part.size, part.endStyle);
+    group.position.set(part.assembly.x, part.assembly.y || 0, part.assembly.z);
+    group.rotation.y = (part.assembly.rotY || 0) * Math.PI / 180;
+    assemblyViewer.scene.add(group);
+    assemblyGroupById[part.id] = group;
+  });
+  updateSelectionRing();
+}
+
+function updateSelectionRing() {
+  if (selectionRing) { assemblyViewer.scene.remove(selectionRing); selectionRing.geometry.dispose(); selectionRing.material.dispose(); selectionRing = null; }
+  if (!selectedPartId || !assemblyGroupById[selectedPartId]) return;
+  const geo = new THREE.RingGeometry(40, 46, 32);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffd700, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+  selectionRing = new THREE.Mesh(geo, mat);
+  selectionRing.rotation.x = -Math.PI / 2;
+  selectionRing.position.copy(assemblyGroupById[selectedPartId].position);
+  selectionRing.position.y = 0.5;
+  assemblyViewer.scene.add(selectionRing);
+}
+
+function selectPart(id) {
+  selectedPartId = id;
+  const part = savedParts.find(p => p.id === id);
+  const nameInfo = document.getElementById('selectedNameInfo');
+  const rotateGroup = document.getElementById('rotateGroup');
+  if (part) {
+    nameInfo.style.display = 'flex';
+    nameInfo.textContent = 'Выбрано: ' + part.name;
+    rotateGroup.style.display = 'flex';
+    document.getElementById('rotateInput').value = part.assembly.rotY || 0;
+  } else {
+    nameInfo.style.display = 'none';
+    rotateGroup.style.display = 'none';
+  }
+  updateSelectionRing();
+  renderPartsList();
+}
+
+document.getElementById('rotateInput').addEventListener('input', (e) => {
+  if (!selectedPartId) return;
+  const part = savedParts.find(p => p.id === selectedPartId);
+  const group = assemblyGroupById[selectedPartId];
+  const deg = Number(e.target.value);
+  if (part) part.assembly.rotY = deg;
+  if (group) group.rotation.y = deg * Math.PI / 180;
+});
+document.getElementById('rotateInput').addEventListener('change', persistParts);
+
+document.getElementById('moveModeBtn').addEventListener('click', (e) => {
+  moveMode = !moveMode;
+  e.target.classList.toggle('toggle-on', moveMode);
+  e.target.textContent = moveMode ? 'Двигать деталь: ВКЛ' : 'Двигать деталь';
+});
+
+function renderPartsList() {
+  const list = document.getElementById('partsList');
+  if (!savedParts.length) {
+    list.innerHTML = '<p class="empty-list">Пока пусто. Согни деталь на вкладке «Гибка» и сохрани её.</p>';
     return;
   }
-  pointers.set(e.pointerId, curr);
-});
-
-function releasePointer(e) { pointers.delete(e.pointerId); }
-threeCanvas.addEventListener('pointerup', releasePointer);
-threeCanvas.addEventListener('pointercancel', releasePointer);
-threeCanvas.addEventListener('pointerleave', (e) => { if (pointers.size < 2) pointers.delete(e.pointerId); });
-
-threeCanvas.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  orbit.radius = Math.min(Math.max(orbit.radius * (1 + e.deltaY * 0.001), 60), 1200);
-  updateCameraFromOrbit();
-}, { passive: false });
-
-function resizeThreeCanvas() {
-  const w = threeCanvas.clientWidth, h = threeCanvas.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
+  list.innerHTML = '';
+  savedParts.forEach(part => {
+    const card = document.createElement('div');
+    card.className = 'part-card' + (part.id === selectedPartId ? ' selected' : '');
+    const profileLabel = part.profile === 'square' ? 'квадрат ' + part.size + ' мм' : 'труба Ø' + part.size + ' мм';
+    card.innerHTML =
+      '<div class="name">' + escapeHtml(part.name) + '</div>' +
+      '<div class="meta">' + profileLabel + ' · длина ' + part.length + ' мм · габариты ' + part.bbox.width + '×' + part.bbox.depth + ' мм</div>' +
+      '<div class="actions"><button class="selectBtn">Выбрать</button><button class="danger deleteBtn">Удалить</button></div>';
+    card.querySelector('.selectBtn').addEventListener('click', () => selectPart(part.id));
+    card.querySelector('.deleteBtn').addEventListener('click', () => {
+      savedParts = savedParts.filter(p => p.id !== part.id);
+      if (selectedPartId === part.id) selectedPartId = null;
+      persistParts();
+      rebuildAssemblyScene();
+      renderPartsList();
+    });
+    list.appendChild(card);
+  });
 }
 
-window.addEventListener('resize', resizeThreeCanvas);
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ======================================================================
+//  ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+// ======================================================================
+
+const tabBend = document.getElementById('tabBend');
+const tabAssembly = document.getElementById('tabAssembly');
+const bendView = document.getElementById('bendView');
+const assemblyView = document.getElementById('assemblyView');
+
+function activateTab(name) {
+  const isBend = name === 'bend';
+  tabBend.classList.toggle('active', isBend);
+  tabAssembly.classList.toggle('active', !isBend);
+  bendView.style.display = isBend ? 'block' : 'none';
+  assemblyView.style.display = isBend ? 'none' : 'block';
+  if (!isBend) {
+    rebuildAssemblyScene();
+    renderPartsList();
+    requestAnimationFrame(resizeAssembly);
+  } else {
+    requestAnimationFrame(resizeViewport);
+  }
+}
+
+tabBend.addEventListener('click', () => activateTab('bend'));
+tabAssembly.addEventListener('click', () => activateTab('assembly'));
+
+window.addEventListener('resize', () => { resizeViewport(); resizeAssembly(); });
+
+// ======================================================================
+//  РЕНДЕР-ЦИКЛ
+// ======================================================================
 
 function animate() {
   requestAnimationFrame(animate);
-  renderer.render(scene, camera);
+  if (viewerIsActive(viewportCanvas)) renderer.render(bendViewer.scene, bendViewer.camera);
+  if (viewerIsActive(assemblyCanvas)) assemblyRenderer.render(assemblyViewer.scene, assemblyViewer.camera);
 }
 
 // --- инициализация ---
 resizeSketchCanvas();
-resizeThreeCanvas();
-updateCameraFromOrbit();
+resizeViewport();
+resizeAssembly();
+persistParts();
 animate();
 </script>
 </body>
