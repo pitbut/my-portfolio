@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Трубогиб 3D — гибка профиля по траектории</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    color: #e8ecf5;
+    line-height: 1.5;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25);
+  }
+  .back-link:hover { transform: translateY(-2px); }
+
+  h1 {
+    background: linear-gradient(135deg, #FFA500, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.7em;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+
+  .subtitle { color: #9aa5c0; margin-bottom: 20px; font-size: 0.95em; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 22px;
+    align-items: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+  }
+
+  .control-group { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: #c7cee3; }
+  .control-group input[type="range"] { width: 130px; accent-color: #FFA500; }
+  .control-group select {
+    background: #1a2340; color: #e8ecf5; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 6px 10px; font-size: 0.9em;
+  }
+  #diameterValue, #lengthInfo { color: #FFD700; font-weight: 600; min-width: 60px; }
+
+  button {
+    background: rgba(255,255,255,0.08);
+    color: #e8ecf5;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  button:hover { background: rgba(255,255,255,0.16); }
+  button:active { transform: scale(0.96); }
+  button.primary {
+    background: linear-gradient(135deg, #FFA500, #FFD700);
+    color: #000; border: none;
+  }
+
+  .panels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .panel {
+    flex: 1 1 380px;
+    max-width: 480px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .panel h3 {
+    font-size: 0.95em;
+    color: #9aa5c0;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0c1120;
+    touch-action: none;
+  }
+
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .hint {
+    margin-top: 8px;
+    font-size: 0.8em;
+    color: #6f7a99;
+  }
+
+  .empty-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    color: #4d577a;
+    font-size: 0.9em;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="back-link" href="../../index.html">← Назад к проектам</a>
+  <h1>Трубогиб 3D</h1>
+  <p class="subtitle">Рисуешь траекторию гиба — труба выгибается по ней. Прототип для будущего мобильного 3D-конструктора мебели.</p>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="diameterInput">Диаметр трубы:</label>
+      <input type="range" id="diameterInput" min="6" max="40" step="1" value="16">
+      <span id="diameterValue">16 мм</span>
+    </div>
+    <div class="control-group">
+      <span>Заготовка:</span>
+      <span id="lengthInfo">— мм</span>
+    </div>
+    <button id="clearBtn">Очистить</button>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <h3>Траектория гиба (вид сверху)</h3>
+      <div class="canvas-wrap">
+        <canvas id="sketchCanvas"></canvas>
+        <div class="empty-hint" id="sketchHint">Проведи пальцем линию —<br>дрожание руки уберётся само</div>
+      </div>
+      <p class="hint">Клетка сетки = 20 мм</p>
+    </div>
+    <div class="panel">
+      <h3>3D просмотр</h3>
+      <div class="canvas-wrap">
+        <canvas id="three-canvas"></canvas>
+      </div>
+      <p class="hint">Вращай пальцем/мышью, зум — колесо или щипок двумя пальцами</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================================================================
+//  СГЛАЖИВАНИЕ КАРАНДАША (шумоподавление) + УПРОЩЕНИЕ ЛИНИИ
+// ======================================================================
+
+// Экспоненциальное сглаживание в реальном времени, пока рисуем —
+// каждая новая точка "тянется" к сглаженной, дрожь руки гасится на лету.
+function emaPoint(prev, raw, alpha) {
+  return { x: prev.x + (raw.x - prev.x) * alpha, y: prev.y + (raw.y - prev.y) * alpha };
+}
+
+// Упрощение полилинии (алгоритм Дугласа-Пекера) — убирает лишние
+// точки после того, как линия дорисована, оставляя только опорные.
+function simplify(points, epsilon) {
+  if (points.length < 3) return points.slice();
+
+  function perpendicularDistance(p, a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.hypot(dx, dy);
+    if (len === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+    const t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / (len * len);
+    const projX = a.x + t * dx, projY = a.y + t * dy;
+    return Math.hypot(p.x - projX, p.y - projY);
+  }
+
+  function dp(pts) {
+    if (pts.length < 3) return pts;
+    let maxDist = 0, index = 0;
+    for (let i = 1; i < pts.length - 1; i++) {
+      const d = perpendicularDistance(pts[i], pts[0], pts[pts.length - 1]);
+      if (d > maxDist) { maxDist = d; index = i; }
+    }
+    if (maxDist > epsilon) {
+      const left = dp(pts.slice(0, index + 1));
+      const right = dp(pts.slice(index));
+      return left.slice(0, -1).concat(right);
+    }
+    return [pts[0], pts[pts.length - 1]];
+  }
+
+  return dp(points);
+}
+
+// ======================================================================
+//  2D ХОЛСТ — РИСОВАНИЕ ТРАЕКТОРИИ
+// ======================================================================
+
+const sketchCanvas = document.getElementById('sketchCanvas');
+const sketchCtx = sketchCanvas.getContext('2d');
+const sketchHint = document.getElementById('sketchHint');
+const GRID_STEP = 20; // px, соответствует 20 мм
+
+let cw = 0, ch = 0, dpr = 1;
+let rawStroke = [];       // точки как есть (для отладки, не используются напрямую)
+let smoothedStroke = [];  // точки после сглаживания в реальном времени
+let finalPoints = [];     // упрощённые точки после отпускания пальца (в координатах холста)
+let drawing = false;
+
+function resizeSketchCanvas() {
+  dpr = window.devicePixelRatio || 1;
+  cw = sketchCanvas.clientWidth;
+  ch = sketchCanvas.clientHeight;
+  sketchCanvas.width = Math.round(cw * dpr);
+  sketchCanvas.height = Math.round(ch * dpr);
+  sketchCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawSketch();
+}
+
+function drawGrid() {
+  sketchCtx.clearRect(0, 0, cw, ch);
+  sketchCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  sketchCtx.lineWidth = 1;
+  for (let x = 0; x <= cw; x += GRID_STEP) {
+    sketchCtx.beginPath(); sketchCtx.moveTo(x + 0.5, 0); sketchCtx.lineTo(x + 0.5, ch); sketchCtx.stroke();
+  }
+  for (let y = 0; y <= ch; y += GRID_STEP) {
+    sketchCtx.beginPath(); sketchCtx.moveTo(0, y + 0.5); sketchCtx.lineTo(cw, y + 0.5); sketchCtx.stroke();
+  }
+  // оси через центр
+  sketchCtx.strokeStyle = 'rgba(255,255,255,0.14)';
+  sketchCtx.beginPath(); sketchCtx.moveTo(cw / 2 + 0.5, 0); sketchCtx.lineTo(cw / 2 + 0.5, ch); sketchCtx.stroke();
+  sketchCtx.beginPath(); sketchCtx.moveTo(0, ch / 2 + 0.5); sketchCtx.lineTo(cw, ch / 2 + 0.5); sketchCtx.stroke();
+}
+
+function strokeLine(points, color, width) {
+  if (points.length < 2) return;
+  sketchCtx.strokeStyle = color;
+  sketchCtx.lineWidth = width;
+  sketchCtx.lineCap = 'round';
+  sketchCtx.lineJoin = 'round';
+  sketchCtx.beginPath();
+  sketchCtx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) sketchCtx.lineTo(points[i].x, points[i].y);
+  sketchCtx.stroke();
+}
+
+function drawSketch() {
+  drawGrid();
+  if (drawing && smoothedStroke.length > 1) {
+    strokeLine(smoothedStroke, '#FFA500', 3);
+  } else if (finalPoints.length > 1) {
+    strokeLine(finalPoints, '#FFD700', 3);
+    // узловые точки
+    sketchCtx.fillStyle = '#FFD700';
+    finalPoints.forEach(p => {
+      sketchCtx.beginPath(); sketchCtx.arc(p.x, p.y, 3, 0, Math.PI * 2); sketchCtx.fill();
+    });
+  }
+}
+
+function canvasPointFromEvent(e) {
+  const rect = sketchCanvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+const EMA_ALPHA = 0.35;      // сила сглаживания "на лету"
+const SIMPLIFY_EPS = 3;      // px — насколько сильно упрощаем после отпускания
+const MIN_POINT_DIST = 2;    // px — не пишем точки чаще этого расстояния
+
+sketchCanvas.addEventListener('pointerdown', (e) => {
+  sketchCanvas.setPointerCapture(e.pointerId);
+  drawing = true;
+  const p = canvasPointFromEvent(e);
+  rawStroke = [p];
+  smoothedStroke = [p];
+  sketchHint.style.display = 'none';
+  drawSketch();
+});
+
+sketchCanvas.addEventListener('pointermove', (e) => {
+  if (!drawing) return;
+  const p = canvasPointFromEvent(e);
+  const last = rawStroke[rawStroke.length - 1];
+  if (Math.hypot(p.x - last.x, p.y - last.y) < MIN_POINT_DIST) return;
+  rawStroke.push(p);
+  const prevSmoothed = smoothedStroke[smoothedStroke.length - 1];
+  smoothedStroke.push(emaPoint(prevSmoothed, p, EMA_ALPHA));
+  drawSketch();
+});
+
+function finishStroke() {
+  if (!drawing) return;
+  drawing = false;
+  if (smoothedStroke.length >= 2) {
+    finalPoints = simplify(smoothedStroke, SIMPLIFY_EPS);
+    buildTubeFrom(finalPoints);
+  }
+  drawSketch();
+}
+
+sketchCanvas.addEventListener('pointerup', finishStroke);
+sketchCanvas.addEventListener('pointercancel', finishStroke);
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  finalPoints = [];
+  smoothedStroke = [];
+  rawStroke = [];
+  drawing = false;
+  sketchHint.style.display = 'flex';
+  drawSketch();
+  clearTube();
+});
+
+window.addEventListener('resize', resizeSketchCanvas);
+
+// ======================================================================
+//  3D ПРОСМОТР — TRUBA ПО ТРАЕКТОРИИ + ОРБИТАЛЬНАЯ КАМЕРА
+// ======================================================================
+
+const threeCanvas = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 1, 5000);
+
+scene.add(new THREE.AmbientLight(0x556080, 0.9));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(150, 220, 150);
+scene.add(dirLight);
+const dirLight2 = new THREE.DirectionalLight(0x88aaff, 0.4);
+dirLight2.position.set(-150, 100, -150);
+scene.add(dirLight2);
+
+const gridHelper = new THREE.GridHelper(400, 20, 0x2a3559, 0x1c2340);
+scene.add(gridHelper);
+const axesHelper = new THREE.AxesHelper(60);
+scene.add(axesHelper);
+
+let tubeMesh = null;
+let capA = null, capB = null;
+let pipeRadius = 8; // мм
+
+function clearTube() {
+  if (tubeMesh) { scene.remove(tubeMesh); tubeMesh.geometry.dispose(); tubeMesh.material.dispose(); tubeMesh = null; }
+  if (capA) { scene.remove(capA); capA.geometry.dispose(); capA = null; }
+  if (capB) { scene.remove(capB); capB.geometry.dispose(); capB = null; }
+  document.getElementById('lengthInfo').textContent = '— мм';
+}
+
+// Переводим точки холста (px) в мировые координаты 3D (мм), плоскость XZ (вид сверху)
+function canvasPointsToWorld(points) {
+  return points.map(p => new THREE.Vector3(p.x - cw / 2, 0, p.y - ch / 2));
+}
+
+function buildTubeFrom(points2d) {
+  if (points2d.length < 2) return;
+  const worldPoints = canvasPointsToWorld(points2d);
+
+  const curve = new THREE.CatmullRomCurve3(worldPoints, false, 'catmullrom', 0.5);
+  const tubularSegments = Math.max(worldPoints.length * 8, 64);
+  const geometry = new THREE.TubeGeometry(curve, tubularSegments, pipeRadius, 16, false);
+  const material = new THREE.MeshStandardMaterial({ color: 0xffa500, metalness: 0.6, roughness: 0.35 });
+
+  clearTube();
+  tubeMesh = new THREE.Mesh(geometry, material);
+  scene.add(tubeMesh);
+
+  // круглые "заглушки" на концах, чтобы труба смотрелась цельным стержнем
+  const capGeo = new THREE.SphereGeometry(pipeRadius, 16, 16);
+  capA = new THREE.Mesh(capGeo, material);
+  capA.position.copy(worldPoints[0]);
+  capB = new THREE.Mesh(capGeo, material);
+  capB.position.copy(worldPoints[worldPoints.length - 1]);
+  scene.add(capA, capB);
+
+  // длина заготовки — сумма длин отрезков по мировым точкам
+  let length = 0;
+  for (let i = 1; i < worldPoints.length; i++) length += worldPoints[i].distanceTo(worldPoints[i - 1]);
+  document.getElementById('lengthInfo').textContent = Math.round(length) + ' мм';
+}
+
+document.getElementById('diameterInput').addEventListener('input', (e) => {
+  pipeRadius = Number(e.target.value) / 2;
+  document.getElementById('diameterValue').textContent = e.target.value + ' мм';
+  if (finalPoints.length >= 2) buildTubeFrom(finalPoints);
+});
+
+// --- простая орбитальная камера (вращение пальцем/мышью, зум колесом/щипком) ---
+const orbit = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: 320, target: new THREE.Vector3(0, 0, 0) };
+const pointers = new Map();
+
+function updateCameraFromOrbit() {
+  const sinPhi = Math.sin(orbit.phi);
+  camera.position.set(
+    orbit.target.x + orbit.radius * sinPhi * Math.sin(orbit.theta),
+    orbit.target.y + orbit.radius * Math.cos(orbit.phi),
+    orbit.target.z + orbit.radius * sinPhi * Math.cos(orbit.theta)
+  );
+  camera.lookAt(orbit.target);
+}
+
+threeCanvas.addEventListener('pointerdown', (e) => {
+  threeCanvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+});
+
+threeCanvas.addEventListener('pointermove', (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  const prev = pointers.get(e.pointerId);
+  const curr = { x: e.clientX, y: e.clientY };
+
+  if (pointers.size === 1) {
+    const dx = curr.x - prev.x, dy = curr.y - prev.y;
+    orbit.theta -= dx * 0.008;
+    orbit.phi = Math.min(Math.max(orbit.phi - dy * 0.008, 0.15), Math.PI - 0.15);
+    updateCameraFromOrbit();
+  } else if (pointers.size === 2) {
+    pointers.set(e.pointerId, curr);
+    const pts = Array.from(pointers.values());
+    const prevPts = Array.from(pointers.entries()).map(([id, v]) => id === e.pointerId ? prev : v);
+    const distNow = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    const distPrev = Math.hypot(prevPts[0].x - prevPts[1].x, prevPts[0].y - prevPts[1].y);
+    orbit.radius = Math.min(Math.max(orbit.radius * (distPrev / Math.max(distNow, 1)), 60), 1200);
+    updateCameraFromOrbit();
+    return;
+  }
+  pointers.set(e.pointerId, curr);
+});
+
+function releasePointer(e) { pointers.delete(e.pointerId); }
+threeCanvas.addEventListener('pointerup', releasePointer);
+threeCanvas.addEventListener('pointercancel', releasePointer);
+threeCanvas.addEventListener('pointerleave', (e) => { if (pointers.size < 2) pointers.delete(e.pointerId); });
+
+threeCanvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  orbit.radius = Math.min(Math.max(orbit.radius * (1 + e.deltaY * 0.001), 60), 1200);
+  updateCameraFromOrbit();
+}, { passive: false });
+
+function resizeThreeCanvas() {
+  const w = threeCanvas.clientWidth, h = threeCanvas.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+
+window.addEventListener('resize', resizeThreeCanvas);
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+// --- инициализация ---
+resizeSketchCanvas();
+resizeThreeCanvas();
+updateCameraFromOrbit();
+animate();
+</script>
+</body>
+</html>
