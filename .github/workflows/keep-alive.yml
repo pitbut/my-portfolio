@@ -13,14 +13,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Ping every Render-hosted service
-        env:
-          # Render services that are NOT portfolio cards (so they never show up
-          # in projects.json) but still need to be kept awake. One URL per line.
-          EXTRA_URLS: |
-            https://bazar-pit.onrender.com
         run: |
-          from_portfolio=$(jq -r '.[].link | select(test("onrender\\.com"))' projects.json)
-          urls=$(printf '%s\n%s\n' "$from_portfolio" "$EXTRA_URLS" | sed '/^\s*$/d' | sort -u)
+          urls=$(jq -r '.[].link | select(test("onrender\\.com"))' projects.json | sort -u)
 
           if [ -z "$urls" ]; then
             echo "No onrender.com links found"
