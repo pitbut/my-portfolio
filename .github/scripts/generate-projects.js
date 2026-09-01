@@ -13,7 +13,7 @@ if (!fs.existsSync(projectsDir)) {
 
 const folders = fs.readdirSync(projectsDir).filter(file => {
     const fullPath = path.join(projectsDir, file);
-    return fs.statSync(fullPath).isDirectory();
+    return fs.statSync(fullPath).isDirectory() && !file.endsWith('.bak');
 });
 
 console.log(`📂 Найдено папок: ${folders.length}`);

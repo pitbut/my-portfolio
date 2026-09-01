@@ -1,8 +1,35 @@
 [
   {
+    "id": "chat",
+    "title": "Chat",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/chat/preview.jpg",
+    "link": "projects/chat/index.html",
+    "date": "2026-09-01",
+    "tags": []
+  },
+  {
+    "id": "checker",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/checker/preview.jpg",
+    "link": "projects/checker/index.html",
+    "date": "2026-09-01",
+    "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-09-01",
+    "tags": []
+  },
+  {
     "id": "agro-calc",
     "title": "🌾 Агро-калькулятор",
-    "description": "Расчёт кормления сельскохозяйственных животных (КРС, свиньи, овцы, козы, птица, кролики) по типовым зоотехническим нормам — сколько корма нужно в сутки/за период, с прямым и обратным расчётом (по поголовью, по имеющемуся корму или по желаемому результату). Плюс расчёт посева: норма высева, удобрения по выносу с урожаем, потребность в воде, площадь под план или урожай с площади, календарь созревания, трудозатраты и экономика по ценам. Отчёт в Word.",
+    "description": "Расчёт кормления сельскохозяйственных животных (КРС, свиньи, овцы, козы, птица, кролики) по типовым зоотехническим нормам — сколько корма нужно в сутки/за период, с прямым и обратным расчётом (по поголовью, по имеющемуся корму или по желаемому результату). Плюс расчёт посева: норма высева, удобрения по выносу с урожаем, потребность в воде, площадь под план или урожай с площади, календарь созревания, трудозатраты и экономика по ценам. Отчёт — .docx. Flask, без базы данных и регистрации.",
     "image": "projects/agro-calc/preview.svg",
     "link": "https://agro.robutpit.com",
     "date": "2026-08-22",
@@ -15,47 +42,20 @@
     ]
   },
   {
-    "id": "sobutylnik",
-    "title": "🥂 Собутыльник",
-    "description": "Виртуальный ИИ-собутыльник: голосовая беседа с barge-in (можно перебить), тосты, шутки, чоканье и музыка, выбор личности и голоса, распознавание обстановки по фото. Регистрация с подтверждением email, гостевое демо на главной, чат поддержки с админом (текст+файлы), админ-панель с блокировкой пользователей и управлением лимитами. Flask + SQLAlchemy + Anthropic Claude.",
-    "image": "projects/sobutylnik/preview.svg",
-    "link": "https://sobutylnik.robutpit.com",
+    "id": "debt-oracle",
+    "title": "🪙 Долговой Оракул",
+    "description": "Калькулятор долга: шуточный тест на факторы риска — стоит ли дать в долг другу, родственнику или коллеге, и стоит ли занимать самому под проценты или без. Два сценария по 9 вопросов (история задержек, доход, расписка, проценты), итоговая вероятность возврата только в конце. Плюс отдельный калькулятор процентов по долгу (простых и сложных) и FAQ про расписки и просрочки.",
+    "image": "projects/debt-oracle/preview.svg",
+    "link": "projects/debt-oracle/index.html",
     "date": "2026-08-22",
     "tags": [
-      "Flask",
-      "Python",
-      "SQLAlchemy",
-      "Anthropic Claude",
-      "PostgreSQL",
-      "Web Speech API"
+      "Калькулятор долга",
+      "Дать в долг",
+      "Взять в долг",
+      "Проценты по долгу",
+      "HTML",
+      "JavaScript"
     ]
-  },
-  {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-08-16",
-    "tags": []
-  },
-  {
-    "id": "checker",
-    "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/checker/preview.jpg",
-    "link": "projects/checker/index.html",
-    "date": "2026-08-16",
-    "tags": []
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-08-16",
-    "tags": []
   },
   {
     "id": "ai-tutor",
@@ -270,11 +270,28 @@
     ]
   },
   {
+    "id": "futboll",
+    "title": "🎬 Робот Трансляция Live",
+    "description": "Потоковая трансляция с веб-камеры и удалённое управление ESP32-роботом через интернет. Стример, зрители и до двух операторов в одной комнате, чат в реальном времени, код доступа к комнате.",
+    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=%F0%9F%8E%AC%20%D0%A0%D0%BE%D0%B1%D0%BE%D1%82%20%D0%A2%D1%80%D0%B0%D0%BD%D1%81%D0%BB%D1%8F%D1%86%D0%B8%D1%8F%20Live",
+    "link": "https://www.robutpit.com/arena/",
+    "date": "2026-01-10",
+    "tags": [
+      "IoT",
+      "Python",
+      "Flask",
+      "ESP32",
+      "WebSocket",
+      "Трансляция",
+      "Робототехника"
+    ]
+  },
+  {
     "id": "sobesednik",
     "title": "🎙️ Свободный Чат",
     "description": "AI собеседник с голосовым управлением и анимированным аватаром. Поддержка Groq, Google Gemini, OpenAI. 7 личностей включая Учителя. Голосовой ввод/вывод на русском языке.",
     "image": "projects/sobesednik/preview.jpg",
-    "link": "https://sobesednik.robutpit.com",
+    "link": "https://sobesednik.onrender.com",
     "date": "2026-01-10",
     "tags": [
       "AI",
