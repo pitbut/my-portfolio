@@ -197,6 +197,29 @@
   .part-card .actions button { padding: 6px 12px; font-size: 0.8em; }
 
   .empty-list { color: #4d577a; font-size: 0.88em; text-align: center; padding: 30px 10px; }
+
+  .transform-panel {
+    display: none;
+    gap: 24px;
+    flex-wrap: wrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+  }
+  .transform-panel.open { display: flex; }
+  .transform-col { flex: 1 1 220px; }
+  .transform-col h4 { font-size: 0.8em; color: #9aa5c0; margin-bottom: 8px; font-weight: 600; }
+  .transform-col .control-group { margin-bottom: 6px; font-size: 0.85em; }
+  .transform-col .control-group span { width: 14px; }
+  .transform-col input[type="number"] {
+    width: 66px; background: #1a2340; color: #e8ecf5; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px; padding: 5px 8px; font-size: 0.85em;
+  }
+  .transform-col input[type="number"]:disabled { opacity: 0.4; }
+  .transform-col input[type="range"] { width: 90px; accent-color: #FFA500; }
+  .transform-col input[type="range"]:disabled { opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -239,6 +262,7 @@
         </select>
       </div>
       <button id="clearBtn">Очистить</button>
+      <button id="cancelEditBtn" style="display:none">Отмена редактирования</button>
     </div>
 
     <div class="controls">
@@ -276,11 +300,26 @@
   <div id="assemblyView" style="display:none">
     <div class="controls">
       <button id="moveModeBtn">Двигать деталь</button>
-      <div class="control-group" id="rotateGroup" style="display:none">
-        <label for="rotateInput">Поворот:</label>
-        <input type="range" id="rotateInput" min="0" max="359" step="1" value="0">
-      </div>
+      <label class="control-group"><input type="checkbox" id="snapToggle"> Прилипание к деталям</label>
       <div class="control-group" id="selectedNameInfo" style="display:none"></div>
+      <button id="editPartBtn" style="display:none">Редактировать</button>
+      <button id="cloneBtn" style="display:none">Добавить копию</button>
+      <button id="lockBtn" style="display:none">Зафиксировать</button>
+    </div>
+
+    <div class="transform-panel" id="transformPanel">
+      <div class="transform-col">
+        <h4>Положение (мм)</h4>
+        <div class="control-group"><span>X</span><input type="number" id="posXInput" step="1"></div>
+        <div class="control-group"><span>Y</span><input type="number" id="posYInput" step="1"></div>
+        <div class="control-group"><span>Z</span><input type="number" id="posZInput" step="1"></div>
+      </div>
+      <div class="transform-col">
+        <h4>Поворот (°)</h4>
+        <div class="control-group"><span>X</span><input type="range" id="rotXSlider" min="0" max="359" step="1"><input type="number" id="rotXNum" min="0" max="359" step="1"></div>
+        <div class="control-group"><span>Y</span><input type="range" id="rotYSlider" min="0" max="359" step="1"><input type="number" id="rotYNum" min="0" max="359" step="1"></div>
+        <div class="control-group"><span>Z</span><input type="range" id="rotZSlider" min="0" max="359" step="1"><input type="number" id="rotZNum" min="0" max="359" step="1"></div>
+      </div>
     </div>
 
     <div class="controls">
@@ -307,7 +346,7 @@
         <div class="canvas-wrap">
           <canvas id="assemblyCanvas"></canvas>
         </div>
-        <p class="hint">Выбери деталь в списке или тапни по ней в 3D. «Двигать деталь» + перетаскивание — переместить.</p>
+        <p class="hint">Тап по детали в списке или в 3D — выбрать. «Двигать деталь» + перетаскивание — сдвиг по полу (X/Z), высота (Y) и повороты — числами/ползунками выше.</p>
       </div>
     </div>
   </div>
@@ -644,13 +683,85 @@ function createItemGroup(item) {
       if (!childItem) return;
       const { group: childGroup } = createItemGroup(childItem);
       childGroup.position.set(child.x, child.y || 0, child.z);
-      childGroup.rotation.y = (child.rotY || 0) * Math.PI / 180;
+      childGroup.rotation.set((child.rotX || 0) * Math.PI / 180, (child.rotY || 0) * Math.PI / 180, (child.rotZ || 0) * Math.PI / 180);
       group.add(childGroup);
     });
     return { group, length: null, bbox: item.bbox || { width: 0, depth: 0 } };
   }
   const pts = item.points.map(p => new THREE.Vector3(p.x, p.y, p.z));
   return createPartGroup(pts, item.profile, item.size, item.thickness || 0, item.endStyle);
+}
+
+function itemTransformMatrix(t) {
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(t.x || 0, t.y || 0, t.z || 0),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler((t.rotX || 0) * Math.PI / 180, (t.rotY || 0) * Math.PI / 180, (t.rotZ || 0) * Math.PI / 180)),
+    new THREE.Vector3(1, 1, 1)
+  );
+}
+
+// Приближённые точки-сэмплы вдоль детали в мировых координатах (с радиусом профиля) —
+// используется для проверки "касания" между деталями при перетаскивании
+function collectWorldSamples(item, matrix) {
+  matrix = matrix || new THREE.Matrix4();
+  if (item.type === 'assembly') {
+    let out = [];
+    (item.children || []).forEach(child => {
+      const childItem = itemsById[child.itemId];
+      if (!childItem) return;
+      const combined = matrix.clone().multiply(itemTransformMatrix(child));
+      out = out.concat(collectWorldSamples(childItem, combined));
+    });
+    return out;
+  }
+  const { radius } = profileGeomParams(item.profile, item.size);
+  return item.points.map(p => {
+    const v = new THREE.Vector3(p.x, p.y, p.z).applyMatrix4(matrix);
+    return { x: v.x, y: v.y, z: v.z, r: radius };
+  });
+}
+
+// Проверяет, столкнётся ли movingItem (с кандидатной позицией x/z) с любой другой
+// деталью верхнего уровня сборки
+function wouldCollide(movingItem, candidateX, candidateZ) {
+  const movingMatrix = itemTransformMatrix(Object.assign({}, movingItem.assembly, { x: candidateX, z: candidateZ }));
+  const movingSamples = collectWorldSamples(movingItem, movingMatrix);
+  for (const other of savedParts) {
+    if (other.parentId || other.id === movingItem.id) continue;
+    const otherSamples = collectWorldSamples(other, itemTransformMatrix(other.assembly));
+    for (const a of movingSamples) {
+      for (const b of otherSamples) {
+        const d = Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+        if (d < a.r + b.r) return true;
+      }
+    }
+  }
+  return false;
+}
+
+// Останавливает деталь в точке касания вместо того, чтобы дать ей "проскочить"
+// сквозь другую за один большой прыжок курсора/пальца: сначала грубо сэмплируем
+// путь от текущей позиции к целевой, затем уточняем границу бинарным поиском
+function findSnapClamp(item, startX, startZ, targetX, targetZ) {
+  // разрешение сэмплирования подстраивается под длину прыжка курсора за один
+  // кадр — иначе быстрый/крупный сдвиг может "проскочить" мимо узкого коридора
+  // касания между деталями, так и не будучи пойман фиксированным числом шагов
+  const dist = Math.hypot(targetX - startX, targetZ - startZ);
+  const STEPS = Math.min(200, Math.max(10, Math.ceil(dist / 4)));
+  let blockedAt = null;
+  for (let i = 1; i <= STEPS; i++) {
+    const t = i / STEPS;
+    const tx = startX + (targetX - startX) * t, tz = startZ + (targetZ - startZ) * t;
+    if (wouldCollide(item, tx, tz)) { blockedAt = (i - 1) / STEPS; break; }
+  }
+  if (blockedAt === null) return { x: targetX, z: targetZ }; // весь путь свободен
+  let lo = blockedAt, hi = blockedAt + 1 / STEPS;
+  for (let i = 0; i < 12; i++) {
+    const t = (lo + hi) / 2;
+    const tx = startX + (targetX - startX) * t, tz = startZ + (targetZ - startZ) * t;
+    if (wouldCollide(item, tx, tz)) hi = t; else lo = t;
+  }
+  return { x: startX + (targetX - startX) * lo, z: startZ + (targetZ - startZ) * lo };
 }
 
 // ======================================================================
@@ -828,11 +939,17 @@ document.getElementById('endSelect').addEventListener('change', (e) => {
   if (draftWorldPoints) rebuildDraft();
 });
 
-// --- сохранение детали ---
+// --- сохранение / редактирование детали ---
+let editingItemId = null; // если задан — "Сохранить" обновляет существующую деталь, а не создаёт новую
+
 const saveRow = document.getElementById('saveRow');
+const saveBtn = document.getElementById('saveBtn');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
+
 document.getElementById('saveBtn').addEventListener('click', () => {
   if (!draftWorldPoints) return;
-  document.getElementById('saveNameInput').value = 'Деталь ' + (savedParts.length + 1);
+  const editing = editingItemId ? savedParts.find(p => p.id === editingItemId) : null;
+  document.getElementById('saveNameInput').value = editing ? editing.name : ('Деталь ' + (savedParts.length + 1));
   saveRow.classList.add('open');
   document.getElementById('saveNameInput').focus();
 });
@@ -841,31 +958,81 @@ document.getElementById('saveConfirmBtn').addEventListener('click', () => {
   if (!draftWorldPoints) return;
   const name = document.getElementById('saveNameInput').value.trim() || ('Деталь ' + (savedParts.length + 1));
   const { length, bbox } = createPartGroup(draftWorldPoints, currentProfile, currentSize, currentThickness, currentEndStyle);
-  const idx = savedParts.length;
   // центрируем точки относительно собственного bounding box детали,
   // чтобы положение/поворот в сборке считались от геометрического центра, а не от точки старта рисования
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
   draftWorldPoints.forEach(p => { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); });
   const centerX = (minX + maxX) / 2, centerZ = (minZ + maxZ) / 2;
   const centeredPoints = draftWorldPoints.map(p => ({ x: p.x - centerX, y: p.y, z: p.z - centerZ }));
-  savedParts.push({
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    name,
-    type: 'part',
-    parentId: null,
-    profile: currentProfile,
-    size: currentSize,
-    thickness: currentThickness,
-    endStyle: currentEndStyle,
-    points: centeredPoints,
-    length, bbox,
-    assembly: { x: (idx % 4) * 160 - 240, y: 0, z: Math.floor(idx / 4) * 160, rotY: 0 }
-  });
+
+  if (editingItemId) {
+    const item = savedParts.find(p => p.id === editingItemId);
+    if (item) {
+      Object.assign(item, { name, profile: currentProfile, size: currentSize, thickness: currentThickness, endStyle: currentEndStyle, points: centeredPoints, length, bbox });
+    }
+    editingItemId = null;
+  } else {
+    const idx = savedParts.length;
+    savedParts.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name,
+      type: 'part',
+      parentId: null,
+      profile: currentProfile,
+      size: currentSize,
+      thickness: currentThickness,
+      endStyle: currentEndStyle,
+      points: centeredPoints,
+      length, bbox,
+      assembly: { x: (idx % 4) * 160 - 240, y: 0, z: Math.floor(idx / 4) * 160, rotX: 0, rotY: 0, rotZ: 0, locked: false }
+    });
+  }
+  saveBtn.textContent = 'Сохранить деталь';
+  cancelEditBtn.style.display = 'none';
   persistParts();
   saveRow.classList.remove('open');
   renderPartsList();
-  resetSketch(); // черновик сохранён — очищаем холст, чтобы сразу рисовать следующую деталь
+  resetSketch(); // деталь сохранена — очищаем холст, чтобы сразу рисовать следующую
 });
+
+cancelEditBtn.addEventListener('click', () => {
+  editingItemId = null;
+  saveBtn.textContent = 'Сохранить деталь';
+  cancelEditBtn.style.display = 'none';
+  resetSketch();
+});
+
+// открывает сохранённую деталь на вкладке "Гибка" для редактирования
+function startEditPart(id) {
+  const item = savedParts.find(p => p.id === id);
+  if (!item || item.type === 'assembly') return;
+  editingItemId = id;
+
+  currentProfile = item.profile;
+  document.getElementById('profileSelect').value = item.profile;
+  document.getElementById('sizeLabel').textContent = item.profile === 'square' ? 'Сторона:' : 'Диаметр:';
+  currentSize = item.size;
+  document.getElementById('sizeInput').value = item.size;
+  document.getElementById('diameterValue').textContent = item.size + ' мм';
+  currentThickness = item.thickness || 0;
+  document.getElementById('thicknessInput').value = currentThickness;
+  document.getElementById('thicknessValue').textContent = currentThickness > 0 ? (currentThickness + ' мм') : 'сплошная';
+  currentEndStyle = item.endStyle;
+  document.getElementById('endSelect').value = item.endStyle;
+  document.querySelector('#endSelect option[value="round"]').disabled = (currentProfile === 'square');
+
+  // сохранённые точки уже в мировых мм-координатах (центр bbox = 0,0) — переносим в координаты холста
+  finalPoints = item.points.map(p => ({ x: p.x + cw / 2, y: p.z + ch / 2 }));
+  editMode = null;
+  editingNodeIndex = -1;
+  sketchHint.style.display = 'none';
+  rebuildDraft();
+  drawSketch();
+
+  saveBtn.textContent = 'Сохранить изменения';
+  cancelEditBtn.style.display = 'inline-block';
+  activateTab('bend');
+}
 
 // ======================================================================
 //  ВКЛАДКА "СБОРКА"
@@ -893,16 +1060,25 @@ const assemblyViewer = createOrbitViewer(assemblyCanvas, {
   radius: 500,
   onDrag: (e, curr, prev) => {
     if (!moveMode || !selectedPartId) return false;
+    const item = savedParts.find(p => p.id === selectedPartId);
+    if (!item || (item.assembly && item.assembly.locked)) return false; // деталь зафиксирована — драг вращает камеру как обычно
     const pt = raycastGround(curr.x, curr.y, assemblyCanvas, assemblyViewer.camera);
     if (!pt) return true;
-    const part = savedParts.find(p => p.id === selectedPartId);
     const group = assemblyGroupById[selectedPartId];
-    if (part && group) {
-      group.position.x = pt.x;
-      group.position.z = pt.z;
-      part.assembly.x = pt.x;
-      part.assembly.z = pt.z;
-      if (selectionRing) { selectionRing.position.x = pt.x; selectionRing.position.z = pt.z; }
+    if (item && group) {
+      let targetX = pt.x, targetZ = pt.z;
+      const snapOn = document.getElementById('snapToggle').checked;
+      if (snapOn) {
+        const clamped = findSnapClamp(item, item.assembly.x, item.assembly.z, targetX, targetZ);
+        targetX = clamped.x;
+        targetZ = clamped.z;
+      }
+      group.position.x = targetX;
+      group.position.z = targetZ;
+      item.assembly.x = targetX;
+      item.assembly.z = targetZ;
+      if (selectionRing) { selectionRing.position.x = targetX; selectionRing.position.z = targetZ; }
+      syncTransformInputs(item);
     }
     return true; // блокируем орбиту камеры пока двигаем деталь
   },
@@ -955,7 +1131,7 @@ function rebuildAssemblyScene() {
   savedParts.filter(item => !item.parentId).forEach(item => {
     const { group } = createItemGroup(item);
     group.position.set(item.assembly.x, item.assembly.y || 0, item.assembly.z);
-    group.rotation.y = (item.assembly.rotY || 0) * Math.PI / 180;
+    group.rotation.set((item.assembly.rotX || 0) * Math.PI / 180, (item.assembly.rotY || 0) * Math.PI / 180, (item.assembly.rotZ || 0) * Math.PI / 180);
     assemblyViewer.scene.add(group);
     assemblyGroupById[item.id] = group;
   });
@@ -974,33 +1150,124 @@ function updateSelectionRing() {
   assemblyViewer.scene.add(selectionRing);
 }
 
+const TRANSFORM_FIELD_IDS = ['posXInput', 'posYInput', 'posZInput', 'rotXSlider', 'rotXNum', 'rotYSlider', 'rotYNum', 'rotZSlider', 'rotZNum'];
+
+function syncTransformInputs(item) {
+  const a = item.assembly;
+  document.getElementById('posXInput').value = Math.round(a.x || 0);
+  document.getElementById('posYInput').value = Math.round(a.y || 0);
+  document.getElementById('posZInput').value = Math.round(a.z || 0);
+  document.getElementById('rotXSlider').value = a.rotX || 0;
+  document.getElementById('rotXNum').value = a.rotX || 0;
+  document.getElementById('rotYSlider').value = a.rotY || 0;
+  document.getElementById('rotYNum').value = a.rotY || 0;
+  document.getElementById('rotZSlider').value = a.rotZ || 0;
+  document.getElementById('rotZNum').value = a.rotZ || 0;
+}
+
+function applyTransformFromInputs() {
+  if (!selectedPartId) return;
+  const item = savedParts.find(p => p.id === selectedPartId);
+  const group = assemblyGroupById[selectedPartId];
+  if (!item || !group || item.assembly.locked) return;
+  item.assembly.x = Number(document.getElementById('posXInput').value) || 0;
+  item.assembly.y = Number(document.getElementById('posYInput').value) || 0;
+  item.assembly.z = Number(document.getElementById('posZInput').value) || 0;
+  item.assembly.rotX = Number(document.getElementById('rotXNum').value) || 0;
+  item.assembly.rotY = Number(document.getElementById('rotYNum').value) || 0;
+  item.assembly.rotZ = Number(document.getElementById('rotZNum').value) || 0;
+  group.position.set(item.assembly.x, item.assembly.y, item.assembly.z);
+  group.rotation.set(item.assembly.rotX * Math.PI / 180, item.assembly.rotY * Math.PI / 180, item.assembly.rotZ * Math.PI / 180);
+  updateSelectionRing();
+  persistParts();
+}
+
+function bindRotationPair(sliderId, numId) {
+  const slider = document.getElementById(sliderId), num = document.getElementById(numId);
+  slider.addEventListener('input', () => { num.value = slider.value; applyTransformFromInputs(); });
+  num.addEventListener('input', () => { slider.value = num.value; applyTransformFromInputs(); });
+}
+bindRotationPair('rotXSlider', 'rotXNum');
+bindRotationPair('rotYSlider', 'rotYNum');
+bindRotationPair('rotZSlider', 'rotZNum');
+['posXInput', 'posYInput', 'posZInput'].forEach(id => document.getElementById(id).addEventListener('input', applyTransformFromInputs));
+
 function selectPart(id) {
   selectedPartId = id;
-  const part = savedParts.find(p => p.id === id);
+  const item = savedParts.find(p => p.id === id);
   const nameInfo = document.getElementById('selectedNameInfo');
-  const rotateGroup = document.getElementById('rotateGroup');
-  if (part) {
+  const transformPanel = document.getElementById('transformPanel');
+  const lockBtn = document.getElementById('lockBtn');
+  const cloneBtn = document.getElementById('cloneBtn');
+  const editBtn = document.getElementById('editPartBtn');
+  if (item) {
     nameInfo.style.display = 'flex';
-    nameInfo.textContent = 'Выбрано: ' + part.name;
-    rotateGroup.style.display = 'flex';
-    document.getElementById('rotateInput').value = part.assembly.rotY || 0;
+    nameInfo.textContent = 'Выбрано: ' + item.name;
+    transformPanel.classList.add('open');
+    lockBtn.style.display = 'inline-block';
+    lockBtn.textContent = item.assembly.locked ? 'Разблокировать' : 'Зафиксировать';
+    lockBtn.classList.toggle('toggle-on', !!item.assembly.locked);
+    cloneBtn.style.display = 'inline-block';
+    editBtn.style.display = item.type === 'assembly' ? 'none' : 'inline-block';
+    syncTransformInputs(item);
+    const locked = !!item.assembly.locked;
+    TRANSFORM_FIELD_IDS.forEach(fid => { document.getElementById(fid).disabled = locked; });
   } else {
     nameInfo.style.display = 'none';
-    rotateGroup.style.display = 'none';
+    transformPanel.classList.remove('open');
+    lockBtn.style.display = 'none';
+    cloneBtn.style.display = 'none';
+    editBtn.style.display = 'none';
   }
   updateSelectionRing();
   renderPartsList();
 }
 
-document.getElementById('rotateInput').addEventListener('input', (e) => {
+document.getElementById('lockBtn').addEventListener('click', () => {
   if (!selectedPartId) return;
-  const part = savedParts.find(p => p.id === selectedPartId);
-  const group = assemblyGroupById[selectedPartId];
-  const deg = Number(e.target.value);
-  if (part) part.assembly.rotY = deg;
-  if (group) group.rotation.y = deg * Math.PI / 180;
+  const item = savedParts.find(p => p.id === selectedPartId);
+  if (!item) return;
+  item.assembly.locked = !item.assembly.locked;
+  persistParts();
+  selectPart(selectedPartId);
 });
-document.getElementById('rotateInput').addEventListener('change', persistParts);
+
+document.getElementById('editPartBtn').addEventListener('click', () => {
+  if (selectedPartId) startEditPart(selectedPartId);
+});
+
+// глубокое клонирование детали/сборки (со всеми вложенными детьми, с новыми id) —
+// так "Добавить копию" позволяет вставить в сборку ещё один экземпляр той же детали
+function cloneItemDeep(sourceId) {
+  function cloneOne(srcId, newParentId) {
+    const src = savedParts.find(p => p.id === srcId);
+    if (!src) return null;
+    const clone = JSON.parse(JSON.stringify(src));
+    clone.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    clone.parentId = newParentId;
+    savedParts.push(clone);
+    if (src.type === 'assembly') {
+      clone.children = (src.children || []).map(ch => Object.assign({}, ch, { itemId: cloneOne(ch.itemId, clone.id) }));
+    }
+    return clone.id;
+  }
+  const newTopId = cloneOne(sourceId, null);
+  const top = savedParts.find(p => p.id === newTopId);
+  if (top) {
+    top.name = top.name + ' (копия)';
+    top.assembly = Object.assign({}, top.assembly, { x: (top.assembly.x || 0) + 60, z: (top.assembly.z || 0) + 60, locked: false });
+  }
+  return newTopId;
+}
+
+document.getElementById('cloneBtn').addEventListener('click', () => {
+  if (!selectedPartId) return;
+  const newId = cloneItemDeep(selectedPartId);
+  persistParts();
+  rebuildAssemblyScene();
+  renderPartsList();
+  selectPart(newId);
+});
 
 document.getElementById('moveModeBtn').addEventListener('click', (e) => {
   moveMode = !moveMode;
@@ -1108,7 +1375,7 @@ document.getElementById('groupConfirmBtn').addEventListener('click', () => {
   // относительно этого центроида — так позиция/поворот каждой детали сохраняется
   const cx = chosen.reduce((s, c) => s + c.assembly.x, 0) / chosen.length;
   const cz = chosen.reduce((s, c) => s + c.assembly.z, 0) / chosen.length;
-  const children = chosen.map(c => ({ itemId: c.id, x: c.assembly.x - cx, y: c.assembly.y || 0, z: c.assembly.z - cz, rotY: c.assembly.rotY || 0 }));
+  const children = chosen.map(c => ({ itemId: c.id, x: c.assembly.x - cx, y: c.assembly.y || 0, z: c.assembly.z - cz, rotX: c.assembly.rotX || 0, rotY: c.assembly.rotY || 0, rotZ: c.assembly.rotZ || 0 }));
   const newId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   chosen.forEach(c => { c.parentId = newId; });
   savedParts.push({
@@ -1116,7 +1383,7 @@ document.getElementById('groupConfirmBtn').addEventListener('click', () => {
     name,
     type: 'assembly',
     children,
-    assembly: { x: cx, y: 0, z: cz, rotY: 0 },
+    assembly: { x: cx, y: 0, z: cz, rotX: 0, rotY: 0, rotZ: 0, locked: false },
     parentId: null
   });
   if (selectedPartId && chosen.some(c => c.id === selectedPartId)) selectedPartId = null;
@@ -1130,17 +1397,20 @@ document.getElementById('groupConfirmBtn').addEventListener('click', () => {
 function ungroupItem(id) {
   const item = savedParts.find(p => p.id === id);
   if (!item || item.type !== 'assembly') return;
-  const rad = (item.assembly.rotY || 0) * Math.PI / 180;
-  const cos = Math.cos(rad), sin = Math.sin(rad);
+  const parentMatrix = itemTransformMatrix(item.assembly);
   (item.children || []).forEach(child => {
     const childItem = itemsById[child.itemId];
     if (!childItem) return;
-    // переводим локальные координаты ребёнка в мировые, учитывая перемещение/поворот сборки
+    // переводим локальные координаты/поворот ребёнка в мировые через композицию матриц
+    // (полноценно, а не только по Y — дети могут быть повёрнуты по всем трём осям)
+    const worldMatrix = parentMatrix.clone().multiply(itemTransformMatrix(child));
+    const pos = new THREE.Vector3(), quat = new THREE.Quaternion(), scale = new THREE.Vector3();
+    worldMatrix.decompose(pos, quat, scale);
+    const euler = new THREE.Euler().setFromQuaternion(quat, 'XYZ');
     childItem.assembly = {
-      x: item.assembly.x + (child.x * cos - child.z * sin),
-      y: child.y || 0,
-      z: item.assembly.z + (child.x * sin + child.z * cos),
-      rotY: (item.assembly.rotY || 0) + (child.rotY || 0)
+      x: pos.x, y: pos.y, z: pos.z,
+      rotX: euler.x * 180 / Math.PI, rotY: euler.y * 180 / Math.PI, rotZ: euler.z * 180 / Math.PI,
+      locked: (childItem.assembly && childItem.assembly.locked) || false
     };
     childItem.parentId = null;
   });
