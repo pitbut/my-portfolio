@@ -189,7 +189,9 @@
     padding: 10px 12px;
   }
   .part-card.selected { border-color: #FFA500; background: rgba(255,165,0,0.1); }
-  .part-card .name { font-weight: 600; font-size: 0.92em; margin-bottom: 3px; }
+  .part-card .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .part-card .card-top input[type="checkbox"] { width: 16px; height: 16px; accent-color: #FFA500; flex-shrink: 0; }
+  .part-card .name { font-weight: 600; font-size: 0.92em; margin-bottom: 0; }
   .part-card .meta { font-size: 0.78em; color: #8b93b3; margin-bottom: 8px; }
   .part-card .actions { display: flex; gap: 6px; }
   .part-card .actions button { padding: 6px 12px; font-size: 0.8em; }
@@ -281,12 +283,24 @@
       <div class="control-group" id="selectedNameInfo" style="display:none"></div>
     </div>
 
+    <div class="controls">
+      <span id="groupCountInfo" class="control-group">Отмечено чекбоксом: 0</span>
+      <button id="groupBtn" class="primary" disabled>Сгруппировать в сборку</button>
+    </div>
+
+    <div class="save-row" id="groupRow">
+      <input type="text" id="groupNameInput" placeholder="Название сборки">
+      <button id="groupConfirmBtn" class="primary">Ок</button>
+      <button id="groupCancelBtn">Отмена</button>
+    </div>
+
     <div class="panels">
       <div class="panel">
-        <h3>Сохранённые детали</h3>
+        <h3>Сохранённые детали и сборки</h3>
         <div class="parts-list" id="partsList">
           <p class="empty-list">Пока пусто. Согни деталь на вкладке «Гибка» и сохрани её.</p>
         </div>
+        <p class="hint">Чекбокс — отметить для группировки (нужно минимум 2). «Выбрать» — для перемещения/поворота.</p>
       </div>
       <div class="panel">
         <h3>Сборка (3D)</h3>
@@ -533,7 +547,7 @@ function finishStroke(e) {
 sketchCanvas.addEventListener('pointerup', finishStroke);
 sketchCanvas.addEventListener('pointercancel', finishStroke);
 
-document.getElementById('clearBtn').addEventListener('click', () => {
+function resetSketch() {
   finalPoints = [];
   smoothedStroke = [];
   rawStroke = [];
@@ -542,7 +556,9 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   sketchHint.style.display = 'flex';
   drawSketch();
   clearDraft();
-});
+}
+
+document.getElementById('clearBtn').addEventListener('click', resetSketch);
 
 window.addEventListener('resize', resizeSketchCanvas);
 
@@ -616,6 +632,25 @@ function disposeGroup(group) {
     if (obj.geometry) obj.geometry.dispose();
     if (obj.material) obj.material.dispose();
   });
+}
+
+// Строит 3D-группу для элемента библиотеки — это либо цельная деталь (труба/профиль),
+// либо сборка (набор ссылок на другие элементы, включая другие сборки — рекурсивно)
+function createItemGroup(item) {
+  if (item.type === 'assembly') {
+    const group = new THREE.Group();
+    (item.children || []).forEach(child => {
+      const childItem = itemsById[child.itemId];
+      if (!childItem) return;
+      const { group: childGroup } = createItemGroup(childItem);
+      childGroup.position.set(child.x, child.y || 0, child.z);
+      childGroup.rotation.y = (child.rotY || 0) * Math.PI / 180;
+      group.add(childGroup);
+    });
+    return { group, length: null, bbox: item.bbox || { width: 0, depth: 0 } };
+  }
+  const pts = item.points.map(p => new THREE.Vector3(p.x, p.y, p.z));
+  return createPartGroup(pts, item.profile, item.size, item.thickness || 0, item.endStyle);
 }
 
 // ======================================================================
@@ -816,6 +851,8 @@ document.getElementById('saveConfirmBtn').addEventListener('click', () => {
   savedParts.push({
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     name,
+    type: 'part',
+    parentId: null,
     profile: currentProfile,
     size: currentSize,
     thickness: currentThickness,
@@ -827,6 +864,7 @@ document.getElementById('saveConfirmBtn').addEventListener('click', () => {
   persistParts();
   saveRow.classList.remove('open');
   renderPartsList();
+  resetSketch(); // черновик сохранён — очищаем холст, чтобы сразу рисовать следующую деталь
 });
 
 // ======================================================================
@@ -837,10 +875,18 @@ const STORAGE_KEY = 'trubogib3d_parts_v1';
 let savedParts = [];
 try { savedParts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { savedParts = []; }
 
+let itemsById = {};
+function reindexItems() {
+  itemsById = {};
+  savedParts.forEach(p => { itemsById[p.id] = p; });
+}
+
 function persistParts() {
+  reindexItems();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(savedParts));
+  const topLevelCount = savedParts.filter(p => !p.parentId).length;
   const badge = document.getElementById('partsCountBadge');
-  badge.textContent = savedParts.length ? ' (' + savedParts.length + ')' : '';
+  badge.textContent = topLevelCount ? ' (' + topLevelCount + ')' : '';
 }
 
 const assemblyViewer = createOrbitViewer(assemblyCanvas, {
@@ -905,13 +951,13 @@ let moveMode = false;
 function rebuildAssemblyScene() {
   Object.values(assemblyGroupById).forEach(g => { assemblyViewer.scene.remove(g); disposeGroup(g); });
   assemblyGroupById = {};
-  savedParts.forEach(part => {
-    const pts = part.points.map(p => new THREE.Vector3(p.x, p.y, p.z));
-    const { group } = createPartGroup(pts, part.profile, part.size, part.thickness || 0, part.endStyle);
-    group.position.set(part.assembly.x, part.assembly.y || 0, part.assembly.z);
-    group.rotation.y = (part.assembly.rotY || 0) * Math.PI / 180;
+  reindexItems();
+  savedParts.filter(item => !item.parentId).forEach(item => {
+    const { group } = createItemGroup(item);
+    group.position.set(item.assembly.x, item.assembly.y || 0, item.assembly.z);
+    group.rotation.y = (item.assembly.rotY || 0) * Math.PI / 180;
     assemblyViewer.scene.add(group);
-    assemblyGroupById[part.id] = group;
+    assemblyGroupById[item.id] = group;
   });
   updateSelectionRing();
 }
@@ -962,38 +1008,147 @@ document.getElementById('moveModeBtn').addEventListener('click', (e) => {
   e.target.textContent = moveMode ? 'Двигать деталь: ВКЛ' : 'Двигать деталь';
 });
 
+function pluralDetails(n) {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'деталь';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'детали';
+  return 'деталей';
+}
+
 function renderPartsList() {
   const list = document.getElementById('partsList');
-  if (!savedParts.length) {
+  const topLevel = savedParts.filter(item => !item.parentId);
+  if (!topLevel.length) {
     list.innerHTML = '<p class="empty-list">Пока пусто. Согни деталь на вкладке «Гибка» и сохрани её.</p>';
+    updateGroupButtonState();
     return;
   }
   list.innerHTML = '';
-  savedParts.forEach(part => {
+  topLevel.forEach(item => {
     const card = document.createElement('div');
-    card.className = 'part-card' + (part.id === selectedPartId ? ' selected' : '');
-    const profileLabel = part.profile === 'square' ? 'квадрат ' + part.size + ' мм' : 'труба Ø' + part.size + ' мм';
-    const wallLabel = part.thickness > 0.3 ? ('стенка ' + part.thickness + ' мм') : 'сплошная';
+    card.className = 'part-card' + (item.id === selectedPartId ? ' selected' : '');
+    let metaLine;
+    if (item.type === 'assembly') {
+      const n = (item.children || []).length;
+      metaLine = 'Сборка · ' + n + ' ' + pluralDetails(n);
+    } else {
+      const profileLabel = item.profile === 'square' ? 'квадрат ' + item.size + ' мм' : 'труба Ø' + item.size + ' мм';
+      const wallLabel = item.thickness > 0.3 ? ('стенка ' + item.thickness + ' мм') : 'сплошная';
+      metaLine = profileLabel + ' · ' + wallLabel + ' · длина ' + item.length + ' мм · габариты ' + item.bbox.width + '×' + item.bbox.depth + ' мм';
+    }
     card.innerHTML =
-      '<div class="name">' + escapeHtml(part.name) + '</div>' +
-      '<div class="meta">' + profileLabel + ' · ' + wallLabel + ' · длина ' + part.length + ' мм · габариты ' + part.bbox.width + '×' + part.bbox.depth + ' мм</div>' +
-      '<div class="actions"><button class="selectBtn">Выбрать</button><button class="danger deleteBtn">Удалить</button></div>';
-    card.querySelector('.selectBtn').addEventListener('click', () => selectPart(part.id));
-    card.querySelector('.deleteBtn').addEventListener('click', () => {
-      savedParts = savedParts.filter(p => p.id !== part.id);
-      if (selectedPartId === part.id) selectedPartId = null;
-      persistParts();
-      rebuildAssemblyScene();
-      renderPartsList();
+      '<div class="card-top"><input type="checkbox" class="groupCheck"' + (groupSelection.has(item.id) ? ' checked' : '') + '><span class="name">' + escapeHtml(item.name) + '</span></div>' +
+      '<div class="meta">' + metaLine + '</div>' +
+      '<div class="actions"><button class="selectBtn">Выбрать</button>' +
+      (item.type === 'assembly' ? '<button class="ungroupBtn">Разгруппировать</button>' : '') +
+      '<button class="danger deleteBtn">Удалить</button></div>';
+    card.querySelector('.groupCheck').addEventListener('change', (e) => {
+      if (e.target.checked) groupSelection.add(item.id); else groupSelection.delete(item.id);
+      updateGroupButtonState();
     });
+    card.querySelector('.selectBtn').addEventListener('click', () => selectPart(item.id));
+    const ungroupBtn = card.querySelector('.ungroupBtn');
+    if (ungroupBtn) ungroupBtn.addEventListener('click', () => ungroupItem(item.id));
+    card.querySelector('.deleteBtn').addEventListener('click', () => deleteItemRecursive(item.id));
     list.appendChild(card);
   });
+  updateGroupButtonState();
 }
 
 function escapeHtml(s) {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+
+// ------- удаление (каскадное, включая вложенные детали сборки) -------
+function deleteItemRecursive(id) {
+  const toDelete = new Set([id]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    savedParts.forEach(p => {
+      if (p.parentId && toDelete.has(p.parentId) && !toDelete.has(p.id)) {
+        toDelete.add(p.id);
+        changed = true;
+      }
+    });
+  }
+  savedParts = savedParts.filter(p => !toDelete.has(p.id));
+  if (toDelete.has(selectedPartId)) selectedPartId = null;
+  toDelete.forEach(tid => groupSelection.delete(tid));
+  persistParts();
+  rebuildAssemblyScene();
+  renderPartsList();
+}
+
+// ------- группировка нескольких деталей/сборок в одну сборку -------
+let groupSelection = new Set();
+
+function updateGroupButtonState() {
+  document.getElementById('groupCountInfo').textContent = 'Отмечено чекбоксом: ' + groupSelection.size;
+  document.getElementById('groupBtn').disabled = groupSelection.size < 2;
+}
+
+const groupRow = document.getElementById('groupRow');
+document.getElementById('groupBtn').addEventListener('click', () => {
+  if (groupSelection.size < 2) return;
+  const assemblyCount = savedParts.filter(p => p.type === 'assembly').length;
+  document.getElementById('groupNameInput').value = 'Сборка ' + (assemblyCount + 1);
+  groupRow.classList.add('open');
+  document.getElementById('groupNameInput').focus();
+});
+document.getElementById('groupCancelBtn').addEventListener('click', () => groupRow.classList.remove('open'));
+document.getElementById('groupConfirmBtn').addEventListener('click', () => {
+  const chosen = savedParts.filter(p => groupSelection.has(p.id));
+  if (chosen.length < 2) return;
+  const assemblyCount = savedParts.filter(p => p.type === 'assembly').length;
+  const name = document.getElementById('groupNameInput').value.trim() || ('Сборка ' + (assemblyCount + 1));
+  // помещаем новую сборку в центроид выбранных деталей, дети хранят координаты
+  // относительно этого центроида — так позиция/поворот каждой детали сохраняется
+  const cx = chosen.reduce((s, c) => s + c.assembly.x, 0) / chosen.length;
+  const cz = chosen.reduce((s, c) => s + c.assembly.z, 0) / chosen.length;
+  const children = chosen.map(c => ({ itemId: c.id, x: c.assembly.x - cx, y: c.assembly.y || 0, z: c.assembly.z - cz, rotY: c.assembly.rotY || 0 }));
+  const newId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  chosen.forEach(c => { c.parentId = newId; });
+  savedParts.push({
+    id: newId,
+    name,
+    type: 'assembly',
+    children,
+    assembly: { x: cx, y: 0, z: cz, rotY: 0 },
+    parentId: null
+  });
+  if (selectedPartId && chosen.some(c => c.id === selectedPartId)) selectedPartId = null;
+  groupSelection.clear();
+  persistParts();
+  groupRow.classList.remove('open');
+  rebuildAssemblyScene();
+  renderPartsList();
+});
+
+function ungroupItem(id) {
+  const item = savedParts.find(p => p.id === id);
+  if (!item || item.type !== 'assembly') return;
+  const rad = (item.assembly.rotY || 0) * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  (item.children || []).forEach(child => {
+    const childItem = itemsById[child.itemId];
+    if (!childItem) return;
+    // переводим локальные координаты ребёнка в мировые, учитывая перемещение/поворот сборки
+    childItem.assembly = {
+      x: item.assembly.x + (child.x * cos - child.z * sin),
+      y: child.y || 0,
+      z: item.assembly.z + (child.x * sin + child.z * cos),
+      rotY: (item.assembly.rotY || 0) + (child.rotY || 0)
+    };
+    childItem.parentId = null;
+  });
+  savedParts = savedParts.filter(p => p.id !== id);
+  if (selectedPartId === id) selectedPartId = null;
+  persistParts();
+  rebuildAssemblyScene();
+  renderPartsList();
 }
 
 // ======================================================================
