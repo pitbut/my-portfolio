@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.env
+data/voices/*
+!data/voices/.gitkeep
+data/base_speaker_se.pt
+*.wav
+*.mp3

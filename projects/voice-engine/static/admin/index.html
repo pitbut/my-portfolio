@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Voice Engine — админка</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #222; }
+  h1 { font-size: 20px; }
+  fieldset { margin-bottom: 24px; border: 1px solid #ddd; border-radius: 8px; }
+  label { display: block; margin: 10px 0 4px; font-size: 14px; }
+  input[type=text], input[type=password] { width: 100%; padding: 8px; box-sizing: border-box; }
+  button { padding: 8px 16px; margin-top: 12px; cursor: pointer; }
+  ul { padding-left: 0; list-style: none; }
+  li { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+  .error { color: #c0392b; font-size: 14px; }
+  .ok { color: #27ae60; font-size: 14px; }
+  .hint { color: #666; font-size: 13px; }
+</style>
+</head>
+<body>
+  <h1>Voice Engine — управление голосами</h1>
+  <p class="hint">Эта страница видна только тому, у кого есть токен администратора. Обычные посетители сайта на неё не попадают.</p>
+
+  <fieldset>
+    <legend>Токен доступа</legend>
+    <label for="token">X-Admin-Token</label>
+    <input type="password" id="token" placeholder="вставьте токен">
+    <button onclick="saveToken()">Сохранить и обновить список</button>
+    <p id="tokenStatus"></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Добавить голос</legend>
+    <label for="voiceName">Название голоса (то, что увидит посетитель)</label>
+    <input type="text" id="voiceName" placeholder="например: Наставник">
+    <label for="voiceFile">Запись голоса (wav/mp3/webm, 1-3 минуты чистой речи)</label>
+    <input type="file" id="voiceFile" accept="audio/*">
+    <button onclick="uploadVoice()">Создать голос</button>
+    <p id="uploadStatus"></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Существующие голоса</legend>
+    <ul id="voiceList"></ul>
+  </fieldset>
+
+<script>
+function getToken() { return localStorage.getItem('voiceEngineAdminToken') || ''; }
+
+function saveToken() {
+  localStorage.setItem('voiceEngineAdminToken', document.getElementById('token').value.trim());
+  loadVoices();
+}
+
+async function loadVoices() {
+  const statusEl = document.getElementById('tokenStatus');
+  const listEl = document.getElementById('voiceList');
+  listEl.innerHTML = '';
+  statusEl.textContent = '';
+  try {
+    const res = await fetch('/api/admin/voices', { headers: { 'X-Admin-Token': getToken() } });
+    if (res.status === 401) { statusEl.innerHTML = '<span class="error">Неверный токен.</span>'; return; }
+    if (res.status === 503) { statusEl.innerHTML = '<span class="error">На сервере не задан VOICE_ENGINE_ADMIN_TOKEN.</span>'; return; }
+    const voices = await res.json();
+    if (voices.length === 0) { listEl.innerHTML = '<li class="hint">Пока нет ни одного голоса.</li>'; return; }
+    for (const v of voices) {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${v.name} <span class="hint">(${v.id})</span></span>`;
+      const btn = document.createElement('button');
+      btn.textContent = 'Удалить';
+      btn.onclick = () => deleteVoice(v.id);
+      li.appendChild(btn);
+      listEl.appendChild(li);
+    }
+  } catch (e) {
+    statusEl.innerHTML = '<span class="error">Ошибка соединения: ' + e + '</span>';
+  }
+}
+
+async function uploadVoice() {
+  const name = document.getElementById('voiceName').value.trim();
+  const fileInput = document.getElementById('voiceFile');
+  const statusEl = document.getElementById('uploadStatus');
+  statusEl.textContent = '';
+
+  if (!name || !fileInput.files.length) {
+    statusEl.innerHTML = '<span class="error">Укажите имя и выберите файл.</span>';
+    return;
+  }
+
+  const form = new FormData();
+  form.append('name', name);
+  form.append('audio', fileInput.files[0]);
+
+  statusEl.textContent = 'Обрабатываю запись (это может занять до минуты)…';
+  try {
+    const res = await fetch('/api/admin/voices', {
+      method: 'POST',
+      headers: { 'X-Admin-Token': getToken() },
+      body: form,
+    });
+    const data = await res.json();
+    if (!res.ok) { statusEl.innerHTML = '<span class="error">' + (data.error || 'Ошибка') + '</span>'; return; }
+    statusEl.innerHTML = '<span class="ok">Готово: голос «' + data.name + '» создан.</span>';
+    document.getElementById('voiceName').value = '';
+    fileInput.value = '';
+    loadVoices();
+  } catch (e) {
+    statusEl.innerHTML = '<span class="error">Ошибка соединения: ' + e + '</span>';
+  }
+}
+
+async function deleteVoice(id) {
+  if (!confirm('Удалить этот голос?')) return;
+  await fetch('/api/admin/voices/' + id, { method: 'DELETE', headers: { 'X-Admin-Token': getToken() } });
+  loadVoices();
+}
+
+document.getElementById('token').value = getToken();
+loadVoices();
+</script>
+</body>
+</html>
