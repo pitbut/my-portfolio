@@ -1,0 +1,45 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <text x="600" y="90" font-family="Arial, sans-serif" font-size="46" font-weight="bold" fill="#f8fafc" text-anchor="middle">
+    📖 Печать книгой и тетрадями
+  </text>
+  <text x="600" y="132" font-family="Arial, sans-serif" font-size="22" fill="#94a3b8" text-anchor="middle">
+    Порядок страниц для буклета и сшивных тетрадей • копирование в Word/PDF
+  </text>
+
+  <!-- left sheet stack (booklet) -->
+  <g filter="url(#shadow)">
+    <rect x="110" y="200" width="360" height="260" rx="10" fill="#1e293b" stroke="#475569" stroke-width="2" transform="rotate(-4 290 330)"/>
+    <rect x="140" y="185" width="360" height="260" rx="10" fill="#334155" stroke="#475569" stroke-width="2"/>
+    <line x1="320" y1="195" x2="320" y2="435" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6 6"/>
+    <text x="230" y="320" font-family="Arial" font-size="60" fill="#f8fafc" text-anchor="middle">8</text>
+    <text x="410" y="320" font-family="Arial" font-size="60" fill="#f8fafc" text-anchor="middle">1</text>
+    <text x="320" y="420" font-family="Arial" font-size="18" fill="#f59e0b" text-anchor="middle">Книгой (буклет)</text>
+  </g>
+
+  <!-- right: three small signature booklets -->
+  <g filter="url(#shadow)">
+    <rect x="640" y="230" width="140" height="200" rx="8" fill="#334155" stroke="#475569" stroke-width="2"/>
+    <rect x="800" y="215" width="140" height="200" rx="8" fill="#334155" stroke="#3b82f6" stroke-width="2"/>
+    <rect x="960" y="230" width="140" height="200" rx="8" fill="#334155" stroke="#475569" stroke-width="2"/>
+    <line x1="710" y1="238" x2="710" y2="422" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+    <line x1="870" y1="223" x2="870" y2="407" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+    <line x1="1030" y1="238" x2="1030" y2="422" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+    <text x="840" y="470" font-family="Arial" font-size="18" fill="#3b82f6" text-anchor="middle">Тетрадями</text>
+  </g>
+
+  <text x="600" y="560" font-family="Arial, sans-serif" font-size="20" fill="#cbd5e1" text-anchor="middle">
+    Строка • Столбик • Лицо/оборот • Настройки принтера
+  </text>
+</svg>

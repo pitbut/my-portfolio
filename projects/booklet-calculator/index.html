@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Печать книгой и тетрадями — калькулятор порядка страниц</title>
+<link rel="canonical" href="https://www.robutpit.com/projects/booklet-calculator/index.html">
+<meta name="description" content="Калькулятор порядка страниц для печати книгой (буклетом) и тетрадями: введите количество страниц — получите готовый порядок печати в строку или столбиком для вставки в Word/PDF, разбивку по листам и советы по настройкам принтера.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f172a;
+    --bg-card:#1e293b;
+    --bg-secondary:#334155;
+    --text:#f8fafc;
+    --text-muted:#94a3b8;
+    --accent:#f59e0b;
+    --primary:#3b82f6;
+    --success:#22c55e;
+    --warning:#f97316;
+    --border:#475569;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;}
+  .container{max-width:960px;margin:0 auto;padding:1.25rem;}
+  a{color:var(--primary);}
+  header{padding:1.25rem 0 1.5rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem;}
+  .back-link{display:inline-block;font-size:.85rem;color:var(--text-muted);text-decoration:none;margin-bottom:.75rem;}
+  .back-link:hover{color:var(--primary);}
+  h1{font-size:1.6rem;font-weight:700;margin-bottom:.4rem;}
+  header p{color:var(--text-muted);font-size:.95rem;max-width:720px;}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.4rem;margin-bottom:1.25rem;}
+  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:.75rem;}
+  .card h3{font-size:.95rem;font-weight:600;margin:.9rem 0 .5rem;color:var(--accent);}
+  .tip{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:.75rem .9rem;font-size:.85rem;color:#cbd5e1;margin-bottom:1rem;}
+  .warn{background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.4);border-radius:10px;padding:.75rem .9rem;font-size:.85rem;color:#fed7aa;margin-top:.75rem;}
+  .tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+  .tab{flex:1;min-width:200px;padding:.8rem 1rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;font-size:.9rem;font-weight:600;text-align:center;transition:.15s;}
+  .tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .tab span{display:block;font-weight:400;font-size:.78rem;color:var(--text-muted);margin-top:.15rem;}
+  .tab.active span{color:#dbeafe;}
+  .field-row{display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.5rem;}
+  .field{flex:1;min-width:180px;}
+  .field label{display:block;font-size:.82rem;color:var(--text-muted);margin-bottom:.35rem;}
+  input[type=number], select{width:100%;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.6rem .7rem;font-size:.95rem;font-family:inherit;}
+  input[type=number]:focus, select:focus{outline:2px solid var(--primary);}
+  .btn{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:.55rem 1rem;font-size:.85rem;font-weight:600;cursor:pointer;transition:.15s;}
+  .btn:hover{opacity:.88;}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+  .btn.small{padding:.35rem .65rem;font-size:.78rem;}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin:.75rem 0;}
+  .stat{background:var(--bg-secondary);border-radius:10px;padding:.6rem .75rem;}
+  .stat .num{font-size:1.3rem;font-weight:700;color:var(--accent);}
+  .stat .lbl{font-size:.75rem;color:var(--text-muted);}
+  .out-block{margin-bottom:.75rem;}
+  .out-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;flex-wrap:wrap;gap:.4rem;}
+  .out-head .lbl{font-size:.82rem;color:var(--text-muted);}
+  textarea.out{width:100%;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.6rem .7rem;font-family:'Courier New',monospace;font-size:.85rem;resize:vertical;}
+  textarea.out.row{white-space:nowrap;overflow-x:auto;height:2.6rem;}
+  table.sheets{width:100%;border-collapse:collapse;font-size:.83rem;margin-top:.4rem;}
+  table.sheets th, table.sheets td{border:1px solid var(--border);padding:.4rem .5rem;text-align:center;}
+  table.sheets th{background:var(--bg-secondary);color:var(--text-muted);font-weight:600;}
+  table.sheets td.blank{color:var(--text-muted);font-style:italic;}
+  details.unit{background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem 1rem;margin-bottom:.8rem;}
+  details.unit summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:.2rem 0;}
+  details.unit summary .rng{color:var(--text-muted);font-weight:400;font-size:.82rem;}
+  .toggle-row{display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap;}
+  .toggle-row .btn.small.active{background:var(--primary);border-color:var(--primary);}
+  .overview{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:1rem;}
+  .overview th,.overview td{border:1px solid var(--border);padding:.45rem .6rem;text-align:left;}
+  .overview th{background:var(--bg-secondary);color:var(--text-muted);}
+  footer{text-align:center;color:var(--text-muted);font-size:.8rem;padding:2rem 0 1rem;}
+  .actions-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem;}
+  .empty{color:var(--text-muted);font-size:.9rem;padding:1rem 0;}
+  .reveal-section{margin-bottom:.9rem;}
+  .reveal-body{margin-top:.6rem;padding-top:.65rem;border-top:1px dashed var(--border);}
+  .reprint{margin-top:1rem;}
+  .reprint h3{margin-top:0;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <a class="back-link" href="https://www.robutpit.com/">← Портфолио</a>
+    <h1>📖 Печать книгой и тетрадями</h1>
+    <p>Введите количество страниц — калькулятор посчитает порядок печати для сгибаемого буклета (книгой) или для нескольких сшивных блоков (тетрадями). Готовый порядок можно скопировать в строку или столбиком и вставить в поле «Страницы» диалога печати Word / Adobe / браузера.</p>
+  </header>
+
+  <div class="tip">
+    💡 Если в вашей программе печати (Word, Adobe Reader, LibreOffice) уже есть готовый пункт «Буклет» / «Booklet» / «Брошюра» / «Книжная складка» — он расставит страницы автоматически, калькулятор не нужен. Этот инструмент пригодится, когда такого пункта нет (простые программы, браузер, печать в типографии) — тогда порядок страниц задаётся вручную через поле «Страницы» в диалоге печати.
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabBook" onclick="setMode('book')">📗 Печать книгой<span>Один буклет, все листы вложены друг в друга</span></div>
+    <div class="tab" id="tabSig" onclick="setMode('signatures')">📚 Печать тетрадями<span>Несколько сшивных блоков подряд — для толстых книг</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Параметры</h2>
+    <div class="field-row">
+      <div class="field">
+        <label for="totalPages">Количество страниц документа</label>
+        <input type="number" id="totalPages" min="1" max="5000" value="16" oninput="render()">
+      </div>
+      <div class="field" id="sigField" style="display:none;">
+        <label for="sigSize">Страниц в одной тетради</label>
+        <select id="sigSize" onchange="onSigSizeChange()">
+          <option value="8">8 (2 листа)</option>
+          <option value="16" selected>16 (4 листа)</option>
+          <option value="20">20 (5 листов)</option>
+          <option value="24">24 (6 листов)</option>
+          <option value="32">32 (8 листов)</option>
+          <option value="custom">Своё значение…</option>
+        </select>
+      </div>
+      <div class="field" id="sigCustomField" style="display:none;">
+        <label for="sigCustom">Своё число (кратно 4)</label>
+        <input type="number" id="sigCustom" min="4" step="4" value="16" oninput="render()">
+      </div>
+      <div class="field">
+        <label for="paperCount">Листов бумаги у вас есть (необязательно)</label>
+        <input type="number" id="paperCount" min="0" placeholder="проверить, хватит ли" oninput="render()">
+      </div>
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+  <footer>Расчёт выполняется прямо в браузере, ничего не отправляется на сервер.</footer>
+</div>
+
+<script>
+let mode = 'book'; // 'book' | 'signatures'
+const fmtState = {};      // idBase -> 'row' | 'col', persisted across re-renders
+const fmtCache = {};      // idBase -> array currently shown by that output box
+const variantCache = {};  // idBase -> {normal:[], reversed:[]} for pass-2 blocks
+const passVariant = {};   // idBase -> 'normal' | 'reversed', persisted
+const unitCache = {};     // idBase -> sheets array, for reprint/split widgets
+
+function ru(n, one, few, many){
+  const abs = Math.abs(n)%100, last = abs%10;
+  if(abs>10 && abs<20) return many;
+  if(last>1 && last<5) return few;
+  if(last===1) return one;
+  return many;
+}
+
+function setMode(m){
+  mode = m;
+  document.getElementById('tabBook').classList.toggle('active', m==='book');
+  document.getElementById('tabSig').classList.toggle('active', m==='signatures');
+  document.getElementById('sigField').style.display = m==='signatures' ? '' : 'none';
+  document.getElementById('sigCustomField').style.display = (m==='signatures' && document.getElementById('sigSize').value==='custom') ? '' : 'none';
+  render();
+}
+
+function onSigSizeChange(){
+  document.getElementById('sigCustomField').style.display = document.getElementById('sigSize').value==='custom' ? '' : 'none';
+  render();
+}
+
+function ceilMul4(n){ return Math.max(4, Math.ceil(n/4)*4); }
+
+function buildSheets(unitSize){
+  const sheets = unitSize/4;
+  const arr = [];
+  for(let s=1; s<=sheets; s++){
+    arr.push({ sheet:s, fl: unitSize-2*s+2, fr: 2*s-1, bl: 2*s, br: unitSize-2*s+1 });
+  }
+  return arr;
+}
+
+function buildUnit(startGlobal, realPages){
+  realPages = Math.max(0, realPages);
+  const unitSize = ceilMul4(realPages || 1);
+  const sheets = buildSheets(unitSize).map(x=>{
+    const wrap = n => ({ n, g: n+startGlobal-1, blank: n>realPages });
+    return { sheet:x.sheet, fl:wrap(x.fl), fr:wrap(x.fr), bl:wrap(x.bl), br:wrap(x.br) };
+  });
+  return { startGlobal, endGlobal: startGlobal+realPages-1, realPages, unitSize, blanks: unitSize-realPages, sheets };
+}
+
+function fmtList(arr){ return arr.join(','); }
+function fmtCol(arr){ return arr.join('\n'); }
+
+function copyBox(id, btn){
+  const el = document.getElementById(id);
+  const text = el.value;
+  const done = ok => {
+    const old = btn.dataset.label || btn.textContent;
+    btn.dataset.label = old;
+    btn.textContent = ok ? '✅ Скопировано' : '⚠️ Выделите и Ctrl+C';
+    setTimeout(()=>{ btn.textContent = old; }, 1500);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>done(true)).catch(()=>{ el.select(); done(false); });
+  } else {
+    el.select();
+    try{ document.execCommand('copy'); done(true); } catch(e){ done(false); }
+  }
+}
+
+function toggleReveal(id, btn){
+  const el = document.getElementById(id);
+  if(el.hasAttribute('hidden')){ el.removeAttribute('hidden'); btn.textContent = btn.dataset.hide; }
+  else { el.setAttribute('hidden',''); btn.textContent = btn.dataset.show; }
+}
+
+function revealSection(id, showLabel, hideLabel, innerHtml){
+  return `<div class="reveal-section">
+    <button class="btn ghost" data-show="${showLabel}" data-hide="${hideLabel}" onclick="toggleReveal('${id}', this)">${showLabel}</button>
+    <div id="${id}" hidden class="reveal-body">${innerHtml}</div>
+  </div>`;
+}
+
+function applyFmt(idBase){
+  const mode2 = fmtState[idBase] || 'row';
+  const arr = fmtCache[idBase] || [];
+  const ta = document.getElementById(idBase+'-ta');
+  if(!ta) return;
+  ta.value = mode2==='row' ? fmtList(arr) : fmtCol(arr);
+  ta.classList.toggle('row', mode2==='row');
+  ta.rows = mode2==='row' ? 1 : Math.min(20, Math.max(2, arr.length));
+}
+
+function setFmt(idBase, m, btnRow, btnCol){
+  fmtState[idBase] = m;
+  btnRow.classList.toggle('active', m==='row');
+  btnCol.classList.toggle('active', m==='col');
+  applyFmt(idBase);
+}
+
+function setVariant(idBase, variant, btnN, btnR){
+  passVariant[idBase] = variant;
+  fmtCache[idBase] = variantCache[idBase][variant];
+  btnN.classList.toggle('active', variant==='normal');
+  btnR.classList.toggle('active', variant==='reversed');
+  applyFmt(idBase);
+}
+
+// Единый вывод с переключателем "в строку / столбиком" + копирование.
+function outputBlock(idBase, label, arr){
+  fmtCache[idBase] = arr;
+  const m = fmtState[idBase] || 'row';
+  return `
+    <div class="out-block">
+      <div class="out-head">
+        <span class="lbl">${label}</span>
+        <div class="toggle-row" style="margin:0;">
+          <button class="btn small ghost${m==='row'?' active':''}" id="${idBase}-btnRow" onclick="setFmt('${idBase}','row', document.getElementById('${idBase}-btnRow'), document.getElementById('${idBase}-btnCol'))">В строку</button>
+          <button class="btn small ghost${m==='col'?' active':''}" id="${idBase}-btnCol" onclick="setFmt('${idBase}','col', document.getElementById('${idBase}-btnRow'), document.getElementById('${idBase}-btnCol'))">Столбиком</button>
+          <button class="btn small" onclick="copyBox('${idBase}-ta', this)">📋 Копировать</button>
+        </div>
+      </div>
+      <textarea class="out ${m==='row'?'row':''}" id="${idBase}-ta" rows="${m==='row'?1:Math.min(20,Math.max(2,arr.length))}" readonly>${m==='row'?fmtList(arr):fmtCol(arr)}</textarea>
+    </div>`;
+}
+
+// Как outputBlock, но с дополнительным выбором "прямой / обратный порядок листов" (для прохода 2 ручного дуплекса).
+function outputBlockVariant(idBase, label, normalArr, reversedArr){
+  variantCache[idBase] = { normal: normalArr, reversed: reversedArr };
+  const variant = passVariant[idBase] || 'normal';
+  fmtCache[idBase] = variantCache[idBase][variant];
+  const m = fmtState[idBase] || 'row';
+  const arr = fmtCache[idBase];
+  return `
+    <div class="out-block">
+      <div class="out-head"><span class="lbl">${label}</span></div>
+      <div class="toggle-row">
+        <button class="btn small ghost${variant==='normal'?' active':''}" id="${idBase}-btnN" onclick="setVariant('${idBase}','normal', document.getElementById('${idBase}-btnN'), document.getElementById('${idBase}-btnR'))">Прямой порядок листов</button>
+        <button class="btn small ghost${variant==='reversed'?' active':''}" id="${idBase}-btnR" onclick="setVariant('${idBase}','reversed', document.getElementById('${idBase}-btnN'), document.getElementById('${idBase}-btnR'))">Обратный порядок листов</button>
+      </div>
+      <div class="toggle-row" style="margin-top:.3rem;">
+        <button class="btn small ghost${m==='row'?' active':''}" id="${idBase}-btnRow" onclick="setFmt('${idBase}','row', document.getElementById('${idBase}-btnRow'), document.getElementById('${idBase}-btnCol'))">В строку</button>
+        <button class="btn small ghost${m==='col'?' active':''}" id="${idBase}-btnCol" onclick="setFmt('${idBase}','col', document.getElementById('${idBase}-btnRow'), document.getElementById('${idBase}-btnCol'))">Столбиком</button>
+        <button class="btn small" onclick="copyBox('${idBase}-ta', this)">📋 Копировать</button>
+      </div>
+      <textarea class="out ${m==='row'?'row':''}" id="${idBase}-ta" rows="${m==='row'?1:Math.min(20,Math.max(2,arr.length))}" readonly>${m==='row'?fmtList(arr):fmtCol(arr)}</textarea>
+    </div>`;
+}
+
+function renderSplitParts(idBase){
+  const sheets = unitCache[idBase];
+  let chunk = parseInt(document.getElementById(idBase+'-chunk').value, 10);
+  if(!chunk || chunk<1) chunk = 10;
+  let html = '';
+  for(let i=0; i<sheets.length; i+=chunk){
+    const part = sheets.slice(i, i+chunk);
+    const arr = part.flatMap(sh=>[sh.fl.g, sh.fr.g, sh.bl.g, sh.br.g]);
+    const partId = idBase+'-sp'+(i/chunk);
+    html += outputBlock(partId, `Часть ${Math.floor(i/chunk)+1} — листы ${part[0].sheet}–${part[part.length-1].sheet}`, arr);
+  }
+  document.getElementById(idBase+'-split').innerHTML = html;
+}
+
+function longListTip(idBase, unit){
+  if(unit.sheets.length <= 12) return '';
+  return `<div class="warn" style="margin-top:.6rem;">⚠️ В списке ${unit.sheets.length*4} чисел — некоторые программы (например, Word) могут обрезать слишком длинный список в поле «Страницы». После вставки проверьте в диалоге печати, что учтены все ${unit.sheets.length} лист${ru(unit.sheets.length,'','а','ов')}. Если часть «потерялась» — распечатайте по частям:
+    <div style="margin-top:.5rem;">
+      <label>Листов на часть: <input type="number" id="${idBase}-chunk" min="1" max="${unit.sheets.length}" value="10" style="width:64px;display:inline-block;"></label>
+      <button class="btn small" onclick="renderSplitParts('${idBase}')">Разбить на части</button>
+    </div>
+    <div id="${idBase}-split"></div>
+  </div>`;
+}
+
+function reprintWidgetHtml(idBase, unit){
+  return `<div class="reprint">
+    <h3>Перепечатать один лист (замялся / пропустили)</h3>
+    <div class="field-row" style="align-items:center;">
+      <label style="margin:0;">Номер листа: <input type="number" id="${idBase}-rp" min="1" max="${unit.sheets.length}" value="1" style="width:70px;display:inline-block;"></label>
+      <button class="btn small" onclick="showReprint('${idBase}')">Показать порядок для этого листа</button>
+    </div>
+    <div id="${idBase}-rp-out" style="margin-top:.5rem;"></div>
+  </div>`;
+}
+
+function showReprint(idBase){
+  const sheets = unitCache[idBase];
+  let n = parseInt(document.getElementById(idBase+'-rp').value, 10);
+  n = Math.min(Math.max(1, n||1), sheets.length);
+  const sh = sheets[n-1];
+  const side = p => p.blank ? '— (пусто)' : p.g;
+  const arr = [sh.fl.g, sh.fr.g, sh.bl.g, sh.br.g];
+  const label = `Лист ${n}: лицо — стр. ${side(sh.fl)} и ${side(sh.fr)}; оборот — стр. ${side(sh.bl)} и ${side(sh.br)}`;
+  document.getElementById(idBase+'-rp-out').innerHTML = outputBlock(idBase+'-rp-ta', label, arr);
+}
+
+function paperWarningHtml(required){
+  const raw = document.getElementById('paperCount').value;
+  if(raw === '') return '';
+  const have = parseInt(raw, 10) || 0;
+  if(have >= required) return `<div class="tip" style="margin-top:.5rem;">✅ Бумаги достаточно: нужно ${required} лист${ru(required,'','а','ов')}, у вас указано ${have}.</div>`;
+  const diff = required - have;
+  return `<div class="warn" style="margin-top:.5rem;">⚠️ Не хватает бумаги: нужно ${required} лист${ru(required,'','а','ов')}, у вас ${have} — добавьте ещё ${diff} лист${ru(diff,'','а','ов')}.</div>`;
+}
+
+function sheetsTable(sheets){
+  let rows = sheets.map(sh=>{
+    const cell = p => `<td class="${p.blank?'blank':''}">${p.blank? '— (пусто)' : p.g}</td>`;
+    return `<tr><td>${sh.sheet}</td>${cell(sh.fl)}${cell(sh.fr)}${cell(sh.bl)}${cell(sh.br)}</tr>`;
+  }).join('');
+  return `<table class="sheets">
+    <tr><th>Лист</th><th>Лицо, слева</th><th>Лицо, справа</th><th>Оборот, слева</th><th>Оборот, справа</th></tr>
+    ${rows}
+  </table>`;
+}
+
+function blanksWarningHtml(unit){
+  if(unit.blanks<=0) return '';
+  const from = unit.endGlobal+1, to = unit.startGlobal+unit.unitSize-1;
+  const range = unit.blanks===1 ? `№${from}` : `№${from}–${to}`;
+  return `<div class="warn">⚠️ Число страниц не кратно 4 — добавьте ${unit.blanks} пуст${ru(unit.blanks,'ую страницу','ые страницы','ых страниц')} в конец документа (${range}) перед печатью, иначе разметка «съедет».</div>`;
+}
+
+function unitHtml(unit, idBase, title){
+  unitCache[idBase] = unit.sheets;
+  const order = unit.sheets.flatMap(sh=>[sh.fl.g, sh.fr.g, sh.bl.g, sh.br.g]);
+  const pass1 = unit.sheets.flatMap(sh=>[sh.fl.g, sh.fr.g]);
+  const pass2 = unit.sheets.flatMap(sh=>[sh.bl.g, sh.br.g]);
+  const pass2rev = [...unit.sheets].reverse().flatMap(sh=>[sh.bl.g, sh.br.g]);
+
+  const orderInner = outputBlock(idBase+'-all', title, order) + longListTip(idBase, unit);
+  const tableInner = sheetsTable(unit.sheets) + reprintWidgetHtml(idBase, unit);
+  const duplexInner = `<div class="tip" style="margin-bottom:.6rem;">Сначала распечатайте «Проход 1» (лицевые стороны), переверните всю пачку листов и загрузите её снова, затем печатайте «Проход 2». Если после сборки страницы не совпали по листам — переключите проход 2 на обратный порядок ниже и повторите тест на 2–3 листах.</div>`
+    + outputBlock(idBase+'-p1', 'Проход 1 (лицевые стороны)', pass1)
+    + outputBlockVariant(idBase+'-p2', 'Проход 2 (обратные стороны)', pass2, pass2rev);
+
+  return `
+    <div class="summary-grid">
+      <div class="stat"><div class="num">${unit.realPages}</div><div class="lbl">реальных страниц</div></div>
+      <div class="stat"><div class="num">${unit.unitSize}</div><div class="lbl">страниц с учётом добора</div></div>
+      <div class="stat"><div class="num">${unit.blanks}</div><div class="lbl">пустых страниц добавить</div></div>
+      <div class="stat"><div class="num">${unit.sheets.length}</div><div class="lbl">физических листов</div></div>
+    </div>
+    ${blanksWarningHtml(unit)}
+
+    ${revealSection(idBase+'-sec-order', '🖨 Показать порядок печати', '🙈 Скрыть порядок печати', orderInner)}
+    ${revealSection(idBase+'-sec-table', '📋 Показать разбивку по листам / перепечатать один лист', '🙈 Скрыть разбивку по листам', tableInner)}
+    ${revealSection(idBase+'-sec-duplex', '🔁 Показать ручную двустороннюю печать', '🙈 Скрыть ручную двустороннюю печать', duplexInner)}
+  `;
+}
+
+function printerTips(){
+  return `
+  <div class="card">
+    <h2>🖨️ Настройки принтера</h2>
+    <ul style="padding-left:1.1rem;font-size:.9rem;color:#cbd5e1;line-height:1.8;">
+      <li><b>Страниц на листе:</b> 2 (2-up / «2 страницы на листе»)</li>
+      <li><b>Ориентация листа:</b> альбомная (landscape) — страницы располагаются рядом</li>
+      <li><b>Двусторонняя печать (Duplex):</b> «переворот по короткому краю» (Flip on Short Edge / Short-edge binding) — важно для буклета, иначе оборот будет вверх ногами</li>
+      <li><b>Поле «Страницы» / Page range:</b> вставьте скопированный список чисел через запятую — программа распечатает их именно в указанном порядке, а не по возрастанию (это и создаёт нужную раскладку)</li>
+      <li><b>Поля (margins):</b> минимальные и одинаковые со всех сторон, чтобы после сгиба текст не съезжал к корешку</li>
+    </ul>
+  </div>`;
+}
+
+function render(){
+  const total = parseInt(document.getElementById('totalPages').value, 10);
+  const results = document.getElementById('results');
+
+  if(!total || total < 1){
+    results.innerHTML = '<div class="card"><p class="empty">Введите количество страниц больше нуля.</p></div>';
+    return;
+  }
+  if(total > 5000){
+    results.innerHTML = '<div class="card"><p class="empty">Слишком большое число страниц (максимум 5000).</p></div>';
+    return;
+  }
+
+  let html = '';
+
+  if(mode === 'book'){
+    const unit = buildUnit(1, total);
+    if(total > 60){
+      html += `<div class="warn" style="margin-bottom:1rem;">📌 При ${total} страницах буклет получится очень толстым и плохо сложится в один блок — рассмотрите режим «Печать тетрадями», он делит документ на несколько тонких сшивных блоков.</div>`;
+    }
+    html += `<div class="card"><h2>Результат — печать книгой</h2>${unitHtml(unit, 'book', 'Общий порядок')}${paperWarningHtml(unit.sheets.length)}</div>`;
+  } else {
+    let sizeVal = document.getElementById('sigSize').value;
+    let sigSize = sizeVal === 'custom' ? parseInt(document.getElementById('sigCustom').value, 10) : parseInt(sizeVal, 10);
+    if(!sigSize || sigSize < 4) sigSize = 4;
+    sigSize = ceilMul4(sigSize);
+
+    const units = [];
+    let remaining = total;
+    let startPage = 1;
+    while(remaining > 0){
+      const real = Math.min(sigSize, remaining);
+      const unit = buildUnit(startPage, real);
+      units.push(unit);
+      startPage += real;
+      remaining -= real;
+    }
+
+    const totalSheets = units.reduce((s,u)=>s+u.sheets.length, 0);
+    let overviewRows = units.map((u,i)=>`<tr><td>Тетрадь ${i+1}</td><td>${u.startGlobal}–${u.endGlobal}</td><td>${u.realPages}</td><td>${u.sheets.length}</td><td>${u.blanks}</td></tr>`).join('');
+    html += `<div class="card">
+      <h2>Обзор тетрадей</h2>
+      <table class="overview">
+        <tr><th>Тетрадь</th><th>Страницы</th><th>Реальных стр.</th><th>Листов</th><th>Пустых добавить</th></tr>
+        ${overviewRows}
+      </table>
+      <p style="font-size:.85rem;color:var(--text-muted);">Каждая тетрадь печатается, складывается и вкладывается отдельно, затем тетради собираются по порядку и сшиваются/склеиваются по корешку. Всего на весь блок нужно <b>${totalSheets}</b> лист${ru(totalSheets,'','а','ов')} бумаги.</p>
+      ${paperWarningHtml(totalSheets)}
+    </div>`;
+
+    units.forEach((u,i)=>{
+      html += `<details class="unit" open><summary>Тетрадь ${i+1} <span class="rng">— страницы ${u.startGlobal}–${u.endGlobal}</span></summary>${unitHtml(u, 'sig'+i, 'Порядок для тетради '+(i+1))}</details>`;
+    });
+  }
+
+  html += printerTips();
+  results.innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
