@@ -5,7 +5,7 @@ compatibility_date = "2026-07-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "site_shares_db"
-database_id = "ЗАМЕНИ_НА_ID_ПОСЛЕ_wrangler_d1_create"
+database_id = "8fecc32a-6894-4532-a6ae-e1aa8b8f2e55"
 
 [vars]
 ALLOWED_ORIGIN = "https://www.robutpit.com"

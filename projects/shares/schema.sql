@@ -17,10 +17,17 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified INTEGER NOT NULL DEFAULT 0,
   verification_token TEXT,
   verification_sent_at TEXT,
+  -- Восстановление забытого пароля по ссылке из письма (см. handleForgotPassword/
+  -- handleResetPassword). Токен одноразовый и короткоживущий (см.
+  -- PASSWORD_RESET_TTL_HOURS в worker/src/index.js) — короче, чем verification_token,
+  -- потому что смена пароля чувствительнее к перехвату ссылки.
+  password_reset_token TEXT,
+  password_reset_sent_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_password_reset_token ON users(password_reset_token);
 
 -- Сообщения администратора конкретному держателю акций (видны в его кабинете)
 CREATE TABLE IF NOT EXISTS admin_messages (
@@ -172,6 +179,16 @@ CREATE TABLE IF NOT EXISTS referral_views (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   referrer_id INTEGER NOT NULL REFERENCES users(id),
   viewed_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Дедупликация просмотров по IP (хранится хэш, не сам адрес) — без этого
+-- один и тот же посетитель мог бы бесконечно накручивать total_views, просто
+-- закрывая и открывая вкладку (localStorage на клиенте это не остановит,
+-- его легко обойти очисткой данных браузера/приватной вкладкой).
+-- См. handleTrackView в worker/src/index.js.
+CREATE TABLE IF NOT EXISTS view_dedup (
+  ip_hash TEXT PRIMARY KEY,
+  last_counted_at TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_sell_orders_status_price ON sell_orders(status, price_per_share);

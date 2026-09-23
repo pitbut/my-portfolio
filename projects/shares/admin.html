@@ -42,7 +42,10 @@
                 <strong data-i18n="valuation_title">Оценка проекта и цена акции</strong>
                 <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="valuation_hint">Укажи общую сумму — оценку стоимости всего проекта. Она делится поровну на все 10 000 акций — так и получается цена одной акции.</p>
                 <div class="buy-row" style="margin-top:10px;">
-                    <input type="number" id="valuation-input" data-i18n-placeholder="valuation_placeholder" placeholder="общая сумма, $" min="1" step="0.01">
+                    <div class="field-group">
+                        <label data-i18n="valuation_label">Общая сумма, $</label>
+                        <input type="number" id="valuation-input" data-i18n-placeholder="valuation_placeholder" placeholder="общая сумма, $" min="1" step="0.01">
+                    </div>
                     <button id="valuation-btn" data-i18n="save_valuation_button">Сохранить</button>
                 </div>
                 <p style="font-size:13px; margin-top:8px;" id="valuation-current"></p>
@@ -53,8 +56,14 @@
                 <strong data-i18n="referral_bonus_title">Бонус за регистрацию</strong>
                 <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="referral_bonus_hint">Акция начисляется за подтверждённую регистрацию (не за покупку). Если регистрация была по реферальной ссылке, эта акция делится: доля ниже уходит пригласившему, остальное — новому участнику.</p>
                 <div class="buy-row" style="margin-top:10px;">
-                    <input type="number" id="signup-bonus-input" data-i18n-placeholder="signup_bonus_placeholder" placeholder="акций за регистрацию" min="0" step="0.01">
-                    <input type="number" id="referral-rate-input" data-i18n-placeholder="referral_rate_placeholder" placeholder="доля рефереру, %" min="0" max="100" step="0.1">
+                    <div class="field-group">
+                        <label data-i18n="signup_bonus_label">Акций за регистрацию</label>
+                        <input type="number" id="signup-bonus-input" data-i18n-placeholder="signup_bonus_placeholder" placeholder="акций за регистрацию" min="0" step="0.01">
+                    </div>
+                    <div class="field-group">
+                        <label data-i18n="referral_rate_label">Доля рефереру, %</label>
+                        <input type="number" id="referral-rate-input" data-i18n-placeholder="referral_rate_placeholder" placeholder="доля рефереру, %" min="0" max="100" step="0.1">
+                    </div>
                     <button id="referral-bonus-btn" data-i18n="save_referral_bonus_button">Сохранить</button>
                 </div>
                 <p style="font-size:13px; margin-top:8px;" id="referral-bonus-current"></p>
@@ -65,7 +74,10 @@
                 <strong data-i18n="admin_dividends_title">Дивиденды держателям (бонусные акции)</strong>
                 <p style="font-size:12px; color:#888; margin:6px 0;" data-i18n="admin_dividends_hint">Раз в месяц часть акций начисляется всем держателям бесплатно, пропорционально их доле — без денег, только бонусные акции.</p>
                 <div class="buy-row" style="margin-top:10px;">
-                    <input type="number" id="dividend-pool-input" data-i18n-placeholder="dividend_pool_placeholder" placeholder="размер пула, акций/мес" min="0" step="1">
+                    <div class="field-group">
+                        <label data-i18n="dividend_pool_label">Пул на месяц, акций</label>
+                        <input type="number" id="dividend-pool-input" data-i18n-placeholder="dividend_pool_placeholder" placeholder="размер пула, акций/мес" min="0" step="1">
+                    </div>
                     <button class="secondary" id="dividend-pool-btn" data-i18n="save_dividend_pool_button">Сохранить пул</button>
                     <button id="dividend-distribute-btn" data-i18n="distribute_now_button">Начислить сейчас</button>
                 </div>

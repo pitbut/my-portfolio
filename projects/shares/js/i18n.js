@@ -41,6 +41,18 @@ const I18N = {
         verify_success: "Email подтверждён! Акция за регистрацию начислена, входим в кабинет…",
         verify_missing_token: "В ссылке не хватает токена подтверждения — открой её из письма ещё раз.",
 
+        forgot_password_link: "Забыли пароль?",
+        forgot_password_title: "Восстановление пароля",
+        forgot_password_hint: "Укажи email, с которым регистрировался(лась) — пришлём ссылку для установки нового пароля.",
+        forgot_password_submit: "Отправить ссылку",
+        forgot_password_sent: "Если аккаунт с такой почтой существует — письмо со ссылкой для смены пароля отправлено.",
+
+        reset_password_title: "Новый пароль",
+        new_password_label: "Новый пароль (минимум 8 символов)",
+        reset_password_submit: "Сохранить пароль",
+        reset_password_success: "Пароль изменён! Переходим на страницу входа…",
+        reset_missing_token: "В ссылке не хватает токена восстановления — открой её из письма ещё раз.",
+
         rank_label: "Место в рейтинге: #{rank}",
         shares_held_label: "Твоих акций",
         referral_views_label: "Переходы по ссылке",
@@ -72,6 +84,7 @@ const I18N = {
 
         valuation_title: "Оценка проекта и цена акции",
         valuation_hint: "Укажи общую сумму — оценку стоимости всего проекта (например, выросшую за счёт привлечённой рекламы). Эта сумма делится поровну на все акции в обращении — так и получается цена одной акции.",
+        valuation_label: "Общая сумма, $",
         valuation_placeholder: "общая сумма, $",
         save_valuation_button: "Сохранить",
         valuation_current: "Текущая оценка: ${valuation} → цена одной акции: ${price}",
@@ -84,6 +97,7 @@ const I18N = {
 
         admin_dividends_title: "Дивиденды держателям (бонусные акции)",
         admin_dividends_hint: "Раз в месяц часть акций начисляется всем держателям бесплатно, пропорционально их доле — без денег, только бонусные акции. Настрой размер пула на месяц и начисли его вручную в любой момент, либо дождись автоматического начисления 1-го числа (если в Cloudflare настроен cron).",
+        dividend_pool_label: "Пул на месяц, акций",
         dividend_pool_placeholder: "размер пула, акций/мес",
         save_dividend_pool_button: "Сохранить пул",
         distribute_now_button: "Начислить сейчас",
@@ -95,7 +109,9 @@ const I18N = {
 
         referral_bonus_title: "Бонус за регистрацию",
         referral_bonus_hint: "Акция начисляется за подтверждённую регистрацию (не за покупку). Если регистрация была по реферальной ссылке, эта акция делится: доля ниже уходит пригласившему, остальное — новому участнику.",
+        signup_bonus_label: "Акций за регистрацию",
         signup_bonus_placeholder: "акций за регистрацию",
+        referral_rate_label: "Доля рефереру, %",
         referral_rate_placeholder: "доля рефереру, % (например 5)",
         save_referral_bonus_button: "Сохранить",
         referral_bonus_current: "Сейчас: {shares} акц. за регистрацию, из них {rate}% рефереру",
@@ -159,6 +175,18 @@ const I18N = {
         verify_success: "Email confirmed! Your signup share was credited, logging you in…",
         verify_missing_token: "This link is missing a confirmation token — open it again from the email.",
 
+        forgot_password_link: "Forgot your password?",
+        forgot_password_title: "Password recovery",
+        forgot_password_hint: "Enter the email you registered with — we'll send a link to set a new password.",
+        forgot_password_submit: "Send link",
+        forgot_password_sent: "If an account with that email exists, an email with a password reset link has been sent.",
+
+        reset_password_title: "New password",
+        new_password_label: "New password (min. 8 characters)",
+        reset_password_submit: "Save password",
+        reset_password_success: "Password changed! Redirecting to the login page…",
+        reset_missing_token: "This link is missing a reset token — open it again from the email.",
+
         rank_label: "Rank: #{rank}",
         shares_held_label: "Your shares",
         referral_views_label: "Link visits",
@@ -190,6 +218,7 @@ const I18N = {
 
         valuation_title: "Project valuation and share price",
         valuation_hint: "Enter the total sum — the valuation of the whole project (for example, grown thanks to advertising you attracted). This sum is split evenly across all shares currently outstanding — that's how the price of one share is formed.",
+        valuation_label: "Total valuation, $",
         valuation_placeholder: "total valuation, $",
         save_valuation_button: "Save",
         valuation_current: "Current valuation: ${valuation} → price per share: ${price}",
@@ -202,6 +231,7 @@ const I18N = {
 
         admin_dividends_title: "Dividends for holders (bonus shares)",
         admin_dividends_hint: "Once a month, shares are distributed to all holders for free, in proportion to their stake — no money, only bonus shares. Set the monthly pool size and distribute it manually any time, or wait for the automatic run on the 1st (if a cron trigger is set up in Cloudflare).",
+        dividend_pool_label: "Monthly pool, shares",
         dividend_pool_placeholder: "pool size, shares/month",
         save_dividend_pool_button: "Save pool",
         distribute_now_button: "Distribute now",
@@ -213,7 +243,9 @@ const I18N = {
 
         referral_bonus_title: "Signup bonus",
         referral_bonus_hint: "A share is credited for a confirmed registration (not for a purchase). If the signup came through a referral link, that share is split: the rate below goes to the referrer, the rest to the new participant.",
+        signup_bonus_label: "Shares per signup",
         signup_bonus_placeholder: "shares per signup",
+        referral_rate_label: "Referrer's share, %",
         referral_rate_placeholder: "referrer's share, % (e.g. 5)",
         save_referral_bonus_button: "Save",
         referral_bonus_current: "Currently: {shares} shares per signup, {rate}% of that goes to the referrer",
