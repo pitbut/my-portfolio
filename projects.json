@@ -344,16 +344,17 @@
   },
   {
     "id": "biblioteka",
-    "title": "🔬 ARGO — научный журнал естествознания",
-    "description": "Научный журнал естествознания ARGO: облачная база статей на Firebase. Загрузка PDF до 10 МБ, синхронизация в реальном времени, лайки, поиск. Все читатели видят одну общую базу.",
+    "title": "🔬 ARGO — научный журнал",
+    "description": "Электронный научный журнал открытого доступа: подача статей в DOCX/PDF, публикация сразу с отметкой «На рецензии», двойное слепое рецензирование с автоназначением редакторов, выпуски раз в два месяца с автоматической вёрсткой PDF, индексация Google Scholar, OAI-PMH. RU/UZ/EN.",
     "image": "projects/biblioteka/preview.jpg",
-    "link": "projects/biblioteka/index.html",
-    "date": "2025-01-08",
+    "link": "https://www.robutpit.com/journal/",
+    "date": "2026-09-26",
     "tags": [
-      "Firebase",
-      "Firestore",
-      "Storage",
-      "PDF",
+      "Flask",
+      "PostgreSQL",
+      "WeasyPrint",
+      "Рецензирование",
+      "Google Scholar",
       "Образование"
     ]
   },
