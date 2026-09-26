@@ -5,8 +5,8 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4461105142069010"
      crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Карта проектов — Как стать миллиардером</title>
-    <meta name="description" content="Все проекты сайта robutpit.com на одной странице: инженерные калькуляторы, игры, ИИ-сервисы и платформы. Поиск и фильтр по тегам.">
+    <title>Водопровод — головоломка</title>
+    <meta name="description" content="Головоломка «Водопровод»: поворачивайте трубы и подайте воду от башни в каждый дом. Бесконечные уровни, от 4×4 до 9×9. Играйте бесплатно в браузере и на телефоне.">
 <link rel="canonical" href="https://www.robutpit.com/projects/example-project/index.html">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <style>
@@ -16,112 +16,150 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            color: #333;
-            line-height: 1.6;
+            color: #e2e8f0;
+            line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 16px; }
+        .container { max-width: 620px; margin: 0 auto; padding: 24px 16px 40px; }
 
         .back-link {
             display: inline-block;
-            margin-bottom: 30px;
-            padding: 12px 25px;
+            margin-bottom: 20px;
+            padding: 10px 22px;
             background: linear-gradient(135deg, #FFD700, #FFA500);
             color: #000;
             text-decoration: none;
             border-radius: 25px;
             font-weight: 600;
-            transition: transform 0.3s ease;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s ease;
         }
         .back-link:hover { transform: translateY(-3px); }
-
-        .content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
 
         h1 {
             background: linear-gradient(135deg, #FFA500, #FFD700);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2.2em;
             font-weight: 900;
         }
+        .rules { color: #94a3b8; margin: 4px 0 18px; }
 
-        .lead { font-size: 1.1em; color: #555; margin-bottom: 25px; }
+        .hud {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .hud div {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .hud b { display: block; font-size: 1.3em; color: #FFD700; font-variant-numeric: tabular-nums; }
+        .hud span { font-size: 0.75em; color: #94a3b8; }
 
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 25px; }
-        .stat {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.15));
+        .board-wrap { position: relative; }
+        .board {
+            display: grid;
+            gap: 0;
+            width: 100%;
+            aspect-ratio: 1;
+            background: #0b1220;
+            border: 3px solid #1e293b;
+            border-radius: 14px;
+            overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .cell {
+            position: relative;
+            border: none;
+            background: #111a2e;
+            outline: 1px solid #1a2540;
+            cursor: pointer;
+            padding: 0;
+        }
+        .cell:hover { background: #16223b; }
+        .cell.locked { background: #1f2a44; }
+        .cell.locked::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border: 2px dashed rgba(255, 215, 0, 0.45);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .cell svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .pipes { transition: transform 0.18s ease-out; }
+
+        .wall { stroke: #334155; stroke-width: 26; stroke-linecap: butt; }
+        .water { stroke: #475569; stroke-width: 12; stroke-linecap: butt; transition: stroke 0.25s; }
+        .hub-wall { fill: #334155; }
+        .hub { fill: #475569; transition: fill 0.25s; }
+        .on .water { stroke: #38bdf8; stroke-dasharray: 10 8; animation: flow 0.6s linear infinite; }
+        .on .hub { fill: #38bdf8; }
+        @keyframes flow { to { stroke-dashoffset: -18; } }
+
+        .house-body { fill: #64748b; }
+        .house-roof { fill: #475569; }
+        .house-win { fill: #1e293b; transition: fill 0.25s; }
+        .on .house-body { fill: #f1f5f9; }
+        .on .house-roof { fill: #ef4444; }
+        .on .house-win { fill: #FFD700; }
+
+        .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .btn {
+            flex: 1 1 auto;
+            padding: 11px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn:hover { background: rgba(255, 255, 255, 0.12); }
+        .btn.active { background: #FFA500; color: #000; border-color: #FFA500; }
+        .btn.primary { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; border: none; }
+
+        .win {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(11, 18, 32, 0.82);
+            border-radius: 14px;
+            backdrop-filter: blur(2px);
+        }
+        .win.show { display: flex; animation: pop 0.35s ease-out; }
+        @keyframes pop { from { opacity: 0; transform: scale(0.95); } }
+        .win-card { text-align: center; padding: 20px; }
+        .win-card h2 { font-size: 1.7em; color: #FFD700; margin-bottom: 6px; }
+        .stars { font-size: 2.4em; letter-spacing: 6px; margin: 6px 0; }
+        .win-card p { color: #cbd5e1; margin-bottom: 16px; }
+
+        .howto {
+            margin-top: 26px;
+            background: rgba(255, 255, 255, 0.04);
             border-left: 4px solid #FFD700;
             border-radius: 10px;
-            padding: 14px 16px;
+            padding: 14px 18px;
+            color: #94a3b8;
+            font-size: 0.92em;
         }
-        .stat b { display: block; font-size: 1.8em; color: #0f3460; line-height: 1.1; }
-        .stat span { color: #666; font-size: 0.9em; }
+        .howto b { color: #e2e8f0; }
+        .howto li { margin-left: 18px; }
 
-        .search {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 1em;
-            border: 2px solid #eee;
-            border-radius: 12px;
-            margin-bottom: 14px;
-            outline: none;
-        }
-        .search:focus { border-color: #FFA500; }
-
-        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; }
-        .tag-btn {
-            border: 1px solid #ddd;
-            background: #fafafa;
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 0.85em;
-            cursor: pointer;
-            color: #444;
-        }
-        .tag-btn.active { background: #FFA500; border-color: #FFA500; color: #000; font-weight: 600; }
-
-        .list { list-style: none; }
-        .item {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            padding: 14px 0;
-            border-top: 1px solid #f0f0f0;
-        }
-        .item img, .item .noimg {
-            width: 110px;
-            height: 66px;
-            object-fit: cover;
-            border-radius: 8px;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .item-body { min-width: 0; }
-        .item a { color: #0f3460; font-weight: 700; text-decoration: none; font-size: 1.05em; }
-        .item a:hover { color: #FFA500; }
-        .item p {
-            color: #666;
-            font-size: 0.9em;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .item small { color: #999; }
-        .empty { color: #999; padding: 20px 0; text-align: center; }
-
-        @media (max-width: 600px) {
-            .content { padding: 22px; }
-            h1 { font-size: 1.8em; }
-            .item img, .item .noimg { width: 80px; height: 50px; }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.7em; }
+            .hud b { font-size: 1.1em; }
         }
     </style>
 </head>
@@ -129,81 +167,254 @@
     <div class="container">
         <a href="../../index.html" class="back-link">← Вернуться к портфолио</a>
 
-        <div class="content">
-            <h1>🗺️ Карта проектов</h1>
-            <p class="lead">Все разработки сайта на одной странице — от инженерных калькуляторов до игр и ИИ-сервисов. Ищите по названию или выберите тег.</p>
+        <h1>💧 Водопровод</h1>
+        <p class="rules">Поворачивайте трубы, чтобы вода из башни дошла до каждого дома.</p>
 
-            <div class="stats">
-                <div class="stat"><b id="stat-total">—</b><span>проектов</span></div>
-                <div class="stat"><b id="stat-tags">—</b><span>технологий и тем</span></div>
-                <div class="stat"><b id="stat-first">—</b><span>первый проект</span></div>
-                <div class="stat"><b id="stat-last">—</b><span>последнее обновление</span></div>
+        <div class="hud">
+            <div><b id="level">1</b><span>уровень</span></div>
+            <div><b id="houses">0/0</b><span>дома с водой</span></div>
+            <div><b id="moves">0</b><span>ходы</span></div>
+            <div><b id="time">0:00</b><span>время</span></div>
+        </div>
+
+        <div class="board-wrap">
+            <div id="board" class="board"></div>
+            <div id="win" class="win">
+                <div class="win-card">
+                    <h2>Все дома с водой! 🎉</h2>
+                    <div id="stars" class="stars"></div>
+                    <p id="win-text"></p>
+                    <button id="next" class="btn primary">Следующий уровень →</button>
+                </div>
             </div>
+        </div>
 
-            <input id="search" class="search" type="search" placeholder="🔍 Поиск по проектам...">
-            <div id="tags" class="tags"></div>
-            <ul id="list" class="list"><li class="empty">Загрузка проектов...</li></ul>
+        <div class="controls">
+            <button id="lock-mode" class="btn">🔒 Закреплять</button>
+            <button id="restart" class="btn">↺ Заново</button>
+            <button id="new" class="btn">🎲 Другое поле</button>
+        </div>
+
+        <div class="howto">
+            <b>Как играть</b>
+            <ul>
+                <li>Нажмите на клетку — труба повернётся по часовой стрелке.</li>
+                <li>Трубы, по которым течёт вода, становятся голубыми, дома загораются.</li>
+                <li>Уверены в клетке? Закрепите её: правый клик, или включите «🔒 Закреплять» на телефоне.</li>
+                <li>Концы труб не должны торчать в пустоту — все трубы должны соединиться.</li>
+                <li>Три звезды — если решили за минимальное число поворотов.</li>
+            </ul>
         </div>
     </div>
 
     <script>
-        const SELF = 'example-project';
-        let projects = [];
-        let activeTag = null;
+        // Биты направлений: вверх, вправо, вниз, влево
+        const DX = [0, 1, 0, -1];
+        const DY = [-1, 0, 1, 0];
+        const EDGE = [[50, 0], [100, 50], [50, 100], [0, 50]];
+        const STORE_KEY = 'vodoprovod';
 
-        const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        const fmt = d => new Date(d).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short' });
-        // Пути в projects.json относительны корня сайта
-        const url = p => /^https?:\/\//.test(p) ? p : '../../' + encodeURI(p);
+        const $ = id => document.getElementById(id);
+        const board = $('board');
 
-        function render() {
-            const q = document.getElementById('search').value.trim().toLowerCase();
-            const shown = projects.filter(p =>
-                (!activeTag || (p.tags || []).includes(activeTag)) &&
-                (!q || (p.title + ' ' + p.description + ' ' + (p.tags || []).join(' ')).toLowerCase().includes(q))
-            );
-            document.getElementById('list').innerHTML = shown.length ? shown.map(p => `
-                <li class="item">
-                    ${p.image ? `<img src="${url(p.image)}" alt="" loading="lazy" onerror="this.className='noimg';this.removeAttribute('src')">` : '<div class="noimg"></div>'}
-                    <div class="item-body">
-                        <a href="${url(p.link)}">${esc(p.title)}</a> <small>· ${fmt(p.date)}</small>
-                        <p>${esc(p.description)}</p>
-                    </div>
-                </li>`).join('') : '<li class="empty">Ничего не найдено</li>';
+        let n, pipes, rot, startRot, locked, source, cells, minMoves;
+        let moves = 0, startTime = null, timer = null, solved = false, lockMode = false;
+        let level = load().level || 1;
+
+        function load() {
+            try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
+        }
+        function save(data) {
+            try { localStorage.setItem(STORE_KEY, JSON.stringify({ ...load(), ...data })); } catch (e) {}
         }
 
-        function renderTags() {
-            const counts = {};
-            projects.forEach(p => (p.tags || []).forEach(t => counts[t] = (counts[t] || 0) + 1));
-            const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 20);
-            document.getElementById('stat-tags').textContent = Object.keys(counts).length;
-            const box = document.getElementById('tags');
-            box.innerHTML = top.map(([t, n]) => `<button class="tag-btn" data-tag="${esc(t)}">${esc(t)} · ${n}</button>`).join('');
-            box.onclick = e => {
-                const btn = e.target.closest('.tag-btn');
-                if (!btn) return;
-                activeTag = activeTag === btn.dataset.tag ? null : btn.dataset.tag;
-                box.querySelectorAll('.tag-btn').forEach(b => b.classList.toggle('active', b.dataset.tag === activeTag));
-                render();
-            };
+        // Поворот маски на k шагов по часовой стрелке
+        const turn = (m, k) => { k = ((k % 4) + 4) % 4; return ((m << k) | (m >> (4 - k))) & 15; };
+        const bits = m => [0, 1, 2, 3].filter(d => m & (1 << d));
+        const current = i => turn(pipes[i], rot[i]);
+
+        function neighbor(i, d) {
+            const x = i % n + DX[d], y = Math.floor(i / n) + DY[d];
+            return x < 0 || y < 0 || x >= n || y >= n ? -1 : y * n + x;
         }
 
-        fetch('../../projects.json')
-            .then(r => r.json())
-            .then(data => {
-                projects = data.filter(p => p.id !== SELF);
-                const dates = projects.map(p => p.date).sort();
-                document.getElementById('stat-total').textContent = projects.length;
-                document.getElementById('stat-first').textContent = fmt(dates[0]);
-                document.getElementById('stat-last').textContent = fmt(dates[dates.length - 1]);
-                renderTags();
-                render();
-            })
-            .catch(() => {
-                document.getElementById('list').innerHTML = '<li class="empty">⚠️ Не удалось загрузить список проектов</li>';
+        // Случайное остовное дерево (алгоритм Прима), не больше трёх выходов на клетку
+        function generate() {
+            while (true) {
+                pipes = new Array(n * n).fill(0);
+                source = Math.floor(n / 2) * n + Math.floor(n / 2);
+                const inTree = new Set([source]);
+                const frontier = [0, 1, 2, 3].map(d => [source, d]);
+                while (frontier.length) {
+                    const [from, d] = frontier.splice(Math.floor(Math.random() * frontier.length), 1)[0];
+                    const to = neighbor(from, d);
+                    if (to < 0 || inTree.has(to) || bits(pipes[from]).length >= 3) continue;
+                    pipes[from] |= 1 << d;
+                    pipes[to] |= 1 << ((d + 2) % 4);
+                    inTree.add(to);
+                    for (let e = 0; e < 4; e++) frontier.push([to, e]);
+                }
+                if (inTree.size === n * n) return;
+            }
+        }
+
+        function scramble() {
+            do {
+                startRot = pipes.map(() => Math.floor(Math.random() * 4));
+                rot = [...startRot];
+            } while (isSolved());
+            // Минимум поворотов по часовой, чтобы каждая труба вернулась в правильное положение
+            minMoves = pipes.reduce((sum, m, i) => {
+                for (let k = 0; k < 4; k++) if (turn(m, startRot[i] + k) === m) return sum + k;
+                return sum;
+            }, 0);
+        }
+
+        function powered() {
+            const on = new Set([source]);
+            const stack = [source];
+            while (stack.length) {
+                const i = stack.pop();
+                for (const d of bits(current(i))) {
+                    const j = neighbor(i, d);
+                    if (j >= 0 && !on.has(j) && current(j) & (1 << ((d + 2) % 4))) {
+                        on.add(j);
+                        stack.push(j);
+                    }
+                }
+            }
+            return on;
+        }
+
+        function isSolved() {
+            for (let i = 0; i < n * n; i++) {
+                for (const d of bits(current(i))) {
+                    const j = neighbor(i, d);
+                    if (j < 0 || !(current(j) & (1 << ((d + 2) % 4)))) return false;
+                }
+            }
+            return powered().size === n * n;
+        }
+
+        const houseSVG = `
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"/>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"/>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"/>
+            </svg>`;
+        const towerSVG = `
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+                <path d="M40 48 L34 80 M60 48 L66 80 M37 64 L63 64" stroke="#94a3b8" stroke-width="4"/>
+                <rect x="28" y="22" width="44" height="28" rx="8" fill="#0ea5e9" stroke="#e0f2fe" stroke-width="3"/>
+                <path d="M34 36 q8 -6 16 0 t16 0" fill="none" stroke="#e0f2fe" stroke-width="3"/>
+            </svg>`;
+
+        function pipeSVG(m) {
+            const lines = bits(m).map(d => `M50 50 L${EDGE[d][0]} ${EDGE[d][1]}`).join(' ');
+            return `
+                <svg class="pipes" viewBox="0 0 100 100" aria-hidden="true">
+                    <path class="wall" d="${lines}"/>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"/>
+                    <path class="water" d="${lines}"/>
+                    <circle class="hub" cx="50" cy="50" r="6"/>
+                </svg>`;
+        }
+
+        function build() {
+            board.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+            board.innerHTML = '';
+            cells = pipes.map((m, i) => {
+                const cell = document.createElement('button');
+                cell.className = 'cell';
+                cell.setAttribute('aria-label', 'Труба');
+                const isHouse = i !== source && bits(m).length === 1;
+                cell.innerHTML = pipeSVG(m) + (i === source ? towerSVG : isHouse ? houseSVG : '');
+                cell.addEventListener('click', () => lockMode ? toggleLock(i) : rotate(i));
+                cell.addEventListener('contextmenu', e => { e.preventDefault(); toggleLock(i); });
+                board.appendChild(cell);
+                return cell;
             });
+            $('houses').dataset.total = pipes.filter((m, i) => i !== source && bits(m).length === 1).length;
+            cells.forEach((c, i) => draw(i));
+            update();
+        }
 
-        document.getElementById('search').addEventListener('input', render);
+        function draw(i) {
+            cells[i].querySelector('.pipes').style.transform = `rotate(${rot[i] * 90}deg)`;
+            cells[i].classList.toggle('locked', locked.has(i));
+        }
+
+        function rotate(i) {
+            if (solved || locked.has(i)) return;
+            rot[i]++;
+            moves++;
+            if (!startTime) {
+                startTime = Date.now();
+                timer = setInterval(tick, 1000);
+            }
+            draw(i);
+            update();
+        }
+
+        function toggleLock(i) {
+            if (solved) return;
+            locked.has(i) ? locked.delete(i) : locked.add(i);
+            draw(i);
+        }
+
+        function elapsed() {
+            const s = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
+            return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+        }
+        function tick() { $('time').textContent = elapsed(); }
+
+        function update() {
+            const on = powered();
+            cells.forEach((c, i) => c.classList.toggle('on', on.has(i)));
+            const lit = cells.filter((c, i) => i !== source && bits(pipes[i]).length === 1 && on.has(i)).length;
+            $('houses').textContent = `${lit}/${$('houses').dataset.total}`;
+            $('moves').textContent = moves;
+            if (isSolved()) win();
+        }
+
+        function win() {
+            solved = true;
+            clearInterval(timer);
+            const stars = moves <= minMoves ? 3 : moves <= minMoves * 1.5 ? 2 : 1;
+            $('stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            $('win-text').textContent = `Ходов: ${moves} (минимум ${minMoves}) · время ${elapsed()}`;
+            setTimeout(() => $('win').classList.add('show'), 400);
+            save({ level: level + 1 });
+        }
+
+        function reset() {
+            clearInterval(timer);
+            moves = 0;
+            startTime = null;
+            solved = false;
+            locked = new Set();
+            $('time').textContent = '0:00';
+            $('win').classList.remove('show');
+        }
+
+        function newGame() {
+            reset();
+            n = Math.min(3 + level, 9);
+            $('level').textContent = level;
+            generate();
+            scramble();
+            build();
+        }
+
+        $('restart').onclick = () => { reset(); rot = [...startRot]; build(); };
+        $('new').onclick = newGame;
+        $('next').onclick = () => { level++; newGame(); };
+        $('lock-mode').onclick = () => {
+            lockMode = !lockMode;
+            $('lock-mode').classList.toggle('active', lockMode);
+        };
+
+        newGame();
     </script>
 </body>
 </html>

@@ -1,23 +1,283 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1a1a2e"/>
-      <stop offset="50%" stop-color="#16213e"/>
-      <stop offset="100%" stop-color="#0f3460"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#FFA500"/>
-      <stop offset="100%" stop-color="#FFD700"/>
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <path d="M150 470 C 330 470 330 250 520 280 S 760 520 900 330 S 1030 160 1080 150" fill="none" stroke="url(#gold)" stroke-width="8" stroke-dasharray="4 18" stroke-linecap="round"/>
-  <g font-family="Arial, sans-serif" font-size="26" fill="#f8fafc" text-anchor="middle" font-weight="bold">
-    <circle cx="150" cy="470" r="46" fill="#667eea"/><text x="150" y="480">⚙</text>
-    <circle cx="520" cy="280" r="46" fill="#764ba2"/><text x="520" y="290">🎮</text>
-    <circle cx="900" cy="330" r="46" fill="#0ea5e9"/><text x="900" y="340">📐</text>
-    <circle cx="1080" cy="150" r="56" fill="url(#gold)"/><text x="1080" y="162" font-size="40">💰</text>
-  </g>
-  <text x="600" y="120" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="url(#gold)" text-anchor="middle">Карта проектов</text>
-  <text x="600" y="570" font-family="Arial, sans-serif" font-size="30" fill="#cbd5e1" text-anchor="middle">Все разработки сайта на одной странице</text>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1a2e"/><stop offset="50%" stop-color="#16213e"/><stop offset="100%" stop-color="#0f3460"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#FFA500"/><stop offset="100%" stop-color="#FFD700"/></linearGradient><style>.wall{stroke:#334155;stroke-width:26;fill:none}.water{stroke:#475569;stroke-width:12;fill:none}.hub-wall{fill:#334155}.hub{fill:#475569}
+.on .water{stroke:#38bdf8}.on .hub{fill:#38bdf8}.house-body{fill:#64748b}.house-roof{fill:#475569}.house-win{fill:#1e293b}
+.on .house-body{fill:#f1f5f9}.on .house-roof{fill:#ef4444}.on .house-win{fill:#FFD700}</style></defs>
+<rect width="1200" height="630" fill="url(#bg)"/>
+<text x="60" y="250" font-family="Arial, sans-serif" font-size="84" font-weight="bold" fill="url(#gold)">Водопровод</text>
+<text x="62" y="310" font-family="Arial, sans-serif" font-size="30" fill="#cbd5e1">Головоломка: поверни трубы</text>
+<text x="62" y="352" font-family="Arial, sans-serif" font-size="30" fill="#cbd5e1">и подай воду в каждый дом</text>
+<rect x="616" y="51" width="528" height="528" rx="12" fill="#0b1220" stroke="#1e293b" stroke-width="4"/>
+<rect x="620" y="55" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(620 55) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(620 55) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="706.6666666666666" y="55" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(706.6666666666666 55) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L100 50 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="793.3333333333334" y="55" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(793.3333333333334 55) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="880" y="55" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(880 55) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(880 55) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="966.6666666666667" y="55" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(966.6666666666667 55) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(966.6666666666667 55) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="1053.3333333333335" y="55" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(1053.3333333333335 55) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(1053.3333333333335 55) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="620" y="141.66666666666669" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(620 141.66666666666669) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(620 141.66666666666669) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="706.6666666666666" y="141.66666666666669" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(706.6666666666666 141.66666666666669) scale(0.8666666666666667) rotate(180 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="793.3333333333334" y="141.66666666666669" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(793.3333333333334 141.66666666666669) scale(0.8666666666666667) rotate(180 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="880" y="141.66666666666669" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(880 141.66666666666669) scale(0.8666666666666667) rotate(180 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="966.6666666666667" y="141.66666666666669" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(966.6666666666667 141.66666666666669) scale(0.8666666666666667) rotate(180 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L100 50 M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L100 50 M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="1053.3333333333335" y="141.66666666666669" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(1053.3333333333335 141.66666666666669) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="620" y="228.33333333333334" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(620 228.33333333333334) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(620 228.33333333333334) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="706.6666666666666" y="228.33333333333334" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(706.6666666666666 228.33333333333334) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L100 50 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="793.3333333333334" y="228.33333333333334" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(793.3333333333334 228.33333333333334) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="880" y="228.33333333333334" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(880 228.33333333333334) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L100 50 M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L100 50 M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="966.6666666666667" y="228.33333333333334" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(966.6666666666667 228.33333333333334) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="1053.3333333333335" y="228.33333333333334" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(1053.3333333333335 228.33333333333334) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="620" y="315" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(620 315) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(620 315) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="706.6666666666666" y="315" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(706.6666666666666 315) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="793.3333333333334" y="315" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(793.3333333333334 315) scale(0.8666666666666667) rotate(270 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L100 50 M50 50 L50 100"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L100 50 M50 50 L50 100"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="880" y="315" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(880 315) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(880 315) scale(0.8666666666666667)">
+                <path d="M40 48 L34 80 M60 48 L66 80 M37 64 L63 64" stroke="#94a3b8" stroke-width="4"></path>
+                <rect x="28" y="22" width="44" height="28" rx="8" fill="#0ea5e9" stroke="#e0f2fe" stroke-width="3"></rect>
+                <path d="M34 36 q8 -6 16 0 t16 0" fill="none" stroke="#e0f2fe" stroke-width="3"></path>
+            </g></g>
+<rect x="966.6666666666667" y="315" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(966.6666666666667 315) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="1053.3333333333335" y="315" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(1053.3333333333335 315) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L50 0"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(1053.3333333333335 315) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="620" y="401.6666666666667" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(620 401.6666666666667) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(620 401.6666666666667) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="706.6666666666666" y="401.6666666666667" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(706.6666666666666 401.6666666666667) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L100 50 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50 M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="793.3333333333334" y="401.6666666666667" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(793.3333333333334 401.6666666666667) scale(0.8666666666666667) rotate(270 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="880" y="401.6666666666667" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(880 401.6666666666667) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(880 401.6666666666667) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="966.6666666666667" y="401.6666666666667" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(966.6666666666667 401.6666666666667) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="1053.3333333333335" y="401.6666666666667" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(1053.3333333333335 401.6666666666667) scale(0.8666666666666667) rotate(0 50 50)">
+                    <path class="wall" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 100 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="620" y="488.33333333333337" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(620 488.33333333333337) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(620 488.33333333333337) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="706.6666666666666" y="488.33333333333337" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(706.6666666666666 488.33333333333337) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="793.3333333333334" y="488.33333333333337" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(793.3333333333334 488.33333333333337) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(793.3333333333334 488.33333333333337) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="880" y="488.33333333333337" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class=""><g transform="translate(880 488.33333333333337) scale(0.8666666666666667) rotate(180 50 50)">
+                    <path class="wall" d="M50 50 L100 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g><g transform="translate(880 488.33333333333337) scale(0.8666666666666667)">
+                <rect class="house-body" x="33" y="46" width="34" height="26" rx="2"></rect>
+                <path class="house-roof" d="M28 48 L50 28 L72 48 Z"></path>
+                <rect class="house-win" x="44" y="54" width="12" height="11" rx="1"></rect>
+            </g></g>
+<rect x="966.6666666666667" y="488.33333333333337" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(966.6666666666667 488.33333333333337) scale(0.8666666666666667) rotate(180 50 50)">
+                    <path class="wall" d="M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L100 50 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
+<rect x="1053.3333333333335" y="488.33333333333337" width="86.66666666666667" height="86.66666666666667" fill="#111a2e" stroke="#1a2540"/><g class="on"><g transform="translate(1053.3333333333335 488.33333333333337) scale(0.8666666666666667) rotate(360 50 50)">
+                    <path class="wall" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub-wall" cx="50" cy="50" r="13"></circle>
+                    <path class="water" d="M50 50 L50 0 M50 50 L0 50"></path>
+                    <circle class="hub" cx="50" cy="50" r="6"></circle>
+                </g></g>
 </svg>
