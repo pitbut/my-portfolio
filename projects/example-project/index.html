@@ -5,14 +5,13 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4461105142069010"
      crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой первый проект</title>
+    <title>Карта проектов — Как стать миллиардером</title>
+    <meta name="description" content="Все проекты сайта robutpit.com на одной странице: инженерные калькуляторы, игры, ИИ-сервисы и платформы. Поиск и фильтр по тегам.">
+<link rel="canonical" href="https://www.robutpit.com/projects/example-project/index.html">
+    <link rel="icon" href="/favicon.ico" sizes="any">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -20,13 +19,9 @@
             color: #333;
             line-height: 1.6;
         }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 16px; }
+
         .back-link {
             display: inline-block;
             margin-bottom: 30px;
@@ -39,115 +34,176 @@
             transition: transform 0.3s ease;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
-        
-        .back-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
-        }
-        
+        .back-link:hover { transform: translateY(-3px); }
+
         .content {
             background: white;
-            padding: 50px;
+            padding: 40px;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
-        
+
         h1 {
             background: linear-gradient(135deg, #FFA500, #FFD700);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-size: 2.5em;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-weight: 900;
         }
-        
-        h2 {
-            color: #FFA500;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 1.8em;
-        }
-        
-        p {
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            color: #555;
-        }
-        
-        .highlight {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
-            padding: 20px;
-            border-radius: 10px;
+
+        .lead { font-size: 1.1em; color: #555; margin-bottom: 25px; }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .stat {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.15));
             border-left: 4px solid #FFD700;
-            margin: 30px 0;
+            border-radius: 10px;
+            padding: 14px 16px;
         }
-        
-        .project-image {
+        .stat b { display: block; font-size: 1.8em; color: #0f3460; line-height: 1.1; }
+        .stat span { color: #666; font-size: 0.9em; }
+
+        .search {
             width: 100%;
-            height: 400px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            margin: 30px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            color: white;
-            font-weight: 700;
+            padding: 12px 16px;
+            font-size: 1em;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            outline: none;
         }
-        
-        @media (max-width: 768px) {
-            .content {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .project-image {
-                height: 250px;
-            }
+        .search:focus { border-color: #FFA500; }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; }
+        .tag-btn {
+            border: 1px solid #ddd;
+            background: #fafafa;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.85em;
+            cursor: pointer;
+            color: #444;
+        }
+        .tag-btn.active { background: #FFA500; border-color: #FFA500; color: #000; font-weight: 600; }
+
+        .list { list-style: none; }
+        .item {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            padding: 14px 0;
+            border-top: 1px solid #f0f0f0;
+        }
+        .item img, .item .noimg {
+            width: 110px;
+            height: 66px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .item-body { min-width: 0; }
+        .item a { color: #0f3460; font-weight: 700; text-decoration: none; font-size: 1.05em; }
+        .item a:hover { color: #FFA500; }
+        .item p {
+            color: #666;
+            font-size: 0.9em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .item small { color: #999; }
+        .empty { color: #999; padding: 20px 0; text-align: center; }
+
+        @media (max-width: 600px) {
+            .content { padding: 22px; }
+            h1 { font-size: 1.8em; }
+            .item img, .item .noimg { width: 80px; height: 50px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="../../index.html" class="back-link">← Вернуться к портфолио</a>
-        
+
         <div class="content">
-            <h1>🚀 Мой первый проект</h1>
-            
-            <p>Это пример страницы проекта. Здесь вы можете подробно описать ваш проект, его цели и результаты.</p>
-            
-            <div class="project-image">
-                Место для изображения проекта
+            <h1>🗺️ Карта проектов</h1>
+            <p class="lead">Все разработки сайта на одной странице — от инженерных калькуляторов до игр и ИИ-сервисов. Ищите по названию или выберите тег.</p>
+
+            <div class="stats">
+                <div class="stat"><b id="stat-total">—</b><span>проектов</span></div>
+                <div class="stat"><b id="stat-tags">—</b><span>технологий и тем</span></div>
+                <div class="stat"><b id="stat-first">—</b><span>первый проект</span></div>
+                <div class="stat"><b id="stat-last">—</b><span>последнее обновление</span></div>
             </div>
-            
-            <h2>📝 Описание</h2>
-            <p>Замените этот текст описанием вашего проекта. Расскажите:</p>
-            <ul style="margin-left: 30px; margin-bottom: 20px;">
-                <li>Какую проблему решает ваш проект</li>
-                <li>Какие технологии вы использовали</li>
-                <li>Какие результаты вы достигли</li>
-                <li>Что планируете улучшить в будущем</li>
-            </ul>
-            
-            <h2>💡 Ключевые особенности</h2>
-            <div class="highlight">
-                <p><strong>Инновационный подход:</strong> Опишите что делает ваш проект уникальным.</p>
-                <p><strong>Используемые технологии:</strong> ESP32, Python, JavaScript, React, и т.д.</p>
-                <p><strong>Результаты:</strong> Какие метрики или достижения вы получили.</p>
-            </div>
-            
-            <h2>🎯 Будущие планы</h2>
-            <p>Опишите что планируете добавить или улучшить в проекте в будущем.</p>
-            
-            <div style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #f0f0f0; text-align: center;">
-                <p style="color: #999;">Создано с 💰 на пути к миллиарду</p>
-            </div>
+
+            <input id="search" class="search" type="search" placeholder="🔍 Поиск по проектам...">
+            <div id="tags" class="tags"></div>
+            <ul id="list" class="list"><li class="empty">Загрузка проектов...</li></ul>
         </div>
     </div>
+
+    <script>
+        const SELF = 'example-project';
+        let projects = [];
+        let activeTag = null;
+
+        const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const fmt = d => new Date(d).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short' });
+        // Пути в projects.json относительны корня сайта
+        const url = p => /^https?:\/\//.test(p) ? p : '../../' + encodeURI(p);
+
+        function render() {
+            const q = document.getElementById('search').value.trim().toLowerCase();
+            const shown = projects.filter(p =>
+                (!activeTag || (p.tags || []).includes(activeTag)) &&
+                (!q || (p.title + ' ' + p.description + ' ' + (p.tags || []).join(' ')).toLowerCase().includes(q))
+            );
+            document.getElementById('list').innerHTML = shown.length ? shown.map(p => `
+                <li class="item">
+                    ${p.image ? `<img src="${url(p.image)}" alt="" loading="lazy" onerror="this.className='noimg';this.removeAttribute('src')">` : '<div class="noimg"></div>'}
+                    <div class="item-body">
+                        <a href="${url(p.link)}">${esc(p.title)}</a> <small>· ${fmt(p.date)}</small>
+                        <p>${esc(p.description)}</p>
+                    </div>
+                </li>`).join('') : '<li class="empty">Ничего не найдено</li>';
+        }
+
+        function renderTags() {
+            const counts = {};
+            projects.forEach(p => (p.tags || []).forEach(t => counts[t] = (counts[t] || 0) + 1));
+            const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 20);
+            document.getElementById('stat-tags').textContent = Object.keys(counts).length;
+            const box = document.getElementById('tags');
+            box.innerHTML = top.map(([t, n]) => `<button class="tag-btn" data-tag="${esc(t)}">${esc(t)} · ${n}</button>`).join('');
+            box.onclick = e => {
+                const btn = e.target.closest('.tag-btn');
+                if (!btn) return;
+                activeTag = activeTag === btn.dataset.tag ? null : btn.dataset.tag;
+                box.querySelectorAll('.tag-btn').forEach(b => b.classList.toggle('active', b.dataset.tag === activeTag));
+                render();
+            };
+        }
+
+        fetch('../../projects.json')
+            .then(r => r.json())
+            .then(data => {
+                projects = data.filter(p => p.id !== SELF);
+                const dates = projects.map(p => p.date).sort();
+                document.getElementById('stat-total').textContent = projects.length;
+                document.getElementById('stat-first').textContent = fmt(dates[0]);
+                document.getElementById('stat-last').textContent = fmt(dates[dates.length - 1]);
+                renderTags();
+                render();
+            })
+            .catch(() => {
+                document.getElementById('list').innerHTML = '<li class="empty">⚠️ Не удалось загрузить список проектов</li>';
+            });
+
+        document.getElementById('search').addEventListener('input', render);
+    </script>
 </body>
 </html>

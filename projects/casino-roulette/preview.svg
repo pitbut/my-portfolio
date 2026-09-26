@@ -1,0 +1,71 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="felt" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#felt)"/>
+  <g transform="translate(360 315)">
+    <circle r="250" fill="url(#gold)"/>
+    <circle r="232" fill="#3f1d0b"/>
+    <path d="M0 0 L0.0 -222.0 A222 222 0 0 1 37.5 -218.8 Z" fill="#16a34a" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L37.5 -218.8 A222 222 0 0 1 74.0 -209.3 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L74.0 -209.3 A222 222 0 0 1 108.3 -193.8 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L108.3 -193.8 A222 222 0 0 1 139.5 -172.7 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L139.5 -172.7 A222 222 0 0 1 166.6 -146.7 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L166.6 -146.7 A222 222 0 0 1 189.0 -116.4 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L189.0 -116.4 A222 222 0 0 1 206.0 -82.8 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L206.0 -82.8 A222 222 0 0 1 217.0 -46.8 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L217.0 -46.8 A222 222 0 0 1 221.8 -9.4 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L221.8 -9.4 A222 222 0 0 1 220.2 28.2 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L220.2 28.2 A222 222 0 0 1 212.3 65.0 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L212.3 65.0 A222 222 0 0 1 198.2 99.9 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L198.2 99.9 A222 222 0 0 1 178.5 132.0 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L178.5 132.0 A222 222 0 0 1 153.6 160.3 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L153.6 160.3 A222 222 0 0 1 124.3 183.9 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L124.3 183.9 A222 222 0 0 1 91.4 202.3 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L91.4 202.3 A222 222 0 0 1 55.9 214.8 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L55.9 214.8 A222 222 0 0 1 18.8 221.2 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L18.8 221.2 A222 222 0 0 1 -18.8 221.2 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-18.8 221.2 A222 222 0 0 1 -55.9 214.8 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-55.9 214.8 A222 222 0 0 1 -91.4 202.3 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-91.4 202.3 A222 222 0 0 1 -124.3 183.9 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-124.3 183.9 A222 222 0 0 1 -153.6 160.3 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-153.6 160.3 A222 222 0 0 1 -178.5 132.0 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-178.5 132.0 A222 222 0 0 1 -198.2 99.9 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-198.2 99.9 A222 222 0 0 1 -212.3 65.0 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-212.3 65.0 A222 222 0 0 1 -220.2 28.2 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-220.2 28.2 A222 222 0 0 1 -221.8 -9.4 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-221.8 -9.4 A222 222 0 0 1 -217.0 -46.8 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-217.0 -46.8 A222 222 0 0 1 -206.0 -82.8 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-206.0 -82.8 A222 222 0 0 1 -189.0 -116.4 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-189.0 -116.4 A222 222 0 0 1 -166.6 -146.7 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-166.6 -146.7 A222 222 0 0 1 -139.5 -172.7 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-139.5 -172.7 A222 222 0 0 1 -108.3 -193.8 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-108.3 -193.8 A222 222 0 0 1 -74.0 -209.3 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-74.0 -209.3 A222 222 0 0 1 -37.5 -218.8 Z" fill="#b91c1c" stroke="#fde68a" stroke-width="1.5"/>
+    <path d="M0 0 L-37.5 -218.8 A222 222 0 0 1 -0.0 -222.0 Z" fill="#111827" stroke="#fde68a" stroke-width="1.5"/>
+    <circle r="140" fill="#3f1d0b" stroke="url(#gold)" stroke-width="8"/>
+    <circle r="60" fill="url(#gold)"/>
+    <g stroke="url(#gold)" stroke-width="14" stroke-linecap="round">
+      <line x1="0" y1="-55" x2="0" y2="-120"/>
+      <line x1="0" y1="55" x2="0" y2="120"/>
+      <line x1="-55" y1="0" x2="-120" y2="0"/>
+      <line x1="55" y1="0" x2="120" y2="0"/>
+    </g>
+    <circle cx="140" cy="-150" r="14" fill="#f8fafc"/>
+  </g>
+  <text x="890" y="250" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#fde68a" text-anchor="middle">Казино</text>
+  <text x="890" y="340" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#fde68a" text-anchor="middle">Рулетка</text>
+  <text x="890" y="410" font-family="Arial, sans-serif" font-size="30" fill="#dcfce7" text-anchor="middle">Европейская · 37 чисел</text>
+  <g transform="translate(730 450)" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">
+    <rect width="100" height="70" rx="10" fill="#b91c1c"/><text x="50" y="46" fill="#fff">7</text>
+    <rect x="110" width="100" height="70" rx="10" fill="#111827"/><text x="160" y="46" fill="#fff">13</text>
+    <rect x="220" width="100" height="70" rx="10" fill="#16a34a"/><text x="270" y="46" fill="#fff">0</text>
+  </g>
+</svg>

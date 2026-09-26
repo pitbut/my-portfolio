@@ -50,6 +50,12 @@ folders.forEach(folder => {
         return;
     }
     
+    // Пропускаем страницы-редиректы (старые URL, перенесённые в другую папку)
+    if (!isExternalProject && /http-equiv=["']refresh["']/i.test(fs.readFileSync(indexPath, 'utf8'))) {
+        console.log(`↪️  Пропускаю ${folder} - это редирект`);
+        return;
+    }
+    
     // Если нет info.json - создаём базовую информацию
     if (!projectInfo) {
         console.log(`ℹ️  ${folder} - создаю базовую информацию`);
@@ -61,10 +67,10 @@ folders.forEach(folder => {
     }
     
     // Определяем путь к изображению
-    let imagePath = 'https://via.placeholder.com/400x300/667eea/ffffff?text=' + 
-                    encodeURIComponent(projectInfo.title || folder);
+    // Пустая строка — карточка покажет градиентную заглушку с названием
+    let imagePath = '';
     
-    const possibleImages = ['preview.jpg', 'preview.png', 'preview.gif', 'preview.webp', 
+    const possibleImages = ['preview.jpg', 'preview.png', 'preview.svg', 'preview.gif', 'preview.webp', 
                            'thumb.jpg', 'thumb.png', 'thumbnail.jpg', 'thumbnail.png'];
     
     for (const img of possibleImages) {
@@ -75,7 +81,7 @@ folders.forEach(folder => {
         }
     }
     
-    if (projectInfo.image) {
+    if (projectInfo.image && fs.existsSync(path.join(projectPath, projectInfo.image))) {
         imagePath = `projects/${folder}/${projectInfo.image}`;
     }
     

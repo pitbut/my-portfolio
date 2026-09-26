@@ -74,9 +74,9 @@ function createProjectCard(project, index) {
     
     card.innerHTML = `
         <div class="project-image">
-            <img src="${encodeURI(project.image)}"
-                 alt="${project.title}"
-                 onerror="this.src='https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(project.title)}'">
+            ${project.image
+                ? `<img src="${encodeURI(project.image)}" alt="${project.title}" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'image-fallback', textContent: this.alt}))">`
+                : `<div class="image-fallback">${project.title}</div>`}
         </div>
         <div class="project-content">
             <h3>${project.title}</h3>
