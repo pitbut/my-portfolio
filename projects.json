@@ -1,5 +1,41 @@
 [
   {
+    "id": "chat",
+    "title": "Chat",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/chat/preview.jpg",
+    "link": "projects/chat/index.html",
+    "date": "2026-09-25",
+    "tags": []
+  },
+  {
+    "id": "checker",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/checker/preview.jpg",
+    "link": "projects/checker/index.html",
+    "date": "2026-09-25",
+    "tags": []
+  },
+  {
+    "id": "kalkulyator proizvodstva",
+    "title": "Kalkulyator Proizvodstva",
+    "description": "Описание проекта скоро появится",
+    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=Kalkulyator%20Proizvodstva",
+    "link": "projects/kalkulyator proizvodstva/index.html",
+    "date": "2026-09-25",
+    "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-09-25",
+    "tags": []
+  },
+  {
     "id": "booklet-calculator",
     "title": "📖 Печать книгой и тетрадями",
     "description": "Калькулятор порядка страниц для печати книгой (буклетом) и тетрадями (сшивными блоками): введите количество страниц — получите готовый порядок печати в строку (для вставки в поле «Страницы» Word/Adobe/браузера) или столбиком, разбивку по листам (лицо/оборот), советы по настройкам принтера и ручную двустороннюю печать с прямым и обратным порядком проходов — без перекладки бумаги.",
@@ -13,42 +49,6 @@
       "Вёрстка",
       "Инструмент"
     ]
-  },
-  {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-09-22",
-    "tags": []
-  },
-  {
-    "id": "checker",
-    "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/checker/preview.jpg",
-    "link": "projects/checker/index.html",
-    "date": "2026-09-22",
-    "tags": []
-  },
-  {
-    "id": "kalkulyator proizvodstva",
-    "title": "Kalkulyator Proizvodstva",
-    "description": "Описание проекта скоро появится",
-    "image": "https://via.placeholder.com/400x300/667eea/ffffff?text=Kalkulyator%20Proizvodstva",
-    "link": "projects/kalkulyator proizvodstva/index.html",
-    "date": "2026-09-22",
-    "tags": []
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-09-22",
-    "tags": []
   },
   {
     "id": "agro-calc",
