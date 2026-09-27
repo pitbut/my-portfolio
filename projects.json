@@ -1,5 +1,23 @@
 [
   {
+    "id": "chat",
+    "title": "Chat",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/chat/preview.jpg",
+    "link": "projects/chat/index.html",
+    "date": "2026-09-27",
+    "tags": []
+  },
+  {
+    "id": "checker",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/checker/preview.jpg",
+    "link": "projects/checker/index.html",
+    "date": "2026-09-27",
+    "tags": []
+  },
+  {
     "id": "fizcraft",
     "title": "🧱 ФизКрафт — обучающая песочница",
     "description": "Многопользовательская воксельная 3D-песочница: каждый блок — реальный материал с плотностью, трением, прочностью и теплопроводностью. Игроки строят карты-задания и проходят чужие, применяя физику (пружины, рычаги, трение, закон Архимеда), математику (координаты, y = f(x)), химию (реакции с сохранением массы) и программирование (робот на Blockly). Хаб с порталами, «Карта 0 — Обучение», редактор карт, серверные награды-жизни. RU/UZ/EN, ПК и телефон.",
@@ -17,31 +35,29 @@
     ]
   },
   {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-09-26",
-    "tags": []
-  },
-  {
-    "id": "checker",
-    "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/checker/preview.jpg",
-    "link": "projects/checker/index.html",
-    "date": "2026-09-26",
-    "tags": []
-  },
-  {
     "id": "videokonferenciya",
     "title": "Videokonferenciya",
     "description": "Описание проекта скоро появится",
     "image": "projects/videokonferenciya/preview.jpg",
     "link": "projects/videokonferenciya/index.html",
-    "date": "2026-09-26",
+    "date": "2026-09-27",
     "tags": []
+  },
+  {
+    "id": "biblioteka",
+    "title": "🔬 ARGO — научный журнал",
+    "description": "Электронный научный журнал открытого доступа: подача статей в DOCX/PDF, публикация сразу с отметкой «На рецензии», двойное слепое рецензирование с автоназначением редакторов, выпуски раз в два месяца с автоматической вёрсткой PDF, индексация Google Scholar, OAI-PMH. RU/UZ/EN.",
+    "image": "projects/biblioteka/preview.jpg",
+    "link": "https://www.robutpit.com/journal/",
+    "date": "2026-09-26",
+    "tags": [
+      "Flask",
+      "PostgreSQL",
+      "WeasyPrint",
+      "Рецензирование",
+      "Google Scholar",
+      "Образование"
+    ]
   },
   {
     "id": "booklet-calculator",
@@ -357,22 +373,6 @@
       "Flask",
       "Groq",
       "Gemini"
-    ]
-  },
-  {
-    "id": "biblioteka",
-    "title": "🔬 ARGO — научный журнал",
-    "description": "Электронный научный журнал открытого доступа: подача статей в DOCX/PDF, публикация сразу с отметкой «На рецензии», двойное слепое рецензирование с автоназначением редакторов, выпуски раз в два месяца с автоматической вёрсткой PDF, индексация Google Scholar, OAI-PMH. RU/UZ/EN.",
-    "image": "projects/biblioteka/preview.jpg",
-    "link": "https://www.robutpit.com/journal/",
-    "date": "2026-09-26",
-    "tags": [
-      "Flask",
-      "PostgreSQL",
-      "WeasyPrint",
-      "Рецензирование",
-      "Google Scholar",
-      "Образование"
     ]
   },
   {
