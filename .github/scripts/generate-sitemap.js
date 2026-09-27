@@ -3,7 +3,8 @@
 // поэтому список проектов всегда синхронизирован автоматически, без
 // ручного обновления при каждом новом проекте.
 //
-// Внешние проекты (Render и т.п., link начинается с http) в карту сайта не
+// Внешние проекты (Render, поддомены — link начинается с http, но не с
+// https://www.robutpit.com/) в карту сайта не
 // включаем — это не наш домен, свою карту сайта им туда класть незачем.
 const fs = require('fs');
 
@@ -14,9 +15,10 @@ const projects = JSON.parse(fs.readFileSync('./projects.json', 'utf8'));
 const urls = [
     { loc: `${SITE_URL}/`, changefreq: 'weekly', priority: '1.0' },
     ...projects
-        .filter(p => !p.link.startsWith('http://') && !p.link.startsWith('https://'))
+        // Абсолютные ссылки на наш же домен (/journal/, /fizcraft/ и т.п.) — тоже наши страницы.
+        .filter(p => p.link.startsWith(`${SITE_URL}/`) || (!p.link.startsWith('http://') && !p.link.startsWith('https://')))
         .map(p => ({
-            loc: `${SITE_URL}/${encodeURI(p.link)}`,
+            loc: p.link.startsWith(`${SITE_URL}/`) ? p.link : `${SITE_URL}/${encodeURI(p.link)}`,
             changefreq: 'monthly',
             priority: '0.7',
         })),
