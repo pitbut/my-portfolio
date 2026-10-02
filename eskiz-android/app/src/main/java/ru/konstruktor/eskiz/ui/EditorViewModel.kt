@@ -54,7 +54,17 @@ sealed interface Selection {
 /** Окно ввода размера: для линейного размера (a, b), окружности (диаметр) или дуги (радиус). */
 data class DimDialog(val a: Int = 0, val b: Int = 0, val dimId: Int? = null, val circleId: Int? = null, val arcId: Int? = null)
 
-enum class ExportKind { DRAWING_PNG, PHOTO, PDF, DXF, ALL }
+enum class ExportKind(val title: String) {
+    DRAWING_PNG("Чертёж — картинка PNG"),
+    DRAWING_JPG("Чертёж — картинка JPG"),
+    PDF("Чертёж — PDF"),
+    SVG("Чертёж — SVG (вектор)"),
+    DXF("DXF для КОМПАС / AutoCAD"),
+    PHOTO("Фото с размерами (JPG)"),
+    STEP("3D-модель STEP (выдавливание на толщину)"),
+    PROJECT("Проект целиком (.eskiz) — открыть на другом телефоне"),
+    ALL("Всё сразу"),
+}
 
 class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(app) {
     private val store = ProjectStore(app)
@@ -509,7 +519,20 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
     fun values() = Values(project, calibration)
 
     /** Готовит файлы для отправки (в фоне) и отдаёт их в [onReady]. */
-    fun export(kind: ExportKind, onReady: (List<File>) -> Unit) {
+    fun setThickness(t: Double?) = update { p -> p.copy(thickness = t) }
+
+    /** Профиль для 3D: либо он, либо понятная причина, почему его нет. */
+    fun profileOrError(): Pair<ru.konstruktor.eskiz.export.Extrusion.Profile?, String?> = try {
+        ru.konstruktor.eskiz.export.Extrusion.profile(ru.konstruktor.eskiz.render.DrawingModel(project, calibration)) to null
+    } catch (e: ru.konstruktor.eskiz.export.Extrusion.ProfileError) {
+        null to e.message
+    }
+
+    /**
+     * Готовит файлы (в фоне) и отдаёт их в [onReady]. Для сохранения в файл ([forSave])
+     * «всё сразу» упаковывается в один ZIP.
+     */
+    fun export(kind: ExportKind, forSave: Boolean, onReady: (List<File>) -> Unit) {
         if (busy != null) return
         busy = "Готовлю файлы…"
         val p = project; val cal = calibration; val ctx = getApplication<Application>()
@@ -518,18 +541,35 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
                 runCatching {
                     when (kind) {
                         ExportKind.DRAWING_PNG -> listOf(Exporters.drawingPng(ctx, p, cal))
-                        ExportKind.PHOTO -> listOf(Exporters.photoJpg(ctx, p, cal, photoFile))
+                        ExportKind.DRAWING_JPG -> listOf(Exporters.drawingJpg(ctx, p, cal))
                         ExportKind.PDF -> listOf(Exporters.drawingPdf(ctx, p, cal))
+                        ExportKind.SVG -> listOf(Exporters.drawingSvg(ctx, p, cal))
                         ExportKind.DXF -> listOf(Exporters.drawingDxf(ctx, p, cal))
-                        ExportKind.ALL -> listOf(
-                            Exporters.drawingPng(ctx, p, cal), Exporters.photoJpg(ctx, p, cal, photoFile),
-                            Exporters.drawingPdf(ctx, p, cal), Exporters.drawingDxf(ctx, p, cal),
-                        )
+                        ExportKind.PHOTO -> listOf(Exporters.photoJpg(ctx, p, cal, photoFile))
+                        ExportKind.STEP -> listOf(Exporters.step(ctx, p, cal, p.thickness ?: error("Укажите толщину детали")))
+                        ExportKind.PROJECT -> listOf(Exporters.projectArchive(ctx, p, photoFile))
+                        ExportKind.ALL -> {
+                            val list = mutableListOf(
+                                Exporters.drawingPng(ctx, p, cal), Exporters.drawingPdf(ctx, p, cal),
+                                Exporters.drawingSvg(ctx, p, cal), Exporters.drawingDxf(ctx, p, cal),
+                                Exporters.photoJpg(ctx, p, cal, photoFile), Exporters.projectArchive(ctx, p, photoFile),
+                            )
+                            p.thickness?.let { t -> runCatching { Exporters.step(ctx, p, cal, t) }.getOrNull()?.let { list += it } }
+                            if (forSave) listOf(Exporters.zip(ctx, p, list)) else list
+                        }
                     }
                 }
             }
             busy = null
             files.onSuccess(onReady).onFailure { message = "Не удалось подготовить файл: ${it.message}" }
+        }
+    }
+
+    fun saveFile(file: File, uri: android.net.Uri) {
+        val ctx = getApplication<Application>()
+        viewModelScope.launch {
+            val r = withContext(Dispatchers.IO) { runCatching { Exporters.saveTo(ctx, file, uri) } }
+            message = if (r.isSuccess) "Сохранено: ${file.name}" else "Не удалось сохранить: ${r.exceptionOrNull()?.message}"
         }
     }
 

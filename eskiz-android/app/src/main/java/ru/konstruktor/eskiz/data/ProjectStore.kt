@@ -51,6 +51,35 @@ class ProjectStore(private val context: Context) {
         return p
     }
 
+    /** Открывает проект из архива .eskiz (как новый проект). */
+    fun importArchive(uri: Uri): Project {
+        var json: String? = null
+        val id = UUID.randomUUID().toString()
+        dir(id).mkdirs()
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            java.util.zip.ZipInputStream(input).use { z ->
+                while (true) {
+                    val e = z.nextEntry ?: break
+                    when (e.name) {
+                        "project.json" -> json = z.readBytes().decodeToString()
+                        "photo.jpg" -> photo(id).outputStream().use { z.copyTo(it) }
+                    }
+                }
+            }
+        }
+        val text = json
+        if (text == null || !photo(id).exists()) { delete(id); error("Это не файл проекта «Эскиз»") }
+        val src: Project = this.json.decodeFromString(text)
+        val bmp = BitmapFactory.decodeFile(photo(id).absolutePath)
+        val ts = 400.0 / max(bmp.width, bmp.height)
+        val th = Bitmap.createScaledBitmap(bmp, (bmp.width * ts).toInt().coerceAtLeast(1), (bmp.height * ts).toInt().coerceAtLeast(1), true)
+        thumb(id).outputStream().use { th.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+        bmp.recycle(); th.recycle()
+        val p = src.copy(id = id, updated = System.currentTimeMillis())
+        save(p)
+        return p
+    }
+
     private fun decodeOriented(uri: Uri, maxSide: Int): Bitmap? {
         val cr = context.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }

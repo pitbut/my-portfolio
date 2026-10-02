@@ -104,6 +104,16 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) createFrom(uri)
     }
+    var importError by remember { mutableStateOf<String?>(null) }
+    val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        busy = true
+        scope.launch {
+            val r = withContext(Dispatchers.IO) { runCatching { store.importArchive(uri) } }
+            busy = false
+            r.onSuccess { onOpen(it.id) }.onFailure { importError = it.message ?: "Не удалось открыть файл" }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -119,6 +129,10 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
                                     val f = withContext(Dispatchers.Default) { Exporters.markerSheetPdf(ctx) }
                                     Exporters.share(ctx, listOf(f), "Лист-мишень")
                                 }
+                            })
+                            DropdownMenuItem(text = { Text("Открыть проект (.eskiz)") }, onClick = {
+                                menu = false
+                                importer.launch(arrayOf("application/zip", "application/octet-stream", "*/*"))
                             })
                             DropdownMenuItem(text = { Text("Как пользоваться") }, onClick = { menu = false; about = true })
                         }
@@ -178,6 +192,15 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
             }
             if (busy) CircularProgressIndicator(Modifier.align(Alignment.Center))
         }
+    }
+
+    importError?.let { e ->
+        AlertDialog(
+            onDismissRequest = { importError = null },
+            title = { Text("Не удалось открыть") },
+            text = { Text(e) },
+            confirmButton = { TextButton(onClick = { importError = null }) { Text("OK") } },
+        )
     }
 
     toDelete?.let { p ->

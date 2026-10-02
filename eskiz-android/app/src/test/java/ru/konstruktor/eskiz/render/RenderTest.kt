@@ -91,6 +91,44 @@ class RenderTest {
     }
 
     @Test
+    fun stepExtrusion() {
+        val p = project()
+        val model = DrawingModel(p, cal(p))
+        val prof = ru.konstruktor.eskiz.export.Extrusion.profile(model)
+        println("STEP: внешний контур ${prof.outer.edges.size} рёбер, внутренних ${prof.inner.size}, площадь %.1f".format(prof.outer.area))
+        File(out, "plate.step").writeText(ru.konstruktor.eskiz.export.Extrusion.step(prof, 8.0, "Пластина опорная"))
+
+        // Вариант с квадратным вырезом 20×20 внутри.
+        val c = listOf(P(60.0, 160.0), P(80.0, 160.0), P(80.0, 180.0), P(60.0, 180.0)).mapIndexed { i, q -> val s = w2p.apply(q); SPoint(50 + i, s.x, s.y) }
+        val cut = p.copy(points = p.points + c, lines = p.lines + (0 until 4).map { SLine(60 + it, 50 + it, 50 + (it + 1) % 4) },
+            circles = p.circles.filter { it.id != 32 })
+        val prof2 = ru.konstruktor.eskiz.export.Extrusion.profile(DrawingModel(cut, cal(cut)))
+        File(out, "plate_cut.step").writeText(ru.konstruktor.eskiz.export.Extrusion.step(prof2, 5.0, "cut"))
+        assertTrue(prof2.inner.size == 3)
+    }
+
+    @Test
+    fun svgAndArchive() {
+        val app = RuntimeEnvironment.getApplication()
+        val p = project(); val c = cal(p)
+        val svg = Exporters.drawingSvg(app, p, c)
+        svg.copyTo(File(out, "page.svg"), overwrite = true)
+        val txt = svg.readText()
+        assertTrue(txt.startsWith("<?xml") && txt.contains("<svg") && txt.contains("R60.9") && txt.trimEnd().endsWith("</svg>"))
+
+        // Архив проекта: сохранили и открыли как новый — разметка та же.
+        val store = ru.konstruktor.eskiz.data.ProjectStore(app)
+        val photo = File(out, "photo.jpg").apply {
+            outputStream().use { Bitmap.createBitmap(300, 200, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, 80, it) }
+        }
+        val arch = Exporters.projectArchive(app, p, photo)
+        val back = store.importArchive(android.net.Uri.fromFile(arch))
+        assertTrue(back.id != p.id)
+        assertTrue(back.copy(id = p.id, updated = p.updated) == p)
+        assertTrue(store.photo(back.id).exists() && store.thumb(back.id).exists())
+    }
+
+    @Test
     fun dxf() {
         val p = project()
         val f = Exporters.drawingDxf(RuntimeEnvironment.getApplication(), p, cal(p))

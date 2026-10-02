@@ -34,18 +34,81 @@ object Exporters {
 
     private fun safeName(p: Project) = p.name.replace(Regex("[^\\p{L}\\p{N}_ -]"), "_").trim().ifBlank { "eskiz" }
 
-    /** Чертёж на листе A4 в PNG. */
-    fun drawingPng(ctx: Context, project: Project, cal: Calibration): File {
+    private fun drawingBitmap(project: Project, cal: Calibration): Bitmap {
         val model = DrawingModel(project, cal)
         val page = PageSpec.choose(model.bounds)
         val k = 8f // 8 пикселей на мм ≈ 200 dpi
         val bmp = Bitmap.createBitmap((page.w * k).toInt(), (page.h * k).toInt(), Bitmap.Config.ARGB_8888)
         Renderer.drawPage(CanvasPen(Canvas(bmp)), model, page, k, 0f, 0f)
+        return bmp
+    }
+
+    /** Чертёж на листе A4 в PNG. */
+    fun drawingPng(ctx: Context, project: Project, cal: Calibration): File {
+        val bmp = drawingBitmap(project, cal)
         val f = File(shareDir(ctx), "${safeName(project)}_чертёж.png")
         f.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bmp.recycle()
         return f
     }
+
+    /** Чертёж на листе A4 в JPG. */
+    fun drawingJpg(ctx: Context, project: Project, cal: Calibration): File {
+        val bmp = drawingBitmap(project, cal)
+        val f = File(shareDir(ctx), "${safeName(project)}_чертёж.jpg")
+        f.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+        bmp.recycle()
+        return f
+    }
+
+    /** Чертёж в SVG (векторный, единицы — мм листа). */
+    fun drawingSvg(ctx: Context, project: Project, cal: Calibration): File {
+        val model = DrawingModel(project, cal)
+        val page = PageSpec.choose(model.bounds)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = ru.konstruktor.eskiz.render.GOST_FONT }
+        val pen = ru.konstruktor.eskiz.render.SvgPen { s, size -> paint.textSize = size; paint.measureText(s) }
+        Renderer.drawPage(pen, model, page, 1f, 0f, 0f)
+        val f = File(shareDir(ctx), "${safeName(project)}_чертёж.svg")
+        f.writeText(pen.document(page.w, page.h))
+        return f
+    }
+
+    /** 3D-модель: контур, выдавленный на толщину, в STEP. */
+    fun step(ctx: Context, project: Project, cal: Calibration, thickness: Double): File {
+        val model = DrawingModel(project, cal)
+        val text = Extrusion.step(Extrusion.profile(model), thickness, project.stamp.title.ifBlank { project.name })
+        val f = File(shareDir(ctx), "${safeName(project)}.step")
+        f.writeText(text, Charsets.US_ASCII)
+        return f
+    }
+
+    /** Проект целиком (фото + разметка) — открывается в «Эскизе» на другом телефоне. */
+    fun projectArchive(ctx: Context, project: Project, photo: File): File {
+        val f = File(shareDir(ctx), "${safeName(project)}.eskiz")
+        val json = kotlinx.serialization.json.Json { encodeDefaults = true }.encodeToString(Project.serializer(), project)
+        java.util.zip.ZipOutputStream(f.outputStream()).use { z ->
+            z.putNextEntry(java.util.zip.ZipEntry("project.json")); z.write(json.toByteArray()); z.closeEntry()
+            z.putNextEntry(java.util.zip.ZipEntry("photo.jpg")); photo.inputStream().use { it.copyTo(z) }; z.closeEntry()
+        }
+        return f
+    }
+
+    /** Несколько файлов одним ZIP — для сохранения «всё сразу». */
+    fun zip(ctx: Context, project: Project, files: List<File>): File {
+        val f = File(shareDir(ctx), "${safeName(project)}_всё.zip")
+        java.util.zip.ZipOutputStream(f.outputStream()).use { z ->
+            for (src in files) { z.putNextEntry(java.util.zip.ZipEntry(src.name)); src.inputStream().use { it.copyTo(z) }; z.closeEntry() }
+        }
+        return f
+    }
+
+    /** Копирует готовый файл туда, куда пользователь выбрал сохранить. */
+    fun saveTo(ctx: Context, file: File, uri: Uri) {
+        ctx.contentResolver.openOutputStream(uri)?.use { out -> file.inputStream().use { it.copyTo(out) } }
+            ?: error("Не удалось открыть файл для записи")
+    }
+
+    fun mimeOf(f: File) = mime(f)
 
     /** Фото с нанесёнными размерами в PNG/JPEG. */
     fun photoJpg(ctx: Context, project: Project, cal: Calibration, photo: File): File {
@@ -250,6 +313,9 @@ object Exporters {
         "jpg", "jpeg" -> "image/jpeg"
         "pdf" -> "application/pdf"
         "dxf" -> "application/dxf"
+        "svg" -> "image/svg+xml"
+        "step", "stp" -> "application/step"
+        "zip" -> "application/zip"
         else -> "application/octet-stream"
     }
 }

@@ -96,7 +96,6 @@ fun EditorScreen(projectId: String, onBack: () -> Unit) {
     val snack = remember { SnackbarHostState() }
 
     var menu by remember { mutableStateOf(false) }
-    var shareMenu by remember { mutableStateOf(false) }
     var renameDlg by remember { mutableStateOf(false) }
     var stampDlg by remember { mutableStateOf(false) }
     var calibDlg by remember { mutableStateOf(false) }
@@ -114,9 +113,23 @@ fun EditorScreen(projectId: String, onBack: () -> Unit) {
         vm.message?.let { snack.showSnackbar(it); vm.message = null }
     }
 
-    fun share(kind: ExportKind) {
-        shareMenu = false
-        vm.export(kind) { files -> Exporters.share(ctx, files, "Отправить чертёж") }
+    var exportDlg by remember { mutableStateOf(false) }
+    var toSave by remember { mutableStateOf<java.io.File?>(null) }
+    val saver = androidx.activity.compose.rememberLauncherForActivityResult(CreateDocument()) { uri ->
+        val f = toSave
+        if (uri != null && f != null) vm.saveFile(f, uri)
+        toSave = null
+    }
+
+    fun export(kind: ExportKind, save: Boolean) {
+        exportDlg = false
+        vm.export(kind, forSave = save) { files ->
+            if (save) {
+                val f = files.first()
+                toSave = f
+                saver.launch(f.name to Exporters.mimeOf(f))
+            } else Exporters.share(ctx, files, "Отправить")
+        }
     }
 
     Scaffold(
@@ -136,17 +149,7 @@ fun EditorScreen(projectId: String, onBack: () -> Unit) {
                         Icon(if (vm.mode == ViewMode.PHOTO) Icons.Filled.Architecture else Icons.Filled.Photo,
                             if (vm.mode == ViewMode.PHOTO) "Чертёж" else "Фото")
                     }
-                    Box {
-                        IconButton(onClick = { shareMenu = true }) { Icon(Icons.Filled.Share, "Поделиться") }
-                        DropdownMenu(shareMenu, onDismissRequest = { shareMenu = false }) {
-                            DropdownMenuItem(text = { Text("Чертёж — картинка PNG") }, onClick = { share(ExportKind.DRAWING_PNG) })
-                            DropdownMenuItem(text = { Text("Фото с размерами") }, onClick = { share(ExportKind.PHOTO) })
-                            DropdownMenuItem(text = { Text("Чертёж — PDF") }, onClick = { share(ExportKind.PDF) })
-                            DropdownMenuItem(text = { Text("DXF для КОМПАС / AutoCAD") }, onClick = { share(ExportKind.DXF) })
-                            HorizontalDivider()
-                            DropdownMenuItem(text = { Text("Всё сразу") }, onClick = { share(ExportKind.ALL) })
-                        }
-                    }
+                    IconButton(onClick = { exportDlg = true }) { Icon(Icons.Filled.Share, "Экспорт") }
                     Box {
                         IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, "Ещё") }
                         DropdownMenu(menu, onDismissRequest = { menu = false }) {
@@ -217,6 +220,7 @@ fun EditorScreen(projectId: String, onBack: () -> Unit) {
     }
 
     vm.dialog?.let { DimInputDialog(vm, it) }
+    if (exportDlg) ExportDialog(vm, onDismiss = { exportDlg = false }, onExport = ::export)
     if (renameDlg) TextDialog("Название", vm.project.name, onDismiss = { renameDlg = false }) { vm.rename(it); renameDlg = false }
     if (stampDlg) StampDialog(vm.project.stamp, onDismiss = { stampDlg = false }) { vm.setStamp(it); stampDlg = false }
     if (calibDlg) CalibDialog(vm) { calibDlg = false }
