@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- деталь -->
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="3.5" android:fillColor="#00000000"
+        android:strokeLineJoin="round"
+        android:pathData="M34,44 L74,44 L74,70 L54,70 L54,60 L34,60 Z" />
+    <!-- отверстие -->
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:fillColor="#00000000"
+        android:pathData="M64,57 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+    <!-- выносные -->
+    <path android:strokeColor="#FFCA28" android:strokeWidth="2" android:pathData="M34,42 L34,32 M74,42 L74,32" />
+    <!-- размерная линия -->
+    <path android:strokeColor="#FFCA28" android:strokeWidth="2" android:pathData="M38,35 L70,35" />
+    <path android:fillColor="#FFCA28" android:pathData="M34,35 L40,32.5 L40,37.5 Z M74,35 L68,32.5 L68,37.5 Z" />
+</vector>

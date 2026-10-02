@@ -1,0 +1,6 @@
+-keep class org.opencv.** { *; }
+-keepattributes *Annotation*, InnerClasses
+-keepclassmembers class ru.konstruktor.eskiz.data.** { *; }
+-keep,includedescriptorclasses class ru.konstruktor.eskiz.**$$serializer { *; }
+-keepclassmembers class ru.konstruktor.eskiz.** { *** Companion; }
+-keepclasseswithmembers class ru.konstruktor.eskiz.** { kotlinx.serialization.KSerializer serializer(...); }
