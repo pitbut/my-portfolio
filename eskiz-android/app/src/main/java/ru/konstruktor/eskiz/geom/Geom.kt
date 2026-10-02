@@ -123,3 +123,37 @@ fun solveLinear(a: Array<DoubleArray>, b: DoubleArray): DoubleArray? {
     }
     return DoubleArray(n) { m[it][n] / m[it][it] }
 }
+
+/** Окружность через три точки, null — если точки на одной прямой. */
+fun circleThrough(a: P, b: P, c: P): Circle? {
+    val d = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y))
+    if (abs(d) < 1e-9 * (1 + a.dot(a) + b.dot(b) + c.dot(c))) return null
+    val a2 = a.dot(a); val b2 = b.dot(b); val c2 = c.dot(c)
+    val ux = (a2 * (b.y - c.y) + b2 * (c.y - a.y) + c2 * (a.y - b.y)) / d
+    val uy = (a2 * (c.x - b.x) + b2 * (a.x - c.x) + c2 * (b.x - a.x)) / d
+    val center = P(ux, uy)
+    return Circle(center, dist(center, a))
+}
+
+/**
+ * Дуга от [a] через [m] к [b]: центр, радиус, начальный угол и угол раствора со знаком
+ * (углы как у atan2 в текущей системе координат).
+ */
+class Arc(val c: P, val r: Double, val start: Double, val sweep: Double) {
+    val end get() = start + sweep
+    val mid get() = start + sweep / 2
+    fun at(t: Double) = P(c.x + r * cos(start + sweep * t), c.y + r * sin(start + sweep * t))
+    fun sample(n: Int): List<P> = (0..n).map { at(it.toDouble() / n) }
+
+    companion object {
+        fun through(a: P, m: P, b: P): Arc? {
+            val circle = circleThrough(a, m, b) ?: return null
+            val tau = 2 * Math.PI
+            fun norm(x: Double) = ((x % tau) + tau) % tau
+            val sa = (a - circle.c).angle(); val sm = (m - circle.c).angle(); val sb = (b - circle.c).angle()
+            val ccw = norm(sb - sa)
+            val sweep = if (norm(sm - sa) < ccw) ccw else ccw - tau
+            return Arc(circle.c, circle.r, sa, sweep)
+        }
+    }
+}

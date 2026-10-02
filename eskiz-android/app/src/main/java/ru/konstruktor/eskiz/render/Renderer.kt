@@ -1,12 +1,10 @@
 package ru.konstruktor.eskiz.render
 
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.Typeface
 import ru.konstruktor.eskiz.data.Project
+import ru.konstruktor.eskiz.geom.Arc
 import ru.konstruktor.eskiz.geom.Calibration
+import ru.konstruktor.eskiz.geom.Circle
 import ru.konstruktor.eskiz.geom.DimLayout
 import ru.konstruktor.eskiz.geom.P
 import ru.konstruktor.eskiz.geom.dist
@@ -25,82 +23,56 @@ object Colors {
 }
 
 object Renderer {
-    private val gostFont: Typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
 
     class DimStyle(
+        val pen: Pen,
         val textSize: Float,
         val lineW: Float,
         val arrow: Float,
         /** Белая подложка под линиями и текстом (для фото). */
         val halo: Boolean,
     ) {
-        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            textSize = this@DimStyle.textSize
-            typeface = gostFont
-            textAlign = Paint.Align.CENTER
-        }
         /** Высота текста для раскладки (высота прописных букв). */
         val textH get() = textSize * 0.75
+
+        fun measure(s: String) = pen.measure(s, textSize)
 
         fun params(gapMul: Double = 2.6, stepMul: Double = 2.1) = DimLayout.Params(
             textH = textH.toDouble(),
             gap = textH * gapMul,
             step = textH * stepMul,
             arrow = arrow.toDouble(),
-            measure = { textPaint.measureText(it).toDouble() },
+            measure = { measure(it).toDouble() },
         )
     }
 
-    // Экран и экспорт рисуют из разных потоков — у каждого потока свои кисти.
-    private val strokeTL = ThreadLocal.withInitial {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
-    }
-    private val fillTL = ThreadLocal.withInitial { Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL } }
-    private val stroke: Paint get() = strokeTL.get()!!
-    private val fill: Paint get() = fillTL.get()!!
-
-    private fun line(c: Canvas, a: P, b: P, color: Int, w: Float) {
-        stroke.color = color; stroke.strokeWidth = w
-        c.drawLine(a.x.toFloat(), a.y.toFloat(), b.x.toFloat(), b.y.toFloat(), stroke)
+    private fun haloLine(pen: Pen, a: P, b: P, color: Int, w: Float, halo: Boolean) {
+        if (halo) pen.line(a, b, Color.WHITE, w * 2.6f)
+        pen.line(a, b, color, w)
     }
 
-    private fun haloLine(c: Canvas, a: P, b: P, color: Int, w: Float, halo: Boolean) {
-        if (halo) line(c, a, b, Color.WHITE, w * 2.6f)
-        line(c, a, b, color, w)
-    }
-
-    private fun arrow(c: Canvas, tip: P, dir: P, len: Float, color: Int, halo: Boolean) {
+    private fun arrow(pen: Pen, tip: P, dir: P, len: Float, color: Int, halo: Boolean) {
         // dir — направление от острия к хвосту
         val d = dir.norm()
         val n = d.perp()
         val base = tip + d * len.toDouble()
-        val p = Path().apply {
-            moveTo(tip.x.toFloat(), tip.y.toFloat())
-            val l = base + n * (len / 6.0); val r = base - n * (len / 6.0)
-            lineTo(l.x.toFloat(), l.y.toFloat()); lineTo(r.x.toFloat(), r.y.toFloat()); close()
-        }
-        if (halo) { stroke.color = Color.WHITE; stroke.strokeWidth = len / 4; c.drawPath(p, stroke) }
-        fill.color = color
-        c.drawPath(p, fill)
+        val pts = listOf(tip, base + n * (len / 6.0), base - n * (len / 6.0))
+        if (halo) pen.polyline(pts, true, Color.WHITE, len / 4)
+        pen.fillPolygon(pts, color)
     }
 
-    private fun text(c: Canvas, s: String, center: P, angleRad: Double, style: DimStyle, color: Int) {
-        val tp = style.textPaint
-        c.save()
-        c.rotate(Math.toDegrees(angleRad).toFloat(), center.x.toFloat(), center.y.toFloat())
-        val baseline = (center.y + style.textH / 2).toFloat()
-        if (style.halo) {
-            tp.style = Paint.Style.STROKE; tp.strokeWidth = style.textSize * 0.28f; tp.color = Color.WHITE
-            tp.strokeJoin = Paint.Join.ROUND
-            c.drawText(s, center.x.toFloat(), baseline, tp)
-        }
-        tp.style = Paint.Style.FILL; tp.color = color
-        c.drawText(s, center.x.toFloat(), baseline, tp)
-        c.restore()
+    private fun text(s: String, center: P, angleRad: Double, style: DimStyle, color: Int) {
+        val baseline = P(center.x, center.y + style.textH / 2)
+        style.pen.text(
+            s, baseline, style.textSize, color, center = true,
+            angleDeg = Math.toDegrees(angleRad).toFloat(), pivot = center,
+            halo = if (style.halo) style.textSize * 0.28f else 0f,
+        )
     }
 
     /** Рисует разложенные размеры. */
-    fun drawDims(c: Canvas, r: DimLayout.Result, style: DimStyle, colorOf: (Int) -> Int) {
+    fun drawDims(r: DimLayout.Result, style: DimStyle, colorOf: (Int) -> Int) {
+        val pen = style.pen
         val w = style.lineW
         val over = style.textH * 0.5
         for (d in r.linear) {
@@ -109,37 +81,41 @@ object Renderer {
             // Выносные линии с выходом за размерную.
             for ((p, q) in listOf(d.a to d.da, d.b to d.db)) {
                 val dir = q - p
-                if (dir.len() > 1e-6) haloLine(c, p, q + dir.norm() * over, col, w, style.halo)
+                if (dir.len() > 1e-6) haloLine(pen, p, q + dir.norm() * over, col, w, style.halo)
             }
             val len = dist(d.da, d.db)
-            val tw = style.textPaint.measureText(d.text)
+            val tw = style.measure(d.text)
             val tProj = (d.textCenter - d.da).dot(u) + tw / 2
             val start = if (d.arrowsOutside) d.da - u * (style.arrow * 2.0) else d.da
             val end = if (tProj > len) d.da + u * (tProj + style.textH * 0.3) else if (d.arrowsOutside) d.db + u * (style.arrow * 2.0) else d.db
-            haloLine(c, start, end, col, w, style.halo)
+            haloLine(pen, start, end, col, w, style.halo)
             if (d.arrowsOutside) {
-                arrow(c, d.da, -u, style.arrow, col, style.halo)
-                arrow(c, d.db, u, style.arrow, col, style.halo)
+                arrow(pen, d.da, -u, style.arrow, col, style.halo)
+                arrow(pen, d.db, u, style.arrow, col, style.halo)
             } else {
-                arrow(c, d.da, u, style.arrow, col, style.halo)
-                arrow(c, d.db, -u, style.arrow, col, style.halo)
+                arrow(pen, d.da, u, style.arrow, col, style.halo)
+                arrow(pen, d.db, -u, style.arrow, col, style.halo)
             }
-            text(c, d.text, d.textCenter, d.textAngle, style, col)
+            text(d.text, d.textCenter, d.textAngle, style, col)
         }
         for (d in r.diameters) {
             val col = colorOf(d.id)
-            haloLine(c, d.start, d.elbow, col, w, style.halo)
-            haloLine(c, d.elbow, d.shelfEnd, col, w, style.halo)
-            arrow(c, d.start, d.elbow - d.start, style.arrow, col, style.halo)
-            text(c, d.text, d.textCenter, 0.0, style, col)
+            haloLine(pen, d.start, d.elbow, col, w, style.halo)
+            haloLine(pen, d.elbow, d.shelfEnd, col, w, style.halo)
+            arrow(pen, d.start, d.elbow - d.start, style.arrow, col, style.halo)
+            text(d.text, d.textCenter, 0.0, style, col)
         }
     }
+
+    /** Допустимые направления выноски радиуса — внутри раствора дуги. */
+    fun radiusAngles(a: Arc) = listOf(a.mid, a.mid - a.sweep * 0.3, a.mid + a.sweep * 0.3)
 
     class PhotoOverlay(
         val selectedDim: Int? = null,
         val selectedPoint: Int? = null,
         val selectedLine: Int? = null,
         val selectedCircle: Int? = null,
+        val selectedArc: Int? = null,
         val pendingPoints: Set<Int> = emptySet(),
         val pendingCirclePts: List<P> = emptyList(),
         val showDims: Boolean = true,
@@ -153,36 +129,45 @@ object Renderer {
      * Возвращает раскладку размеров (в координатах экрана) — для выбора размера касанием.
      */
     fun drawPhotoOverlay(
-        c: Canvas, project: Project, cal: Calibration, toScreen: (P) -> P, dp: Float, o: PhotoOverlay,
+        pen: Pen, project: Project, cal: Calibration, toScreen: (P) -> P, dp: Float, o: PhotoOverlay,
     ): DimLayout.Result {
         val values = Values(project, cal)
+        val shadow = 0x99000000.toInt()
         val segs = if (o.showLines) project.lines.mapNotNull { l ->
             val a = project.point(l.a) ?: return@mapNotNull null
             val b = project.point(l.b) ?: return@mapNotNull null
             Triple(l.id, toScreen(a.p), toScreen(b.p))
         } else emptyList()
         for ((id, a, b) in segs) {
-            line(c, a, b, 0x99000000.toInt(), 4.5f * dp)
-            line(c, a, b, if (id == o.selectedLine) Colors.SELECTED else Colors.CONTOUR, 2.2f * dp)
+            pen.line(a, b, shadow, 4.5f * dp)
+            pen.line(a, b, if (id == o.selectedLine) Colors.SELECTED else Colors.CONTOUR, 2.2f * dp)
         }
 
-        // Окружности: рисуем как замкнутую кривую через точки края (на фото это эллипсы).
+        // Дуги (на фото — по трём точкам в экранных координатах).
+        val arcsScreen = if (o.showLines) project.arcs.mapNotNull { a ->
+            val pa = project.point(a.a) ?: return@mapNotNull null
+            val pm = project.point(a.m) ?: return@mapNotNull null
+            val pb = project.point(a.b) ?: return@mapNotNull null
+            a to Arc.through(toScreen(pa.p), toScreen(pm.p), toScreen(pb.p))
+        } else emptyList()
+        for ((a, arc) in arcsScreen) {
+            val col = if (a.id == o.selectedArc) Colors.SELECTED else Colors.CONTOUR
+            if (arc != null) { pen.arc(arc, shadow, 4.5f * dp); pen.arc(arc, col, 2.2f * dp) }
+        }
+
+        // Окружности: замкнутая кривая через точки края (на фото это эллипсы).
         val circlesScreen = project.circles.mapNotNull { ci ->
             val pts = ci.pts.map(toScreen)
             val fc = fitCircle(pts) ?: return@mapNotNull null
-            val path = Path()
-            pts.forEachIndexed { i, p -> if (i == 0) path.moveTo(p.x.toFloat(), p.y.toFloat()) else path.lineTo(p.x.toFloat(), p.y.toFloat()) }
-            if (pts.size >= 6) path.close() else {
-                path.reset(); path.addCircle(fc.c.x.toFloat(), fc.c.y.toFloat(), fc.r.toFloat(), Path.Direction.CW)
-            }
-            stroke.color = 0x99000000.toInt(); stroke.strokeWidth = 4.5f * dp; c.drawPath(path, stroke)
-            stroke.color = if (ci.id == o.selectedCircle) Colors.SELECTED else Colors.CONTOUR; stroke.strokeWidth = 2.2f * dp
-            c.drawPath(path, stroke)
-            Triple(ci, fc, values)
+            val col = if (ci.id == o.selectedCircle) Colors.SELECTED else Colors.CONTOUR
+            if (pts.size >= 6) { pen.polyline(pts, true, shadow, 4.5f * dp); pen.polyline(pts, true, col, 2.2f * dp) }
+            else { pen.circle(fc.c, fc.r, shadow, 4.5f * dp); pen.circle(fc.c, fc.r, col, 2.2f * dp) }
+            ci to fc
         }
 
-        val style = DimStyle(textSize = 15f * dp, lineW = 1.4f * dp, arrow = 9f * dp, halo = true)
-        val lin = if (o.showDims) project.dims.filter { o.visible == null || it.id in o.visible }.mapNotNull { d ->
+        val style = DimStyle(pen, textSize = 15f * dp, lineW = 1.4f * dp, arrow = 9f * dp, halo = true)
+        fun vis(id: Int) = o.showDims && (o.visible == null || id in o.visible)
+        val lin = project.dims.filter { vis(it.id) }.mapNotNull { d ->
             val a = project.point(d.a) ?: return@mapNotNull null
             val b = project.point(d.b) ?: return@mapNotNull null
             val txt = when {
@@ -194,19 +179,29 @@ object Renderer {
                 } ?: "?"
             }
             DimLayout.LinearIn(d.id, toScreen(a.p), toScreen(b.p), txt)
-        } else emptyList()
-        val dia = if (o.showDims) circlesScreen.filter { o.visible == null || it.first.id in o.visible }.map { (ci, fc, v) ->
+        }
+        val dia = circlesScreen.filter { vis(it.first.id) }.map { (ci, fc) ->
             val txt = when {
                 ci.known != null -> "Ø" + fmtMm(ci.known) + if (ci.id in cal.outliers) " ⚠" else ""
-                else -> v.computedCircle(ci.id)?.let { "Ø≈" + fmtMm(it) } ?: "Ø?"
+                else -> values.computedCircle(ci.id)?.let { "Ø≈" + fmtMm(it) } ?: "Ø?"
             }
             DimLayout.DiameterIn(ci.id, fc.c, fc.r, txt)
-        } else emptyList()
-        val layout = DimLayout.layout(segs.map { it.second to it.third }, circlesScreen.map { it.second }, lin, dia, style.params())
-        drawDims(c, layout, style) { id ->
-            val known = project.dims.firstOrNull { it.id == id }?.known ?: project.circles.firstOrNull { it.id == id }?.known
+        } + arcsScreen.filter { vis(it.first.id) && it.second != null }.map { (a, arc) ->
+            val txt = when {
+                a.known != null -> "R" + fmtMm(a.known) + if (a.id in cal.outliers) " ⚠" else ""
+                else -> values.computedArc(a.id)?.let { "R≈" + fmtMm(it) } ?: "R?"
+            }
+            DimLayout.DiameterIn(a.id, arc!!.c, arc.r, txt, radiusAngles(arc))
+        }
+        val geometry = segs.map { it.second to it.third } +
+            arcsScreen.mapNotNull { it.second }.flatMap { it.sample(12).zipWithNext() }
+        val layout = DimLayout.layout(geometry, circlesScreen.map { it.second }, lin, dia, style.params())
+        drawDims(layout, style) { id ->
+            val known = project.dims.firstOrNull { it.id == id }?.known
+                ?: project.circles.firstOrNull { it.id == id }?.known
+                ?: project.arcs.firstOrNull { it.id == id }?.known
             when {
-                id == o.selectedDim -> Colors.SELECTED
+                id == o.selectedDim || id == o.selectedArc || id == o.selectedCircle -> Colors.SELECTED
                 id in cal.outliers -> Colors.OUTLIER
                 known != null -> Colors.KNOWN
                 else -> Colors.COMPUTED
@@ -217,34 +212,30 @@ object Renderer {
         for (p in project.points) {
             val s = toScreen(p.p)
             val hi = p.id == o.selectedPoint || p.id in o.pendingPoints
-            val r = (if (hi) 7f else 4.5f) * dp
-            fill.color = 0xCC000000.toInt(); c.drawCircle(s.x.toFloat(), s.y.toFloat(), r + 1.5f * dp, fill)
-            fill.color = if (hi) Colors.SELECTED else Color.WHITE; c.drawCircle(s.x.toFloat(), s.y.toFloat(), r, fill)
+            val r = (if (hi) 7.0 else 4.5) * dp
+            pen.fillCircle(s, r + 1.5 * dp, 0xCC000000.toInt())
+            pen.fillCircle(s, r, if (hi) Colors.SELECTED else Color.WHITE)
         }
-        for (p in o.pendingCirclePts) {
-            val s = toScreen(p)
-            fill.color = Colors.SELECTED; c.drawCircle(s.x.toFloat(), s.y.toFloat(), 5f * dp, fill)
-        }
+        for (p in o.pendingCirclePts) pen.fillCircle(toScreen(p), 5.0 * dp, Colors.SELECTED)
         return layout
     }
 
     /**
-     * Лист чертежа. [k] — пикселей холста на 1 мм листа, ([ox], [oy]) — положение угла листа на холсте.
+     * Лист чертежа. [k] — единиц холста на 1 мм листа, ([ox], [oy]) — положение угла листа на холсте.
      */
     fun drawPage(
-        c: Canvas, model: DrawingModel, page: PageSpec, k: Float, ox: Float, oy: Float,
+        pen: Pen, model: DrawingModel, page: PageSpec, k: Float, ox: Float, oy: Float,
         visible: Set<Int>? = null,
     ) {
         fun paper(x: Double, y: Double) = P(ox + x * k, oy + y * k)
-        fill.color = Color.WHITE
-        c.drawRect(ox, oy, ox + page.w.toFloat() * k, oy + page.h.toFloat() * k, fill)
+        pen.fillRect(ox.toDouble(), oy.toDouble(), ox + page.w * k, oy + page.h * k, Color.WHITE)
 
         val thick = 0.6f * k
         val thin = 0.25f * k
         // Рамка.
         val fl = page.frameL; val fo = page.frameO
         val corners = listOf(paper(fl, fo), paper(page.w - fo, fo), paper(page.w - fo, page.h - fo), paper(fl, page.h - fo))
-        for (i in 0..3) line(c, corners[i], corners[(i + 1) % 4], Colors.INK, thick)
+        for (i in 0..3) pen.line(corners[i], corners[(i + 1) % 4], Colors.INK, thick)
 
         // Модель → лист.
         val b = model.bounds
@@ -253,67 +244,67 @@ object Renderer {
         fun mp(p: P): P { val q = page.drawCenter + (p - mc) * m; return paper(q.x, q.y) }
 
         val segs = model.lines.map { mp(it.first) to mp(it.second) }
-        for ((a, bb) in segs) line(c, a, bb, Colors.INK, thick)
-        val circles = model.circles.map { ci -> ci to ru.konstruktor.eskiz.geom.Circle(mp(ci.circle.c), ci.circle.r * m * k) }
+        for ((a, bb) in segs) pen.line(a, bb, Colors.INK, thick)
+        // Поворот и масштаб сохраняют окружности, поэтому дуга на листе — та же дуга.
+        val arcs = model.arcs.map { ai -> ai to Arc(mp(ai.arc.c), ai.arc.r * m * k, ai.arc.start, ai.arc.sweep) }
+        for ((_, a) in arcs) pen.arc(a, Colors.INK, thick)
+        val circles = model.circles.map { ci -> ci to Circle(mp(ci.circle.c), ci.circle.r * m * k) }
         for ((_, cc) in circles) {
-            stroke.color = Colors.INK; stroke.strokeWidth = thick
-            c.drawCircle(cc.c.x.toFloat(), cc.c.y.toFloat(), cc.r.toFloat(), stroke)
+            pen.circle(cc.c, cc.r, Colors.INK, thick)
             // Осевые линии отверстия.
             val ext = cc.r + 2.0 * k
-            dashed(c, cc.c - P(ext, 0.0), cc.c + P(ext, 0.0), thin, k)
-            dashed(c, cc.c - P(0.0, ext), cc.c + P(0.0, ext), thin, k)
+            dashed(pen, cc.c - P(ext, 0.0), cc.c + P(ext, 0.0), thin, k)
+            dashed(pen, cc.c - P(0.0, ext), cc.c + P(0.0, ext), thin, k)
         }
 
-        val style = DimStyle(textSize = 4.7f * k, lineW = thin, arrow = 3f * k, halo = false)
-        val p = DimLayout.Params(style.textH.toDouble(), 10.0 * k, 7.0 * k, style.arrow.toDouble()) { style.textPaint.measureText(it).toDouble() }
+        val style = DimStyle(pen, textSize = 4.7f * k, lineW = thin, arrow = 3f * k, halo = false)
+        val p = DimLayout.Params(style.textH.toDouble(), 10.0 * k, 7.0 * k, style.arrow.toDouble()) { style.measure(it).toDouble() }
         val lin = model.dims.filter { visible == null || it.id in visible }
             .map { DimLayout.LinearIn(it.id, mp(it.a), mp(it.b), it.value?.let(::fmtMm) ?: "?") }
         val dia = circles.filter { visible == null || it.first.id in visible }
-            .map { (ci, cc) -> DimLayout.DiameterIn(ci.id, cc.c, cc.r, "Ø" + (ci.value?.let(::fmtMm) ?: "?")) }
-        val layout = DimLayout.layout(segs, circles.map { it.second }, lin, dia, p)
-        drawDims(c, layout, style) { Colors.INK }
+            .map { (ci, cc) -> DimLayout.DiameterIn(ci.id, cc.c, cc.r, "Ø" + (ci.value?.let(::fmtMm) ?: "?")) } +
+            arcs.filter { visible == null || it.first.id in visible }
+                .map { (ai, a) -> DimLayout.DiameterIn(ai.id, a.c, a.r, "R" + (ai.value?.let(::fmtMm) ?: "?"), radiusAngles(a)) }
+        val geometry = segs + arcs.flatMap { it.second.sample(12).zipWithNext() }
+        val layout = DimLayout.layout(geometry, circles.map { it.second }, lin, dia, p)
+        drawDims(layout, style) { Colors.INK }
 
-        drawStamp(c, model, page, k, ox, oy)
+        drawStamp(pen, model, page, k, ox, oy)
     }
 
-    private fun dashed(c: Canvas, a: P, b: P, w: Float, k: Float) {
+    private fun dashed(pen: Pen, a: P, b: P, w: Float, k: Float) {
         val len = dist(a, b)
         val u = (b - a).norm()
         var t = 0.0
         var dash = true
         while (t < len) {
             val seg = if (dash) 6.0 * k else 1.5 * k
-            if (dash) line(c, a + u * t, a + u * minOf(len, t + seg), Colors.INK, w)
+            if (dash) pen.line(a + u * t, a + u * minOf(len, t + seg), Colors.INK, w)
             t += seg; dash = !dash
         }
     }
 
-    private fun drawStamp(c: Canvas, model: DrawingModel, page: PageSpec, k: Float, ox: Float, oy: Float) {
+    private fun drawStamp(pen: Pen, model: DrawingModel, page: PageSpec, k: Float, ox: Float, oy: Float) {
         val x0 = page.w - page.frameO - page.stampW
         val y0 = page.h - page.frameO - page.stampH
         fun pt(x: Double, y: Double) = P(ox + (x0 + x) * k, oy + (y0 + y) * k)
         val thick = 0.6f * k; val thin = 0.25f * k
-        val W = page.stampW; val H = page.stampH
-        line(c, pt(0.0, 0.0), pt(W, 0.0), Colors.INK, thick)
-        line(c, pt(0.0, 0.0), pt(0.0, H), Colors.INK, thick)
+        val w = page.stampW; val h = page.stampH
+        pen.line(pt(0.0, 0.0), pt(w, 0.0), Colors.INK, thick)
+        pen.line(pt(0.0, 0.0), pt(0.0, h), Colors.INK, thick)
         // Колонки: подписи 0–65 | наименование 65–135 | масштаб/лист 135–185.
-        line(c, pt(65.0, 0.0), pt(65.0, H), Colors.INK, thick)
-        line(c, pt(135.0, 0.0), pt(135.0, H), Colors.INK, thick)
+        pen.line(pt(65.0, 0.0), pt(65.0, h), Colors.INK, thick)
+        pen.line(pt(135.0, 0.0), pt(135.0, h), Colors.INK, thick)
         for (y in listOf(10.0, 20.0)) {
-            line(c, pt(0.0, y), pt(65.0, y), Colors.INK, thin)
-            line(c, pt(135.0, y), pt(W, y), Colors.INK, thin)
+            pen.line(pt(0.0, y), pt(65.0, y), Colors.INK, thin)
+            pen.line(pt(135.0, y), pt(w, y), Colors.INK, thin)
         }
-        line(c, pt(22.0, 0.0), pt(22.0, H), Colors.INK, thin)
-        line(c, pt(50.0, 0.0), pt(50.0, H), Colors.INK, thin)
-        line(c, pt(160.0, 0.0), pt(160.0, H), Colors.INK, thin)
+        pen.line(pt(22.0, 0.0), pt(22.0, h), Colors.INK, thin)
+        pen.line(pt(50.0, 0.0), pt(50.0, h), Colors.INK, thin)
+        pen.line(pt(160.0, 0.0), pt(160.0, h), Colors.INK, thin)
 
-        val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = gostFont; color = Colors.INK; textAlign = Paint.Align.LEFT }
-        fun t(s: String, x: Double, y: Double, size: Double, center: Boolean = false) {
-            tp.textSize = (size * k).toFloat()
-            tp.textAlign = if (center) Paint.Align.CENTER else Paint.Align.LEFT
-            val q = pt(x, y)
-            c.drawText(s, q.x.toFloat(), q.y.toFloat(), tp)
-        }
+        fun t(s: String, x: Double, y: Double, size: Double, center: Boolean = false) =
+            pen.text(s, pt(x, y), (size * k).toFloat(), Colors.INK, center)
         val st = model.project.stamp
         val date = SimpleDateFormat("dd.MM.yy", Locale("ru")).format(Date(model.project.updated))
         t("Разраб.", 1.5, 6.8, 2.8); t(st.author.take(14), 23.0, 6.8, 2.8); t(date, 51.0, 6.8, 2.5)

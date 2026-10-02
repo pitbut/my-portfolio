@@ -22,6 +22,11 @@ class DiameterConstraint(id: Int, val pts: List<P>, known: Double) : Constraint(
     override fun predict(f: (P) -> P) = (fitCircle(pts.map(f))?.r ?: 0.0) * 2
 }
 
+/** Известный радиус дуги, проходящей через три точки фото. */
+class RadiusConstraint(id: Int, val a: P, val m: P, val b: P, known: Double) : Constraint(id, known) {
+    override fun predict(f: (P) -> P) = circleThrough(f(a), f(m), f(b))?.r ?: 0.0
+}
+
 enum class CalibMode {
     /** Нет ни одного известного размера: всё в пикселях. */
     NONE,

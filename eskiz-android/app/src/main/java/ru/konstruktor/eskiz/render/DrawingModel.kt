@@ -5,6 +5,8 @@ import ru.konstruktor.eskiz.geom.Calibration
 import ru.konstruktor.eskiz.geom.Circle
 import ru.konstruktor.eskiz.geom.P
 import ru.konstruktor.eskiz.geom.dist
+import ru.konstruktor.eskiz.geom.Arc
+import ru.konstruktor.eskiz.geom.circleThrough
 import ru.konstruktor.eskiz.geom.fitCircle
 import kotlin.math.PI
 import kotlin.math.max
@@ -57,6 +59,28 @@ class Values(val project: Project, val cal: Calibration) {
         val c = project.circles.firstOrNull { it.id == id } ?: return null
         return fitCircle(c.pts.map { cal.toMm(it) })?.r?.times(2)
     }
+
+    fun arc(id: Int): Double? {
+        val a = project.arcs.firstOrNull { it.id == id } ?: return null
+        a.known?.let { return it }
+        return computedArc(id)
+    }
+
+    fun computedArc(id: Int): Double? {
+        if (!cal.calibrated) return null
+        val a = project.arcs.firstOrNull { it.id == id } ?: return null
+        val pa = project.point(a.a) ?: return null
+        val pm = project.point(a.m) ?: return null
+        val pb = project.point(a.b) ?: return null
+        return circleThrough(cal.toMm(pa.p), cal.toMm(pm.p), cal.toMm(pb.p))?.r
+    }
+
+    fun arcUncertainty(id: Int): Double? {
+        val a = project.arcs.firstOrNull { it.id == id } ?: return null
+        val pts = listOfNotNull(project.point(a.a)?.p, project.point(a.m)?.p, project.point(a.b)?.p)
+        if (pts.size < 3) return null
+        return cal.circleUncertainty(pts)?.div(2)
+    }
 }
 
 /**
@@ -102,6 +126,17 @@ class DrawingModel(val project: Project, val cal: Calibration) {
 
     class DimItem(val id: Int, val a: P, val b: P, val value: Double?)
 
+    class ArcItem(val id: Int, val arc: Arc, val value: Double?)
+
+    /** Дуги контура в мм чертежа. */
+    val arcs: List<ArcItem> = project.arcs.mapNotNull { a ->
+        val pa = project.point(a.a) ?: return@mapNotNull null
+        val pm = project.point(a.m) ?: return@mapNotNull null
+        val pb = project.point(a.b) ?: return@mapNotNull null
+        val arc = Arc.through(map(pa.p), map(pm.p), map(pb.p)) ?: return@mapNotNull null
+        ArcItem(a.id, arc, values.arc(a.id))
+    }
+
     /**
      * Показывать ли размер на чертеже. Автоматически — размеры вдоль контура и горизонтальные/
      * вертикальные; диагонали, введённые для калибровки, на чертёж не выносятся.
@@ -126,13 +161,14 @@ class DrawingModel(val project: Project, val cal: Calibration) {
     /** Габарит геометрии [minX, minY, maxX, maxY]. */
     val bounds: DoubleArray = run {
         val pts = lines.flatMap { listOf(it.first, it.second) } + dims.flatMap { listOf(it.a, it.b) } +
-            circles.flatMap { listOf(it.circle.c - P(it.circle.r, it.circle.r), it.circle.c + P(it.circle.r, it.circle.r)) }
+            circles.flatMap { listOf(it.circle.c - P(it.circle.r, it.circle.r), it.circle.c + P(it.circle.r, it.circle.r)) } +
+            arcs.flatMap { it.arc.sample(16) }
         if (pts.isEmpty()) doubleArrayOf(0.0, 0.0, 100.0, 100.0)
         else doubleArrayOf(pts.minOf { it.x }, pts.minOf { it.y }, pts.maxOf { it.x }, pts.maxOf { it.y })
     }
 
     /** Порядок появления размеров (для пошагового режима): id линейных и диаметральных размеров. */
-    val revealOrder: List<Int> = (project.dims.map { it.id } + project.circles.map { it.id }).sorted()
+    val revealOrder: List<Int> = (project.dims.map { it.id } + project.circles.map { it.id } + project.arcs.map { it.id }).sorted()
 }
 
 /** Масштабы по ГОСТ 2.302: отношение «лист / натура». */

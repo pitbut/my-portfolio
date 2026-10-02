@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import ru.konstruktor.eskiz.cv.Vision
 import ru.konstruktor.eskiz.data.Project
 import ru.konstruktor.eskiz.data.ProjectStore
+import ru.konstruktor.eskiz.data.SArc
 import ru.konstruktor.eskiz.data.SCircle
 import ru.konstruktor.eskiz.data.SDim
 import ru.konstruktor.eskiz.data.SLine
@@ -29,6 +30,7 @@ import ru.konstruktor.eskiz.geom.DiameterConstraint
 import ru.konstruktor.eskiz.geom.LinearConstraint
 import ru.konstruktor.eskiz.geom.Mat3
 import ru.konstruktor.eskiz.geom.P
+import ru.konstruktor.eskiz.geom.RadiusConstraint
 import ru.konstruktor.eskiz.geom.dist
 import ru.konstruktor.eskiz.geom.distToSegment
 import ru.konstruktor.eskiz.render.Values
@@ -36,7 +38,7 @@ import java.io.File
 import kotlin.math.max
 
 enum class Tool(val title: String) {
-    SELECT("Выбор"), POINT("Точка"), LINE("Линия"), DIM("Размер"), CIRCLE("Отверстие"), AUTO("Авто"),
+    SELECT("Выбор"), POINT("Точка"), LINE("Линия"), ARC("Дуга"), DIM("Размер"), CIRCLE("Отверстие"), AUTO("Авто"),
 }
 
 enum class ViewMode { PHOTO, DRAWING }
@@ -46,10 +48,11 @@ sealed interface Selection {
     data class Line(val id: Int) : Selection
     data class Dim(val id: Int) : Selection
     data class Circle(val id: Int) : Selection
+    data class Arc(val id: Int) : Selection
 }
 
-/** Окно ввода размера: для линейного размера (a, b) или для окружности. */
-data class DimDialog(val a: Int = 0, val b: Int = 0, val dimId: Int? = null, val circleId: Int? = null)
+/** Окно ввода размера: для линейного размера (a, b), окружности (диаметр) или дуги (радиус). */
+data class DimDialog(val a: Int = 0, val b: Int = 0, val dimId: Int? = null, val circleId: Int? = null, val arcId: Int? = null)
 
 enum class ExportKind { DRAWING_PNG, PHOTO, PDF, DXF, ALL }
 
@@ -66,6 +69,8 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
     var selection by mutableStateOf<Selection?>(null)
     var pending by mutableStateOf<List<Int>>(emptyList()); private set
     var circlePts by mutableStateOf<List<P>>(emptyList()); private set
+    /** Линия, которая превращается в дугу (инструмент «Дуга», касание по линии). */
+    var arcFromLine by mutableStateOf<Int?>(null); private set
     var dialog by mutableStateOf<DimDialog?>(null)
     var busy by mutableStateOf<String?>(null); private set
     var message by mutableStateOf<String?>(null)
@@ -107,7 +112,9 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
         }
         val old = project
         project = f(project).copy(updated = System.currentTimeMillis())
-        if (old.points != project.points || old.dims != project.dims || old.circles != project.circles || old.sheetH != project.sheetH) {
+        if (old.points != project.points || old.dims != project.dims || old.circles != project.circles ||
+            old.arcs != project.arcs || old.sheetH != project.sheetH
+        ) {
             recalibrate()
         }
         scheduleSave()
@@ -145,6 +152,13 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
                     val k = c.known ?: continue
                     if (c.pts.size >= 3) cs += DiameterConstraint(c.id, c.pts, k)
                 }
+                for (a in p.arcs) {
+                    val k = a.known ?: continue
+                    val pa = p.point(a.a) ?: continue
+                    val pm = p.point(a.m) ?: continue
+                    val pb = p.point(a.b) ?: continue
+                    cs += RadiusConstraint(a.id, pa.p, pm.p, pb.p, k)
+                }
                 val sheet = p.sheetH?.let { Mat3(it.toDoubleArray()) }
                 Calibrator.calibrate(p.imageW, p.imageH, sheet, cs)
             }
@@ -164,6 +178,15 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
         val b = project.point(l.b) ?: return@mapNotNull null
         val d = distToSegment(img, a.p, b.p)
         if (d <= tol) l.id to d else null
+    }.minByOrNull { it.second }?.first
+
+    private fun hitArc(img: P, tol: Double): Int? = project.arcs.mapNotNull { a ->
+        val pa = project.point(a.a) ?: return@mapNotNull null
+        val pm = project.point(a.m) ?: return@mapNotNull null
+        val pb = project.point(a.b) ?: return@mapNotNull null
+        val pts = ru.konstruktor.eskiz.geom.Arc.through(pa.p, pm.p, pb.p)?.sample(24) ?: listOf(pa.p, pb.p)
+        val d = pts.zipWithNext().minOf { (u, v) -> distToSegment(img, u, v) }
+        if (d <= tol) a.id to d else null
     }.minByOrNull { it.second }?.first
 
     private fun hitCircle(img: P, tol: Double): Int? = project.circles.mapNotNull { c ->
@@ -188,6 +211,7 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
             dimHit != null -> Selection.Dim(dimHit)
             else -> hitPoint(img, tol)?.let { Selection.Point(it) }
                 ?: hitLine(img, tol)?.let { Selection.Line(it) }
+                ?: hitArc(img, tol)?.let { Selection.Arc(it) }
                 ?: hitCircle(img, tol)?.let { Selection.Circle(it) }
         }
     }
@@ -195,7 +219,32 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
     /** Отпускание пальца в режимах установки точек. */
     fun place(img: P, tol: Double) {
         when (tool) {
-            Tool.POINT -> { obtainPoint(img, tol) }
+            Tool.POINT -> {
+                // Касание по линии контура — новая вершина в этой линии.
+                if (hitPoint(img, tol) == null) hitLine(img, tol)?.let { splitLine(it, img); return }
+                obtainPoint(img, tol)
+            }
+            Tool.ARC -> {
+                val fromLine = arcFromLine
+                if (pending.isEmpty() && fromLine == null && hitPoint(img, tol) == null) {
+                    hitLine(img, tol)?.let { lid ->
+                        val l = project.lines.first { it.id == lid }
+                        arcFromLine = lid
+                        pending = listOf(l.a, l.b)
+                        return
+                    }
+                }
+                val id = obtainPoint(img, tol)
+                if (fromLine != null) {
+                    val (a, b) = pending
+                    pending = emptyList(); arcFromLine = null
+                    if (id != a && id != b) createArc(a, id, b)
+                } else {
+                    if (id in pending) return
+                    val pts = pending + id
+                    if (pts.size == 3) { pending = emptyList(); createArc(pts[0], pts[1], pts[2]) } else pending = pts
+                }
+            }
             Tool.LINE -> {
                 val id = obtainPoint(img, tol)
                 val last = pending.lastOrNull()
@@ -236,6 +285,41 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
         }
     }
 
+    /** Вставляет вершину в линию контура: линия a–b превращается в a–новая–b. */
+    private fun splitLine(lineId: Int, img: P) {
+        val l = project.lines.firstOrNull { it.id == lineId } ?: return
+        val a = project.point(l.a)?.p ?: return
+        val b = project.point(l.b)?.p ?: return
+        val d = b - a
+        val t = ((img - a).dot(d) / d.dot(d)).coerceIn(0.05, 0.95)
+        val q = a + d * t
+        var nid = 0
+        update { p ->
+            nid = p.nextId
+            p.copy(
+                points = p.points + SPoint(nid, q.x, q.y),
+                lines = p.lines.filter { it.id != lineId } + SLine(nid + 1, l.a, nid) + SLine(nid + 2, nid, l.b),
+                nextId = nid + 3,
+            )
+        }
+        selection = Selection.Point(nid)
+        message = "Точка добавлена в контур — её можно перетащить в режиме «Выбор»"
+    }
+
+    /** Дуга через три точки; прямая линия между её концами (если была) заменяется дугой. */
+    private fun createArc(a: Int, m: Int, b: Int) {
+        var aid = 0
+        update { p ->
+            aid = p.nextId
+            p.copy(
+                arcs = p.arcs + SArc(aid, a, m, b),
+                lines = p.lines.filter { !((it.a == a && it.b == b) || (it.a == b && it.b == a)) },
+                nextId = aid + 1,
+            )
+        }
+        dialog = DimDialog(arcId = aid)
+    }
+
     private fun obtainPoint(img: P, tol: Double): Int {
         hitPoint(img, tol)?.let { return it }
         val t = snapTarget(img, tol)
@@ -261,12 +345,13 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
         dragStart = null
     }
 
-    fun cancelPending() { pending = emptyList(); circlePts = emptyList() }
+    fun cancelPending() { pending = emptyList(); circlePts = emptyList(); arcFromLine = null }
 
     fun saveDim(d: DimDialog, value: Double?) {
         dialog = null
         when {
             d.circleId != null -> update { p -> p.copy(circles = p.circles.map { if (it.id == d.circleId) it.copy(known = value) else it }) }
+            d.arcId != null -> update { p -> p.copy(arcs = p.arcs.map { if (it.id == d.arcId) it.copy(known = value) else it }) }
             d.dimId != null -> update { p -> p.copy(dims = p.dims.map { if (it.id == d.dimId) it.copy(known = value) else it }) }
             else -> {
                 val existing = project.dims.firstOrNull { (it.a == d.a && it.b == d.b) || (it.a == d.b && it.b == d.a) }
@@ -278,10 +363,16 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
 
     fun deleteSelection() {
         when (val s = selection) {
-            is Selection.Point -> update { p ->
-                p.copy(points = p.points.filter { it.id != s.id },
-                    lines = p.lines.filter { it.a != s.id && it.b != s.id },
-                    dims = p.dims.filter { it.a != s.id && it.b != s.id })
+            is Selection.Point -> update { p -> deletePoint(p, s.id) }
+            is Selection.Arc -> {
+                // Дуга заменяется прямой — контур остаётся замкнутым.
+                update { p ->
+                    val arc = p.arcs.firstOrNull { it.id == s.id } ?: return@update p
+                    val rest = p.copy(arcs = p.arcs.filter { it.id != s.id })
+                    val q = removeOrphan(rest, arc.m)
+                    q.copy(lines = q.lines + SLine(q.nextId, arc.a, arc.b), nextId = q.nextId + 1)
+                }
+                message = "Дуга заменена прямой"
             }
             is Selection.Line -> update { p -> p.copy(lines = p.lines.filter { it.id != s.id }) }
             is Selection.Dim -> update { p -> p.copy(dims = p.dims.filter { it.id != s.id }) }
@@ -291,10 +382,44 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
         selection = null
     }
 
+    /**
+     * Удаление точки. Если она была вершиной контура между двумя соседями, соседи соединяются
+     * линией; если серединой дуги — дуга становится прямой.
+     */
+    private fun deletePoint(p: Project, id: Int): Project {
+        val newLines = ArrayList<Pair<Int, Int>>()
+        p.arcs.filter { it.m == id }.forEach { newLines += it.a to it.b }
+        val endArcs = p.arcs.filter { it.a == id || it.b == id }
+        val neighbors = (p.lines.filter { it.a == id || it.b == id }.map { if (it.a == id) it.b else it.a } +
+            endArcs.map { if (it.a == id) it.b else it.a }).distinct()
+        if (neighbors.size == 2) newLines += neighbors[0] to neighbors[1]
+        var q = p.copy(
+            points = p.points.filter { it.id != id },
+            lines = p.lines.filter { it.a != id && it.b != id },
+            arcs = p.arcs.filter { it.a != id && it.b != id && it.m != id },
+            dims = p.dims.filter { it.a != id && it.b != id },
+        )
+        for (arc in endArcs) q = removeOrphan(q, arc.m)
+        for ((a, b) in newLines) {
+            if (a != b && q.point(a) != null && q.point(b) != null &&
+                q.lines.none { (it.a == a && it.b == b) || (it.a == b && it.b == a) }
+            ) q = q.copy(lines = q.lines + SLine(q.nextId, a, b), nextId = q.nextId + 1)
+        }
+        return q
+    }
+
+    /** Удаляет точку, если она больше нигде не используется. */
+    private fun removeOrphan(p: Project, id: Int): Project {
+        val used = p.lines.any { it.a == id || it.b == id } || p.arcs.any { it.a == id || it.b == id || it.m == id } ||
+            p.dims.any { it.a == id || it.b == id }
+        return if (used) p else p.copy(points = p.points.filter { it.id != id })
+    }
+
     fun editSelection() {
         dialog = when (val s = selection) {
             is Selection.Dim -> project.dims.firstOrNull { it.id == s.id }?.let { DimDialog(it.a, it.b, dimId = it.id) }
             is Selection.Circle -> DimDialog(circleId = s.id)
+            is Selection.Arc -> DimDialog(arcId = s.id)
             is Selection.Line -> project.lines.firstOrNull { it.id == s.id }?.let { DimDialog(it.a, it.b) }
             else -> null
         }
@@ -311,7 +436,7 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
     }
 
     fun clearAll() {
-        update { p -> p.copy(points = emptyList(), lines = emptyList(), dims = emptyList(), circles = emptyList(), nextId = 1) }
+        update { p -> p.copy(points = emptyList(), lines = emptyList(), dims = emptyList(), circles = emptyList(), arcs = emptyList(), nextId = 1) }
         selection = null; cancelPending()
     }
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import ru.konstruktor.eskiz.data.Project
+import ru.konstruktor.eskiz.render.CanvasPen
 import ru.konstruktor.eskiz.render.DrawingModel
 import ru.konstruktor.eskiz.render.PageSpec
 import ru.konstruktor.eskiz.render.Renderer
@@ -26,7 +27,7 @@ import kotlin.math.min
 object DrawingOrder {
     /** Первые [n] размеров в порядке ввода — для пошагового показа. */
     fun visible(p: Project, n: Int): Set<Int> = all(p).take(n).toSet()
-    fun all(p: Project): List<Int> = (p.dims.map { it.id } + p.circles.map { it.id }).sorted()
+    fun all(p: Project): List<Int> = (p.dims.map { it.id } + p.circles.map { it.id } + p.arcs.map { it.id }).sorted()
 }
 
 /** Чистый чертёж на листе A4 — так же, как он уйдёт в PNG/PDF. */
@@ -62,7 +63,7 @@ fun DrawingCanvas(vm: EditorViewModel, modifier: Modifier = Modifier) {
             val c = cc.nativeCanvas
             c.drawColor(0xFF90A4AE.toInt())
             val visible = if (vm.stepMode) DrawingOrder.visible(vm.project, vm.stepCount) else null
-            Renderer.drawPage(c, model, page, k, pan.x, pan.y, visible)
+            Renderer.drawPage(CanvasPen(c), model, page, k, pan.x, pan.y, visible)
         }
     }
 }

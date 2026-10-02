@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.IntSize
 import ru.konstruktor.eskiz.geom.DimLayout
 import ru.konstruktor.eskiz.geom.P
 import ru.konstruktor.eskiz.geom.dist
+import ru.konstruktor.eskiz.render.CanvasPen
 import ru.konstruktor.eskiz.render.Colors
 import ru.konstruktor.eskiz.render.Renderer
 import kotlin.math.max
@@ -90,7 +91,7 @@ fun PhotoCanvas(vm: EditorViewModel, modifier: Modifier = Modifier) {
                             vm.startDrag()
                             loupe = dragOrigin; finger = start
                         }
-                        Tool.POINT, Tool.LINE, Tool.DIM, Tool.CIRCLE -> {
+                        Tool.POINT, Tool.LINE, Tool.ARC, Tool.DIM, Tool.CIRCLE -> {
                             kind = Gesture.PLACE
                             loupe = vm.snapTarget(toImg(start), tolImg()); finger = start
                         }
@@ -176,12 +177,13 @@ fun PhotoCanvas(vm: EditorViewModel, modifier: Modifier = Modifier) {
             val sel = vm.selection
             val visible = if (vm.stepMode) DrawingOrder.visible(vm.project, vm.stepCount) else null
             holder.layout = Renderer.drawPhotoOverlay(
-                c, vm.project, vm.calibration, ::toScreen, density,
+                CanvasPen(c), vm.project, vm.calibration, ::toScreen, density,
                 Renderer.PhotoOverlay(
                     selectedDim = (sel as? Selection.Dim)?.id,
                     selectedPoint = (sel as? Selection.Point)?.id,
                     selectedLine = (sel as? Selection.Line)?.id,
                     selectedCircle = (sel as? Selection.Circle)?.id,
+                    selectedArc = (sel as? Selection.Arc)?.id,
                     pendingPoints = vm.pending.toSet(),
                     pendingCirclePts = vm.circlePts,
                     showDims = vm.showDims,

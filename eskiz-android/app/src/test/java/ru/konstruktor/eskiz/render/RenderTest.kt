@@ -48,7 +48,11 @@ class RenderTest {
         fun circ(id: Int, c: P, r: Double, known: Double?) =
             SCircle(id, (0 until 16).map { w2p.apply(P(c.x + r * cos(it * Math.PI / 8), c.y + r * sin(it * Math.PI / 8))) }, known)
         val circles = listOf(circ(30, P(70.0, 110.0), 8.0, 16.0), circ(31, P(140.0, 105.0), 6.0, null), circ(32, P(75.0, 190.0), 10.0, null))
-        return Project("t", "Пластина", 0, 1_700_000_000_000, 3000, 2250, pts, lines, dims, circles, 40,
+        // Правая сторона 2–3 — дуга через точку 7, выпуклая наружу.
+        val mid = w2p.apply(P(185.0, 110.0))
+        val arcs = listOf(ru.konstruktor.eskiz.data.SArc(33, 2, 7, 3))
+        return Project("t", "Пластина", 0, 1_700_000_000_000, 3000, 2250, pts + SPoint(7, mid.x, mid.y),
+            lines.filter { it.id != 11 }, dims, circles, arcs, nextId = 40,
             stamp = Stamp("Пластина опорная", "Иванов", "Ст3 s4"))
     }
 
@@ -64,10 +68,11 @@ class RenderTest {
         val v = Values(p, c)
         for (id in listOf(25, 26, 27)) println("размер $id = ${v.computedDim(id)} ± ${v.dimUncertainty(id)}")
         for (id in listOf(31, 32)) println("Ø $id = ${v.computedCircle(id)} ± ${v.circleUncertainty(id)}")
+        println("R 33 = ${v.computedArc(33)} ± ${v.arcUncertainty(33)}")
         println("масштаб ${scaleLabel(page.scale)}, лист ${page.w}×${page.h}, режим ${c.mode}, ±${c.sigmaRel}")
         val k = 5f
         val bmp = Bitmap.createBitmap((page.w * k).toInt(), (page.h * k).toInt(), Bitmap.Config.ARGB_8888)
-        Renderer.drawPage(Canvas(bmp), model, page, k, 0f, 0f)
+        Renderer.drawPage(CanvasPen(Canvas(bmp)), model, page, k, 0f, 0f)
         File(out, "page.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         // Вычисленные размеры совпадают с истинными.
         assertTrue(kotlin.math.abs(v.computedDim(25)!! - 60.0) < 0.3)
@@ -81,7 +86,7 @@ class RenderTest {
         val bmp = Bitmap.createBitmap((p.imageW * s).toInt(), (p.imageH * s).toInt(), Bitmap.Config.ARGB_8888)
         val cv = Canvas(bmp)
         cv.drawColor(Color.rgb(130, 95, 60))
-        Renderer.drawPhotoOverlay(cv, p, c, { it * s }, 1.6f, Renderer.PhotoOverlay(selectedDim = 26))
+        Renderer.drawPhotoOverlay(CanvasPen(cv), p, c, { it * s }, 1.6f, Renderer.PhotoOverlay(selectedDim = 26))
         File(out, "photo.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
@@ -94,6 +99,7 @@ class RenderTest {
         assertTrue(txt.startsWith("0\nSECTION"))
         assertTrue(txt.trimEnd().endsWith("EOF"))
         assertTrue(txt.contains("%%c16"))
+        assertTrue(txt.contains("\nARC\n"))
         println("DXF: ${txt.lines().size} строк, LINE=${Regex("\nLINE\n").findAll(txt).count()}, CIRCLE=${Regex("\nCIRCLE\n").findAll(txt).count()}, TEXT=${Regex("\nTEXT\n").findAll(txt).count()}")
     }
 }

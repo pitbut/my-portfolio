@@ -16,7 +16,8 @@ import kotlin.math.sin
 object DimLayout {
 
     class LinearIn(val id: Int, val a: P, val b: P, val text: String)
-    class DiameterIn(val id: Int, val c: P, val r: Double, val text: String)
+    /** Диаметр окружности или радиус дуги; [angles] — допустимые направления выноски (для дуги). */
+    class DiameterIn(val id: Int, val c: P, val r: Double, val text: String, val angles: List<Double>? = null)
 
     class Params(
         /** Высота шрифта размерного числа. */
@@ -160,7 +161,7 @@ object DimLayout {
         for (d in diameters) {
             var best: Pair<Double, DiameterOut>? = null
             var bestRect: ORect? = null
-            for ((idx, ang) in angles.withIndex()) {
+            for ((idx, ang) in (d.angles ?: angles).withIndex()) {
                 for (extra in 0..2) {
                     val dir = P(cos(ang), sin(ang))
                     val start = d.c + dir * d.r

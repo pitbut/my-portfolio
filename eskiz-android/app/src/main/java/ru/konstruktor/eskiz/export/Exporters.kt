@@ -19,6 +19,7 @@ import ru.konstruktor.eskiz.data.Project
 import ru.konstruktor.eskiz.geom.Calibration
 import ru.konstruktor.eskiz.geom.DimLayout
 import ru.konstruktor.eskiz.geom.P
+import ru.konstruktor.eskiz.render.CanvasPen
 import ru.konstruktor.eskiz.render.DrawingModel
 import ru.konstruktor.eskiz.render.PageSpec
 import ru.konstruktor.eskiz.render.Renderer
@@ -39,7 +40,7 @@ object Exporters {
         val page = PageSpec.choose(model.bounds)
         val k = 8f // 8 пикселей на мм ≈ 200 dpi
         val bmp = Bitmap.createBitmap((page.w * k).toInt(), (page.h * k).toInt(), Bitmap.Config.ARGB_8888)
-        Renderer.drawPage(Canvas(bmp), model, page, k, 0f, 0f)
+        Renderer.drawPage(CanvasPen(Canvas(bmp)), model, page, k, 0f, 0f)
         val f = File(shareDir(ctx), "${safeName(project)}_чертёж.png")
         f.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bmp.recycle()
@@ -57,7 +58,7 @@ object Exporters {
         src.recycle()
         val scale = bmp.width.toDouble() / project.imageW
         val dp = max(bmp.width, bmp.height) / 900f
-        Renderer.drawPhotoOverlay(c, project, cal, { p -> p * scale }, dp, Renderer.PhotoOverlay())
+        Renderer.drawPhotoOverlay(CanvasPen(c), project, cal, { p -> p * scale }, dp, Renderer.PhotoOverlay())
         val f = File(shareDir(ctx), "${safeName(project)}_фото.jpg")
         f.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
         bmp.recycle()
@@ -70,7 +71,7 @@ object Exporters {
         val k = (72 / 25.4).toFloat()
         val doc = PdfDocument()
         val pg = doc.startPage(PdfDocument.PageInfo.Builder((page.w * k).toInt(), (page.h * k).toInt(), 1).create())
-        Renderer.drawPage(pg.canvas, model, page, k, 0f, 0f)
+        Renderer.drawPage(CanvasPen(pg.canvas), model, page, k, 0f, 0f)
         doc.finishPage(pg)
         val f = File(shareDir(ctx), "${safeName(project)}_чертёж.pdf")
         f.outputStream().use { doc.writeTo(it) }
@@ -118,14 +119,23 @@ object Exporters {
             lineE(ci.circle.c - P(0.0, e), ci.circle.c + P(0.0, e), "AXIS")
         }
 
+        // Дуги: в DXF угол против часовой при оси Y вверх, а у нас Y вниз — углы меняют знак.
+        for (ai in model.arcs) {
+            val a = ai.arc
+            var s0 = -Math.toDegrees(a.start); var s1 = -Math.toDegrees(a.end)
+            if (s1 < s0) { val t = s0; s0 = s1; s1 = t } // DXF рисует от начала к концу против часовой
+            g(0, "ARC"); g(8, "CONTOUR"); xy(a.c); g(40, a.r); g(50, (s0 % 360 + 360) % 360); g(51, (s1 % 360 + 360) % 360)
+        }
+
         // Размеры — линиями, стрелками и текстом (так их читает любая программа).
         val th = 3.5 / m
         val arrowL = 3.0 / m
         val params = DimLayout.Params(th, 10 / m, 7 / m, arrowL) { it.length * th * 0.75 }
         val layout = DimLayout.layout(
-            model.lines, model.circles.map { it.circle },
+            model.lines + model.arcs.flatMap { it.arc.sample(12).zipWithNext() }, model.circles.map { it.circle },
             model.dims.map { DimLayout.LinearIn(it.id, it.a, it.b, it.value?.let(::fmtMm) ?: "?") },
-            model.circles.map { DimLayout.DiameterIn(it.id, it.circle.c, it.circle.r, "%%c" + (it.value?.let(::fmtMm) ?: "?")) },
+            model.circles.map { DimLayout.DiameterIn(it.id, it.circle.c, it.circle.r, "%%c" + (it.value?.let(::fmtMm) ?: "?")) } +
+                model.arcs.map { DimLayout.DiameterIn(it.id, it.arc.c, it.arc.r, "R" + (it.value?.let(::fmtMm) ?: "?"), Renderer.radiusAngles(it.arc)) },
             params,
         )
         fun arrow(tip: P, dir: P) {

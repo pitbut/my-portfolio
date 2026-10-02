@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.RoundedCorner
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Timeline
@@ -80,6 +81,7 @@ private fun toolIcon(t: Tool): ImageVector = when (t) {
     Tool.SELECT -> Icons.Filled.TouchApp
     Tool.POINT -> Icons.Filled.Adjust
     Tool.LINE -> Icons.Filled.Timeline
+    Tool.ARC -> Icons.Filled.RoundedCorner
     Tool.DIM -> Icons.Filled.Straighten
     Tool.CIRCLE -> Icons.Filled.RadioButtonUnchecked
     Tool.AUTO -> Icons.Filled.AutoFixHigh
@@ -238,7 +240,13 @@ private fun CheckItem(text: String, checked: Boolean, onChange: (Boolean) -> Uni
 
 private fun hint(vm: EditorViewModel): String = when (vm.tool) {
     Tool.SELECT -> "Коснитесь объекта, чтобы выбрать. Точку можно перетащить."
-    Tool.POINT -> "Ставьте точки — лупа поможет попасть, точка притянется к углу"
+    Tool.POINT -> "Ставьте точки. Касание по линии контура — новая вершина в ней"
+    Tool.ARC -> when {
+        vm.arcFromLine != null -> "Точка, через которую пройдёт дуга"
+        vm.pending.isEmpty() -> "Дуга: коснитесь линии (станет дугой) или поставьте начало"
+        vm.pending.size == 1 -> "Дуга: точка на дуге"
+        else -> "Дуга: конец"
+    }
     Tool.LINE -> if (vm.pending.isEmpty()) "Линия: первая точка" else "Следующая точка. Ещё раз на последнюю — конец линии"
     Tool.DIM -> if (vm.pending.isEmpty()) "Размер: первая точка или коснитесь линии контура" else "Размер: вторая точка"
     Tool.CIRCLE -> "Отверстие: точка ${vm.circlePts.size + 1} из 3 на краю"
@@ -328,7 +336,16 @@ private fun SelectionCard(vm: EditorViewModel, s: Selection) {
             if (a != null && b != null && cal.calibrated) detail = "≈" + fmtMm(dist(cal.toMm(a.p), cal.toMm(b.p))) + " мм"
             editLabel = "Проставить размер"
         }
-        is Selection.Point -> { title = "Точка"; detail = "Перетащите, чтобы уточнить положение" }
+        is Selection.Point -> { title = "Точка"; detail = "Перетащите, чтобы уточнить. При удалении соседние точки контура соединятся" }
+        is Selection.Arc -> {
+            val a = p.arcs.firstOrNull { it.id == s.id } ?: return
+            title = "Дуга"
+            detail = if (a.known != null) "R" + fmtMm(a.known) + " мм — введён"
+            else v.computedArc(a.id)?.let { "R≈" + fmtMm(it) + (v.arcUncertainty(a.id)?.let { u -> " ±" + fmtMm(u) } ?: "") + " мм — вычислен" }
+                ?: "Радиус появится после калибровки"
+            cal.outliers[a.id]?.let { warn = "По остальным размерам получается R${fmtMm(it)} — проверьте" }
+            editLabel = "Ввести R"
+        }
     }
     Surface(shape = RoundedCornerShape(12.dp), tonalElevation = 4.dp, shadowElevation = 6.dp, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 4.dp)) {
@@ -355,14 +372,17 @@ private fun DimInputDialog(vm: EditorViewModel, d: DimDialog) {
     val p = vm.project
     val cal = vm.calibration
     val isCircle = d.circleId != null
+    val isArc = d.arcId != null
     val existing: Double? = when {
         d.circleId != null -> p.circles.firstOrNull { it.id == d.circleId }?.known
+        d.arcId != null -> p.arcs.firstOrNull { it.id == d.arcId }?.known
         d.dimId != null -> p.dims.firstOrNull { it.id == d.dimId }?.known
         else -> p.dims.firstOrNull { (it.a == d.a && it.b == d.b) || (it.a == d.b && it.b == d.a) }?.known
     }
     val computed: Double? = when {
         !cal.calibrated -> null
         d.circleId != null -> vm.values().computedCircle(d.circleId)
+        d.arcId != null -> vm.values().computedArc(d.arcId)
         else -> {
             val a = p.point(d.a); val b = p.point(d.b)
             if (a != null && b != null) dist(cal.toMm(a.p), cal.toMm(b.p)) else null
@@ -375,7 +395,7 @@ private fun DimInputDialog(vm: EditorViewModel, d: DimDialog) {
 
     AlertDialog(
         onDismissRequest = { vm.dialog = null },
-        title = { Text(if (isCircle) "Диаметр отверстия" else "Размер") },
+        title = { Text(if (isCircle) "Диаметр отверстия" else if (isArc) "Радиус дуги" else "Размер") },
         text = {
             Column {
                 Text(
@@ -387,7 +407,7 @@ private fun DimInputDialog(vm: EditorViewModel, d: DimDialog) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' } },
-                    label = { Text(if (isCircle) "Ø, мм" else "мм") },
+                    label = { Text(if (isCircle) "Ø, мм" else if (isArc) "R, мм" else "мм") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.focusRequester(focus),
