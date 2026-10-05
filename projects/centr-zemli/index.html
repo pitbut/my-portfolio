@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#120c08">
+<title>Путешествие к центру Земли — игра</title>
+<meta name="description" content="Аркада по мотивам романа Жюля Верна: спуститесь через кратер Снайфедльса к морю Лиденброка и вернитесь на поверхность с извержением Стромболи.">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+  <button id="pauseBtn" class="hidden" aria-label="Пауза">❚❚</button>
+
+  <div id="menu" class="screen">
+    <div class="card">
+      <div class="emblem">🌋</div>
+      <h1>Путешествие<br>к центру Земли</h1>
+      <p class="sub">по мотивам романа Жюля Верна</p>
+      <button class="btn primary" id="btnNew">Новая экспедиция</button>
+      <button class="btn" id="btnChapters">Главы</button>
+      <button class="btn" id="btnHelp">Как играть</button>
+      <button class="btn small" id="btnSound">Звук: вкл</button>
+      <p class="best" id="bestLine"></p>
+    </div>
+  </div>
+
+  <div id="chapters" class="screen hidden">
+    <div class="card">
+      <h2>Главы</h2>
+      <div id="chapterList"></div>
+      <button class="btn small" data-back>Назад</button>
+    </div>
+  </div>
+
+  <div id="help" class="screen hidden">
+    <div class="card left">
+      <h2>Как играть</h2>
+      <p>👆 <b>Водите пальцем</b> влево и вправо — Аксель следует за ним. На компьютере — стрелки или A/D.</p>
+      <p>🪨 Не касайтесь стен, камней и чудовищ: у экспедиции <b>3 жизни</b>.</p>
+      <p>💧 <b>Вода</b> убывает. Собирайте фляги и держитесь струй Гансбаха, иначе жажда отнимет жизни.</p>
+      <p>🏮 <b>Лампа Румкорфа</b> светит всё слабее — подбирайте батареи, чтобы видеть путь.</p>
+      <p>💎 Минералы дают очки, а в каждой главе спрятана <b>руна Сакнуссема</b>.</p>
+      <button class="btn small" data-back>Понятно</button>
+    </div>
+  </div>
+
+  <div id="story" class="screen hidden">
+    <div class="card story">
+      <p class="kicker" id="storyKicker"></p>
+      <h2 id="storyTitle"></h2>
+      <div id="storyText"></div>
+      <button class="btn primary" id="storyBtn">В путь</button>
+    </div>
+  </div>
+
+  <div id="pause" class="screen hidden">
+    <div class="card">
+      <h2>Привал</h2>
+      <button class="btn primary" id="btnResume">Продолжить</button>
+      <button class="btn" id="btnRestart">Начать главу заново</button>
+      <button class="btn small" id="btnToMenu">В меню</button>
+    </div>
+  </div>
+
+  <div id="over" class="screen hidden">
+    <div class="card">
+      <h2 id="overTitle">Экспедиция прервана</h2>
+      <p id="overText"></p>
+      <button class="btn primary" id="btnRetry">Ещё раз</button>
+      <button class="btn small" id="btnOverMenu">В меню</button>
+    </div>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
