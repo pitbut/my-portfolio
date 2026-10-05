@@ -123,7 +123,7 @@ object Extrusion {
 
     /** Текст STEP-файла: тело выдавливания профиля на [thickness] мм. */
     fun step(profile: Profile, thickness: Double, name: String): String {
-        val w = Writer()
+        val w = StepWriter()
         val t = thickness
         val zUp = w.dir(0.0, 0.0, 1.0); val xDir = w.dir(1.0, 0.0, 0.0)
         val faces = ArrayList<Int>()
@@ -148,7 +148,7 @@ object Extrusion {
                         surface = w.add("PLANE('',${w.axis(e.p, 0.0, w.dir(d.y, -d.x, 0.0), w.dir(d.x, d.y, 0.0))})")
                         sense = true
                     }
-                    is Edge2.Circ -> {
+                    is Extrusion.Edge2.Circ -> {
                         surface = w.add("CYLINDRICAL_SURFACE('',${w.axis(e.c, 0.0, zUp, xDir)},${w.f(e.r)})")
                         sense = e.ccw
                     }
@@ -196,47 +196,49 @@ object Extrusion {
         }
         return sb.toString().ifBlank { "Part" }
     }
+}
 
-    private class Writer {
-        private val sb = StringBuilder()
-        private var n = 100
+/** Запись сущностей STEP (AP214) с автонумерацией. */
+internal class StepWriter {
+    private val sb = StringBuilder()
+    private var n = 100
 
-        /** Число STEP: 10 знаков (иначе вершины «не ложатся» на кривые в пределах допуска), без лишних нулей. */
-        fun f(v: Double): String =
-            String.format(Locale.US, "%.10f", if (abs(v) < 1e-13) 0.0 else v).trimEnd('0')
-        fun b(v: Boolean) = if (v) ".T." else ".F."
+    /** Число STEP: 10 знаков (иначе вершины «не ложатся» на кривые в пределах допуска), без лишних нулей. */
+    fun f(v: Double): String =
+        String.format(Locale.US, "%.10f", if (abs(v) < 1e-13) 0.0 else v).trimEnd('0')
+    fun b(v: Boolean) = if (v) ".T." else ".F."
 
-        fun add(e: String): Int { val id = n++; sb.append('#').append(id).append('=').append(e).append(";\n"); return id }
-        private fun ref(id: Int) = "#$id"
+    fun add(e: String): Int { val id = n++; sb.append('#').append(id).append('=').append(e).append(";\n"); return id }
+    private fun ref(id: Int) = "#$id"
 
-        fun point(x: Double, y: Double, z: Double) = add("CARTESIAN_POINT('',(${f(x)},${f(y)},${f(z)}))")
-        fun dir(x: Double, y: Double, z: Double): Int {
-            val l = max(1e-15, kotlin.math.sqrt(x * x + y * y + z * z))
-            return add("DIRECTION('',(${f(x / l)},${f(y / l)},${f(z / l)}))")
+    fun point(x: Double, y: Double, z: Double) = add("CARTESIAN_POINT('',(${f(x)},${f(y)},${f(z)}))")
+    fun dir(x: Double, y: Double, z: Double): Int {
+        val l = max(1e-15, kotlin.math.sqrt(x * x + y * y + z * z))
+        return add("DIRECTION('',(${f(x / l)},${f(y / l)},${f(z / l)}))")
+    }
+    fun axis(p: P, z: Double, axisDir: Int, refDir: Int) = ref(add("AXIS2_PLACEMENT_3D('',${ref(point(p.x, p.y, z))},${ref(axisDir)},${ref(refDir)})"))
+    fun vertex(p: P, z: Double) = add("VERTEX_POINT('',${ref(point(p.x, p.y, z))})")
+
+    fun lineEdge(v1: Int, v2: Int, a: P, za: Double, b: P, zb: Double): Int {
+        val dx = b.x - a.x; val dy = b.y - a.y; val dz = zb - za
+        val len = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
+        val line = add("LINE('',${ref(point(a.x, a.y, za))},${ref(add("VECTOR('',${ref(dir(dx, dy, dz))},${f(len)})"))})")
+        return add("EDGE_CURVE('',${ref(v1)},${ref(v2)},${ref(line)},.T.)")
+    }
+
+    fun edge(e: Extrusion.Edge2, v1: Int, v2: Int, z: Double): Int = when (e) {
+        is Extrusion.Edge2.Line -> lineEdge(v1, v2, e.p, z, e.q, z)
+        is Extrusion.Edge2.Circ -> {
+            val circle = add("CIRCLE('',${axis(e.c, z, dir(0.0, 0.0, 1.0), dir(1.0, 0.0, 0.0))},${f(e.r)})")
+            add("EDGE_CURVE('',${ref(v1)},${ref(v2)},${ref(circle)},${b(e.ccw)})")
         }
-        fun axis(p: P, z: Double, axisDir: Int, refDir: Int) = ref(add("AXIS2_PLACEMENT_3D('',${ref(point(p.x, p.y, z))},${ref(axisDir)},${ref(refDir)})"))
-        fun vertex(p: P, z: Double) = add("VERTEX_POINT('',${ref(point(p.x, p.y, z))})")
+    }
 
-        fun lineEdge(v1: Int, v2: Int, a: P, za: Double, b: P, zb: Double): Int {
-            val dx = b.x - a.x; val dy = b.y - a.y; val dz = zb - za
-            val len = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
-            val line = add("LINE('',${ref(point(a.x, a.y, za))},${ref(add("VECTOR('',${ref(dir(dx, dy, dz))},${f(len)})"))})")
-            return add("EDGE_CURVE('',${ref(v1)},${ref(v2)},${ref(line)},.T.)")
-        }
+    fun oe(edge: Int, sense: Boolean) = add("ORIENTED_EDGE('',*,*,${ref(edge)},${b(sense)})")
+    fun loop(oes: List<Int>) = ref(add("EDGE_LOOP('',(${oes.joinToString(",") { ref(it) }}))"))
 
-        fun edge(e: Edge2, v1: Int, v2: Int, z: Double): Int = when (e) {
-            is Edge2.Line -> lineEdge(v1, v2, e.p, z, e.q, z)
-            is Edge2.Circ -> {
-                val circle = add("CIRCLE('',${axis(e.c, z, dir(0.0, 0.0, 1.0), dir(1.0, 0.0, 0.0))},${f(e.r)})")
-                add("EDGE_CURVE('',${ref(v1)},${ref(v2)},${ref(circle)},${b(e.ccw)})")
-            }
-        }
-
-        fun oe(edge: Int, sense: Boolean) = add("ORIENTED_EDGE('',*,*,${ref(edge)},${b(sense)})")
-        fun loop(oes: List<Int>) = ref(add("EDGE_LOOP('',(${oes.joinToString(",") { ref(it) }}))"))
-
-        fun document(brep: Int, name: String): String {
-            val head = """ISO-10303-21;
+    fun document(brep: Int, name: String): String {
+        val head = """ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('Eskiz extrusion'),'2;1');
 FILE_NAME('$name.step','2026-01-01T00:00:00',(''),(''),'Eskiz','Eskiz','');
@@ -258,10 +260,9 @@ DATA;
 #13=(GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#12))GLOBAL_UNIT_ASSIGNED_CONTEXT((#9,#10,#11))REPRESENTATION_CONTEXT('Context3D','3D Context with UNIT and UNCERTAINTY'));
 #14=PRODUCT_RELATED_PRODUCT_CATEGORY('part',${'$'},(#4));
 """
-            val origin = add("AXIS2_PLACEMENT_3D('',${ref(point(0.0, 0.0, 0.0))},${ref(dir(0.0, 0.0, 1.0))},${ref(dir(1.0, 0.0, 0.0))})")
-            val rep = add("ADVANCED_BREP_SHAPE_REPRESENTATION('',(#$brep,#$origin),#13)")
-            add("SHAPE_DEFINITION_REPRESENTATION(#8,#$rep)")
-            return head + sb + "ENDSEC;\nEND-ISO-10303-21;\n"
-        }
+        val origin = add("AXIS2_PLACEMENT_3D('',${ref(point(0.0, 0.0, 0.0))},${ref(dir(0.0, 0.0, 1.0))},${ref(dir(1.0, 0.0, 0.0))})")
+        val rep = add("ADVANCED_BREP_SHAPE_REPRESENTATION('',(#$brep,#$origin),#13)")
+        add("SHAPE_DEFINITION_REPRESENTATION(#8,#$rep)")
+        return head + sb + "ENDSEC;\nEND-ISO-10303-21;\n"
     }
 }
