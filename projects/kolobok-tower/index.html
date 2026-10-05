@@ -905,8 +905,11 @@ function drawHUD() {
 
   // предупреждение о лаве
   if (state === 'play' && player.y - lavaY < 70) {
-    ctx.fillStyle = `rgba(255,80,20,${0.5 + 0.5 * Math.sin(time * 10)})`;
-    ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Лава близко!', CX, top + 40);
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(time * 10);
+    ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center';
+    ctx.lineWidth = 4; ctx.strokeStyle = '#3a0802'; ctx.strokeText('Лава близко!', CX, top + 40);
+    ctx.fillStyle = '#ffd23a'; ctx.fillText('Лава близко!', CX, top + 40);
+    ctx.globalAlpha = 1;
   }
   // заставка башни и сообщения
   const big = introT > 0 ? { text: tower.tw.name, sub: 'Забирайся наверх, пока не догнала лава!', a: Math.min(1, introT) } : msg ? { text: msg.text, a: Math.min(1, msg.t * 2) } : null;
@@ -932,7 +935,7 @@ requestAnimationFrame(frame);
 
 // для автотестов
 window.__game = { get state() { return state; }, get player() { return player; }, get tower() { return tower; }, startTower, newGame, input, pressed, get lavaY() { return lavaY; }, set lavaY(v) { lavaY = v; },
-  step(dt) { manual = true; update(dt); }, colOf, tile };
+  step(dt) { manual = true; update(dt); }, colOf, tile, get time() { return time; } };
 })();
 </script>
 </body>
