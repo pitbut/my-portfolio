@@ -73,7 +73,8 @@ class ModelPipelineTest {
         assertEquals(expected, r.solid.volume, expected * 0.01)
         assertEquals(0, r.solid.openEdges())
 
-        // Модель сохранилась вместе с видами.
+        // Модель сохраняется вместе с видами (отложенно — ждём запись).
+        Thread.sleep(600); shadowOf(Looper.getMainLooper()).idle(); Thread.sleep(200)
         assertEquals(3, ms.load(id).views.size)
 
         val out = File("build/render-test").apply { mkdirs() }

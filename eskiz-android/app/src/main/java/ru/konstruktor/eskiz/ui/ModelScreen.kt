@@ -101,7 +101,7 @@ fun ModelScreen(modelId: String, onBack: () -> Unit, onOpenSketch: (String) -> U
         toSave = null
     }
 
-    BackHandler(onBack = onBack)
+    BackHandler { vm.saveNow(); onBack() }
     LaunchedEffect(vm.message) { vm.message?.let { snack.showSnackbar(it); vm.message = null } }
     // Возврат из эскиза: пересобираем с учётом правок.
     LaunchedEffect(Unit) { vm.refreshSketches() }
@@ -111,7 +111,7 @@ fun ModelScreen(modelId: String, onBack: () -> Unit, onOpenSketch: (String) -> U
         topBar = {
             TopAppBar(
                 title = { Text(vm.model.name, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.clickable { renameDlg = true }) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Назад") } },
+                navigationIcon = { IconButton(onClick = { vm.saveNow(); onBack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Назад") } },
                 actions = {
                     IconButton(onClick = { exportDlg = true }, enabled = vm.result != null) { Icon(Icons.Filled.Share, "Экспорт") }
                 },
@@ -136,7 +136,7 @@ fun ModelScreen(modelId: String, onBack: () -> Unit, onOpenSketch: (String) -> U
                     fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 for (role in MultiView.Role.entries) {
-                    ViewSlot(vm, role, onPick = { picker = role }, onOpenSketch = onOpenSketch)
+                    ViewSlot(vm, role, onPick = { picker = role }, onOpenSketch = { vm.saveNow(); onOpenSketch(it) })
                 }
                 if (vm.model.views.size == 1) {
                     var t by remember { mutableStateOf(vm.model.thickness?.let(::fmtMm) ?: "") }

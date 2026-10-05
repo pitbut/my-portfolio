@@ -58,10 +58,25 @@ class ModelViewModel(app: Application, modelId: String) : AndroidViewModel(app) 
         rebuild()
     }
 
+    private var saveJob: Job? = null
+
     private fun update(f: (Model3D) -> Model3D) {
         model = f(model).copy(updated = System.currentTimeMillis())
+        // Одно отложенное сохранение последнего состояния: параллельные записи могли терять изменения.
+        saveJob?.cancel()
         val m = model
-        viewModelScope.launch(Dispatchers.IO) { models.save(m) }
+        saveJob = viewModelScope.launch(Dispatchers.IO) { kotlinx.coroutines.delay(300); models.save(m) }
+    }
+
+    /** Сохранить сразу (при уходе с экрана). */
+    fun saveNow() {
+        saveJob?.cancel()
+        models.save(model)
+    }
+
+    override fun onCleared() {
+        saveNow()
+        super.onCleared()
     }
 
     fun viewOf(role: MultiView.Role) = model.views.firstOrNull { it.role == role.name }
