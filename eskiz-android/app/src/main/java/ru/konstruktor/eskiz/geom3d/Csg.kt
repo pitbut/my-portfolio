@@ -142,7 +142,7 @@ object Csg {
     /** BSP-деревья рекурсивны: считаем в потоке с большим стеком. */
     private fun <T> deep(block: () -> T): T {
         var result: Result<T>? = null
-        val t = Thread(null, { result = runCatching(block) }, "csg", 256L * 1024 * 1024)
+        val t = Thread(null, { result = runCatching(block) }, "csg", 64L * 1024 * 1024)
         t.start(); t.join()
         return result!!.getOrThrow()
     }

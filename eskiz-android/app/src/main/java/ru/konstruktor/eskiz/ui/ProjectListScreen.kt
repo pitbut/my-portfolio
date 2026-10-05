@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.ViewInAr
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -72,7 +73,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun ProjectListScreen(onOpen: (String) -> Unit) {
+fun ProjectListScreen(tab: Int, onTab: (Int) -> Unit, onOpen: (String) -> Unit, onOpenModel: (String) -> Unit) {
     val ctx = LocalContext.current
     val store = remember { ProjectStore(ctx) }
     val scope = rememberCoroutineScope()
@@ -84,6 +85,11 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
     var menu by remember { mutableStateOf(false) }
     var about by remember { mutableStateOf(false) }
     var toDelete by remember { mutableStateOf<Project?>(null) }
+    val modelStore = remember { ru.konstruktor.eskiz.data.ModelStore(ctx) }
+    val models by produceState<List<ru.konstruktor.eskiz.data.Model3D>?>(null, refresh) {
+        value = withContext(Dispatchers.IO) { modelStore.list() }
+    }
+    var modelToDelete by remember { mutableStateOf<ru.konstruktor.eskiz.data.Model3D?>(null) }
 
     fun createFrom(uri: Uri) {
         busy = true
@@ -117,6 +123,7 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
 
     Scaffold(
         topBar = {
+            Column {
             TopAppBar(
                 title = { Text("Эскиз") },
                 actions = {
@@ -139,8 +146,25 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
                     }
                 },
             )
+            androidx.compose.material3.TabRow(selectedTabIndex = tab) {
+                androidx.compose.material3.Tab(selected = tab == 0, onClick = { onTab(0) }, text = { Text("Эскизы") })
+                androidx.compose.material3.Tab(selected = tab == 1, onClick = { onTab(1) }, text = { Text("3D-модели") })
+            }
+            }
         },
         floatingActionButton = {
+            if (tab == 1) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        scope.launch {
+                            val m = withContext(Dispatchers.IO) { modelStore.create("Деталь ${(models?.size ?: 0) + 1}") }
+                            onOpenModel(m.id)
+                        }
+                    },
+                    icon = { Icon(Icons.Filled.ViewInAr, null) },
+                    text = { Text("Новая 3D-модель") },
+                )
+            } else
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SmallFloatingActionButton(onClick = {
                     gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -155,7 +179,8 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
             val list = projects
-            when {
+            if (tab == 1) ModelsList(models, list.orEmpty(), store, onOpenModel) { modelToDelete = it }
+            else when {
                 list == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 list.isEmpty() -> Column(
                     Modifier.align(Alignment.Center).padding(32.dp),
@@ -203,6 +228,16 @@ fun ProjectListScreen(onOpen: (String) -> Unit) {
         )
     }
 
+    modelToDelete?.let { m ->
+        AlertDialog(
+            onDismissRequest = { modelToDelete = null },
+            title = { Text("Удалить 3D-модель «${m.name}»?") },
+            text = { Text("Эскизы видов останутся, удалится только сборка модели.") },
+            confirmButton = { TextButton(onClick = { modelStore.delete(m.id); modelToDelete = null; refresh++ }) { Text("Удалить") } },
+            dismissButton = { TextButton(onClick = { modelToDelete = null }) { Text("Отмена") } },
+        )
+    }
+
     toDelete?.let { p ->
         AlertDialog(
             onDismissRequest = { toDelete = null },
@@ -241,6 +276,50 @@ private fun Thumb(file: File) {
     Box(Modifier.fillMaxWidth().aspectRatio(4f / 3f).background(Color(0xFF263238))) {
         bmp?.let {
             Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ModelsList(
+    models: List<ru.konstruktor.eskiz.data.Model3D>?, sketches: List<Project>, store: ProjectStore,
+    onOpen: (String) -> Unit, onDelete: (ru.konstruktor.eskiz.data.Model3D) -> Unit,
+) {
+    when {
+        models == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        models.isEmpty() -> Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(Icons.Filled.ViewInAr, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.size(16.dp))
+            Text(
+                "3D-модель собирается из эскизов нескольких видов детали: спереди, сверху, сбоку. " +
+                    "Сначала сделайте эскизы видов на вкладке «Эскизы», затем создайте модель.",
+                textAlign = TextAlign.Center,
+            )
+        }
+        else -> LazyVerticalGrid(
+            columns = GridCells.Adaptive(160.dp),
+            contentPadding = PaddingValues(12.dp, 12.dp, 12.dp, 140.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(models, key = { it.id }) { m ->
+                Card(Modifier.combinedClickable(onClick = { onOpen(m.id) }, onLongClick = { onDelete(m) })) {
+                    val first = m.views.firstOrNull()?.let { v -> sketches.firstOrNull { it.id == v.projectId } }
+                    if (first != null) Thumb(store.thumb(first.id))
+                    else Box(Modifier.fillMaxWidth().aspectRatio(4f / 3f).background(Color(0xFF263238)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.ViewInAr, null, Modifier.size(48.dp), tint = Color(0xFF90A4AE))
+                    }
+                    Column(Modifier.padding(10.dp)) {
+                        Text(m.name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall)
+                        val roles = m.views.mapNotNull { v -> runCatching { ru.konstruktor.eskiz.geom3d.MultiView.Role.valueOf(v.role).title }.getOrNull() }
+                        Text(
+                            if (roles.isEmpty()) "виды не выбраны" else roles.joinToString(", ").lowercase(),
+                            fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
     }
 }

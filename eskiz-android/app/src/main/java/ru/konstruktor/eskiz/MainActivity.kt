@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import org.opencv.android.OpenCVLoader
 import ru.konstruktor.eskiz.ui.EditorScreen
+import ru.konstruktor.eskiz.ui.ModelScreen
 import ru.konstruktor.eskiz.ui.ProjectListScreen
 
 class MainActivity : ComponentActivity() {
@@ -26,10 +27,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EskizTheme {
-                var open by rememberSaveable { mutableStateOf<String?>(null) }
-                val id = open
-                if (id == null) ProjectListScreen(onOpen = { open = it })
-                else EditorScreen(id, onBack = { open = null })
+                // Стек экранов: "p:<id>" — эскиз, "m:<id>" — 3D-модель; пусто — список.
+                var stack by rememberSaveable { mutableStateOf(listOf<String>()) }
+                var tab by rememberSaveable { mutableStateOf(0) }
+                fun push(s: String) { stack = stack + s }
+                fun pop() { stack = stack.dropLast(1) }
+                val top = stack.lastOrNull()
+                when {
+                    top == null -> ProjectListScreen(
+                        tab = tab, onTab = { tab = it },
+                        onOpen = { push("p:$it") }, onOpenModel = { push("m:$it") },
+                    )
+                    top.startsWith("p:") -> EditorScreen(top.removePrefix("p:"), onBack = ::pop)
+                    else -> ModelScreen(top.removePrefix("m:"), onBack = ::pop, onOpenSketch = { push("p:$it") })
+                }
             }
         }
     }

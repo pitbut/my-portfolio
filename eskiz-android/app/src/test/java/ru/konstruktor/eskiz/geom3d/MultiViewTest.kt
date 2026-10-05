@@ -98,6 +98,24 @@ class MultiViewTest {
     }
 
     @Test
+    fun heavyCaseIsFastEnough() {
+        // Спереди: контур с «гребёнкой» сверху — 40 вершин; сверху: пластина 200×120 с 12 отверстиями.
+        val pts = ArrayList<Double>()
+        pts += listOf(0.0, 0.0, 200.0, 0.0)
+        for (i in 19 downTo 0) { val x0 = i * 10.0; pts += listOf(x0 + 10, 30.0 + (i % 2) * 5, x0, 30.0 + (i % 2) * 5) }
+        val front = Extrusion.Profile(poly(*pts.toDoubleArray()), emptyList())
+        val holes = (0 until 12).map { k -> hole(20.0 + (k % 6) * 32, 30.0 + (k / 6) * 60, 5.0) }
+        val top = Extrusion.Profile(poly(0.0, 0.0, 200.0, 0.0, 200.0, 120.0, 0.0, 120.0), holes)
+        val t0 = System.currentTimeMillis()
+        val r = MultiView.build(listOf(MultiView.View(MultiView.Role.FRONT, front), MultiView.View(MultiView.Role.TOP, top)))
+        val ms = System.currentTimeMillis() - t0
+        println("Тяжёлый случай: $ms мс, граней ${r.solid.faces.size}, вершин ${r.solid.vertices.size}, открытых рёбер ${r.solid.openEdges()}")
+        assertEquals(0, r.solid.openEdges())
+        assertTrue(ms < 20000)
+        save("heavy", r)
+    }
+
+    @Test
     fun mismatchedViewsAreReported() {
         val front = Extrusion.Profile(poly(0.0, 0.0, 100.0, 0.0, 100.0, 30.0, 0.0, 30.0), emptyList())
         val top = Extrusion.Profile(poly(0.0, 0.0, 99.0, 0.0, 99.0, 40.0, 0.0, 40.0), emptyList())   // 1% — подгоняется

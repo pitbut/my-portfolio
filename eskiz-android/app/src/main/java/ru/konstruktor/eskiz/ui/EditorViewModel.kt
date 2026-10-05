@@ -150,28 +150,7 @@ class EditorViewModel(app: Application, projectId: String) : AndroidViewModel(ap
         calibJob?.cancel()
         val p = project
         calibJob = viewModelScope.launch {
-            val cal = withContext(Dispatchers.Default) {
-                val cs = ArrayList<Constraint>()
-                for (d in p.dims) {
-                    val k = d.known ?: continue
-                    val a = p.point(d.a) ?: continue
-                    val b = p.point(d.b) ?: continue
-                    cs += LinearConstraint(d.id, a.p, b.p, k)
-                }
-                for (c in p.circles) {
-                    val k = c.known ?: continue
-                    if (c.pts.size >= 3) cs += DiameterConstraint(c.id, c.pts, k)
-                }
-                for (a in p.arcs) {
-                    val k = a.known ?: continue
-                    val pa = p.point(a.a) ?: continue
-                    val pm = p.point(a.m) ?: continue
-                    val pb = p.point(a.b) ?: continue
-                    cs += RadiusConstraint(a.id, pa.p, pm.p, pb.p, k)
-                }
-                val sheet = p.sheetH?.let { Mat3(it.toDoubleArray()) }
-                Calibrator.calibrate(p.imageW, p.imageH, sheet, cs)
-            }
+            val cal = withContext(Dispatchers.Default) { ru.konstruktor.eskiz.data.calibrationOf(p) }
             calibration = cal
         }
     }
