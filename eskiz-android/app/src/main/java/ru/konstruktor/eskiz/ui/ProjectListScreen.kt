@@ -204,7 +204,7 @@ fun ProjectListScreen(tab: Int, onTab: (Int) -> Unit, onOpen: (String) -> Unit, 
                         Card(Modifier.combinedClickable(onClick = { onOpen(p.id) }, onLongClick = { toDelete = p })) {
                             Thumb(store.thumb(p.id))
                             Column(Modifier.padding(10.dp)) {
-                                Text(p.name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall)
+                                Text(p.name, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall)
                                 Text(
                                     SimpleDateFormat("d MMM yyyy, HH:mm", Locale("ru")).format(Date(p.updated)) +
                                         " · размеров ${p.dims.size + p.circles.size}",

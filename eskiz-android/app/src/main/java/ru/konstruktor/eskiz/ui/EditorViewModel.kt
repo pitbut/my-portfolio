@@ -38,7 +38,7 @@ import java.io.File
 import kotlin.math.max
 
 enum class Tool(val title: String) {
-    SELECT("Выбор"), POINT("Точка"), LINE("Линия"), ARC("Дуга"), DIM("Размер"), CIRCLE("Отверстие"), AUTO("Авто"),
+    SELECT("Выбор"), POINT("Точка"), LINE("Линия"), ARC("Дуга"), DIM("Размер"), CIRCLE("Отв."), AUTO("Авто"),
 }
 
 enum class ViewMode { PHOTO, DRAWING }

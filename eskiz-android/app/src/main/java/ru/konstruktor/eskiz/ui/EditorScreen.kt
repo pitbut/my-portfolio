@@ -182,7 +182,7 @@ fun EditorScreen(projectId: String, onBack: () -> Unit) {
                             selected = vm.tool == t,
                             onClick = { vm.tool = t; vm.cancelPending(); if (t != Tool.SELECT) vm.selection = null },
                             icon = { Icon(toolIcon(t), t.title) },
-                            label = { Text(t.title, fontSize = 10.sp, maxLines = 1) },
+                            label = { Text(t.title, fontSize = 9.sp, maxLines = 1, softWrap = false) },
                         )
                     }
                 }
@@ -243,7 +243,7 @@ private fun CheckItem(text: String, checked: Boolean, onChange: (Boolean) -> Uni
 }
 
 private fun hint(vm: EditorViewModel): String = when (vm.tool) {
-    Tool.SELECT -> "Коснитесь объекта, чтобы выбрать. Точку можно перетащить."
+    Tool.SELECT -> "Коснитесь объекта или перетащите точку"
     Tool.POINT -> "Ставьте точки. Касание по линии контура — новая вершина в ней"
     Tool.ARC -> when {
         vm.arcFromLine != null -> "Точка, через которую пройдёт дуга"
