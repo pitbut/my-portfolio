@@ -23,7 +23,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelUuid
-import android.provider.Settings
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -396,33 +395,109 @@ class BluetoothBridge(
 
     // ================================================================== классический Bluetooth: Serial (SPP)
 
-    /** Выбор из сопряжённых устройств (сопряжение — в настройках Android). */
+    /**
+     * Выбор Serial-устройства: сопряжённые сразу в списке, «Искать новые» находит устройства рядом,
+     * а выбор нового запускает сопряжение (Android сам спросит PIN, обычно 1234 или 0000).
+     */
     fun requestSerialDevice(done: (Result<JSONObject>) -> Unit) {
         val a = try { requireAdapter() } catch (e: BtException) { return done(Result.failure(e)) }
-        val bonded = a.bondedDevices.orEmpty()
-            .filter { it.type == BluetoothDevice.DEVICE_TYPE_CLASSIC || it.type == BluetoothDevice.DEVICE_TYPE_DUAL || it.type == BluetoothDevice.DEVICE_TYPE_UNKNOWN }
-            .sortedBy { it.name ?: "" }
-        var finished = false
-        fun finish(r: Result<JSONObject>) { if (!finished) { finished = true; done(r) } }
-        val b = AlertDialog.Builder(activity)
-            .setTitle("${state.manifest.name}: устройство Bluetooth")
-            .setNegativeButton("Отмена") { _, _ -> finish(Result.failure(BtException("пользователь отменил выбор"))) }
-            .setNeutralButton("Сопрячь новое…") { _, _ ->
-                activity.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
-                finish(Result.failure(BtException("сопрягите устройство в настройках и выберите его снова")))
-            }
-            .setOnCancelListener { finish(Result.failure(BtException("пользователь отменил выбор"))) }
-        if (bonded.isEmpty()) {
-            b.setMessage("Нет сопряжённых устройств. Нажмите «Сопрячь новое…», найдите устройство (например, HC-05, PIN обычно 1234) и вернитесь в приложение.")
-        } else {
-            b.setItems(bonded.map { "${it.name ?: "Без имени"}\n${it.address}" }.toTypedArray()) { _, i ->
-                val dev = bonded[i]
-                val d = AppState.Device(dev.address, dev.name ?: "Без имени", TYPE_SERIAL)
-                state.approveDevice(d)
-                finish(Result.success(deviceJson(d)))
+        val isSerial = { d: BluetoothDevice ->
+            d.type == BluetoothDevice.DEVICE_TYPE_CLASSIC || d.type == BluetoothDevice.DEVICE_TYPE_DUAL || d.type == BluetoothDevice.DEVICE_TYPE_UNKNOWN
+        }
+        val devices = a.bondedDevices.orEmpty().filter(isSerial).sortedBy { it.name ?: "" }.toMutableList()
+        val labels = ArrayList<String>(devices.map { it.address })
+        val status = TextView(activity).apply { setPadding(60, 10, 60, 20); textSize = 13f }
+        val list = ListView(activity)
+        val adapter = object : ArrayAdapter<String>(activity, android.R.layout.simple_list_item_2, android.R.id.text1, labels) {
+            override fun getView(position: Int, convertView: android.view.View?, parent: ViewGroup): android.view.View {
+                val v = super.getView(position, convertView, parent)
+                val d = devices[position]
+                v.findViewById<TextView>(android.R.id.text1).text = d.name ?: "Без имени"
+                v.findViewById<TextView>(android.R.id.text2).text =
+                    d.address + if (d.bondState == BluetoothDevice.BOND_BONDED) " · сопряжено" else " · новое — нажмите для сопряжения"
+                return v
             }
         }
-        b.show()
+        list.adapter = adapter
+        fun hint() {
+            status.text = if (devices.isEmpty()) "Нет сопряжённых устройств. Нажмите «Искать новые»." else "Выберите устройство или найдите новое."
+        }
+        hint()
+
+        var finished = false
+        var pairing: String? = null
+        lateinit var dialog: AlertDialog
+        val receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                @Suppress("DEPRECATION")
+                val d: BluetoothDevice? = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                else intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                when (intent.action) {
+                    BluetoothDevice.ACTION_FOUND -> if (d != null && isSerial(d) && devices.none { it.address == d.address }) {
+                        devices.add(d); labels.add(d.address); adapter.notifyDataSetChanged()
+                    }
+                    BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> if (pairing == null) status.text = "Поиск завершён. Нет нужного? Включите устройство и нажмите «Искать новые» ещё раз."
+                    BluetoothDevice.ACTION_BOND_STATE_CHANGED -> if (d != null && d.address == pairing) {
+                        when (intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE)) {
+                            BluetoothDevice.BOND_BONDED -> select(d, dialog) { r -> if (!finished) { finished = true; done(r) } }
+                            BluetoothDevice.BOND_NONE -> { pairing = null; status.text = "Не удалось сопрячь «${d.name ?: d.address}». Проверьте PIN и попробуйте снова." }
+                        }
+                    }
+                }
+            }
+        }
+        val filter = android.content.IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_FOUND)
+            addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        }
+        if (Build.VERSION.SDK_INT >= 33) activity.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        else activity.registerReceiver(receiver, filter)
+
+        fun cleanup() {
+            runCatching { a.cancelDiscovery() }
+            runCatching { activity.unregisterReceiver(receiver) }
+        }
+        dialog = AlertDialog.Builder(activity)
+            .setTitle("${state.manifest.name}: устройство Bluetooth")
+            .setView(android.widget.LinearLayout(activity).apply {
+                orientation = android.widget.LinearLayout.VERTICAL
+                addView(status)
+                addView(list)
+            })
+            .setNegativeButton("Отмена", null)
+            .setNeutralButton("Искать новые", null)
+            .create()
+        dialog.setOnDismissListener {
+            cleanup()
+            if (!finished) { finished = true; done(Result.failure(BtException("пользователь отменил выбор"))) }
+        }
+        dialog.setOnShowListener {
+            // «Искать новые» не закрывает окно
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                runCatching { a.cancelDiscovery() }
+                status.text = if (a.startDiscovery()) "Ищем устройства рядом… (до 12 секунд)" else "Не удалось начать поиск. На Android 11 и старше включите геолокацию."
+            }
+        }
+        list.setOnItemClickListener { _, _, pos, _ ->
+            val d = devices[pos]
+            if (d.bondState == BluetoothDevice.BOND_BONDED) {
+                select(d, dialog) { r -> if (!finished) { finished = true; done(r) } }
+            } else {
+                runCatching { a.cancelDiscovery() }
+                pairing = d.address
+                status.text = "Сопряжение с «${d.name ?: d.address}»… Подтвердите на экране (PIN обычно 1234 или 0000)."
+                if (!d.createBond()) { pairing = null; status.text = "Не удалось начать сопряжение" }
+            }
+        }
+        dialog.show()
+    }
+
+    private fun select(d: BluetoothDevice, dialog: AlertDialog, done: (Result<JSONObject>) -> Unit) {
+        val dev = AppState.Device(d.address, d.name ?: "Без имени", TYPE_SERIAL)
+        state.approveDevice(dev)
+        done(Result.success(deviceJson(dev)))
+        dialog.dismiss()
     }
 
     private class Serial(val socket: BluetoothSocket) {

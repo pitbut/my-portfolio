@@ -39,6 +39,7 @@ import com.robutpit.pitbrowser.apps.Apps
 import com.robutpit.pitbrowser.apps.BleUuids
 import com.robutpit.pitbrowser.apps.BluetoothBridge
 import com.robutpit.pitbrowser.apps.DeviceSensors
+import com.robutpit.pitbrowser.apps.LinkBridge
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -55,6 +56,7 @@ class AppActivity : Activity() {
     private lateinit var sensors: DeviceSensors
     private lateinit var bt: BluetoothBridge
     private lateinit var audio: AudioBridge
+    private lateinit var link: LinkBridge
     private var pendingBtEnable: ((Boolean) -> Unit)? = null
 
     private var proxy: JavaScriptReplyProxy? = null
@@ -88,6 +90,7 @@ class AppActivity : Activity() {
         sensors = DeviceSensors(this) { type, values, ts -> sendEvent("sensor:$type", sensorEvent(type, values, ts)) }
         bt = BluetoothBridge(this, state) { event, data -> sendEvent(event, data) }
         audio = AudioBridge(this) { event, data -> sendEvent(event, data) }
+        link = LinkBridge(this, m) { event, data -> sendEvent(event, data) }
         if (m.has("headphones")) audio.start()
 
         requestedOrientation = orientationOf(m.orientation)
@@ -152,6 +155,7 @@ class AppActivity : Activity() {
             sensors.stopAll()
             bt.closeAll()
             audio.release()
+            link.leave()
             web.destroy()
         }
         super.onDestroy()
@@ -253,6 +257,18 @@ class AppActivity : Activity() {
                 }
                 "bluetooth.serial.disconnect" -> { require("bluetooth"); bt.serialDisconnect(p.optString("device")); ok(true) }
 
+                // PitLink — игры между телефонами
+                "link.host" -> withBluetooth(fail) {
+                    withPlayerName { name -> link.host(p.optString("room"), name) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } } }
+                }
+                "link.join" -> withBluetooth(fail) {
+                    withPlayerName { name -> link.join(name) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } } }
+                }
+                "link.send" -> { require("bluetooth"); link.send(p.opt("data") ?: JSONObject.NULL, p.optString("to").ifEmpty { null }); ok(true) }
+                "link.players" -> { require("bluetooth"); ok(link.players()) }
+                "link.lock" -> { require("bluetooth"); link.lock(p.optBoolean("locked", true)); ok(true) }
+                "link.leave" -> { require("bluetooth"); link.leave(); ok(true) }
+
                 "headphones.state" -> { require("headphones"); ok(audio.state()) }
                 "headphones.captureButtons" -> { require("headphones"); audio.setCaptureMedia(p.optBoolean("enable", true)); ok(true) }
                 "buttons.captureVolume" -> { require("buttons"); audio.captureVolume = p.optBoolean("enable", true); ok(true) }
@@ -345,7 +361,7 @@ class AppActivity : Activity() {
         "geolocation" -> arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
         // до Android 12 поиск Bluetooth-устройств требовал разрешения на местоположение
         "bluetooth" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+            arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE)
         } else {
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         }

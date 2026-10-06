@@ -115,6 +115,123 @@
     return ((a || 0) % 360 + 360) % 360;
   }
 
+  // ---------------------------------------------------------------- PitLink: игры между телефонами
+
+  function makeLink() {
+    var api = {
+      /**
+       * Создать комнату — другие игроки найдут её через pit.link.join().
+       * opts: { room: 'Название' } → { room, you: 'host', players: [{ id, name }] }
+       */
+      host: function (opts) {
+        return native ? call('link.host', { room: (opts && opts.room) || '' }) : web.host(opts || {});
+      },
+      /** Окно выбора комнаты этой игры рядом → { room, you: 'p2', players } */
+      join: function () { return native ? call('link.join') : web.join(); },
+      /**
+       * Отправить данные (любой JSON). opts.to: 'host' | 'all' | id игрока.
+       * По умолчанию: хост → всем, игрок → хосту. Сообщения «всем» от игрока идут через хост.
+       */
+      send: function (data, opts) {
+        var to = (opts && opts.to) || '';
+        return native ? call('link.send', { data: data, to: to }) : web.send(data, to);
+      },
+      players: function () { return native ? call('link.players') : Promise.resolve(web.playersList()); },
+      /** Закрыть комнату для новых игроков (игра началась) или снова открыть: lock(false). */
+      lock: function (locked) { return native ? call('link.lock', { locked: locked !== false }) : Promise.resolve(true); },
+      leave: function () { return native ? call('link.leave') : web.leave(); },
+      /**
+       * События: 'join' ({ player }), 'leave' ({ player }), 'message' ({ from, data }),
+       * 'closed' ({ reason }) — у игрока, когда комната пропала.
+       */
+      on: function (type, fn) { return on('link:' + type, fn); },
+    };
+
+    // Запасной режим: вкладки одного браузера играют друг с другом (BroadcastChannel)
+    var web = {
+      ch: null, role: null, you: null, room: '', players: [], next: 2, cid: null,
+      channel: function () {
+        if (!this.ch) {
+          if (!window.BroadcastChannel) throw new Error('PitLink в этом браузере недоступен');
+          this.ch = new BroadcastChannel('pitlink:' + location.pathname);
+          this.ch.onmessage = function (e) { web.onMessage(e.data); };
+        }
+        return this.ch;
+      },
+      playersList: function () { return this.players.slice(); },
+      host: function (opts) {
+        if (this.role) return Promise.reject(new Error('сначала выйдите из текущей комнаты: pit.link.leave()'));
+        var self = this;
+        return pit.player.name().then(function (name) {
+          self.channel();
+          self.role = 'host'; self.you = 'host'; self.room = opts.room || name;
+          self.players = [{ id: 'host', name: name }];
+          return { room: self.room, you: 'host', players: self.playersList() };
+        });
+      },
+      join: function () {
+        if (this.role) return Promise.reject(new Error('сначала выйдите из текущей комнаты: pit.link.leave()'));
+        var self = this;
+        return pit.player.name().then(function (name) {
+          var ch = self.channel();
+          self.cid = Math.random().toString(36).slice(2);
+          self.role = 'joining';
+          return new Promise(function (resolve, reject) {
+            self.pending = { resolve: resolve, reject: reject };
+            ch.postMessage({ t: 'hello', cid: self.cid, name: name });
+            setTimeout(function () {
+              if (self.pending) { self.pending = null; self.role = null; reject(new Error('комнат рядом нет — откройте игру в другой вкладке и создайте комнату')); }
+            }, 1500);
+          });
+        });
+      },
+      send: function (data, to) {
+        if (this.role === 'host') this.ch.postMessage({ t: 'relay', from: 'host', data: data, only: to && to !== 'all' ? to : null });
+        else if (this.role === 'player') this.ch.postMessage({ t: 'msg', from: this.you, to: to || 'host', data: data });
+        else return Promise.reject(new Error('вы не в комнате — сначала pit.link.host() или pit.link.join()'));
+        return Promise.resolve(true);
+      },
+      leave: function () {
+        if (this.role === 'host') this.ch.postMessage({ t: 'closed' });
+        if (this.role === 'player') this.ch.postMessage({ t: 'bye', id: this.you });
+        this.role = null; this.you = null; this.players = []; this.next = 2;
+        return Promise.resolve(true);
+      },
+      onMessage: function (m) {
+        var self = this;
+        if (this.role === 'host') {
+          if (m.t === 'hello') {
+            var p = { id: 'p' + this.next++, name: m.name };
+            this.players.push(p);
+            this.ch.postMessage({ t: 'welcome', cid: m.cid, room: this.room, you: p.id, players: this.playersList() });
+            this.ch.postMessage({ t: 'join', player: p, except: p.id });
+            emit('link:join', { player: p });
+          } else if (m.t === 'msg') {
+            if (m.to === 'host' || m.to === 'all') emit('link:message', { from: m.from, data: m.data });
+            if (m.to === 'all') this.ch.postMessage({ t: 'relay', from: m.from, data: m.data, except: m.from });
+            else if (m.to !== 'host') this.ch.postMessage({ t: 'relay', from: m.from, data: m.data, only: m.to });
+          } else if (m.t === 'bye') {
+            var gone = this.players.filter(function (x) { return x.id === m.id; })[0];
+            if (!gone) return;
+            this.players = this.players.filter(function (x) { return x.id !== m.id; });
+            this.ch.postMessage({ t: 'leave', player: gone });
+            emit('link:leave', { player: gone });
+          }
+        } else if (this.role === 'joining' && m.t === 'welcome' && m.cid === this.cid && this.pending) {
+          this.role = 'player'; this.you = m.you; this.room = m.room; this.players = m.players;
+          var pend = this.pending; this.pending = null;
+          pend.resolve({ room: m.room, you: m.you, players: m.players });
+        } else if (this.role === 'player') {
+          if (m.t === 'relay' && m.except !== this.you && (!m.only || m.only === this.you)) emit('link:message', { from: m.from, data: m.data });
+          else if (m.t === 'join' && m.except !== this.you) { this.players.push(m.player); emit('link:join', { player: m.player }); }
+          else if (m.t === 'leave') { this.players = this.players.filter(function (x) { return x.id !== m.player.id; }); emit('link:leave', { player: m.player }); }
+          else if (m.t === 'closed') { self.role = null; emit('link:closed', { reason: 'хост закрыл комнату' }); }
+        }
+      },
+    };
+    return api;
+  }
+
   // ---------------------------------------------------------------- кнопки (гарнитура, громкость)
 
   var MEDIA = { play_pause: 1, play: 1, pause: 1, next: 1, previous: 1, stop: 1, fast_forward: 1, rewind: 1 };
@@ -346,6 +463,8 @@
     },
 
     bluetooth: makeBluetooth(),
+
+    link: makeLink(),
 
     headphones: {
       /** { connected, devices: [{ type: 'wired'|'bluetooth'|'usb'|'hearing_aid', name, microphone }] } */

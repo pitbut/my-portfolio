@@ -78,7 +78,7 @@ cd my-game && zip -r ../my-game.pitapp . && cd ..
 | `camera` | `navigator.mediaDevices.getUserMedia({video})` | при установке **и** при первом использовании |
 | `microphone` | `getUserMedia({audio})` | при установке **и** при первом использовании |
 | `geolocation` | `navigator.geolocation` | при установке **и** при первом использовании |
-| `bluetooth` | `pit.bluetooth` — BLE и Serial | при установке **и** при первом использовании |
+| `bluetooth` | `pit.bluetooth` (BLE и Serial) и `pit.link` (игры между телефонами) | при установке **и** при первом использовании |
 
 Звук (Web Audio, `<audio>`), мультитач, геймпады (Gamepad API, в т.ч. Bluetooth-геймпады),
 WebGL, WebAssembly, `localStorage`, IndexedDB работают без разрешений, как в обычном браузере.
@@ -180,8 +180,9 @@ await pit.bluetooth.disconnect(dev);
 - За одну запись — до 512 байт; длинные данные отправляйте частями.
 - `pit.bluetooth.status()` → `{ supported, enabled, ble, classic }`.
 
-**Serial** (классический Bluetooth SPP) — HC-05, HC-06, ESP32 `BluetoothSerial`. Устройство
-нужно один раз сопрячь в настройках телефона:
+**Serial** (классический Bluetooth SPP) — HC-05, HC-06, ESP32 `BluetoothSerial`. В окне выбора
+сопряжённые устройства видны сразу, а кнопка «Искать новые» находит устройства рядом и сопрягает
+их прямо оттуда (Android спросит PIN, обычно 1234 или 0000):
 
 ```js
 const dev = await pit.bluetooth.serial.requestDevice();   // выбор из сопряжённых
@@ -197,6 +198,44 @@ Serial одновременно, команды `LED ON` / `LED OFF` / `PING`, �
 
 Bluetooth-геймпады подключаются в настройках телефона и работают через стандартный Gamepad API
 (`navigator.getGamepads()`), без `pit.bluetooth`.
+
+### Игры между телефонами (PitLink)
+
+Один телефон создаёт комнату, остальные (до ~7) находят её и подключаются — по Bluetooth LE,
+**без интернета и без сопряжения**. Каждая игра видит только свои комнаты.
+
+```js
+// телефон 1
+const room = await pit.link.host({ room: 'Аня' });      // { room, you: 'host', players }
+// телефон 2, 3…
+const room = await pit.link.join();                      // окно выбора комнаты → { room, you: 'p2', players }
+
+pit.link.on('join', (e) => console.log('пришёл', e.player.name));   // { player: { id, name } }
+pit.link.on('leave', (e) => console.log('ушёл', e.player.name));
+pit.link.on('message', (e) => { /* e.from — 'host' | 'p2'…, e.data — то, что отправили */ });
+pit.link.on('closed', (e) => console.log(e.reason));                // у игрока: комната пропала
+
+pit.link.send({ x: 10, y: 20 });                // хост → всем; игрок → хосту
+pit.link.send({ chat: 'привет' }, { to: 'all' }); // игрок → всем (через хост)
+pit.link.send({ secret: 1 }, { to: 'p3' });       // одному игроку
+await pit.link.lock(true);    // игра началась — новые игроки не подключатся
+await pit.link.players();     // [{ id, name }]
+await pit.link.leave();
+```
+
+**Как устроить игру.** Удобнее всего, когда хост «главный»: игроки шлют ему свои действия, он
+считает игру и рассылает результат всем (так сделана «Дуэль реакции»). Сообщения — любой JSON
+до 64 КБ, доставляются по порядку и без потерь. Для движения в реальном времени шлите короткие
+сообщения 10–30 раз в секунду; задержка Bluetooth — обычно десятки миллисекунд, поэтому время
+реакции и т.п. меряйте на своём телефоне, а не по приходу сообщения.
+
+**Отладка на компьютере:** откройте игру в двух вкладках одного браузера — вкладки играют друг с
+другом как два телефона.
+
+Не каждый телефон умеет быть хостом (нужна BLE-периферия; есть почти у всех современных) — если не
+умеет, `host()` вернёт ошибку, и комнату создаёт другой игрок.
+
+Демо: встроенная игра **«Дуэль реакции»** (`apps/reaction-duel/`).
 
 ### Наушники и кнопки
 

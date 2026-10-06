@@ -1,0 +1,11 @@
+{
+  "id": "reaction-duel",
+  "name": "Дуэль реакции",
+  "version": "1.0.0",
+  "description": "Игра для 2–4 телефонов по Bluetooth, без интернета. Экран позеленел — жми быстрее всех! 5 раундов, рекорд реакции.",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "orientation": "portrait",
+  "permissions": ["bluetooth", "vibrate", "scores"],
+  "scores": { "order": "asc", "unit": "мс" }
+}

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Дуэль реакции</title>
+  <style>
+    :root { --bg: #14121f; --card: #1f1c30; --line: #322d4d; --text: #f1eefc; --muted: #a49dc7; --red: #e63c46; --green: #28be6e; --gold: #ffc531; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, Roboto, sans-serif;
+      -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)); text-align: center; }
+    .screen[hidden] { display: none; }
+    h1 { margin: 0; font-size: 36px; }
+    h1 span { color: var(--green); }
+    h2 { margin: 0; font-size: 26px; }
+    .muted { color: var(--muted); font-size: 14px; max-width: 330px; }
+    button { font: inherit; font-size: 18px; font-weight: 700; color: #111; background: var(--gold); border: 0; border-radius: 14px;
+      padding: 14px 24px; min-width: 240px; }
+    button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    button:disabled { opacity: .4; }
+    ul { list-style: none; margin: 0; padding: 0; width: min(330px, 90vw); }
+    li { display: flex; justify-content: space-between; padding: 10px 14px; border-radius: 10px; background: var(--card); margin-bottom: 6px; }
+    li.me { outline: 2px solid var(--gold); }
+    li.win { background: #2c4a2f; }
+    #play { cursor: pointer; transition: background .05s; }
+    #play.wait { background: var(--red); }
+    #play.go { background: var(--green); }
+    #play.done { background: var(--card); }
+    #signal { font-size: 46px; font-weight: 800; }
+    #play .muted { color: rgba(255,255,255,.85); }
+    .round { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 0; right: 0; font-weight: 700; color: rgba(255,255,255,.8); }
+    .err { color: #ff8a8a; font-size: 14px; min-height: 20px; }
+  </style>
+</head>
+<body>
+  <!-- меню -->
+  <div class="screen" id="menu">
+    <h1>Дуэль <span>реакции</span></h1>
+    <div class="muted">2–4 телефона рядом, Bluetooth, без интернета. Красный — ждите. Зелёный — жмите быстрее всех!</div>
+    <button id="hostBtn">Создать комнату</button>
+    <button id="joinBtn" class="ghost">Присоединиться</button>
+    <div class="err" id="menuErr"></div>
+    <div class="muted" id="best"></div>
+  </div>
+
+  <!-- комната -->
+  <div class="screen" id="lobby" hidden>
+    <h2 id="roomName">Комната</h2>
+    <div class="muted" id="lobbyHint"></div>
+    <ul id="lobbyPlayers"></ul>
+    <button id="startBtn" hidden>Начать игру</button>
+    <button id="leaveBtn" class="ghost">Выйти</button>
+  </div>
+
+  <!-- раунд -->
+  <div class="screen" id="play" hidden>
+    <div class="round" id="roundLabel"></div>
+    <div id="signal">Ждите…</div>
+    <div class="muted" id="playHint"></div>
+  </div>
+
+  <!-- результаты -->
+  <div class="screen" id="results" hidden>
+    <h2 id="resultsTitle">Раунд</h2>
+    <ul id="resultsList"></ul>
+    <div class="muted" id="resultsHint"></div>
+    <button id="againBtn" hidden>Ещё партия</button>
+    <button id="menuBtn" class="ghost" hidden>В меню</button>
+  </div>
+
+<script src="pit.js"></script>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const link = pit.link;
+const ROUNDS = 5;
+const FALSE_START = 9999;
+
+let me = null;          // мой id: 'host' | 'p2' ...
+let isHost = false;
+let players = [];       // [{ id, name }]
+let total = {};         // id → очки за партию
+let myBest = Infinity;  // лучшая реакция за партию
+
+function show(id) { for (const s of ['menu', 'lobby', 'play', 'results']) $(s).hidden = s !== id; }
+const nameOf = (id) => (players.find((p) => p.id === id) || {}).name || id;
+
+// ---------------------------------------------------------------- меню и комната
+async function refreshBest() {
+  const best = await pit.scores.best();
+  $('best').textContent = best ? `Ваш рекорд реакции: ${best.score} мс` : '';
+}
+
+$('hostBtn').onclick = async () => {
+  $('menuErr').textContent = '';
+  try {
+    const r = await link.host();
+    enterRoom(r, true);
+  } catch (e) { $('menuErr').textContent = e.message; }
+};
+$('joinBtn').onclick = async () => {
+  $('menuErr').textContent = '';
+  try {
+    const r = await link.join();
+    enterRoom(r, false);
+  } catch (e) { $('menuErr').textContent = e.message; }
+};
+
+function enterRoom(r, host) {
+  isHost = host; me = r.you; players = r.players;
+  $('roomName').textContent = 'Комната «' + r.room + '»';
+  $('startBtn').hidden = !host;
+  $('lobbyHint').textContent = host ? 'Друзья нажимают «Присоединиться» на своих телефонах.' : 'Ждём, когда хост начнёт игру…';
+  renderLobby();
+  show('lobby');
+}
+
+function renderLobby() {
+  const ul = $('lobbyPlayers');
+  ul.textContent = '';
+  for (const p of players) {
+    const li = document.createElement('li');
+    if (p.id === me) li.className = 'me';
+    li.innerHTML = '<span></span><span></span>';
+    li.firstChild.textContent = p.name;
+    li.lastChild.textContent = p.id === 'host' ? '👑 хост' : '';
+    ul.append(li);
+  }
+  $('startBtn').disabled = players.length < 2;
+}
+
+async function leaveRoom() {
+  await link.leave().catch(() => {});
+  clearTimeout(hostTimer);
+  me = null; players = []; state = 'idle';
+  show('menu');
+  refreshBest();
+}
+$('leaveBtn').onclick = leaveRoom;
+$('menuBtn').onclick = leaveRoom;
+
+link.on('join', (e) => { players.push(e.player); renderLobby(); pit.vibrate(30); });
+link.on('leave', (e) => {
+  players = players.filter((p) => p.id !== e.player.id);
+  renderLobby();
+  if (isHost && waiting) { delete waiting[e.player.id]; maybeFinishRound(); }
+});
+link.on('closed', () => { $('menuErr').textContent = 'Хост закрыл комнату'; leaveRoom(); });
+
+// ---------------------------------------------------------------- раунды (логика у хоста)
+let round = 0, state = 'idle', goAt = 0, waiting = null, roundTaps = {}, hostTimer = null;
+
+$('startBtn').onclick = () => { if (players.length >= 2) startMatch(); };
+$('againBtn').onclick = () => startMatch();
+
+function startMatch() {
+  link.lock(true);              // новые игроки не подключатся посреди партии
+  total = {}; players.forEach((p) => { total[p.id] = 0; });
+  round = 0;
+  nextRound();
+}
+
+function nextRound() {
+  round++;
+  roundTaps = {};
+  waiting = {}; players.forEach((p) => { waiting[p.id] = true; });
+  const delay = 1500 + Math.random() * 2500;
+  broadcast({ type: 'ready', round, players });
+  hostTimer = setTimeout(() => {
+    broadcast({ type: 'go', round });
+    hostTimer = setTimeout(() => { for (const id in waiting) roundTaps[id] = FALSE_START; waiting = {}; maybeFinishRound(); }, 3000);
+  }, delay);
+}
+
+function broadcast(msg) { link.send(msg, { to: 'all' }); handle('host', msg); } // хост тоже играет
+
+function onTap(id, ms) {
+  if (!waiting || !waiting[id]) return;
+  delete waiting[id];
+  roundTaps[id] = ms;
+  maybeFinishRound();
+}
+
+function maybeFinishRound() {
+  if (!waiting || Object.keys(waiting).length) return;
+  clearTimeout(hostTimer);
+  waiting = null;
+  const results = players.map((p) => ({ id: p.id, name: p.name, ms: roundTaps[p.id] ?? FALSE_START })).sort((a, b) => a.ms - b.ms);
+  if (results[0].ms < FALSE_START) total[results[0].id] = (total[results[0].id] || 0) + 1;
+  const final = round >= ROUNDS;
+  broadcast({ type: 'result', round, results, total, final });
+  if (!final) hostTimer = setTimeout(nextRound, 3000);
+  else link.lock(false);
+}
+
+// ---------------------------------------------------------------- сообщения (у всех)
+link.on('message', (e) => {
+  if (isHost && e.data.type === 'tap') onTap(e.from, e.data.ms);
+  else if (!isHost) handle(e.from, e.data);
+});
+
+function handle(from, m) {
+  if (m.type === 'ready') {
+    if (m.players) players = m.players;
+    if (m.round === 1) myBest = Infinity;
+    state = 'wait';
+    $('play').className = 'screen wait';
+    $('signal').textContent = 'Ждите…';
+    $('playHint').textContent = 'Не жмите раньше времени — фальстарт!';
+    $('roundLabel').textContent = `Раунд ${m.round} из ${ROUNDS}`;
+    show('play');
+  } else if (m.type === 'go') {
+    if (state !== 'wait') return; // уже фальстарт
+    state = 'go';
+    goAt = performance.now();     // реакцию меряем на своём телефоне — задержка Bluetooth не важна
+    $('play').className = 'screen go';
+    $('signal').textContent = 'ЖМИ!';
+    $('playHint').textContent = '';
+    pit.vibrate(40);
+  } else if (m.type === 'result') {
+    showResults(m);
+  }
+}
+
+function tap(ms) {
+  if (isHost) onTap('host', ms);
+  else link.send({ type: 'tap', ms });
+}
+
+$('play').addEventListener('pointerdown', () => {
+  if (state === 'wait') {
+    state = 'done';
+    $('play').className = 'screen done';
+    $('signal').textContent = 'Фальстарт 😬';
+    pit.vibrate([200]);
+    tap(FALSE_START);
+  } else if (state === 'go') {
+    const ms = Math.round(performance.now() - goAt);
+    state = 'done';
+    myBest = Math.min(myBest, ms);
+    $('play').className = 'screen done';
+    $('signal').textContent = ms + ' мс';
+    $('playHint').textContent = 'Ждём остальных…';
+    tap(ms);
+  }
+});
+
+async function showResults(m) {
+  state = 'idle';
+  $('resultsTitle').textContent = m.final ? 'Итоги партии' : `Раунд ${m.round}`;
+  const ul = $('resultsList');
+  ul.textContent = '';
+  const rows = m.final
+    ? players.map((p) => ({ id: p.id, name: p.name, text: `${m.total[p.id] || 0} 🏆` })).sort((a, b) => (m.total[b.id] || 0) - (m.total[a.id] || 0))
+    : m.results.map((r) => ({ id: r.id, name: r.name, text: r.ms >= FALSE_START ? 'фальстарт' : r.ms + ' мс' }));
+  rows.forEach((r, i) => {
+    const li = document.createElement('li');
+    li.className = (i === 0 ? 'win ' : '') + (r.id === me ? 'me' : '');
+    li.innerHTML = '<span></span><b></b>';
+    li.firstChild.textContent = (i === 0 ? '🥇 ' : '') + r.name;
+    li.lastChild.textContent = r.text;
+    ul.append(li);
+  });
+  $('againBtn').hidden = !(m.final && isHost);
+  $('menuBtn').hidden = !m.final;
+  $('resultsHint').textContent = m.final ? (isHost ? '' : 'Хост может начать ещё партию') : 'Следующий раунд через пару секунд…';
+  show('results');
+  if (m.final && myBest < FALSE_START) {
+    const r = await pit.scores.submit(myBest);
+    if (r.isRecord) $('resultsHint').textContent = `🏆 Новый рекорд реакции: ${myBest} мс!`;
+  }
+}
+
+pit.app.onBack(() => { if (me) leaveRoom(); else pit.app.exit(); });
+refreshBest();
+</script>
+</body>
+</html>
