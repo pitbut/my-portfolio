@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Настройки</title><link rel="stylesheet" href="common.css">
+<style>.row { justify-content: space-between; padding: 14px 16px; } .row:hover { background: none; } label { flex: 1; } .hint { color: var(--muted); font-size: 12px; }
+#home { width: 280px; } .ok { color: var(--accent); margin-left: 10px; font-size: 13px; }</style></head>
+<body><main>
+  <h1>Настройки <span id="saved" class="ok"></span></h1>
+  <div class="card">
+    <div class="row"><label for="engine">Поисковая система</label><select id="engine"></select></div>
+    <div class="row"><label for="home">Домашняя страница<div class="hint">Пусто — страница новой вкладки</div></label><input type="text" id="home" placeholder="pit://newtab"></div>
+    <div class="row"><label for="bar">Показывать панель закладок</label><input type="checkbox" id="bar"></div>
+    <div class="row"><label for="theme">Тема</label><select id="theme"><option value="system">Как в системе</option><option value="light">Светлая</option><option value="dark">Тёмная</option></select></div>
+    <div class="row"><label>Папка загрузок<div class="hint" id="dldir"></div></label><button id="pick">Изменить…</button></div>
+  </div>
+  <div class="day">Конфиденциальность</div>
+  <div class="card">
+    <div class="row"><label>Удалить историю, cookie и кэш<div class="hint">Вы выйдете из аккаунтов на сайтах</div></label><button class="danger" id="wipe">Очистить</button></div>
+  </div>
+  <div class="day">О программе</div>
+  <div class="card"><div class="row"><label>PitBrowser — браузер на движке Chromium (Electron). Приватное окно: Ctrl+Shift+N.</label></div></div>
+</main>
+<script>
+let s;
+const flash = () => { saved.textContent = 'Сохранено'; clearTimeout(flash.t); flash.t = setTimeout(() => saved.textContent = '', 1500); };
+const set = async (patch) => { s = await pit.setSettings(patch); flash(); };
+(async () => {
+  s = await pit.settings();
+  for (const [k, e] of Object.entries(s.engines)) engine.add(new Option(e.name, k));
+  engine.value = s.searchEngine;
+  home.value = s.homePage === 'pit://newtab' ? '' : s.homePage;
+  bar.checked = s.showBookmarksBar;
+  theme.value = s.theme || 'system';
+  dldir.textContent = s.downloadDir || 'Системная папка «Загрузки»';
+})();
+engine.onchange = () => set({ searchEngine: engine.value });
+home.onchange = () => {
+  let v = home.value.trim();
+  if (v && !/^(https?|pit):\/\//.test(v)) v = 'https://' + v;
+  home.value = v;
+  set({ homePage: v || 'pit://newtab' });
+};
+bar.onchange = () => set({ showBookmarksBar: bar.checked });
+theme.onchange = () => set({ theme: theme.value });
+pick.onclick = async () => { const d = await pit.pickDownloadDir(); if (d) { await set({ downloadDir: d }); dldir.textContent = d; } };
+wipe.onclick = async () => { if (confirm('Удалить историю, cookie и кэш?')) { await pit.clearBrowsingData(); flash(); } };
+</script></body></html>

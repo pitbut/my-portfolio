@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https: http:; style-src 'self'">
+  <title>PitBrowser</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="chrome">
+    <div id="tabstrip">
+      <div id="tabs" role="tablist"></div>
+      <button id="newtab" class="icon" title="Новая вкладка (Ctrl+T)">＋</button>
+      <div class="drag"></div>
+    </div>
+
+    <div id="toolbar">
+      <button id="back" class="icon" title="Назад (Alt+←)">←</button>
+      <button id="forward" class="icon" title="Вперёд (Alt+→)">→</button>
+      <button id="reload" class="icon" title="Обновить (Ctrl+R)">⟳</button>
+      <button id="home" class="icon" title="Домой">⌂</button>
+      <form id="omnibox" autocomplete="off">
+        <span id="lock" title="">🔒</span>
+        <input id="address" spellcheck="false" placeholder="Введите адрес или запрос для поиска">
+        <span id="zoomlevel" hidden></span>
+        <button type="button" id="star" class="icon" title="Закладка (Ctrl+D)">☆</button>
+      </form>
+      <button id="downloads" class="icon" title="Загрузки (Ctrl+J)">⤓<span id="dlbadge" hidden></span></button>
+      <button id="menu" class="icon" title="Меню">⋮</button>
+    </div>
+
+    <ul id="suggestions" hidden></ul>
+
+    <div id="menupanel" hidden>
+      <button data-cmd="newtab">Новая вкладка <kbd>Ctrl+T</kbd></button>
+      <button data-cmd="newwindow">Новое окно <kbd>Ctrl+N</kbd></button>
+      <button data-cmd="private">Приватное окно <kbd>Ctrl+Shift+N</kbd></button>
+      <hr>
+      <button data-url="pit://history">История <kbd>Ctrl+H</kbd></button>
+      <button data-url="pit://bookmarks">Закладки <kbd>Ctrl+Shift+O</kbd></button>
+      <button data-url="pit://downloads">Загрузки <kbd>Ctrl+J</kbd></button>
+      <hr>
+      <div class="zoomrow">Масштаб
+        <button data-cmd="zoomout">−</button><span id="zoomval">100%</span><button data-cmd="zoomin">＋</button>
+      </div>
+      <button data-cmd="find">Найти на странице <kbd>Ctrl+F</kbd></button>
+      <hr>
+      <button data-url="pit://settings">Настройки <kbd>Ctrl+,</kbd></button>
+    </div>
+
+    <div id="bookmarksbar"></div>
+
+    <form id="findbar" hidden>
+      <input id="findinput" placeholder="Найти на странице" spellcheck="false">
+      <span id="findcount"></span>
+      <button type="button" id="findprev" class="icon" title="Предыдущее">↑</button>
+      <button type="button" id="findnext" class="icon" title="Следующее">↓</button>
+      <button type="button" id="findclose" class="icon" title="Закрыть (Esc)">✕</button>
+    </form>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

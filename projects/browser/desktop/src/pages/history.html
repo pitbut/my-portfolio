@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>История</title><link rel="stylesheet" href="common.css"></head>
+<body><main>
+  <h1>История <span class="spacer"></span><input type="search" id="q" placeholder="Поиск по истории"><button class="danger" id="clear">Очистить</button></h1>
+  <div id="list"></div>
+</main>
+<script>
+const fmtDay = (t) => new Date(t).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const fmtTime = (t) => new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+async function render() {
+  const items = await pit.history(q.value);
+  const list = document.getElementById('list');
+  list.textContent = '';
+  if (!items.length) { list.innerHTML = '<div class="empty">История пуста</div>'; return; }
+  let day = null, card = null;
+  for (const h of items) {
+    const d = fmtDay(h.time);
+    if (d !== day) { day = d; const e = document.createElement('div'); e.className = 'day'; e.textContent = d; card = document.createElement('div'); card.className = 'card'; list.append(e, card); }
+    const row = document.createElement('div'); row.className = 'row';
+    const time = document.createElement('span'); time.className = 'time'; time.textContent = fmtTime(h.time);
+    const img = document.createElement('img'); img.src = h.favicon || ''; img.onerror = () => img.style.visibility = 'hidden';
+    const main = document.createElement('div'); main.className = 'main';
+    main.innerHTML = '<div class="t"></div><div class="u"></div>';
+    main.firstChild.textContent = h.title || h.url; main.lastChild.textContent = h.url;
+    main.onclick = (e) => pit.open(h.url, e.ctrlKey || e.metaKey);
+    main.onauxclick = (e) => { if (e.button === 1) pit.open(h.url, true); };
+    const del = document.createElement('button'); del.className = 'icon'; del.title = 'Удалить'; del.textContent = '✕';
+    del.onclick = async () => { await pit.removeHistory(h.url); render(); };
+    row.append(time, img, main, del);
+    card.append(row);
+  }
+}
+q.oninput = render;
+clear.onclick = async () => { if (confirm('Удалить всю историю?')) { await pit.clearHistory(); render(); } };
+render();
+</script></body></html>
