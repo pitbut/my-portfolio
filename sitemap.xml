@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.robutpit.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://www.robutpit.com/projects/chat/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.robutpit.com/projects/checker/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.robutpit.com/projects/videokonferenciya/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/fizcraft/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/journal/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/projects/booklet-calculator/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -13,7 +10,10 @@
   <url><loc>https://www.robutpit.com/projects/cone-calculator/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/projects/Udg/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/projects/ekscentrik/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.robutpit.com/projects/chat/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.robutpit.com/projects/videokonferenciya/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/projects/regresiy/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.robutpit.com/projects/checker/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/projects/esp32/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/projects/music/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.robutpit.com/projects/svobodny-chat/index.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

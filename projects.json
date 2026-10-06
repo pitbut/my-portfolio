@@ -1,23 +1,5 @@
 [
   {
-    "id": "chat",
-    "title": "Chat",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/chat/preview.jpg",
-    "link": "projects/chat/index.html",
-    "date": "2026-10-06",
-    "tags": []
-  },
-  {
-    "id": "checker",
-    "title": "Checker",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/checker/preview.jpg",
-    "link": "projects/checker/index.html",
-    "date": "2026-10-06",
-    "tags": []
-  },
-  {
     "id": "ilovabozor",
     "title": "🛍️ IlovaBozor — магазин Android-приложений",
     "description": "Магазин проверенных Android-приложений для Узбекистана. Каждая версия проходит статический анализ APK (разрешения, SDK, опасные комбинации), антивирус ClamAV и проверку ИИ (Claude) на мошенничество, фишинг и несоответствие описанию. Консоль разработчика с мастером публикации (APK/AAB, проверка подписи), блок «Какие данные использует и зачем», отзывы с ИИ-модерацией, статистика скачиваний, админка и API для Android-клиента. Вход через Google, RU/UZ/EN.",
@@ -33,15 +15,6 @@
       "PostgreSQL",
       "Claude API"
     ]
-  },
-  {
-    "id": "videokonferenciya",
-    "title": "Videokonferenciya",
-    "description": "Описание проекта скоро появится",
-    "image": "projects/videokonferenciya/preview.jpg",
-    "link": "projects/videokonferenciya/index.html",
-    "date": "2026-10-06",
-    "tags": []
   },
   {
     "id": "fizcraft",
@@ -346,6 +319,24 @@
     ]
   },
   {
+    "id": "chat",
+    "title": "Chat",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/chat/preview.jpg",
+    "link": "projects/chat/index.html",
+    "date": "2026-01-02",
+    "tags": []
+  },
+  {
+    "id": "videokonferenciya",
+    "title": "Videokonferenciya",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/videokonferenciya/preview.jpg",
+    "link": "projects/videokonferenciya/index.html",
+    "date": "2026-01-02",
+    "tags": []
+  },
+  {
     "id": "regresiy",
     "title": "💰 Регрессионный анализ - Путь к успеху",
     "description": "Комплексный инструмент для планирования и обработки факторных экспериментов (ПФЭ и ДФЭ). Выполняет расчет коэффициентов регрессии, статистическую проверку (критерии Кохрена, Стьюдента, Фишера), строит 3D-графики поверхностей отклика и проводит оптимизацию параметров. Поддерживает импорт из Excel и экспорт отчетов.",
@@ -359,6 +350,15 @@
       "Эксперимент",
       "Математика"
     ]
+  },
+  {
+    "id": "checker",
+    "title": "Checker",
+    "description": "Описание проекта скоро появится",
+    "image": "projects/checker/preview.jpg",
+    "link": "projects/checker/index.html",
+    "date": "2025-12-08",
+    "tags": []
   },
   {
     "id": "esp32",
