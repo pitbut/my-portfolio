@@ -52,6 +52,11 @@ import android.widget.TextView
 import android.widget.Toast
 import org.json.JSONArray
 import org.json.JSONObject
+import com.robutpit.pitbrowser.apps.AppManifest
+import com.robutpit.pitbrowser.apps.Apps
+import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MainActivity : Activity() {
 
@@ -361,6 +366,7 @@ class MainActivity : Activity() {
         m.add(0, 9, 0, "Поисковая система")
         m.add(0, 10, 0, "Очистить данные")
         m.add(0, 11, 0, "Закрыть все вкладки")
+        m.add(0, 12, 0, "Установить приложение из файла")
         menu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> { newTab(NEW_TAB); focusAddress() }
@@ -383,6 +389,7 @@ class MainActivity : Activity() {
                 9 -> chooseEngine()
                 10 -> clearData()
                 11 -> { tabs.toList().forEach { closeTab(it) } }
+                12 -> pickPackageFile()
             }
             true
         }
@@ -552,6 +559,7 @@ class MainActivity : Activity() {
 
     private fun download(url: String, userAgent: String?, disposition: String?, mime: String?) {
         if (url.startsWith("blob:") || url.startsWith("data:")) { toast("Этот тип загрузки пока не поддерживается"); return }
+        if (isPackage(url, disposition, mime)) { downloadPackage(url, userAgent); return }
         val run = {
             val name = URLUtil.guessFileName(url, disposition, mime)
             runCatching {
@@ -597,6 +605,11 @@ class MainActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_PACKAGE_FILE) {
+            val uri = data?.data ?: return
+            installFromSource("файл на телефоне") { contentResolver.openInputStream(uri) ?: error("не удалось открыть файл") }
+            return
+        }
         if (requestCode == REQ_FILE) {
             fileCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data))
             fileCallback = null
@@ -621,7 +634,7 @@ class MainActivity : Activity() {
             val uri = request.url
             return when (uri.scheme?.lowercase()) {
                 "http", "https", "about", "data", "file" -> false
-                "pitbrowser" -> { uri.getQueryParameter("q")?.let { q -> Omnibox.toUrl(q, store.searchEngine)?.let { view.loadUrl(it) } }; true }
+                "pitbrowser" -> { handleInternal(view, uri); true }
                 "intent" -> {
                     runCatching {
                         val intent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
@@ -682,9 +695,14 @@ class MainActivity : Activity() {
         val tiles = store.bookmarks().takeLast(12).map { it.url to it.title }.ifEmpty { DEFAULT_TILES }
         val arr = JSONArray()
         tiles.forEach { (url, title) -> arr.put(JSONObject().put("url", url).put("title", title)) }
+        val apps = JSONArray()
+        Apps.packages(this).list().forEach { a ->
+            apps.put(JSONObject().put("id", a.id).put("name", a.name).put("icon", Apps.iconDataUri(this, a) ?: JSONObject.NULL))
+        }
         return JSONObject()
             .put("engine", Omnibox.ENGINES[store.searchEngine]?.name ?: "Google")
             .put("tiles", arr)
+            .put("apps", apps)
             .toString()
     }
 
@@ -784,6 +802,152 @@ class MainActivity : Activity() {
         }
     }
 
+    // ------------------------------------------------------------------ приложения и игры (.pitapp)
+
+    /** Ссылки с главного экрана: pitbrowser://open?q=…, launch?id=…, app?id=…, install-file */
+    private fun handleInternal(view: WebView, uri: Uri) {
+        // только со своей страницы новой вкладки — обычный сайт не может запускать и удалять приложения
+        if (view.url?.startsWith(NEW_TAB) != true) return
+        val id = uri.getQueryParameter("id").orEmpty()
+        when (uri.host) {
+            "open" -> uri.getQueryParameter("q")?.let { q -> Omnibox.toUrl(q, store.searchEngine)?.let { view.loadUrl(it) } }
+            "launch" -> if (Apps.packages(this).get(id) != null) startActivity(Apps.launchIntent(this, id))
+            "app" -> Apps.packages(this).get(id)?.let { showAppMenu(it) }
+            "install-file" -> pickPackageFile()
+        }
+    }
+
+    private fun refreshHome() = tabs.filter { it.url.startsWith(NEW_TAB) }.forEach { it.web.reload() }
+
+    private fun isPackage(url: String, disposition: String?, mime: String?): Boolean =
+        mime == PITAPP_MIME || URLUtil.guessFileName(url, disposition, mime).endsWith(".pitapp") ||
+            Uri.parse(url).path.orEmpty().endsWith(".pitapp")
+
+    private fun pickPackageFile() {
+        @Suppress("DEPRECATION")
+        startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), REQ_PACKAGE_FILE)
+    }
+
+    /** Скачивание пакета с сайта (магазина) во временный файл — затем окно «Установить?». */
+    private fun downloadPackage(url: String, userAgent: String?) {
+        if (!url.startsWith("https://")) { toast("Приложения устанавливаются только по защищённой ссылке https://"); return }
+        val host = Uri.parse(url).host.orEmpty()
+        installFromSource(host) {
+            val tmp = File(cacheDir, "download.pitapp")
+            var conn: HttpURLConnection? = null
+            try {
+                conn = URL(url).openConnection() as HttpURLConnection
+                conn.setRequestProperty("User-Agent", userAgent ?: "PitBrowser")
+                CookieManager.getInstance().getCookie(url)?.let { conn.setRequestProperty("Cookie", it) }
+                if (conn.responseCode != 200) error("сервер ответил ${conn.responseCode}")
+                if (conn.contentLengthLong > com.robutpit.pitbrowser.apps.AppPackages.MAX_SIZE) error("пакет слишком большой")
+                conn.inputStream.use { input -> tmp.outputStream().use { input.copyTo(it) } }
+            } finally {
+                conn?.disconnect()
+            }
+            tmp.inputStream()
+        }
+    }
+
+    /**
+     * Получает пакет (в фоне), показывает, что это за приложение и какие у него разрешения,
+     * и устанавливает только после согласия пользователя.
+     */
+    private fun installFromSource(source: String, open: () -> java.io.InputStream) {
+        toast("Загрузка приложения…")
+        Thread {
+            val tmp = File(cacheDir, "install.pitapp")
+            val result = runCatching {
+                open().use { input -> tmp.outputStream().use { input.copyTo(it) } }
+                tmp.inputStream().use { Apps.packages(this).inspect(it) }
+            }
+            runOnUiThread {
+                result.onFailure { toast("Не удалось открыть пакет: ${it.message}") }
+                result.onSuccess { confirmInstall(it, source, tmp) }
+            }
+        }.start()
+    }
+
+    private fun confirmInstall(m: AppManifest, source: String, file: File) {
+        val existing = Apps.packages(this).get(m.id)
+        val perms = m.permissions.joinToString("\n") { "• " + (AppManifest.PERMISSIONS[it] ?: it) }.ifEmpty { "• не требуются" }
+        val text = buildString {
+            if (m.description.isNotBlank()) append(m.description).append("\n\n")
+            append("Версия: ${m.version}")
+            if (existing != null) append(" (установлена ${existing.version})")
+            append("\nИсточник: $source\n\nРазрешения:\n$perms")
+        }
+        AlertDialog.Builder(this)
+            .setTitle(if (existing != null) "Обновить «${m.name}»?" else "Установить «${m.name}»?")
+            .setMessage(text)
+            .setPositiveButton(if (existing != null) "Обновить" else "Установить") { _, _ ->
+                Thread {
+                    val r = runCatching { file.inputStream().use { Apps.packages(this).install(it) } }
+                    file.delete()
+                    runOnUiThread {
+                        r.onFailure { toast("Ошибка установки: ${it.message}") }
+                        r.onSuccess { app ->
+                            refreshHome()
+                            AlertDialog.Builder(this)
+                                .setMessage("«${app.name}» установлено")
+                                .setPositiveButton("Открыть") { _, _ -> startActivity(Apps.launchIntent(this, app.id)) }
+                                .setNegativeButton("Готово", null)
+                                .show()
+                        }
+                    }
+                }.start()
+            }
+            .setNegativeButton("Отмена") { _, _ -> file.delete() }
+            .show()
+    }
+
+    private fun showAppMenu(m: AppManifest) {
+        val items = mutableListOf<Pair<String, () -> Unit>>(
+            "Открыть" to { startActivity(Apps.launchIntent(this, m.id)) },
+        )
+        if (m.has("scores")) items += "Рекорды" to { showScores(m) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) items += "Ярлык на рабочий стол" to {
+            if (!Apps.pinShortcut(this, m)) toast("Ваш рабочий стол не поддерживает ярлыки")
+        }
+        if (m.permissions.any { it in AppManifest.RUNTIME }) items += "Сбросить разрешения" to {
+            val st = Apps.state(this, m)
+            AppManifest.RUNTIME.forEach { p -> st.clearPermission(p) }
+            toast("Приложение снова спросит разрешения")
+        }
+        items += "Удалить" to {
+            AlertDialog.Builder(this)
+                .setMessage("Удалить «${m.name}» вместе с рекордами?")
+                .setPositiveButton("Удалить") { _, _ ->
+                    Apps.uninstall(this, m.id)
+                    Apps.rememberUninstalled(this, m.id)
+                    refreshHome()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+        AlertDialog.Builder(this)
+            .setTitle("${m.name} ${m.version}")
+            .setItems(items.map { it.first }.toTypedArray()) { _, i -> items[i].second() }
+            .show()
+    }
+
+    private fun showScores(m: AppManifest) {
+        val list = Apps.state(this, m).top(20)
+        if (list.isEmpty()) { toast("Рекордов пока нет"); return }
+        val fmt = java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT)
+        val unit = m.scoreUnit.let { if (it.isEmpty()) "" else " $it" }
+        val lines = list.mapIndexed { i, s ->
+            val v = if (s.score % 1.0 == 0.0) s.score.toLong().toString() else "%.2f".format(s.score)
+            "${i + 1}. $v$unit — ${s.player}  (${fmt.format(java.util.Date(s.time))})"
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Рекорды: ${m.name}")
+            .setItems(lines.toTypedArray(), null)
+            .setNeutralButton("Очистить") { _, _ -> Apps.state(this, m).clearScores(); toast("Рекорды очищены") }
+            .setPositiveButton("Закрыть", null)
+            .show()
+    }
+
     // ------------------------------------------------------------------ мелочи
 
     private fun copy(text: String) {
@@ -797,9 +961,11 @@ class MainActivity : Activity() {
 
     companion object {
         const val NEW_TAB = "file:///android_asset/newtab.html"
+        private const val PITAPP_MIME = "application/x-pitapp"
         private const val REQ_FILE = 1
         private const val REQ_PERMS = 2
         private const val REQ_STORAGE = 3
+        private const val REQ_PACKAGE_FILE = 4
         private val DEFAULT_TILES = listOf(
             "https://www.youtube.com/" to "YouTube",
             "https://ru.wikipedia.org/" to "Wikipedia",

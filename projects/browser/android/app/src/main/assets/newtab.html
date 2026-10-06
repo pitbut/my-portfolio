@@ -20,10 +20,23 @@
   .ic img { width: 24px; height: 24px; }
   .n { font-size: 12px; max-width: 76px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .engine { color: var(--muted); font-size: 12px; text-align: center; margin-top: 8px; }
+  h2 { width: 100%; max-width: 560px; font-size: 13px; font-weight: 600; color: var(--muted); margin: 8px 0 6px; display: flex; justify-content: space-between; align-items: center; }
+  h2 button { font: inherit; color: var(--accent); background: none; border: 0; padding: 4px 0; }
+  .apps { margin-bottom: 18px; }
+  .app { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 2px; border-radius: 14px;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+  .app:active { background: rgba(127,127,127,.15); }
+  .app .ic { width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #ffd54a, #e08a00); border: 0; color: #222; font-size: 24px; }
+  .app .ic img { width: 58px; height: 58px; }
+  .hint { color: var(--muted); font-size: 12px; max-width: 560px; width: 100%; margin: -8px 0 14px; }
 </style></head>
 <body>
   <div class="logo">Pit<span>Browser</span></div>
   <form id="f"><input id="q" type="search" placeholder="Поиск или адрес сайта" autocomplete="off" enterkeyhint="go"><div class="engine" id="engine"></div></form>
+  <h2 id="appsTitle" hidden>Приложения и игры <button id="installFile" type="button">+ Из файла</button></h2>
+  <div class="grid apps" id="apps"></div>
+  <div class="hint" id="appsHint" hidden>Нажмите — открыть, удерживайте — рекорды, ярлык, удаление.</div>
+  <h2>Сайты</h2>
   <div class="grid" id="grid"></div>
 <script>
 document.getElementById('f').onsubmit = function (e) {
@@ -31,8 +44,11 @@ document.getElementById('f').onsubmit = function (e) {
   var v = document.getElementById('q').value.trim();
   if (v) location.href = 'pitbrowser://open?q=' + encodeURIComponent(v);
 };
-// Вызывается приложением после загрузки: render({engine: 'Google', tiles: [{title, url}]})
+document.getElementById('installFile').onclick = function () { location.href = 'pitbrowser://install-file'; };
+
+// Вызывается приложением после загрузки: render({engine, tiles: [{title, url}], apps: [{id, name, icon}]})
 function render(data) {
+  renderApps(data.apps || []);
   document.getElementById('engine').textContent = 'Поиск: ' + data.engine;
   var grid = document.getElementById('grid');
   grid.textContent = '';
@@ -46,6 +62,33 @@ function render(data) {
     var n = document.createElement('div'); n.className = 'n'; n.textContent = t.title;
     a.appendChild(ic); a.appendChild(n);
     grid.appendChild(a);
+  });
+}
+
+function renderApps(apps) {
+  var box = document.getElementById('apps');
+  box.textContent = '';
+  document.getElementById('appsTitle').hidden = false;
+  document.getElementById('appsHint').hidden = !apps.length;
+  apps.forEach(function (a) {
+    var el = document.createElement('div'); el.className = 'app';
+    var ic = document.createElement('div'); ic.className = 'ic';
+    if (a.icon) { var img = document.createElement('img'); img.src = a.icon; ic.appendChild(img); }
+    else ic.textContent = (a.name || '?').charAt(0).toUpperCase();
+    var n = document.createElement('div'); n.className = 'n'; n.textContent = a.name;
+    el.appendChild(ic); el.appendChild(n);
+    // короткое нажатие — запуск, долгое — меню приложения
+    var timer = null, longPressed = false;
+    el.addEventListener('touchstart', function () {
+      longPressed = false;
+      timer = setTimeout(function () { longPressed = true; location.href = 'pitbrowser://app?id=' + encodeURIComponent(a.id); }, 550);
+    }, { passive: true });
+    ['touchend', 'touchmove', 'touchcancel'].forEach(function (t) { el.addEventListener(t, function () { clearTimeout(timer); }, { passive: true }); });
+    el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    el.addEventListener('click', function () {
+      if (!longPressed) location.href = 'pitbrowser://launch?id=' + encodeURIComponent(a.id);
+    });
+    box.appendChild(el);
   });
 }
 </script></body></html>

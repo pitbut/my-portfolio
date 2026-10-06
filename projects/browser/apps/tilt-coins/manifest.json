@@ -1,0 +1,11 @@
+{
+  "id": "tilt-coins",
+  "name": "Монетки",
+  "version": "1.0.0",
+  "description": "Наклоняйте телефон, чтобы катать шарик: собирайте монеты и не падайте в ямы. 60 секунд — побейте свой рекорд!",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "orientation": "portrait",
+  "permissions": ["sensors", "vibrate", "scores", "screen"],
+  "scores": { "order": "desc", "unit": "монет" }
+}

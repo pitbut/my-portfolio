@@ -55,11 +55,15 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew && ./gradlew --no-daemon testDebugUnitTest assembleRelease
-      - run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/PitBrowser-android.apk
+      - name: Collect APK and demo .pitapp
+        run: |
+          mkdir -p out
+          cp app/build/outputs/apk/release/app-release.apk out/PitBrowser-android.apk
+          cp app/build/generated/pitAssets/preinstalled/*.pitapp out/
       - uses: actions/upload-artifact@v4
         with:
           name: pitbrowser-Android
-          path: projects/browser/android/app/build/outputs/apk/release/PitBrowser-android.apk
+          path: projects/browser/android/out/*
           if-no-files-found: error
 
   release:
@@ -79,4 +83,5 @@ jobs:
             **macOS:** `.dmg` — при первом запуске правый клик → «Открыть»
             **Linux:** `.AppImage` или `.deb`
             **Android:** `PitBrowser-android.apk`
+            **Демо-игра:** `tilt-coins.pitapp` (уже встроена в APK)
           files: out/*

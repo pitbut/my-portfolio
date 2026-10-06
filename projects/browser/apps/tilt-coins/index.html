@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Монетки</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #1c1a3a; color: #fff;
+      font: 16px system-ui, Roboto, sans-serif; -webkit-user-select: none; user-select: none; touch-action: none; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; background: rgba(15, 12, 40, .82); text-align: center; padding: 24px; }
+    .screen[hidden] { display: none; }
+    h1 { margin: 0; font-size: 44px; color: #ffc531; text-shadow: 0 3px 0 #a26a00; }
+    h2 { margin: 0; font-size: 30px; }
+    .big { font-size: 56px; font-weight: 800; color: #ffc531; }
+    .muted { color: #b9b4e0; font-size: 14px; max-width: 320px; line-height: 1.4; }
+    button { font: inherit; font-size: 20px; font-weight: 700; color: #1c1a3a; background: #ffc531; border: 0;
+      border-radius: 16px; padding: 14px 40px; min-width: 220px; box-shadow: 0 4px 0 #a26a00; }
+    button:active { transform: translateY(3px); box-shadow: 0 1px 0 #a26a00; }
+    button.ghost { background: transparent; color: #ffc531; box-shadow: none; border: 2px solid #ffc531; padding: 10px 30px; font-size: 17px; }
+    ol { margin: 0; padding: 0; list-style: none; width: min(320px, 85vw); }
+    li { display: flex; justify-content: space-between; padding: 7px 12px; border-radius: 10px; }
+    li:nth-child(odd) { background: rgba(255,255,255,.06); }
+    li.me { background: rgba(255,197,49,.25); }
+    .hud { position: fixed; top: max(12px, env(safe-area-inset-top)); left: 16px; right: 16px; display: flex;
+      justify-content: space-between; font-size: 22px; font-weight: 800; pointer-events: none; text-shadow: 0 2px 4px #000; }
+    .hud[hidden] { display: none; }
+    #record { color: #ffc531; animation: pulse .6s ease-in-out 3; }
+    @keyframes pulse { 50% { transform: scale(1.15); } }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="hud" id="hud" hidden><span id="coins">🪙 0</span><span id="time">⏱ 60</span></div>
+
+  <div class="screen" id="menu">
+    <h1>Монетки</h1>
+    <div class="muted" id="howto">Наклоняйте телефон, чтобы катать шарик. Собирайте монеты, обходите тёмные ямы. У вас 60 секунд.</div>
+    <div class="muted" id="bestLine"></div>
+    <button id="play">Играть</button>
+    <button class="ghost" id="showTop">Рекорды</button>
+  </div>
+
+  <div class="screen" id="pause" hidden>
+    <h2>Пауза</h2>
+    <button id="resume">Продолжить</button>
+    <button class="ghost" id="quit">В меню</button>
+  </div>
+
+  <div class="screen" id="over" hidden>
+    <h2>Время вышло!</h2>
+    <div class="big" id="final">0</div>
+    <div id="record" hidden>🏆 Новый рекорд!</div>
+    <ol id="table"></ol>
+    <button id="again">Ещё раз</button>
+    <button class="ghost" id="toMenu">В меню</button>
+  </div>
+
+  <div class="screen" id="top" hidden>
+    <h2>Рекорды</h2>
+    <ol id="topTable"></ol>
+    <button class="ghost" id="closeTop">Назад</button>
+  </div>
+
+<script src="pit.js"></script>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const canvas = $('c');
+const ctx = canvas.getContext('2d');
+const GAME_TIME = 60;
+
+let W = 0, H = 0, dpr = 1;
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---------------------------------------------------------------- управление
+// Наклон: значения акселерометра в координатах телефона → направление на экране.
+const tilt = { x: 0, y: 0, active: false };
+let unsubscribe = null;
+function listenTilt() {
+  if (unsubscribe) return;
+  unsubscribe = pit.sensors.on('accelerometer', (e) => {
+    const [x, y] = e.values;
+    let sx, sy;
+    switch (e.rotation) {
+      case 90: sx = y; sy = x; break;
+      case 180: sx = x; sy = -y; break;
+      case 270: sx = -y; sy = -x; break;
+      default: sx = -x; sy = y;
+    }
+    tilt.x = sx; tilt.y = sy; tilt.active = true;
+  }, { hz: 60 });
+}
+
+// Запасное управление для компьютера: стрелки / WASD, или зажать палец/мышь — шарик катится туда.
+const keys = {};
+addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; if (e.key === 'Escape' && state === 'play') pauseGame(); });
+addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+const pointer = { down: false, x: 0, y: 0 };
+canvas.addEventListener('pointerdown', (e) => { pointer.down = true; pointer.x = e.clientX; pointer.y = e.clientY; });
+canvas.addEventListener('pointermove', (e) => { pointer.x = e.clientX; pointer.y = e.clientY; });
+addEventListener('pointerup', () => { pointer.down = false; });
+
+function control() {
+  let ax = 0, ay = 0;
+  if (keys.arrowleft || keys.a) ax -= 7;
+  if (keys.arrowright || keys.d) ax += 7;
+  if (keys.arrowup || keys.w) ay -= 7;
+  if (keys.arrowdown || keys.s) ay += 7;
+  if (pointer.down) {
+    const dx = pointer.x - ball.x, dy = pointer.y - ball.y, d = Math.hypot(dx, dy) || 1;
+    ax += dx / d * 8; ay += dy / d * 8;
+  }
+  if (!ax && !ay && tilt.active) { ax = tilt.x; ay = tilt.y; }
+  return [ax, ay];
+}
+
+// ---------------------------------------------------------------- звук
+let audio = null;
+function beep(freq, dur, type = 'sine', vol = 0.15) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, audio.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + dur);
+    o.connect(g); g.connect(audio.destination);
+    o.start(); o.stop(audio.currentTime + dur);
+  } catch (e) { /* без звука */ }
+}
+
+// ---------------------------------------------------------------- игра
+let state = 'menu';
+let ball, coins, holes, score, timeLeft, last, flash, particles;
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+function free(r) {
+  for (let i = 0; i < 50; i++) {
+    const p = { x: rand(r + 10, W - r - 10), y: rand(r + 70, H - r - 10) };
+    const ok = Math.hypot(p.x - ball.x, p.y - ball.y) > 120 &&
+      holes.every((h) => Math.hypot(p.x - h.x, p.y - h.y) > h.r + r + 30);
+    if (ok) return p;
+  }
+  return { x: W / 2, y: H / 2 };
+}
+function addCoin() {
+  const gold = Math.random() < 0.12;
+  coins.push({ ...free(16), r: gold ? 18 : 14, value: gold ? 5 : 1, phase: Math.random() * 6 });
+}
+function addHole() {
+  const r = rand(26, 40);
+  const a = Math.random() * Math.PI * 2, sp = rand(20, 55);
+  holes.push({ ...free(r), r, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp });
+}
+
+function startGame() {
+  ball = { x: W / 2, y: H / 2, vx: 0, vy: 0, r: 16 };
+  coins = []; holes = []; particles = [];
+  score = 0; timeLeft = GAME_TIME; flash = 0;
+  for (let i = 0; i < 2; i++) addHole();
+  for (let i = 0; i < 3; i++) addCoin();
+  show(null);
+  $('hud').hidden = false;
+  state = 'play';
+  listenTilt();
+  pit.screen.keepOn(true);
+  last = performance.now();
+  updateHud();
+}
+
+function update(dt) {
+  const [ax, ay] = control();
+  ball.vx += ax * 60 * dt; ball.vy += ay * 60 * dt;
+  ball.vx *= Math.pow(0.4, dt); ball.vy *= Math.pow(0.4, dt);
+  ball.x += ball.vx * dt; ball.y += ball.vy * dt;
+  if (ball.x < ball.r) { ball.x = ball.r; ball.vx = Math.abs(ball.vx) * 0.5; }
+  if (ball.x > W - ball.r) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx) * 0.5; }
+  if (ball.y < ball.r) { ball.y = ball.r; ball.vy = Math.abs(ball.vy) * 0.5; }
+  if (ball.y > H - ball.r) { ball.y = H - ball.r; ball.vy = -Math.abs(ball.vy) * 0.5; }
+
+  for (const h of holes) {
+    h.x += h.vx * dt; h.y += h.vy * dt;
+    if (h.x < h.r || h.x > W - h.r) h.vx *= -1;
+    if (h.y < h.r + 60 || h.y > H - h.r) h.vy *= -1;
+    if (Math.hypot(ball.x - h.x, ball.y - h.y) < h.r) {
+      // упал в яму: минус 5 секунд, шарик возвращается в центр
+      timeLeft = Math.max(0, timeLeft - 5);
+      ball.x = W / 2; ball.y = H / 2; ball.vx = ball.vy = 0;
+      flash = 0.4;
+      pit.vibrate([250]);
+      beep(140, 0.4, 'sawtooth', 0.2);
+      // вытолкнуть ямы из центра, чтобы не упасть сразу снова
+      for (const o of holes) if (Math.hypot(o.x - W / 2, o.y - H / 2) < o.r + 60) { o.x = o.r + 10; }
+    }
+  }
+
+  for (let i = coins.length - 1; i >= 0; i--) {
+    const c = coins[i];
+    if (Math.hypot(ball.x - c.x, ball.y - c.y) < ball.r + c.r) {
+      score += c.value;
+      for (let k = 0; k < 10; k++) particles.push({ x: c.x, y: c.y, vx: rand(-150, 150), vy: rand(-150, 150), life: 0.5, gold: true });
+      coins.splice(i, 1);
+      addCoin();
+      pit.vibrate(c.value > 1 ? [30, 40, 30] : [25]);
+      beep(c.value > 1 ? 1320 : 880, 0.12, 'square', 0.08);
+    }
+  }
+  // со временем ям становится больше
+  const wanted = 2 + Math.floor((GAME_TIME - timeLeft) / 12);
+  if (holes.length < wanted) addHole();
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  flash = Math.max(0, flash - dt);
+  timeLeft -= dt;
+  if (timeLeft <= 0) { timeLeft = 0; gameOver(); }
+  updateHud();
+}
+
+function draw(t) {
+  ctx.fillStyle = '#1c1a3a';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(255,255,255,.04)';
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  if (!ball) return;
+
+  for (const h of holes) {
+    const g = ctx.createRadialGradient(h.x, h.y, h.r * 0.2, h.x, h.y, h.r);
+    g.addColorStop(0, '#000'); g.addColorStop(1, '#3b2f6b');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(h.x, h.y, h.r, 0, Math.PI * 2); ctx.fill();
+  }
+  for (const c of coins) {
+    const s = Math.abs(Math.sin(t / 300 + c.phase)) * 0.7 + 0.3; // монета «крутится»
+    ctx.fillStyle = c.value > 1 ? '#ff8a00' : '#ffc531';
+    ctx.strokeStyle = '#a26a00'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(c.x, c.y, c.r * s, c.r, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+  for (const p of particles) {
+    ctx.globalAlpha = p.life * 2;
+    ctx.fillStyle = '#ffc531';
+    ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+  }
+  ctx.globalAlpha = 1;
+  const g = ctx.createRadialGradient(ball.x - 5, ball.y - 6, 2, ball.x, ball.y, ball.r);
+  g.addColorStop(0, '#fff'); g.addColorStop(1, '#9fb4ff');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
+  if (flash > 0) { ctx.fillStyle = `rgba(255,40,40,${flash})`; ctx.fillRect(0, 0, W, H); }
+}
+
+function updateHud() {
+  $('coins').textContent = '🪙 ' + score;
+  $('time').textContent = '⏱ ' + Math.ceil(timeLeft);
+}
+
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (state === 'play') update(dt);
+  draw(now);
+  requestAnimationFrame(loop);
+}
+
+// ---------------------------------------------------------------- экраны
+function show(id) {
+  for (const s of ['menu', 'pause', 'over', 'top']) $(s).hidden = s !== id;
+}
+
+function pauseGame() {
+  if (state !== 'play') return;
+  state = 'pause';
+  show('pause');
+}
+
+async function gameOver() {
+  state = 'over';
+  $('hud').hidden = true;
+  pit.screen.keepOn(false);
+  pit.vibrate([80, 60, 80, 60, 200]);
+  $('final').textContent = score;
+  $('record').hidden = true;
+  show('over');
+  const r = await pit.scores.submit(score);
+  $('record').hidden = !(r.isRecord && score > 0);
+  if (r.isRecord && score > 0) beep(660, 0.15), setTimeout(() => beep(990, 0.3), 150);
+  await fillTable($('table'), r.rank);
+}
+
+async function fillTable(el, highlightRank) {
+  const list = await pit.scores.top({ limit: 10 });
+  el.textContent = '';
+  if (!list.length) { el.innerHTML = '<li>Пока пусто — сыграйте!</li>'; return; }
+  list.forEach((s, i) => {
+    const li = document.createElement('li');
+    if (i + 1 === highlightRank) li.className = 'me';
+    const name = document.createElement('span'); name.textContent = `${i + 1}. ${s.player}`;
+    const val = document.createElement('b'); val.textContent = s.score;
+    li.append(name, val);
+    el.append(li);
+  });
+}
+
+async function refreshMenu() {
+  const best = await pit.scores.best();
+  $('bestLine').textContent = best ? `Ваш рекорд: ${best.score} 🪙` : '';
+  const info = await pit.ready;
+  if (!info.native) $('howto').textContent += ' На компьютере: стрелки или мышь.';
+}
+
+$('play').onclick = startGame;
+$('again').onclick = startGame;
+$('resume').onclick = () => { show(null); state = 'play'; last = performance.now(); };
+$('quit').onclick = $('toMenu').onclick = () => { state = 'menu'; ball = null; $('hud').hidden = true; pit.screen.keepOn(false); show('menu'); refreshMenu(); };
+$('showTop').onclick = async () => { await fillTable($('topTable'), 0); show('top'); };
+$('closeTop').onclick = () => show('menu');
+
+// «Назад» на телефоне: в игре — пауза, в меню — выход из приложения
+pit.app.onBack(() => {
+  if (state === 'play') pauseGame();
+  else if (state === 'pause') $('resume').onclick();
+  else if (!$('top').hidden) show('menu');
+  else pit.app.exit();
+});
+pit.on('pause', pauseGame);
+
+refreshMenu();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
