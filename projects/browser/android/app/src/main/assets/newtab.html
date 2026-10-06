@@ -28,6 +28,7 @@
   .app:active { background: rgba(127,127,127,.15); }
   .app .ic { width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #ffd54a, #e08a00); border: 0; color: #222; font-size: 24px; }
   .app .ic img { width: 58px; height: 58px; }
+  .app.store .ic { background: linear-gradient(135deg, #5b8cff, #7a4dff); font-size: 28px; }
   .hint { color: var(--muted); font-size: 12px; max-width: 560px; width: 100%; margin: -8px 0 14px; }
 </style></head>
 <body>
@@ -48,7 +49,7 @@ document.getElementById('installFile').onclick = function () { location.href = '
 
 // Вызывается приложением после загрузки: render({engine, tiles: [{title, url}], apps: [{id, name, icon}]})
 function render(data) {
-  renderApps(data.apps || []);
+  renderApps(data.apps || [], data.store);
   document.getElementById('engine').textContent = 'Поиск: ' + data.engine;
   var grid = document.getElementById('grid');
   grid.textContent = '';
@@ -65,9 +66,16 @@ function render(data) {
   });
 }
 
-function renderApps(apps) {
+function renderApps(apps, storeUrl) {
   var box = document.getElementById('apps');
   box.textContent = '';
+  // первая плитка — магазин игр
+  if (storeUrl) {
+    var st = document.createElement('div'); st.className = 'app store';
+    st.innerHTML = '<div class="ic">🛍️</div><div class="n">Магазин игр</div>';
+    st.addEventListener('click', function () { location.href = storeUrl; });
+    box.appendChild(st);
+  }
   document.getElementById('appsTitle').hidden = false;
   document.getElementById('appsHint').hidden = !apps.length;
   apps.forEach(function (a) {

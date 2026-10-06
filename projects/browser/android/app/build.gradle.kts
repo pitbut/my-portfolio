@@ -1,3 +1,4 @@
+import java.util.Properties
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -47,11 +48,26 @@ android {
         applicationId = "com.robutpit.pitbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.3.0"
+        versionCode = 5
+        versionName = "1.4.0"
     }
 
     signingConfigs {
+        // Ключ для публикации (IlovaBozor, RuStore): файл android/keystore.properties (в git не попадает)
+        // или переменные окружения PIT_KEYSTORE, PIT_KEYSTORE_PASSWORD, PIT_KEY_ALIAS, PIT_KEY_PASSWORD (GitHub Secrets).
+        val props = Properties().apply {
+            rootProject.file("keystore.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+        }
+        fun secret(key: String, env: String): String? = props.getProperty(key) ?: System.getenv(env)
+        val releaseStore = secret("storeFile", "PIT_KEYSTORE")
+        if (releaseStore != null) {
+            create("release") {
+                storeFile = rootProject.file(releaseStore)
+                storePassword = secret("storePassword", "PIT_KEYSTORE_PASSWORD")
+                keyAlias = secret("keyAlias", "PIT_KEY_ALIAS")
+                keyPassword = secret("keyPassword", "PIT_KEY_PASSWORD")
+            }
+        }
         // открытый тестовый ключ — см. keystore/README.md; для публикации нужен свой
         create("test") {
             storeFile = file("../keystore/pitbrowser-test.keystore")
@@ -69,8 +85,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            // Для публикации подпишите своим ключом (см. README и keystore/README.md).
-            signingConfig = signingConfigs.getByName("test")
+            // есть ключ для публикации — подписываем им, иначе тестовым (см. keystore/README.md)
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("test")
         }
     }
     compileOptions {

@@ -216,9 +216,11 @@ class MainActivity : Activity() {
     /** Убираем «; wv» — иначе часть сайтов отдаёт урезанную версию; в режиме ПК — десктопный UA. */
     private fun userAgent(defaultUa: String): String {
         val mobile = defaultUa.replace("; wv", "").replace(Regex("Version/\\S+ "), "")
-        if (!store.desktopMode) return mobile
+        // метка PitBrowser/версия — по ней магазин понимает, что можно ставить игры .pitapp
+        val mark = " PitBrowser/" + (runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull() ?: "1")
+        if (!store.desktopMode) return mobile + mark
         val chrome = Regex("Chrome/[\\d.]+").find(mobile)?.value ?: "Chrome/130.0.0.0"
-        return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) $chrome Safari/537.36"
+        return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) $chrome Safari/537.36$mark"
     }
 
     private fun newTab(url: String, activate: Boolean = true, after: Tab? = null): Tab {
@@ -354,6 +356,7 @@ class MainActivity : Activity() {
         val menu = PopupMenu(this, anchor)
         val m = menu.menu
         m.add(0, 1, 0, "Новая вкладка")
+        m.add(0, 13, 0, "Магазин игр")
         if (isWeb) m.add(0, 2, 0, if (store.isBookmarked(url)) "Удалить из закладок" else "Добавить в закладки")
         m.add(0, 3, 0, "Закладки")
         m.add(0, 4, 0, "История")
@@ -390,6 +393,7 @@ class MainActivity : Activity() {
                 10 -> clearData()
                 11 -> { tabs.toList().forEach { closeTab(it) } }
                 12 -> pickPackageFile()
+                13 -> navigate(STORE_URL)
             }
             true
         }
@@ -703,6 +707,7 @@ class MainActivity : Activity() {
             .put("engine", Omnibox.ENGINES[store.searchEngine]?.name ?: "Google")
             .put("tiles", arr)
             .put("apps", apps)
+            .put("store", STORE_URL)
             .toString()
     }
 
@@ -962,6 +967,8 @@ class MainActivity : Activity() {
     companion object {
         const val NEW_TAB = "file:///android_asset/newtab.html"
         private const val PITAPP_MIME = "application/x-pitapp"
+        /** Магазин игр PitBrowser — раздел IlovaBozor. */
+        const val STORE_URL = "https://ilovabozor.robutpit.com/games"
         private const val REQ_FILE = 1
         private const val REQ_PERMS = 2
         private const val REQ_STORAGE = 3

@@ -9,3 +9,7 @@ out/
 
 # тестовый ключ хранится в репозитории намеренно (см. keystore/README.md)
 !keystore/pitbrowser-test.keystore
+
+# ключ для публикации — только у владельца, никогда не в git
+keystore.properties
+release/

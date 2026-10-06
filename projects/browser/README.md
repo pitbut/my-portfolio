@@ -98,14 +98,14 @@ cd android
 ./gradlew assembleRelease     # APK → app/build/outputs/apk/release/app-release.apk
 ```
 
-Release-сборка сейчас подписывается отладочным ключом, чтобы APK можно было сразу поставить на
-телефон. Для Google Play / IlovaBozor создайте свой ключ:
+Release-сборка подписывается ключом для публикации, если он настроен, иначе — открытым тестовым
+ключом. Подробно — в [`android/keystore/README.md`](android/keystore/README.md).
 
-```bash
-keytool -genkey -v -keystore pitbrowser.jks -keyalg RSA -keysize 2048 -validity 10000 -alias pitbrowser
-```
+## Магазин игр
 
-и пропишите его в `android/app/build.gradle.kts` в `signingConfigs` (ключ в git не коммитить).
+Игры для PitBrowser публикуются в IlovaBozor (`https://ilovabozor.robutpit.com/games`); на главном
+экране браузера — плитка «Магазин игр». Задание для разработки раздела на сервере —
+[`store/PROMPT-ilovabozor.md`](store/PROMPT-ilovabozor.md).
 
 ## Сборка всех версий в GitHub Actions
 
