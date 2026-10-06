@@ -38,6 +38,7 @@ PitBrowser, как Opera, Vivaldi, Brave и Яндекс Браузер, исп�
 - «Bluetooth-терминал» (BLE и Serial: поиск, сервисы, чтение/запись, уведомления, терминал для
   HC-05/ESP32): [`apps/bt-terminal/`](apps/bt-terminal/) + скетч для ESP32 в `sdk/examples/esp32-pit/`
 - «Дуэль реакции» — игра для 2–4 телефонов по Bluetooth (PitLink): [`apps/reaction-duel/`](apps/reaction-duel/)
+- «NFC-метки» — чтение и запись меток, квест «Охота за метками»: [`apps/nfc-tags/`](apps/nfc-tags/)
 - «Проверка телефона» (наушники, кнопки гарнитуры и громкости, стерео, датчики, вибрация):
   [`apps/phone-lab/`](apps/phone-lab/)
 - все они встроены в APK и ставятся при первом запуске
@@ -56,6 +57,8 @@ android/app/src/main/java/com/robutpit/pitbrowser/
   apps/AudioBridge.kt   наушники, кнопки гарнитуры и громкости
   apps/LinkBridge.kt    PitLink: игры между телефонами (хост — GATT-сервер, игроки — клиенты)
   apps/LinkProtocol.kt  PitLink: нарезка сообщений на BLE-пакеты и сборка
+  apps/NfcBridge.kt     NFC: чтение и запись меток
+  apps/NdefCodec.kt     NFC: формат NDEF (текст, ссылки, данные)
   apps/Apps.kt          запуск, ярлыки на рабочем столе, встроенные приложения
 ```
 
@@ -120,7 +123,6 @@ git tag browser-v1.0.0 && git push origin browser-v1.0.0
 
 ## Идеи для следующих версий
 
-- NFC в PitSDK
 - магазин игр: публикация `.pitapp`, проверка, обновления, онлайн-рекорды
 - приложения и игры в десктопной версии
 

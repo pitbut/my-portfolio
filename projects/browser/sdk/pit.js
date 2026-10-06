@@ -232,6 +232,72 @@
     return api;
   }
 
+  // ---------------------------------------------------------------- NFC
+
+  function makeNfc() {
+    var listeners = 0;
+    // удобные поля: tag.text / tag.url — первая такая запись; json-записи сразу разобраны
+    function enrich(tag) {
+      (tag.records || []).forEach(function (r) {
+        if (r.data !== undefined) r.bytes = fromB64(r.data);
+        if (r.type === 'mime' && /json/.test(r.mime)) { try { r.json = JSON.parse(new TextDecoder().decode(r.bytes)); } catch (e) { /* не JSON */ } }
+        if (r.type === 'text' && tag.text === undefined) tag.text = r.text;
+        if (r.type === 'url' && tag.url === undefined) tag.url = r.url;
+        if (r.json !== undefined && tag.json === undefined) tag.json = r.json;
+      });
+      return tag;
+    }
+    // что записать → массив NDEF-записей
+    function toRecords(data) {
+      if (typeof data === 'string') return [{ type: 'text', text: data, lang: 'ru' }];
+      if (Array.isArray(data)) return data.map(function (r) { return toRecords(r)[0]; });
+      if (data && data.url) return [{ type: 'url', url: String(data.url) }];
+      if (data && data.text !== undefined) return [{ type: 'text', text: String(data.text), lang: data.lang || 'ru' }];
+      if (data && data.json !== undefined) return [{ type: 'mime', mime: 'application/json', data: toB64(JSON.stringify(data.json)) }];
+      if (data && data.mime) return [{ type: 'mime', mime: data.mime, data: toB64(data.data || '') }];
+      if (data && data.type) return [data];
+      throw new Error('PitSDK: записать можно строку, { url }, { text }, { json }, { mime, data } или массив таких записей');
+    }
+    return {
+      /** { supported, enabled } */
+      status: function () { return native ? call('nfc.status') : Promise.resolve({ supported: false, enabled: false }); },
+      /** Открыть настройки NFC (если выключен). */
+      openSettings: function () { return native ? call('nfc.openSettings') : Promise.resolve(); },
+      /**
+       * Метку приложили: fn({ id, techs, ndef, type, maxSize, writable, records, text, url, json }).
+       * Пока есть подписчики и приложение на экране, метки не уходят другим приложениям телефона.
+       */
+      onTag: function (fn) {
+        var off = on('nfc:tag', function (t) { fn(enrich(t)); });
+        if (++listeners === 1 && native) call('nfc.listen', { enable: true }).catch(function (e) { emit('error', e); });
+        return function () {
+          off();
+          if (--listeners === 0 && native) call('nfc.listen', { enable: false }).catch(function () {});
+        };
+      },
+      /**
+       * Записать на следующую приложенную метку (ждёт до opts.timeout мс, по умолчанию 30 с).
+       * data: 'текст' | { url } | { text, lang } | { json: {...} } | { mime, data } | [ ...несколько ]
+       * → { id, bytes }
+       */
+      write: function (data, opts) {
+        var records;
+        try { records = toRecords(data); } catch (e) { return Promise.reject(e); }
+        if (!native) return Promise.reject(new Error('NFC доступен только в приложении, установленном в PitBrowser'));
+        return call('nfc.write', { records: records, timeout: (opts && opts.timeout) || 30000 });
+      },
+      cancelWrite: function () { return native ? call('nfc.cancelWrite') : Promise.resolve(); },
+      /** Только для отладки в обычном браузере: имитировать приложенную метку. */
+      simulate: function (data, id) {
+        if (native) return;
+        var recs = toRecords(data);
+        emit('nfc:tag', { id: id || '04:00:00:00:00:00:01', techs: ['NfcA', 'Ndef'], ndef: true, writable: true, records: recs.map(function (r) {
+          return r.type === 'mime' ? { type: 'mime', mime: r.mime, data: r.data } : r;
+        }) });
+      },
+    };
+  }
+
   // ---------------------------------------------------------------- кнопки (гарнитура, громкость)
 
   var MEDIA = { play_pause: 1, play: 1, pause: 1, next: 1, previous: 1, stop: 1, fast_forward: 1, rewind: 1 };
@@ -465,6 +531,8 @@
     bluetooth: makeBluetooth(),
 
     link: makeLink(),
+
+    nfc: makeNfc(),
 
     headphones: {
       /** { connected, devices: [{ type: 'wired'|'bluetooth'|'usb'|'hearing_aid', name, microphone }] } */

@@ -40,6 +40,7 @@ import com.robutpit.pitbrowser.apps.BleUuids
 import com.robutpit.pitbrowser.apps.BluetoothBridge
 import com.robutpit.pitbrowser.apps.DeviceSensors
 import com.robutpit.pitbrowser.apps.LinkBridge
+import com.robutpit.pitbrowser.apps.NfcBridge
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -57,6 +58,7 @@ class AppActivity : Activity() {
     private lateinit var bt: BluetoothBridge
     private lateinit var audio: AudioBridge
     private lateinit var link: LinkBridge
+    private lateinit var nfc: NfcBridge
     private var pendingBtEnable: ((Boolean) -> Unit)? = null
 
     private var proxy: JavaScriptReplyProxy? = null
@@ -91,6 +93,7 @@ class AppActivity : Activity() {
         bt = BluetoothBridge(this, state) { event, data -> sendEvent(event, data) }
         audio = AudioBridge(this) { event, data -> sendEvent(event, data) }
         link = LinkBridge(this, m) { event, data -> sendEvent(event, data) }
+        nfc = NfcBridge(this) { event, data -> sendEvent(event, data) }
         if (m.has("headphones")) audio.start()
 
         requestedOrientation = orientationOf(m.orientation)
@@ -136,6 +139,7 @@ class AppActivity : Activity() {
         web.onResume()
         sensors.resume()
         audio.resume()
+        nfc.resume()
         hideSystemBars()
         sendEvent("resume", null)
     }
@@ -145,6 +149,7 @@ class AppActivity : Activity() {
             sendEvent("pause", null)
             sensors.pause()
             audio.pause()
+            nfc.pause()
             web.onPause()
         }
         super.onPause()
@@ -156,6 +161,7 @@ class AppActivity : Activity() {
             bt.closeAll()
             audio.release()
             link.leave()
+            nfc.release()
             web.destroy()
         }
         super.onDestroy()
@@ -268,6 +274,16 @@ class AppActivity : Activity() {
                 "link.players" -> { require("bluetooth"); ok(link.players()) }
                 "link.lock" -> { require("bluetooth"); link.lock(p.optBoolean("locked", true)); ok(true) }
                 "link.leave" -> { require("bluetooth"); link.leave(); ok(true) }
+
+                "nfc.status" -> { require("nfc"); ok(nfc.status()) }
+                "nfc.listen" -> { require("nfc"); nfc.listen(p.optBoolean("enable", true)); ok(true) }
+                "nfc.write" -> {
+                    require("nfc")
+                    val records = p.optJSONArray("records") ?: return fail("нет записей для метки")
+                    nfc.write(records, p.optLong("timeout", 30_000)) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } }
+                }
+                "nfc.cancelWrite" -> { require("nfc"); nfc.cancelWrite(); ok(true) }
+                "nfc.openSettings" -> { require("nfc"); nfc.openSettings(); ok(true) }
 
                 "headphones.state" -> { require("headphones"); ok(audio.state()) }
                 "headphones.captureButtons" -> { require("headphones"); audio.setCaptureMedia(p.optBoolean("enable", true)); ok(true) }

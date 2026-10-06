@@ -39,6 +39,7 @@ data class AppManifest(
             "microphone" to "микрофон",
             "geolocation" to "местоположение",
             "bluetooth" to "Bluetooth-устройства",
+            "nfc" to "NFC-метки (чтение и запись)",
             "network" to "доступ в интернет",
         )
 

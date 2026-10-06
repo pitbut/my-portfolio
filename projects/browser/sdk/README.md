@@ -72,6 +72,7 @@ cd my-game && zip -r ../my-game.pitapp . && cd ..
 | `vibrate` | `pit.vibrate` | при установке |
 | `scores` | `pit.scores`, `pit.player` | при установке |
 | `screen` | `pit.screen` — не гаснуть, поворот | при установке |
+| `nfc` | `pit.nfc` — чтение и запись NFC-меток | при установке |
 | `headphones` | `pit.headphones` — наушники, кнопки гарнитуры | при установке |
 | `buttons` | `pit.buttons` — кнопки громкости как игровые | при установке |
 | `network` | доступ в интернет (без него — только свои файлы) | при установке |
@@ -236,6 +237,37 @@ await pit.link.leave();
 умеет, `host()` вернёт ошибку, и комнату создаёт другой игрок.
 
 Демо: встроенная игра **«Дуэль реакции»** (`apps/reaction-duel/`).
+
+### NFC-метки
+
+NFC-метки (наклейки, брелоки, карточки NTAG213/215/216) — для квестов, карточек персонажей,
+«приложи телефон к роботу», чтения номеров пропусков и т.п.
+
+```js
+const s = await pit.nfc.status();             // { supported, enabled }
+if (s.supported && !s.enabled) pit.nfc.openSettings();
+
+const off = pit.nfc.onTag((tag) => {
+  tag.id        // номер метки (UID): '04:A2:3B:4C:5D:6E:7F'
+  tag.text      // первая текстовая запись (если есть)
+  tag.url       // первая ссылка
+  tag.json      // первая JSON-запись, уже разобранная
+  tag.records   // все записи: { type: 'text'|'url'|'mime'|'unknown', ... , bytes }
+  tag.writable, tag.maxSize, tag.techs
+});
+
+await pit.nfc.write('level-3');                           // текст
+await pit.nfc.write({ url: 'https://ilovabozor.robutpit.com/games' });
+await pit.nfc.write({ json: { hero: 'рыцарь', hp: 100 } }); // данные для игры
+await pit.nfc.write([{ text: 'Сундук' }, { json: { gold: 50 } }]); // несколько записей
+// write ждёт, пока приложат метку (до 30 с; opts.timeout), → { id, bytes }
+pit.nfc.cancelWrite();
+```
+
+Пока приложение подписано на метки и открыто, метки не уходят другим приложениям телефона.
+Банковские карты, оплата и защищённые пропуска не читаются — только их номер (UID).
+Отладка на компьютере: `pit.nfc.simulate('pitquest:1')` имитирует приложенную метку.
+Демо: встроенное приложение **«NFC-метки»** (чтение, запись, квест «Охота за метками»).
 
 ### Наушники и кнопки
 

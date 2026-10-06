@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NFC-метки</title>
+  <style>
+    :root { --bg: #1a1410; --card: #261d16; --line: #3d2f24; --text: #f6ece4; --muted: #bba795; --accent: #ff8a3d; --ok: #46c98a; --bad: #ff6b6b; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, Roboto, sans-serif; }
+    body { padding: max(14px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom)); }
+    h1 { font-size: 21px; margin: 4px 0 10px; display: flex; align-items: center; gap: 10px; }
+    #status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 10px; background: var(--card); color: var(--muted); }
+    #status.on { color: var(--ok); } #status.off { color: var(--bad); }
+    .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+    .tabs button { flex: 1; background: var(--card); color: var(--muted); border: 1px solid var(--line); }
+    .tabs button.active { color: #fff; border-color: var(--accent); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+    .card h3 { margin: 0 0 8px; font-size: 16px; }
+    button { font: inherit; font-weight: 700; color: #1a1410; background: var(--accent); border: 0; border-radius: 10px; padding: 11px 16px; }
+    button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    button:disabled { opacity: .4; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .mono { font-family: ui-monospace, monospace; font-size: 13px; word-break: break-all; }
+    .big { font-size: 40px; text-align: center; margin: 10px 0; }
+    .wave { text-align: center; font-size: 56px; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { transform: scale(1.12); opacity: .6; } }
+    .rec { border-top: 1px solid var(--line); padding: 8px 0; }
+    .rec:first-child { border-top: 0; }
+    .rec .kind { font-size: 11px; text-transform: uppercase; color: var(--accent); letter-spacing: .05em; }
+    input, select { width: 100%; font: inherit; color: var(--text); background: #120d0a; border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin: 6px 0; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row > * { flex: 1; }
+    .dots { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+    .dot { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: #120d0a; border: 2px solid var(--line); }
+    .dot.found { background: var(--ok); border-color: var(--ok); color: #0c1a12; }
+    .err { color: var(--bad); font-size: 13px; min-height: 18px; margin-top: 6px; }
+    .okmsg { color: var(--ok); font-size: 13px; margin-top: 6px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>NFC-метки <span id="status">…</span></h1>
+  <div class="card" id="nfcOff" hidden>
+    <div>NFC выключен.</div>
+    <button style="margin-top:8px" id="openSettings">Открыть настройки NFC</button>
+  </div>
+
+  <div class="tabs">
+    <button data-tab="read" class="active">Читать</button>
+    <button data-tab="write">Записать</button>
+    <button data-tab="quest">Квест</button>
+  </div>
+
+  <!-- чтение -->
+  <section id="read">
+    <div class="card" id="readWait">
+      <div class="wave">📶</div>
+      <div class="muted" style="text-align:center">Приложите метку к задней крышке телефона (обычно рядом с камерой)</div>
+    </div>
+    <div class="card" id="tagCard" hidden>
+      <h3>Метка</h3>
+      <div class="muted">Номер (UID)</div><div class="mono" id="tagId"></div>
+      <div class="muted" style="margin-top:6px">Технологии</div><div class="mono" id="tagTechs"></div>
+      <div class="muted" style="margin-top:6px" id="tagSize"></div>
+      <h3 style="margin-top:12px">Записи</h3>
+      <div id="tagRecords"></div>
+    </div>
+  </section>
+
+  <!-- запись -->
+  <section id="write" hidden>
+    <div class="card">
+      <h3>Что записать</h3>
+      <select id="kind">
+        <option value="text">Текст</option>
+        <option value="url">Ссылку</option>
+        <option value="json">Данные для игры (JSON)</option>
+      </select>
+      <input id="value" placeholder="Например: Привет из PitBrowser!" autocomplete="off">
+      <button id="writeBtn" style="width:100%">Записать на метку</button>
+      <div class="err" id="writeErr"></div>
+      <div class="okmsg" id="writeOk"></div>
+    </div>
+    <div class="card" id="writeWait" hidden>
+      <div class="wave">📝</div>
+      <div class="muted" style="text-align:center">Приложите метку и держите, пока не завибрирует</div>
+      <button class="ghost" id="cancelWrite" style="width:100%;margin-top:10px">Отмена</button>
+    </div>
+  </section>
+
+  <!-- квест -->
+  <section id="quest" hidden>
+    <div class="card">
+      <h3>🗝 Охота за метками</h3>
+      <div class="muted">1) Подготовьте метки — каждая станет точкой квеста. 2) Спрячьте их. 3) Нажмите «Играть» и найдите все как можно быстрее.</div>
+      <div class="row" style="margin-top:10px">
+        <select id="questCount"><option>3</option><option selected>5</option><option>7</option><option>10</option></select>
+        <button class="ghost" id="prepare">Подготовить</button>
+      </div>
+      <div class="muted" id="prepHint"></div>
+    </div>
+    <div class="card">
+      <div class="dots" id="dots"></div>
+      <div class="big" id="timer">0.0 с</div>
+      <button id="play" style="width:100%">Играть</button>
+      <div class="muted" id="questMsg" style="text-align:center;margin-top:8px"></div>
+      <div class="muted" id="questBest" style="text-align:center"></div>
+    </div>
+  </section>
+
+<script src="pit.js"></script>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const nfc = pit.nfc;
+const QUEST_PREFIX = 'pitquest:';
+// 1 метка, 3 метки, 5 меток
+const tags = (n) => n + ' ' + (n % 10 === 1 && n % 100 !== 11 ? 'метка' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'метки' : 'меток');
+
+// ---------------------------------------------------------------- состояние NFC
+async function refreshStatus() {
+  const s = await nfc.status();
+  $('status').textContent = !pit.isNative ? 'только в PitBrowser' : !s.supported ? 'нет NFC' : s.enabled ? 'включён' : 'выключен';
+  $('status').className = s.enabled ? 'on' : 'off';
+  $('nfcOff').hidden = !(s.supported && !s.enabled);
+  return s;
+}
+$('openSettings').onclick = () => nfc.openSettings();
+// вернулись из настроек: если NFC включили — подписываемся заново
+pit.on('resume', async () => {
+  const s = await refreshStatus();
+  if (s.enabled) { if (offTag) offTag(); startListening(); }
+});
+
+// ---------------------------------------------------------------- вкладки
+let tab = 'read';
+document.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => {
+  tab = b.dataset.tab;
+  document.querySelectorAll('[data-tab]').forEach((x) => x.classList.toggle('active', x === b));
+  for (const id of ['read', 'write', 'quest']) $(id).hidden = id !== tab;
+});
+
+// ---------------------------------------------------------------- чтение (и квест — по тем же меткам)
+let offTag = null;
+function startListening() {
+  try { offTag = nfc.onTag(onTag); } catch (e) { /* NFC выключен — покажет статус */ }
+}
+
+function onTag(tag) {
+  if (questRunning) return questTag(tag);
+  if (tab !== 'read') return;
+  pit.vibrate(40);
+  $('readWait').hidden = true;
+  $('tagCard').hidden = false;
+  $('tagId').textContent = tag.id;
+  $('tagTechs').textContent = (tag.techs || []).join(', ');
+  $('tagSize').textContent = tag.ndef
+    ? `Тип: ${tag.type || '—'} · место: ${tag.maxSize} байт · ${tag.writable ? 'можно записывать' : 'защищена от записи'}`
+    : (tag.writable ? 'Пустая метка — можно записать' : 'Метка без NDEF (например, банковская карта или пропуск)');
+  const box = $('tagRecords');
+  box.textContent = '';
+  if (!tag.records.length) { box.innerHTML = '<div class="muted">Записей нет</div>'; return; }
+  for (const r of tag.records) {
+    const el = document.createElement('div'); el.className = 'rec';
+    const kind = document.createElement('div'); kind.className = 'kind';
+    const val = document.createElement('div');
+    if (r.type === 'text') { kind.textContent = `текст (${r.lang})`; val.textContent = r.text; }
+    else if (r.type === 'url') {
+      kind.textContent = 'ссылка';
+      const a = document.createElement('a'); a.href = r.url; a.textContent = r.url; a.style.color = 'var(--accent)'; val.append(a);
+    } else if (r.type === 'mime') {
+      kind.textContent = r.mime;
+      val.className = 'mono';
+      val.textContent = r.json !== undefined ? JSON.stringify(r.json) : `${r.bytes.length} байт`;
+    } else { kind.textContent = `другое (tnf ${r.tnf})`; val.className = 'mono'; val.textContent = r.recordType; }
+    el.append(kind, val);
+    box.append(el);
+  }
+}
+
+// ---------------------------------------------------------------- запись
+const PLACEHOLDERS = { text: 'Например: Привет из PitBrowser!', url: 'https://ilovabozor.robutpit.com/games', json: '{"level": 3, "item": "ключ"}' };
+$('kind').onchange = () => { $('value').placeholder = PLACEHOLDERS[$('kind').value]; };
+
+async function writeTag(data) {
+  $('writeErr').textContent = ''; $('writeOk').textContent = '';
+  $('writeWait').hidden = false;
+  try {
+    const r = await nfc.write(data);
+    pit.vibrate([60, 40, 60]);
+    return r;
+  } finally {
+    $('writeWait').hidden = true;
+  }
+}
+
+$('writeBtn').onclick = async () => {
+  const kind = $('kind').value, v = $('value').value.trim();
+  if (!v) { $('writeErr').textContent = 'Введите, что записать'; return; }
+  let data;
+  try {
+    data = kind === 'text' ? { text: v } : kind === 'url' ? { url: /^[a-z]+:/i.test(v) ? v : 'https://' + v } : { json: JSON.parse(v) };
+  } catch (e) { $('writeErr').textContent = 'Неверный JSON'; return; }
+  try {
+    const r = await writeTag(data);
+    $('writeOk').textContent = `Записано на метку ${r.id} (${r.bytes} байт)`;
+  } catch (e) { $('writeErr').textContent = e.message; }
+};
+$('cancelWrite').onclick = () => nfc.cancelWrite();
+
+// ---------------------------------------------------------------- квест
+let questTotal = 5, found = new Set(), questRunning = false, startAt = 0, timerId = null;
+
+function renderDots() {
+  const box = $('dots');
+  box.textContent = '';
+  for (let i = 1; i <= questTotal; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (found.has(i) ? ' found' : '');
+    d.textContent = i;
+    box.append(d);
+  }
+}
+
+$('questCount').onchange = () => { questTotal = Number($('questCount').value); found.clear(); renderDots(); };
+
+$('prepare').onclick = async () => {
+  questTotal = Number($('questCount').value);
+  for (let i = 1; i <= questTotal; i++) {
+    $('prepHint').textContent = `Метка ${i} из ${questTotal}: приложите новую метку…`;
+    try {
+      await writeTag({ text: QUEST_PREFIX + i });
+    } catch (e) {
+      $('prepHint').textContent = `Остановлено на метке ${i}: ${e.message}`;
+      return;
+    }
+  }
+  $('prepHint').textContent = `Готово! Подготовлено: ${tags(questTotal)}. Спрячьте их и нажмите «Играть».`;
+};
+
+$('play').onclick = () => {
+  if (questRunning) return stopQuest('Игра остановлена');
+  questTotal = Number($('questCount').value);
+  found.clear(); renderDots();
+  questRunning = true; startAt = performance.now();
+  $('play').textContent = 'Стоп';
+  $('questMsg').textContent = 'Ищите метки и прикладывайте телефон!';
+  timerId = setInterval(() => { $('timer').textContent = ((performance.now() - startAt) / 1000).toFixed(1) + ' с'; }, 100);
+};
+
+function questTag(tag) {
+  const m = /^pitquest:(\d+)$/.exec(tag.text || '');
+  const n = m && Number(m[1]);
+  if (!n || n > questTotal) { pit.vibrate([30, 30, 30]); $('questMsg').textContent = 'Это не метка квеста'; return; }
+  if (found.has(n)) { $('questMsg').textContent = `Метка ${n} уже найдена`; return; }
+  found.add(n);
+  pit.vibrate(80);
+  renderDots();
+  $('questMsg').textContent = `Найдена метка ${n}! Осталось ${questTotal - found.size}`;
+  if (found.size === questTotal) finishQuest();
+}
+
+async function finishQuest() {
+  const secs = Math.round((performance.now() - startAt) / 100) / 10;
+  stopQuest(`🏁 Найдены все ${tags(questTotal)} за ${secs} с!`);
+  pit.vibrate([100, 60, 100, 60, 300]);
+  const r = await pit.scores.submit(secs, { level: String(questTotal) });
+  if (r.isRecord) $('questMsg').textContent += ' Новый рекорд!';
+  showBest();
+}
+
+function stopQuest(msg) {
+  questRunning = false;
+  clearInterval(timerId);
+  $('play').textContent = 'Играть';
+  $('questMsg').textContent = msg;
+}
+
+async function showBest() {
+  const best = await pit.scores.best({ level: String(questTotal) });
+  $('questBest').textContent = best ? `Рекорд (${tags(questTotal)}): ${best.score} с, ${best.player}` : '';
+}
+$('questCount').addEventListener('change', showBest);
+
+refreshStatus().then((s) => { if (s.enabled || !pit.isNative) startListening(); });
+renderDots();
+showBest();
+</script>
+</body>
+</html>
