@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -32,6 +33,7 @@ import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.robutpit.pitbrowser.apps.AppManifest
 import com.robutpit.pitbrowser.apps.AppServer
+import com.robutpit.pitbrowser.apps.AudioBridge
 import com.robutpit.pitbrowser.apps.AppState
 import com.robutpit.pitbrowser.apps.Apps
 import com.robutpit.pitbrowser.apps.BleUuids
@@ -52,6 +54,7 @@ class AppActivity : Activity() {
     private lateinit var web: WebView
     private lateinit var sensors: DeviceSensors
     private lateinit var bt: BluetoothBridge
+    private lateinit var audio: AudioBridge
     private var pendingBtEnable: ((Boolean) -> Unit)? = null
 
     private var proxy: JavaScriptReplyProxy? = null
@@ -84,6 +87,8 @@ class AppActivity : Activity() {
         server = AppServer(this, m)
         sensors = DeviceSensors(this) { type, values, ts -> sendEvent("sensor:$type", sensorEvent(type, values, ts)) }
         bt = BluetoothBridge(this, state) { event, data -> sendEvent(event, data) }
+        audio = AudioBridge(this) { event, data -> sendEvent(event, data) }
+        if (m.has("headphones")) audio.start()
 
         requestedOrientation = orientationOf(m.orientation)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -127,6 +132,7 @@ class AppActivity : Activity() {
         if (!::web.isInitialized) return
         web.onResume()
         sensors.resume()
+        audio.resume()
         hideSystemBars()
         sendEvent("resume", null)
     }
@@ -135,6 +141,7 @@ class AppActivity : Activity() {
         if (::web.isInitialized) {
             sendEvent("pause", null)
             sensors.pause()
+            audio.pause()
             web.onPause()
         }
         super.onPause()
@@ -144,6 +151,7 @@ class AppActivity : Activity() {
         if (::web.isInitialized) {
             sensors.stopAll()
             bt.closeAll()
+            audio.release()
             web.destroy()
         }
         super.onDestroy()
@@ -152,6 +160,12 @@ class AppActivity : Activity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus && ::web.isInitialized) hideSystemBars()
+    }
+
+    /** Кнопки гарнитуры и громкости — приложению, если оно их запросило. */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (::audio.isInitialized && audio.onKey(event)) return true
+        return super.dispatchKeyEvent(event)
     }
 
     @Deprecated("Deprecated in Java")
@@ -238,6 +252,10 @@ class AppActivity : Activity() {
                     bt.serialWrite(p.optString("device"), BleUuids.decode(p.optString("value"))) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } }
                 }
                 "bluetooth.serial.disconnect" -> { require("bluetooth"); bt.serialDisconnect(p.optString("device")); ok(true) }
+
+                "headphones.state" -> { require("headphones"); ok(audio.state()) }
+                "headphones.captureButtons" -> { require("headphones"); audio.setCaptureMedia(p.optBoolean("enable", true)); ok(true) }
+                "buttons.captureVolume" -> { require("buttons"); audio.captureVolume = p.optBoolean("enable", true); ok(true) }
 
                 "screen.orientation" -> { require("screen"); requestedOrientation = orientationOf(p.optString("orientation", "any")); ok(true) }
 

@@ -115,6 +115,36 @@
     return ((a || 0) % 360 + 360) % 360;
   }
 
+  // ---------------------------------------------------------------- кнопки (гарнитура, громкость)
+
+  var MEDIA = { play_pause: 1, play: 1, pause: 1, next: 1, previous: 1, stop: 1, fast_forward: 1, rewind: 1 };
+  var VOLUME = { volume_up: 1, volume_down: 1 };
+  // клавиши компьютера → кнопки (для отладки в обычном браузере)
+  var WEB_KEYS = {
+    MediaPlayPause: 'play_pause', MediaPlay: 'play', MediaPause: 'pause', MediaTrackNext: 'next',
+    MediaTrackPrevious: 'previous', MediaStop: 'stop', AudioVolumeUp: 'volume_up', AudioVolumeDown: 'volume_down',
+  };
+  var captureCount = {};
+
+  function captureButtons(method, kinds, fn) {
+    var off = on('button', function (e) { if (kinds[e.button]) fn(e); });
+    captureCount[method] = (captureCount[method] || 0) + 1;
+    if (captureCount[method] === 1 && native) call(method, { enable: true }).catch(function (e) { emit('error', e); });
+    return function () {
+      off();
+      if (--captureCount[method] === 0 && native) call(method, { enable: false }).catch(function () {});
+    };
+  }
+
+  if (!native) {
+    ['keydown', 'keyup'].forEach(function (type) {
+      window.addEventListener(type, function (e) {
+        var b = WEB_KEYS[e.key];
+        if (b && !e.repeat) emit('button', { button: b, action: type === 'keydown' ? 'down' : 'up', source: 'keyboard' });
+      });
+    });
+  }
+
   // ---------------------------------------------------------------- Bluetooth
 
   // Байты ⇄ base64 (так данные передаются между игрой и браузером).
@@ -316,6 +346,31 @@
     },
 
     bluetooth: makeBluetooth(),
+
+    headphones: {
+      /** { connected, devices: [{ type: 'wired'|'bluetooth'|'usb'|'hearing_aid', name, microphone }] } */
+      state: function () {
+        return native ? call('headphones.state') : Promise.resolve({ connected: false, devices: [], supported: false });
+      },
+      /** Наушники подключили/отключили: fn({ connected, devices, change: 'connected'|'disconnected' }) */
+      on: function (fn) { return on('headphones', fn); },
+      /** Наушники выдернули — самое время поставить звук на паузу, чтобы он не заиграл из динамика. */
+      onUnplug: function (fn) { return on('headphones:unplugged', fn); },
+      /**
+       * Кнопки гарнитуры (проводной и Bluetooth): fn({ button, action, source }).
+       * button: play_pause, play, pause, next, previous, stop, fast_forward, rewind; action: down | up.
+       * Пока есть подписчики, эти кнопки достаются игре, а не музыкальному плееру.
+       */
+      onButton: function (fn) { return captureButtons('headphones.captureButtons', MEDIA, fn); },
+    },
+
+    buttons: {
+      /**
+       * Кнопки громкости телефона как игровые: fn({ button: 'volume_up'|'volume_down', action: 'down'|'up' }).
+       * Пока есть подписчики, громкость этими кнопками не меняется.
+       */
+      onVolume: function (fn) { return captureButtons('buttons.captureVolume', VOLUME, fn); },
+    },
 
     player: {
       /** Имя игрока (браузер спросит один раз и запомнит). */

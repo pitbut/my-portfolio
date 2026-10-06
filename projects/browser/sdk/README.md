@@ -72,6 +72,8 @@ cd my-game && zip -r ../my-game.pitapp . && cd ..
 | `vibrate` | `pit.vibrate` | при установке |
 | `scores` | `pit.scores`, `pit.player` | при установке |
 | `screen` | `pit.screen` — не гаснуть, поворот | при установке |
+| `headphones` | `pit.headphones` — наушники, кнопки гарнитуры | при установке |
+| `buttons` | `pit.buttons` — кнопки громкости как игровые | при установке |
 | `network` | доступ в интернет (без него — только свои файлы) | при установке |
 | `camera` | `navigator.mediaDevices.getUserMedia({video})` | при установке **и** при первом использовании |
 | `microphone` | `getUserMedia({audio})` | при установке **и** при первом использовании |
@@ -196,6 +198,31 @@ Serial одновременно, команды `LED ON` / `LED OFF` / `PING`, �
 Bluetooth-геймпады подключаются в настройках телефона и работают через стандартный Gamepad API
 (`navigator.getGamepads()`), без `pit.bluetooth`.
 
+### Наушники и кнопки
+
+```js
+const s = await pit.headphones.state();
+// { connected: true, devices: [{ type: 'bluetooth', name: 'Galaxy Buds', microphone: true }] }
+// type: wired | bluetooth | usb | hearing_aid
+
+pit.headphones.on((s) => console.log(s.change, s.devices));   // подключили / отключили
+pit.headphones.onUnplug(() => game.muteMusic());               // выдернули — звук не должен заиграть из динамика
+
+// Кнопки гарнитуры (проводной и Bluetooth): пока есть подписчики, они достаются игре, а не плееру
+const off = pit.headphones.onButton((e) => {
+  if (e.action === 'down' && e.button === 'play_pause') game.togglePause();
+  // button: play_pause, play, pause, next, previous, stop, fast_forward, rewind
+});
+off(); // вернуть кнопки музыкальному плееру
+
+// Кнопки громкости телефона как игровые (например, «огонь» и «прыжок»)
+pit.buttons.onVolume((e) => { if (e.action === 'down') e.button === 'volume_up' ? jump() : fire(); });
+```
+
+Кнопки достаются игре, только пока она на экране; свернули — снова работают как обычно.
+Объёмный звук в наушниках — стандартный Web Audio: `StereoPannerNode` или `PannerNode` (HRTF).
+В обычном браузере `onButton`/`onVolume` реагируют на мультимедийные клавиши клавиатуры.
+
 ### Камера, микрофон, геолокация
 
 Стандартные API браузера — PitBrowser сам спросит пользователя:
@@ -225,6 +252,5 @@ await pit.permissions.request(['camera', 'microphone']);   // → { camera: true
 
 ## Что дальше
 
-- наушники: подключение/отключение, кнопки гарнитуры
 - магазин приложений: публикация, проверка, обновления, онлайн-рекорды
 - те же игры в PitBrowser на компьютере (с имитатором датчиков)

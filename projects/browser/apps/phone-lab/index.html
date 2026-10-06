@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Проверка телефона</title>
+  <style>
+    :root { --bg: #0e1714; --card: #17241f; --line: #26392f; --text: #e6f2ec; --muted: #8fa89b; --accent: #2fc28a; --warn: #ffb547; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, Roboto, sans-serif; }
+    body { padding: max(14px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom)); }
+    h1 { font-size: 21px; margin: 4px 0 12px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+    .card h3 { margin: 0 0 8px; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 10px; background: #0b120f; color: var(--muted); }
+    .pill.on { color: var(--accent); }
+    button { font: inherit; font-weight: 600; color: #08130e; background: var(--accent); border: 0; border-radius: 10px; padding: 9px 14px; }
+    button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .dev { padding: 6px 0; border-top: 1px solid var(--line); }
+    .dev:first-child { border-top: 0; }
+    .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+    .key { text-align: center; padding: 10px 2px; border-radius: 10px; background: #0b120f; border: 1px solid var(--line); font-size: 12px; transition: background .1s; }
+    .key b { display: block; font-size: 20px; }
+    .key.down { background: var(--accent); color: #08130e; }
+    .log { max-height: 120px; overflow-y: auto; font: 12px ui-monospace, monospace; color: var(--muted); margin-top: 8px; }
+    .sensors { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .sensor { background: #0b120f; border-radius: 10px; padding: 8px 10px; }
+    .sensor .v { font: 13px ui-monospace, monospace; color: var(--accent); margin-top: 2px; }
+    label.switch { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+    input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <h1>Проверка телефона</h1>
+
+  <div class="card">
+    <h3>🎧 Наушники <span id="hpStatus" class="pill">…</span></h3>
+    <div id="hpDevices" class="muted"></div>
+    <div class="log" id="hpLog"></div>
+  </div>
+
+  <div class="card">
+    <h3>⏯ Кнопки</h3>
+    <label class="switch">Кнопки гарнитуры — игре <input type="checkbox" id="capMedia"></label>
+    <label class="switch">Кнопки громкости — игре <input type="checkbox" id="capVolume"></label>
+    <div class="keys">
+      <div class="key" data-b="previous"><b>⏮</b>назад</div>
+      <div class="key" data-b="play_pause"><b>⏯</b>пауза</div>
+      <div class="key" data-b="next"><b>⏭</b>вперёд</div>
+      <div class="key" data-b="stop"><b>⏹</b>стоп</div>
+      <div class="key" data-b="volume_down"><b>🔉</b>тише</div>
+      <div class="key" data-b="volume_up"><b>🔊</b>громче</div>
+      <div class="key" data-b="play"><b>▶</b>play</div>
+      <div class="key" data-b="pause"><b>⏸</b>pause</div>
+    </div>
+    <div class="muted" style="margin-top:8px">Включите переключатели и нажимайте кнопки на наушниках или телефоне — они подсветятся здесь.</div>
+  </div>
+
+  <div class="card">
+    <h3>🔈 Стерео</h3>
+    <div class="row">
+      <button class="ghost" data-pan="-1">Левое ухо</button>
+      <button class="ghost" data-pan="0">Оба</button>
+      <button class="ghost" data-pan="1">Правое ухо</button>
+    </div>
+    <div class="muted" style="margin-top:8px">Звук должен быть слышен только с нужной стороны. В играх так делают «объёмный» звук: <code>StereoPannerNode</code>.</div>
+  </div>
+
+  <div class="card">
+    <h3>📡 Датчики <span id="sensCount" class="pill"></span></h3>
+    <div class="sensors" id="sensors"></div>
+  </div>
+
+  <div class="card">
+    <h3>📳 Вибрация</h3>
+    <div class="row">
+      <button class="ghost" data-vib="[40]">Короткая</button>
+      <button class="ghost" data-vib="[400]">Длинная</button>
+      <button class="ghost" data-vib="[80,60,80,60,240]">Узор</button>
+    </div>
+  </div>
+
+<script src="pit.js"></script>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const TYPES = { wired: 'проводные', bluetooth: 'Bluetooth', usb: 'USB', hearing_aid: 'слуховой аппарат' };
+
+function log(text) {
+  const d = document.createElement('div');
+  d.textContent = new Date().toLocaleTimeString('ru-RU') + '  ' + text;
+  $('hpLog').prepend(d);
+}
+
+// ---------------------------------------------------------------- наушники
+function showHeadphones(s) {
+  $('hpStatus').textContent = s.supported === false ? 'только в PitBrowser' : s.connected ? 'подключены' : 'не подключены';
+  $('hpStatus').className = 'pill' + (s.connected ? ' on' : '');
+  const box = $('hpDevices');
+  box.textContent = '';
+  if (!s.connected) { box.textContent = 'Подключите проводные или Bluetooth-наушники — статус обновится сам.'; return; }
+  for (const d of s.devices) {
+    const el = document.createElement('div'); el.className = 'dev';
+    el.textContent = `${d.name} · ${TYPES[d.type] || d.type}${d.microphone ? ' · с микрофоном' : ''}`;
+    box.append(el);
+  }
+}
+pit.headphones.state().then(showHeadphones);
+pit.headphones.on((s) => {
+  showHeadphones(s);
+  log(s.change === 'connected' ? 'наушники подключены' : 'наушники отключены');
+  pit.vibrate(30);
+});
+pit.headphones.onUnplug(() => { log('наушники выдернули → звук на паузу'); stopTone(); });
+
+// ---------------------------------------------------------------- кнопки
+function onButton(e) {
+  const el = document.querySelector(`.key[data-b="${e.button}"]`);
+  if (el) el.classList.toggle('down', e.action === 'down');
+  if (e.action === 'down') log(`кнопка: ${e.button} (${e.source})`);
+}
+let offMedia = null, offVolume = null;
+$('capMedia').onchange = (e) => {
+  if (e.target.checked) offMedia = pit.headphones.onButton(onButton);
+  else if (offMedia) { offMedia(); offMedia = null; }
+};
+$('capVolume').onchange = (e) => {
+  if (e.target.checked) offVolume = pit.buttons.onVolume(onButton);
+  else if (offVolume) { offVolume(); offVolume = null; }
+};
+
+// ---------------------------------------------------------------- стерео
+let audio = null, osc = null, stopTimer = null;
+function stopTone() { if (osc) { try { osc.stop(); } catch (e) {} osc = null; } }
+document.querySelectorAll('[data-pan]').forEach((b) => b.onclick = () => {
+  audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+  stopTone();
+  clearTimeout(stopTimer);
+  osc = audio.createOscillator();
+  const pan = audio.createStereoPanner();
+  const gain = audio.createGain();
+  osc.frequency.value = 520;
+  pan.pan.value = Number(b.dataset.pan);
+  gain.gain.setValueAtTime(0.2, audio.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 1.2);
+  osc.connect(pan).connect(gain).connect(audio.destination);
+  osc.start(); osc.stop(audio.currentTime + 1.2);
+});
+
+// ---------------------------------------------------------------- датчики
+const NAMES = {
+  accelerometer: ['Акселерометр', 'м/с²'], gyroscope: ['Гироскоп', 'рад/с'], magnetometer: ['Магнитометр', 'мкТл'],
+  orientation: ['Ориентация', '°'], light: ['Освещённость', 'лк'], proximity: ['Приближение', 'см'],
+  pressure: ['Давление', 'гПа'], gravity: ['Гравитация', 'м/с²'], linear_acceleration: ['Ускорение', 'м/с²'],
+};
+pit.sensors.available().then((list) => {
+  const shown = list.filter((t) => NAMES[t]);
+  $('sensCount').textContent = `${list.length} шт.`;
+  for (const t of shown) {
+    const el = document.createElement('div'); el.className = 'sensor';
+    el.innerHTML = '<div class="muted"></div><div class="v">—</div>';
+    el.firstChild.textContent = NAMES[t][0];
+    $('sensors').append(el);
+    const v = el.lastChild;
+    pit.sensors.on(t, (e) => {
+      v.textContent = e.values.slice(0, 3).map((x) => x.toFixed(t === 'orientation' ? 0 : 2)).join('  ') + ' ' + NAMES[t][1];
+    }, { hz: 10 });
+  }
+  if (!shown.length) $('sensors').textContent = 'Датчики недоступны (на компьютере это нормально).';
+});
+
+// ---------------------------------------------------------------- вибрация
+document.querySelectorAll('[data-vib]').forEach((b) => b.onclick = () => pit.vibrate(JSON.parse(b.dataset.vib)));
+
+pit.on('pause', stopTone);
+</script>
+</body>
+</html>

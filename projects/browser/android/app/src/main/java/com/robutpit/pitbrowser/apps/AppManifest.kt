@@ -33,6 +33,8 @@ data class AppManifest(
             "vibrate" to "вибрация",
             "scores" to "таблица рекордов",
             "screen" to "управление экраном (не гаснуть, поворот)",
+            "headphones" to "наушники и кнопки гарнитуры",
+            "buttons" to "кнопки громкости как игровые кнопки",
             "camera" to "камера",
             "microphone" to "микрофон",
             "geolocation" to "местоположение",
