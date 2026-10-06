@@ -34,6 +34,8 @@ import com.robutpit.pitbrowser.apps.AppManifest
 import com.robutpit.pitbrowser.apps.AppServer
 import com.robutpit.pitbrowser.apps.AppState
 import com.robutpit.pitbrowser.apps.Apps
+import com.robutpit.pitbrowser.apps.BleUuids
+import com.robutpit.pitbrowser.apps.BluetoothBridge
 import com.robutpit.pitbrowser.apps.DeviceSensors
 import org.json.JSONArray
 import org.json.JSONObject
@@ -49,6 +51,8 @@ class AppActivity : Activity() {
     private lateinit var server: AppServer
     private lateinit var web: WebView
     private lateinit var sensors: DeviceSensors
+    private lateinit var bt: BluetoothBridge
+    private var pendingBtEnable: ((Boolean) -> Unit)? = null
 
     private var proxy: JavaScriptReplyProxy? = null
     private var captureBack = false
@@ -79,6 +83,7 @@ class AppActivity : Activity() {
         state = Apps.state(this, m)
         server = AppServer(this, m)
         sensors = DeviceSensors(this) { type, values, ts -> sendEvent("sensor:$type", sensorEvent(type, values, ts)) }
+        bt = BluetoothBridge(this, state) { event, data -> sendEvent(event, data) }
 
         requestedOrientation = orientationOf(m.orientation)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -138,6 +143,7 @@ class AppActivity : Activity() {
     override fun onDestroy() {
         if (::web.isInitialized) {
             sensors.stopAll()
+            bt.closeAll()
             web.destroy()
         }
         super.onDestroy()
@@ -206,6 +212,33 @@ class AppActivity : Activity() {
                     else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     ok(true)
                 }
+                "bluetooth.status" -> { require("bluetooth"); ok(bt.status()) }
+                "bluetooth.getDevices" -> { require("bluetooth"); ok(bt.approvedDevices()) }
+                "bluetooth.enable" -> withBluetooth(fail) { ok(true) }
+                "bluetooth.requestDevice" -> withBluetooth(fail) {
+                    val services = p.optJSONArray("services")?.let { a -> List(a.length()) { BleUuids.parse(a.optString(it)) } }.orEmpty()
+                    bt.requestDevice(services, p.optString("namePrefix").ifEmpty { null }) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } }
+                }
+                "bluetooth.connect" -> withBluetooth(fail) { bt.connect(p.optString("device")) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } } }
+                "bluetooth.disconnect" -> { require("bluetooth"); bt.disconnect(p.optString("device")); ok(true) }
+                "bluetooth.read" -> withBluetooth(fail) {
+                    bt.read(p.optString("device"), p.optString("service"), p.optString("characteristic")) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } }
+                }
+                "bluetooth.write" -> withBluetooth(fail) {
+                    bt.write(p.optString("device"), p.optString("service"), p.optString("characteristic"), BleUuids.decode(p.optString("value")),
+                        p.optBoolean("withoutResponse")) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } }
+                }
+                "bluetooth.notifications" -> withBluetooth(fail) {
+                    bt.setNotifications(p.optString("device"), p.optString("service"), p.optString("characteristic"),
+                        p.optBoolean("enable", true)) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } }
+                }
+                "bluetooth.serial.requestDevice" -> withBluetooth(fail) { bt.requestSerialDevice { r -> r.fold(ok) { fail(it.message ?: "ошибка") } } }
+                "bluetooth.serial.connect" -> withBluetooth(fail) { bt.serialConnect(p.optString("device")) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } } }
+                "bluetooth.serial.write" -> withBluetooth(fail) {
+                    bt.serialWrite(p.optString("device"), BleUuids.decode(p.optString("value"))) { r -> r.fold(ok) { fail(it.message ?: "ошибка") } }
+                }
+                "bluetooth.serial.disconnect" -> { require("bluetooth"); bt.serialDisconnect(p.optString("device")); ok(true) }
+
                 "screen.orientation" -> { require("screen"); requestedOrientation = orientationOf(p.optString("orientation", "any")); ok(true) }
 
                 "player.name" -> withPlayerName { ok(it) }
@@ -292,7 +325,53 @@ class AppActivity : Activity() {
         "camera" -> arrayOf(Manifest.permission.CAMERA)
         "microphone" -> arrayOf(Manifest.permission.RECORD_AUDIO)
         "geolocation" -> arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        // до Android 12 поиск Bluetooth-устройств требовал разрешения на местоположение
+        "bluetooth" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
         else -> emptyArray()
+    }
+
+    /**
+     * Перед любой Bluetooth-операцией: разрешение в manifest.json, согласие пользователя,
+     * разрешение Android и включённый Bluetooth (если выключен — предложим включить).
+     * Ошибки внутри action (неверный UUID, нет подключения) тоже уходят в fail.
+     */
+    @SuppressLint("MissingPermission") // ACTION_REQUEST_ENABLE вызывается только после ensurePermission("bluetooth")
+    private fun withBluetooth(fail: (String) -> Unit, action: () -> Unit) {
+        require("bluetooth")
+        val run = {
+            try { action() } catch (e: Exception) { fail(e.message ?: e.toString()) }
+        }
+        ensurePermission("bluetooth") { granted ->
+            when {
+                !granted -> fail("пользователь не разрешил доступ к Bluetooth")
+                !bt.supported() -> fail("на этом телефоне нет Bluetooth")
+                bt.enabled() -> run()
+                else -> {
+                    pendingBtEnable = { on -> if (on) run() else fail("Bluetooth выключен") }
+                    try {
+                        @Suppress("DEPRECATION")
+                        startActivityForResult(Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE), REQ_BT_ENABLE)
+                    } catch (e: Exception) {
+                        pendingBtEnable = null
+                        fail("включите Bluetooth в настройках телефона")
+                    }
+                }
+            }
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_BT_ENABLE) {
+            pendingBtEnable?.invoke(bt.enabled())
+            pendingBtEnable = null
+        }
     }
 
     private fun androidGranted(name: String) = androidPerms(name).all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
@@ -331,7 +410,8 @@ class AppActivity : Activity() {
     private fun askAndroid(name: String, then: (Boolean) -> Unit) {
         val missing = androidPerms(name).filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
         if (missing.isEmpty()) return then(true)
-        pendingAndroid = then
+        // для геолокации хватит примерного местоположения, остальным нужны все разрешения (Bluetooth: поиск + подключение)
+        pendingAndroid = { anyGranted -> then(if (name == "geolocation") anyGranted else androidGranted(name)) }
         requestPermissions(missing.toTypedArray(), REQ_PERMS)
     }
 
@@ -458,5 +538,6 @@ class AppActivity : Activity() {
 
     companion object {
         private const val REQ_PERMS = 10
+        private const val REQ_BT_ENABLE = 11
     }
 }

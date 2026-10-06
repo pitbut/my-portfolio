@@ -34,8 +34,10 @@ PitBrowser, как Opera, Vivaldi, Brave и Яндекс Браузер, исп�
 таблицу рекордов, камеру, микрофон и геолокацию — только с разрешения пользователя.
 
 - документация для разработчиков: [`sdk/README.md`](sdk/README.md)
-- демо-игра «Монетки» (управление наклоном, рекорды): [`apps/tilt-coins/`](apps/tilt-coins/) —
-  встроена в APK и ставится при первом запуске
+- демо-игра «Монетки» (управление наклоном, рекорды): [`apps/tilt-coins/`](apps/tilt-coins/)
+- «Bluetooth-терминал» (BLE и Serial: поиск, сервисы, чтение/запись, уведомления, терминал для
+  HC-05/ESP32): [`apps/bt-terminal/`](apps/bt-terminal/) + скетч для ESP32 в `sdk/examples/esp32-pit/`
+- оба встроены в APK и ставятся при первом запуске
 - все папки из `apps/` при сборке APK упаковываются в `.pitapp` и становятся встроенными приложениями
 
 ```
@@ -46,6 +48,8 @@ android/app/src/main/java/com/robutpit/pitbrowser/
   apps/AppState.kt      рекорды и решения пользователя по разрешениям
   apps/AppServer.kt     раздаёт файлы приложения по https://<id>.pitapp.robutpit.com без интернета
   apps/DeviceSensors.kt датчики и вибрация
+  apps/BluetoothBridge.kt Bluetooth: окно выбора, BLE (GATT), Serial (SPP)
+  apps/BleUuids.kt      UUID-имена Bluetooth и base64
   apps/Apps.kt          запуск, ярлыки на рабочем столе, встроенные приложения
 ```
 
@@ -110,7 +114,7 @@ git tag browser-v1.0.0 && git push origin browser-v1.0.0
 
 ## Идеи для следующих версий
 
-- Bluetooth (BLE), наушники и кнопки гарнитуры, NFC в PitSDK
+- наушники и кнопки гарнитуры, NFC в PitSDK
 - магазин игр: публикация `.pitapp`, проверка, обновления, онлайн-рекорды
 - приложения и игры в десктопной версии
 

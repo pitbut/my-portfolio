@@ -76,6 +76,7 @@ cd my-game && zip -r ../my-game.pitapp . && cd ..
 | `camera` | `navigator.mediaDevices.getUserMedia({video})` | при установке **и** при первом использовании |
 | `microphone` | `getUserMedia({audio})` | при установке **и** при первом использовании |
 | `geolocation` | `navigator.geolocation` | при установке **и** при первом использовании |
+| `bluetooth` | `pit.bluetooth` — BLE и Serial | при установке **и** при первом использовании |
 
 Звук (Web Audio, `<audio>`), мультитач, геймпады (Gamepad API, в т.ч. Bluetooth-геймпады),
 WebGL, WebAssembly, `localStorage`, IndexedDB работают без разрешений, как в обычном браузере.
@@ -147,6 +148,54 @@ const name = await pit.player.name();               // браузер спрос
 Рекорды хранит браузер (не сама игра), их видно в меню приложения на главном экране
 (удерживайте иконку → «Рекорды»). Общие онлайн-таблицы лидеров появятся вместе с магазином.
 
+### Bluetooth
+
+Как в Chrome: приложение работает только с устройством, которое пользователь **сам выбрал** в окне
+выбора. Выбор запоминается для этого приложения (`getDevices()`), другие приложения его не видят.
+Если Bluetooth выключен, PitBrowser предложит включить его.
+
+**BLE** — браслеты, пульсометры, датчики, ESP32/nRF, самодельные контроллеры:
+
+```js
+const dev = await pit.bluetooth.requestDevice({ services: ['heart_rate'] }); // окно выбора → { id, name }
+const { services } = await pit.bluetooth.connect(dev);                       // список сервисов и характеристик
+
+const battery = await pit.bluetooth.read(dev, 'battery_service', 'battery_level'); // Uint8Array
+console.log(battery[0] + '%');
+
+const unsubscribe = await pit.bluetooth.subscribe(dev, 'heart_rate', 'heart_rate_measurement', (e) => {
+  console.log('пульс', e.value[1]);                                      // e.value — Uint8Array
+});
+await pit.bluetooth.write(dev, 'nordic_uart', 'nordic_uart_rx', 'LED ON\n'); // строка, массив байт, Uint8Array
+pit.bluetooth.onDisconnect((e) => console.log('отключилось', e.device));
+await pit.bluetooth.disconnect(dev);
+```
+
+- UUID можно писать полностью (`'6e400001-b5a3-…'`), коротко (`'180f'`, `0x180f`) или именем:
+  `battery_service`, `battery_level`, `heart_rate`, `heart_rate_measurement`, `device_information`,
+  `nordic_uart`, `nordic_uart_rx`, `nordic_uart_tx` и др.
+- `requestDevice({ namePrefix: 'ESP32' })` — показать только устройства с таким началом имени.
+- За одну запись — до 512 байт; длинные данные отправляйте частями.
+- `pit.bluetooth.status()` → `{ supported, enabled, ble, classic }`.
+
+**Serial** (классический Bluetooth SPP) — HC-05, HC-06, ESP32 `BluetoothSerial`. Устройство
+нужно один раз сопрячь в настройках телефона:
+
+```js
+const dev = await pit.bluetooth.serial.requestDevice();   // выбор из сопряжённых
+await pit.bluetooth.serial.connect(dev);
+pit.bluetooth.serial.onData((e) => console.log(e.text));  // e.value — Uint8Array, e.text — строка
+await pit.bluetooth.serial.write(dev, 'LED ON\n');
+await pit.bluetooth.serial.disconnect(dev);
+```
+
+**Пример для ESP32:** [`examples/esp32-pit/esp32-pit.ino`](examples/esp32-pit/esp32-pit.ino) — BLE UART и
+Serial одновременно, команды `LED ON` / `LED OFF` / `PING`, кнопка BOOT шлёт `BTN`. Проверить можно
+встроенным приложением **«Bluetooth-терминал»**.
+
+Bluetooth-геймпады подключаются в настройках телефона и работают через стандартный Gamepad API
+(`navigator.getGamepads()`), без `pit.bluetooth`.
+
 ### Камера, микрофон, геолокация
 
 Стандартные API браузера — PitBrowser сам спросит пользователя:
@@ -176,7 +225,6 @@ await pit.permissions.request(['camera', 'microphone']);   // → { camera: true
 
 ## Что дальше
 
-- Bluetooth (BLE): поиск устройств, подключение, обмен данными
 - наушники: подключение/отключение, кнопки гарнитуры
 - магазин приложений: публикация, проверка, обновления, онлайн-рекорды
 - те же игры в PitBrowser на компьютере (с имитатором датчиков)

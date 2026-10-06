@@ -39,6 +39,29 @@ class AppState(private val dir: File, val manifest: AppManifest) {
     /** Разрешено ли сейчас: объявлено в манифесте и (для опасных) одобрено пользователем. */
     fun allowed(name: String): Boolean = manifest.has(name) && (name !in AppManifest.RUNTIME || permission(name) == true)
 
+    // ------------------------------------------------------------ Bluetooth-устройства
+
+    /** Устройство, которое пользователь сам выбрал для этого приложения. */
+    data class Device(val id: String, val name: String, val type: String)
+
+    /** Приложение видит только устройства, выбранные пользователем в окне выбора. */
+    fun devices(): List<Device> {
+        val arr = data.optJSONArray("devices") ?: return emptyList()
+        return List(arr.length()) { i -> arr.getJSONObject(i).let { Device(it.getString("id"), it.optString("name"), it.optString("type")) } }
+    }
+
+    fun isApproved(id: String, type: String) = devices().any { it.id.equals(id, ignoreCase = true) && it.type == type }
+
+    fun approveDevice(d: Device) {
+        val list = devices().filterNot { it.id.equals(d.id, ignoreCase = true) && it.type == d.type } + d
+        val arr = JSONArray()
+        list.takeLast(MAX_DEVICES).forEach { arr.put(JSONObject().put("id", it.id).put("name", it.name).put("type", it.type)) }
+        data.put("devices", arr)
+        save()
+    }
+
+    fun forgetDevices() { data.remove("devices"); save() }
+
     // ------------------------------------------------------------ рекорды
 
     fun scores(): List<Score> {
@@ -89,5 +112,6 @@ class AppState(private val dir: File, val manifest: AppManifest) {
 
     companion object {
         const val MAX_SCORES = 100
+        const val MAX_DEVICES = 20
     }
 }

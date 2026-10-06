@@ -47,18 +47,30 @@ android {
         applicationId = "com.robutpit.pitbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
+    }
+
+    signingConfigs {
+        // открытый тестовый ключ — см. keystore/README.md; для публикации нужен свой
+        create("test") {
+            storeFile = file("../keystore/pitbrowser-test.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("test")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            // Для публикации подпишите своим ключом (см. README). Без ключа — отладочной подписью,
-            // чтобы APK можно было сразу установить на телефон.
-            signingConfig = signingConfigs.getByName("debug")
+            // Для публикации подпишите своим ключом (см. README и keystore/README.md).
+            signingConfig = signingConfigs.getByName("test")
         }
     }
     compileOptions {

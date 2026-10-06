@@ -36,11 +36,12 @@ data class AppManifest(
             "camera" to "камера",
             "microphone" to "микрофон",
             "geolocation" to "местоположение",
+            "bluetooth" to "Bluetooth-устройства",
             "network" to "доступ в интернет",
         )
 
         /** Опасные разрешения: кроме согласия при установке, спрашиваются при первом использовании. */
-        val RUNTIME = setOf("camera", "microphone", "geolocation")
+        val RUNTIME = setOf("camera", "microphone", "geolocation", "bluetooth")
 
         private val ID = Regex("^[a-z0-9][a-z0-9-]{1,39}$")
         private val ORIENTATIONS = setOf("any", "portrait", "landscape")

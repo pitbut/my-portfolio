@@ -1,0 +1,10 @@
+{
+  "id": "bt-terminal",
+  "name": "Bluetooth-терминал",
+  "version": "1.0.0",
+  "description": "Проверка Bluetooth: поиск BLE-устройств, сервисы и характеристики, чтение, запись, уведомления; терминал для HC-05/HC-06 и ESP32 (Serial и BLE UART).",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "orientation": "any",
+  "permissions": ["bluetooth", "vibrate"]
+}

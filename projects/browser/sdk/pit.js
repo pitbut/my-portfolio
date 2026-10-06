@@ -115,6 +115,115 @@
     return ((a || 0) % 360 + 360) % 360;
   }
 
+  // ---------------------------------------------------------------- Bluetooth
+
+  // Байты ⇄ base64 (так данные передаются между игрой и браузером).
+  function toBytes(data) {
+    if (typeof data === 'string') return new TextEncoder().encode(data);
+    if (data instanceof Uint8Array) return data;
+    if (data instanceof ArrayBuffer) return new Uint8Array(data);
+    if (ArrayBuffer.isView(data)) return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+    if (Array.isArray(data)) return Uint8Array.from(data);
+    throw new Error('PitSDK: данные — строка, массив чисел, Uint8Array или ArrayBuffer');
+  }
+  function toB64(data) {
+    var b = toBytes(data), s = '';
+    for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+    return btoa(s);
+  }
+  function fromB64(b64) {
+    var s = atob(b64 || ''), b = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+    return b;
+  }
+  function devId(d) { return typeof d === 'string' ? d : d && d.id; }
+  function uuid(u) { return typeof u === 'number' ? u.toString(16).padStart(4, '0') : String(u); }
+
+  function makeBluetooth() {
+    function need() { if (!native) throw new Error('Bluetooth доступен только в приложении, установленном в PitBrowser'); }
+    function bt(method, params) {
+      try { need(); } catch (e) { return Promise.reject(e); }
+      return call('bluetooth.' + method, params);
+    }
+    function decode(handler) {
+      return function (e) { handler(Object.assign({}, e, { value: fromB64(e.value) })); };
+    }
+    return {
+      /** { supported, enabled, ble, classic } */
+      status: function () {
+        return native ? bt('status') : Promise.resolve({ supported: false, enabled: false, ble: false, classic: false });
+      },
+      /** Попросить пользователя включить Bluetooth. */
+      enable: function () { return bt('enable'); },
+      /**
+       * Окно выбора BLE-устройства. opts: { services: ['heart_rate', '180f', 0x180d, '6e400001-…'], namePrefix: 'ESP32' }
+       * → { id, name, type: 'ble' }. Приложение получает доступ только к выбранному устройству.
+       */
+      requestDevice: function (opts) {
+        opts = opts || {};
+        return bt('requestDevice', { services: (opts.services || []).map(uuid), namePrefix: opts.namePrefix || '' });
+      },
+      /** Устройства, которые пользователь уже выбирал для этого приложения. */
+      getDevices: function () { return native ? bt('getDevices') : Promise.resolve([]); },
+      /** Подключиться → { device, services: [{ uuid, characteristics: [{ uuid, properties }] }] } */
+      connect: function (device) { return bt('connect', { device: devId(device) }); },
+      disconnect: function (device) { return bt('disconnect', { device: devId(device) }); },
+      /** Прочитать характеристику → Uint8Array */
+      read: function (device, service, characteristic) {
+        return bt('read', { device: devId(device), service: uuid(service), characteristic: uuid(characteristic) }).then(fromB64);
+      },
+      /** Записать: строка (UTF-8), массив байт, Uint8Array или ArrayBuffer; до 512 байт за раз. */
+      write: function (device, service, characteristic, data, opts) {
+        return bt('write', {
+          device: devId(device), service: uuid(service), characteristic: uuid(characteristic),
+          value: toB64(data), withoutResponse: !!(opts && opts.withoutResponse),
+        });
+      },
+      /** Подписаться на изменения характеристики: fn({ device, service, characteristic, value: Uint8Array }). */
+      subscribe: function (device, service, characteristic, fn) {
+        var id = devId(device), s = uuid(service), c = uuid(characteristic);
+        // браузер вернёт UUID в единой записи ('2a37'); события до ответа придержим
+        var norm = null, early = [];
+        var off = on('bluetooth:notify', decode(function (e) {
+          if (e.device !== id) return;
+          if (norm === null) early.push(e);
+          else if (e.characteristic === norm) fn(e);
+        }));
+        return bt('notifications', { device: id, service: s, characteristic: c, enable: true }).then(function (u) {
+          norm = u;
+          early.forEach(function (e) { if (e.characteristic === norm) fn(e); });
+          early = [];
+          return function unsubscribe() {
+            off();
+            return bt('notifications', { device: id, service: s, characteristic: c, enable: false }).catch(function () {});
+          };
+        }, function (err) { off(); throw err; });
+      },
+      /** Устройство отключилось: fn({ device }) */
+      onDisconnect: function (fn) { return on('bluetooth:disconnected', fn); },
+
+      /** Классический Bluetooth — последовательный порт (HC-05, HC-06, ESP32 BluetoothSerial). */
+      serial: {
+        /** Выбор из сопряжённых устройств → { id, name, type: 'serial' } */
+        requestDevice: function () { return bt('serial.requestDevice'); },
+        connect: function (device) { return bt('serial.connect', { device: devId(device) }); },
+        write: function (device, data) { return bt('serial.write', { device: devId(device), value: toB64(data) }); },
+        disconnect: function (device) { return bt('serial.disconnect', { device: devId(device) }); },
+        /** Входящие данные: fn({ device, value: Uint8Array, text }) */
+        onData: function (fn) {
+          return on('bluetooth:serial', decode(function (e) {
+            e.text = new TextDecoder().decode(e.value);
+            fn(e);
+          }));
+        },
+      },
+
+      /** Помощники: байты ⇄ текст. */
+      text: function (bytes) { return new TextDecoder().decode(toBytes(bytes)); },
+      bytes: toBytes,
+    };
+  }
+
   // ---------------------------------------------------------------- публичный API
 
   var pit = {
@@ -205,6 +314,8 @@
       },
       rotation: screenRotation,
     },
+
+    bluetooth: makeBluetooth(),
 
     player: {
       /** Имя игрока (браузер спросит один раз и запомнит). */

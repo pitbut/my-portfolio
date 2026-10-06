@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bluetooth-терминал</title>
+  <style>
+    :root { --bg: #0f1420; --card: #192133; --line: #2a3550; --text: #e8ecf5; --muted: #8e9ab5; --accent: #3d8bff; --ok: #34c37a; --bad: #ff5d5d; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, Roboto, sans-serif; }
+    body { padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)); }
+    h1 { font-size: 20px; margin: 4px 0 10px; display: flex; align-items: center; gap: 10px; }
+    #status { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 10px; background: var(--card); color: var(--muted); }
+    #status.on { color: var(--ok); } #status.off { color: var(--bad); }
+    .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+    .tabs button { flex: 1; background: var(--card); color: var(--muted); border: 1px solid var(--line); }
+    .tabs button.active { color: #fff; border-color: var(--accent); background: #1d2c4d; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 12px; }
+    .card h3 { margin: 0 0 8px; font-size: 15px; }
+    button { font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 10px; padding: 10px 14px; }
+    button.small { padding: 5px 10px; font-size: 12px; font-weight: 600; border-radius: 8px; }
+    button.ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
+    button:disabled { opacity: .4; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .grow { flex: 1; min-width: 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; word-break: break-all; }
+    .svc { border-top: 1px solid var(--line); padding: 10px 0 4px; }
+    .svc:first-child { border-top: 0; padding-top: 0; }
+    .chr { padding: 8px 0 8px 10px; border-left: 2px solid var(--line); margin: 6px 0; }
+    .props { color: var(--muted); font-size: 11px; }
+    .val { margin-top: 4px; color: #9fd0ff; }
+    .dev { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); gap: 8px; }
+    .dev:first-child { border-top: 0; }
+    #log { height: 38vh; overflow-y: auto; background: #0a0e17; border-radius: 10px; padding: 8px; margin: 8px 0; }
+    #log div { white-space: pre-wrap; }
+    #log .in { color: #9fd0ff; } #log .out { color: #ffd479; } #log .sys { color: var(--muted); font-style: italic; }
+    input, select { font: inherit; color: var(--text); background: #0a0e17; border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; }
+    [hidden] { display: none !important; }
+    .err { color: var(--bad); font-size: 13px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Bluetooth-терминал <span id="status">…</span></h1>
+
+  <div class="tabs">
+    <button id="tabBle" class="active">BLE</button>
+    <button id="tabSerial">Serial (HC-05)</button>
+  </div>
+
+  <!-- ===== BLE ===== -->
+  <section id="ble">
+    <div class="card">
+      <div class="row">
+        <button id="find" class="grow">🔍 Найти устройство</button>
+        <button id="findUart" class="ghost" title="Только устройства с Nordic UART (ESP32 BLE UART)">UART</button>
+      </div>
+      <div class="muted" style="margin-top:8px">Пульсометры, браслеты, датчики, ESP32, nRF… Приложение видит только выбранное вами устройство.</div>
+      <div id="bleErr" class="err"></div>
+    </div>
+
+    <div class="card" id="recentCard" hidden>
+      <h3>Выбранные ранее</h3>
+      <div id="recent"></div>
+    </div>
+
+    <div class="card" id="devCard" hidden>
+      <div class="row">
+        <div class="grow"><b id="devName"></b><div class="mono muted" id="devId"></div></div>
+        <button id="bleDisconnect" class="small ghost">Отключить</button>
+      </div>
+      <div id="uartHint" class="muted" hidden style="margin-top:8px">Найден Nordic UART — откройте терминал ниже.</div>
+      <div id="services" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- ===== Serial ===== -->
+  <section id="serial" hidden>
+    <div class="card">
+      <div class="row">
+        <button id="pickSerial" class="grow">🔗 Выбрать сопряжённое устройство</button>
+      </div>
+      <div class="muted" style="margin-top:8px">Классический Bluetooth: HC-05, HC-06, ESP32 BluetoothSerial. Сначала сопрягите устройство в настройках телефона (PIN часто 1234 или 0000).</div>
+      <div id="serialErr" class="err"></div>
+    </div>
+  </section>
+
+  <!-- ===== общий терминал ===== -->
+  <div class="card" id="terminal" hidden>
+    <div class="row">
+      <h3 class="grow" id="termTitle">Терминал</h3>
+      <button id="clear" class="small ghost">Очистить</button>
+      <button id="termClose" class="small ghost">Отключить</button>
+    </div>
+    <div id="log"></div>
+    <div class="row">
+      <input id="msg" class="grow" placeholder="Текст или hex: 0x01 0xFF" autocomplete="off">
+      <select id="eol" title="Конец строки"><option value="lf">\n</option><option value="crlf">\r\n</option><option value="none">—</option></select>
+      <button id="send">➤</button>
+    </div>
+  </div>
+
+<script src="pit.js"></script>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const bt = pit.bluetooth;
+const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join(' ');
+// как текст показываем, только если это похоже на текст (одиночный байт — скорее число)
+const printable = (b) => b.length > 1 && /^[\x20-\x7e -￿\r\n\t]*$/.test(bt.text(b)) ? bt.text(b) : '';
+const NUS = { service: 'nordic_uart', rx: 'nordic_uart_rx', tx: 'nordic_uart_tx' };
+const NUS_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+
+// Понятные названия стандартных сервисов и характеристик
+const NAMES = {
+  '1800': 'Общая информация', '1801': 'Служебный', '180a': 'Сведения об устройстве', '180d': 'Пульс', '180f': 'Батарея',
+  '1812': 'HID (клавиатура/геймпад)', '181a': 'Датчики среды', [NUS_UUID]: 'Nordic UART (последовательный порт)',
+  '2a00': 'Имя устройства', '2a19': 'Заряд батареи', '2a37': 'Пульс', '2a29': 'Производитель', '2a24': 'Модель',
+  '2a26': 'Версия прошивки', '2a6e': 'Температура', '2a6f': 'Влажность',
+  '6e400002-b5a3-f393-e0a9-e50e24dcca9e': 'UART: приём (сюда писать)', '6e400003-b5a3-f393-e0a9-e50e24dcca9e': 'UART: передача (отсюда читать)',
+};
+// Расшифровка известных значений
+function decodeKnown(uuid, b) {
+  if (uuid === '2a19' && b.length) return `${b[0]}%`;
+  if (uuid === '2a37' && b.length > 1) return `${(b[0] & 1) ? (b[1] | (b[2] << 8)) : b[1]} уд/мин`;
+  if (uuid === '2a6e' && b.length > 1) return `${(new DataView(b.buffer).getInt16(0, true) / 100).toFixed(1)} °C`;
+  if (uuid === '2a6f' && b.length > 1) return `${(new DataView(b.buffer).getUint16(0, true) / 100).toFixed(1)} %`;
+  return '';
+}
+function showValue(el, uuid, b) {
+  const known = decodeKnown(uuid, b);
+  const txt = printable(b);
+  el.textContent = (known ? known + '  ·  ' : '') + (txt ? `«${txt}»  ·  ` : '') + `hex: ${hex(b) || '(пусто)'}`;
+}
+
+// ---------------------------------------------------------------- состояние Bluetooth
+async function refreshStatus() {
+  const s = await bt.status().catch(() => ({ supported: false }));
+  const st = $('status');
+  st.className = s.enabled ? 'on' : 'off';
+  st.textContent = !pit.isNative ? 'только в PitBrowser' : !s.supported ? 'нет Bluetooth' : s.enabled ? 'включён' : 'выключен';
+}
+pit.on('resume', refreshStatus);
+
+// ---------------------------------------------------------------- вкладки
+function tab(name) {
+  $('tabBle').classList.toggle('active', name === 'ble');
+  $('tabSerial').classList.toggle('active', name === 'serial');
+  $('ble').hidden = name !== 'ble';
+  $('serial').hidden = name !== 'serial';
+}
+$('tabBle').onclick = () => tab('ble');
+$('tabSerial').onclick = () => tab('serial');
+
+// ---------------------------------------------------------------- терминал (общий для Serial и BLE UART)
+let term = null; // { title, send(bytes), close() }
+function log(text, cls) {
+  const d = document.createElement('div');
+  d.className = cls; d.textContent = text;
+  $('log').append(d);
+  $('log').scrollTop = $('log').scrollHeight;
+}
+function openTerminal(t) {
+  term = t;
+  $('termTitle').textContent = t.title;
+  $('terminal').hidden = false;
+  log(`Подключено: ${t.title}`, 'sys');
+  $('terminal').scrollIntoView({ behavior: 'smooth' });
+}
+function closeTerminal(reason) {
+  if (!term) return;
+  log(reason || 'Отключено', 'sys');
+  term = null;
+}
+function parseInput(text) {
+  // «0x01 0xff 10» → байты; иначе — текст
+  if (/^\s*(0x[0-9a-f]{1,2}\s*)+$/i.test(text)) return Uint8Array.from(text.trim().split(/\s+/).map((x) => parseInt(x, 16)));
+  const eol = { lf: '\n', crlf: '\r\n', none: '' }[$('eol').value];
+  return bt.bytes(text + eol);
+}
+async function send() {
+  if (!term) return log('Нет подключения', 'sys');
+  const text = $('msg').value;
+  if (!text) return;
+  try {
+    await term.send(parseInput(text));
+    log('→ ' + text, 'out');
+    $('msg').value = '';
+  } catch (e) { log('Ошибка: ' + e.message, 'sys'); }
+}
+$('send').onclick = send;
+$('msg').addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+$('clear').onclick = () => { $('log').textContent = ''; };
+$('termClose').onclick = () => term && term.close();
+
+// ---------------------------------------------------------------- Serial (классический Bluetooth)
+let serialDev = null;
+bt.serial.onData((e) => {
+  if (!serialDev || e.device !== serialDev.id) return;
+  log('← ' + (printable(e.value) || 'hex: ' + hex(e.value)), 'in');
+});
+$('pickSerial').onclick = async () => {
+  $('serialErr').textContent = '';
+  try {
+    const dev = await bt.serial.requestDevice();
+    log(`Подключение к ${dev.name}…`, 'sys');
+    $('terminal').hidden = false;
+    await bt.serial.connect(dev);
+    serialDev = dev;
+    pit.vibrate(30);
+    openTerminal({
+      title: `${dev.name} (Serial)`,
+      send: (b) => bt.serial.write(dev, b),
+      close: () => bt.serial.disconnect(dev),
+    });
+  } catch (e) { $('serialErr').textContent = e.message; }
+};
+
+// ---------------------------------------------------------------- BLE
+let bleDev = null;
+let subs = [];
+
+async function connectBle(dev) {
+  $('bleErr').textContent = '';
+  $('devCard').hidden = false;
+  $('devName').textContent = dev.name;
+  $('devId').textContent = dev.id + ' — подключение…';
+  $('services').textContent = '';
+  try {
+    const r = await bt.connect(dev);
+    bleDev = dev;
+    pit.vibrate(30);
+    $('devId').textContent = dev.id + ' — подключено';
+    renderServices(r.services);
+    loadRecent();
+  } catch (e) {
+    $('devId').textContent = dev.id;
+    $('bleErr').textContent = e.message;
+  }
+}
+
+function renderServices(services) {
+  const box = $('services');
+  box.textContent = '';
+  const hasUart = services.some((s) => s.uuid === NUS_UUID);
+  $('uartHint').hidden = !hasUart;
+  if (hasUart) {
+    const b = document.createElement('button');
+    b.textContent = 'Открыть терминал (BLE UART)';
+    b.style.marginTop = '8px';
+    b.onclick = openUart;
+    $('uartHint').append(document.createElement('br'), b);
+  }
+  for (const s of services) {
+    const el = document.createElement('div'); el.className = 'svc';
+    el.innerHTML = '<b></b><div class="mono muted"></div>';
+    el.querySelector('b').textContent = NAMES[s.uuid] || 'Сервис';
+    el.querySelector('.mono').textContent = s.uuid;
+    for (const c of s.characteristics) el.append(renderChar(s, c));
+    box.append(el);
+  }
+}
+
+function renderChar(s, c) {
+  const el = document.createElement('div'); el.className = 'chr';
+  el.innerHTML = '<div class="row"><div class="grow"><div class="name"></div><div class="mono muted id"></div><div class="props"></div></div></div><div class="mono val"></div><div class="row btns"></div>';
+  el.querySelector('.name').textContent = NAMES[c.uuid] || 'Характеристика';
+  el.querySelector('.id').textContent = c.uuid;
+  el.querySelector('.props').textContent = c.properties.join(', ');
+  const val = el.querySelector('.val');
+  const btns = el.querySelector('.btns');
+  const btn = (label, fn) => {
+    const b = document.createElement('button'); b.className = 'small ghost'; b.textContent = label;
+    b.onclick = async () => { b.disabled = true; try { await fn(b); } catch (e) { val.textContent = 'Ошибка: ' + e.message; } b.disabled = false; };
+    btns.append(b);
+  };
+  if (c.properties.includes('read')) btn('Читать', async () => showValue(val, c.uuid, await bt.read(bleDev, s.uuid, c.uuid)));
+  if (c.properties.includes('notify') || c.properties.includes('indicate')) {
+    let unsub = null;
+    btn('Подписаться', async (b) => {
+      if (unsub) { await unsub(); unsub = null; b.textContent = 'Подписаться'; return; }
+      unsub = await bt.subscribe(bleDev, s.uuid, c.uuid, (e) => showValue(val, c.uuid, e.value));
+      subs.push(unsub);
+      b.textContent = 'Отписаться';
+    });
+  }
+  if (c.properties.includes('write') || c.properties.includes('writeWithoutResponse')) {
+    btn('Записать', async () => {
+      const text = prompt('Что отправить? Текст или hex (0x01 0xff):');
+      if (text == null) return;
+      const bytes = /^\s*(0x[0-9a-f]{1,2}\s*)+$/i.test(text) ? Uint8Array.from(text.trim().split(/\s+/).map((x) => parseInt(x, 16))) : bt.bytes(text);
+      await bt.write(bleDev, s.uuid, c.uuid, bytes, { withoutResponse: !c.properties.includes('write') });
+      val.textContent = 'Отправлено: ' + hex(bytes);
+    });
+  }
+  return el;
+}
+
+async function openUart() {
+  const dev = bleDev;
+  openTerminal({
+    title: `${dev.name} (BLE UART)`,
+    // BLE пакет ограничен — длинные сообщения режем на части
+    send: async (b) => { for (let i = 0; i < b.length; i += 180) await bt.write(dev, NUS.service, NUS.rx, b.slice(i, i + 180)); },
+    close: () => bt.disconnect(dev),
+  });
+  try {
+    subs.push(await bt.subscribe(dev, NUS.service, NUS.tx, (e) => log('← ' + (printable(e.value) || 'hex: ' + hex(e.value)), 'in')));
+  } catch (e) { log('Не удалось подписаться: ' + e.message, 'sys'); }
+}
+
+$('find').onclick = async () => {
+  $('bleErr').textContent = '';
+  try { await connectBle(await bt.requestDevice()); } catch (e) { $('bleErr').textContent = e.message; }
+};
+$('findUart').onclick = async () => {
+  $('bleErr').textContent = '';
+  try { await connectBle(await bt.requestDevice({ services: [NUS.service] })); } catch (e) { $('bleErr').textContent = e.message; }
+};
+$('bleDisconnect').onclick = () => bleDev && bt.disconnect(bleDev);
+
+bt.onDisconnect((e) => {
+  if (bleDev && e.device === bleDev.id) {
+    $('devId').textContent = bleDev.id + ' — отключено';
+    $('services').textContent = '';
+    $('uartHint').hidden = true;
+    bleDev = null; subs = [];
+  }
+  if (serialDev && e.device === serialDev.id) serialDev = null;
+  closeTerminal('Устройство отключилось');
+  pit.vibrate([40, 40, 40]);
+});
+
+async function loadRecent() {
+  const list = (await bt.getDevices()).filter((d) => d.type === 'ble');
+  $('recentCard').hidden = !list.length;
+  const box = $('recent');
+  box.textContent = '';
+  for (const d of list.reverse()) {
+    const row = document.createElement('div'); row.className = 'dev';
+    row.innerHTML = '<div class="grow"><div></div><div class="mono muted"></div></div>';
+    row.querySelector('.grow div').textContent = d.name;
+    row.querySelector('.mono').textContent = d.id;
+    const b = document.createElement('button'); b.className = 'small'; b.textContent = 'Подключить';
+    b.onclick = () => connectBle(d);
+    row.append(b);
+    box.append(row);
+  }
+}
+
+refreshStatus();
+loadRecent();
+</script>
+</body>
+</html>

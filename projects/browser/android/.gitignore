@@ -6,3 +6,6 @@ local.properties
 .idea/
 *.iml
 out/
+
+# тестовый ключ хранится в репозитории намеренно (см. keystore/README.md)
+!keystore/pitbrowser-test.keystore
