@@ -41,7 +41,7 @@ class AgentRunnerTest {
     @After fun stop() = server.shutdown()
 
     private val notified = mutableListOf<String>()
-    private val device = object : AgentRunner.Device {
+    private val device = object : Device {
         override fun notify(title: String, text: String) { notified += "$title|$text" }
     }
 
@@ -151,7 +151,7 @@ class AgentRunnerTest {
         responses += 401 to """{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}"""
         val bad = run()
         assertEquals("error", bad.status)
-        assertEquals("неверный ключ API", bad.error)
+        assertEquals("неверный ключ Claude API", bad.error)
     }
 
     @Test fun haikuUsesBasicToolsWithoutEffortOrFallbacks() {

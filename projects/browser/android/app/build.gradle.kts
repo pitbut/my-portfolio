@@ -48,8 +48,8 @@ android {
         applicationId = "com.robutpit.pitbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.6.1"
+        versionCode = 9
+        versionName = "1.7.0"
     }
 
     signingConfigs {
@@ -116,6 +116,8 @@ dependencies {
     // агенты: официальный Java SDK Anthropic (Claude API)
     implementation("com.anthropic:anthropic-java:2.68.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    // HTTP для OpenAI-совместимых ИИ и чтения страниц (та же версия, что внутри Anthropic SDK)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     testImplementation("org.json:json:20250517")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("junit:junit:4.13.2")

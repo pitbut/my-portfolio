@@ -14,6 +14,8 @@ import android.webkit.WebViewClient
 import com.robutpit.pitbrowser.agents.Agent
 import com.robutpit.pitbrowser.agents.Agents
 import com.robutpit.pitbrowser.agents.KeyVault
+import com.robutpit.pitbrowser.agents.Provider
+import com.robutpit.pitbrowser.agents.Team
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -85,7 +87,7 @@ class AgentsActivity : Activity() {
         }
     }
 
-    /** Методы для страницы агентов. Ключ API наружу не отдаётся никогда — только маска. */
+    /** Методы для страницы агентов. Ключи API наружу не отдаются никогда — только маски. */
     private inner class Bridge {
         private val ctx get() = this@AgentsActivity
 
@@ -93,40 +95,81 @@ class AgentsActivity : Activity() {
         private fun err(e: Throwable) = JSONObject().put("ok", false).put("error", e.message ?: e.toString()).toString()
         private inline fun safe(f: () -> Any?): String = try { ok(f()) } catch (e: Exception) { err(e) }
 
+        private fun providerJson(p: Provider) = p.toJson()
+            .put("hasKey", Agents.hasKey(ctx, p))
+            .put("maskedKey", KeyVault.load(ctx, p.id)?.let { KeyVault.masked(it) } ?: JSONObject.NULL)
+
         @JavascriptInterface
         fun state(): String = safe {
             val store = Agents.store(ctx)
-            val key = KeyVault.load(ctx)
             JSONObject()
-                .put("hasKey", key != null)
-                .put("maskedKey", key?.let { KeyVault.masked(it) } ?: JSONObject.NULL)
+                .put("providers", JSONArray(Agents.providers(ctx).all().map { providerJson(it) }))
                 .put("agents", JSONArray(store.agents().map { a ->
                     a.toJson().put("lastRun", store.runs(a.id).firstOrNull()?.toJson() ?: JSONObject.NULL)
                 }))
-                .put("models", JSONArray(Agent.MODELS.map { (id, m) ->
-                    JSONObject().put("id", id).put("title", m.title).put("inputPrice", m.inputPrice).put("outputPrice", m.outputPrice)
+                .put("teams", JSONArray(store.teams().map { t ->
+                    t.toJson().put("lastRun", store.runs(t.id).firstOrNull()?.toJson() ?: JSONObject.NULL)
                 }))
-                .put("running", Agents.current?.toJson() ?: JSONObject.NULL)
+                .put("claudePrices", JSONObject().apply {
+                    Agent.MODELS.forEach { (id, m) -> put(id, JSONObject().put("title", m.title).put("in", m.inputPrice).put("out", m.outputPrice)) }
+                })
+                .put("running", JSONArray(Agents.runningRuns().map { it.toJson() }))
+                .put("maxParallel", Agents.MAX_PARALLEL)
                 .put("todayTokens", Agents.todayTokens(ctx))
                 .put("dailyLimit", Agents.dailyLimit(ctx))
                 .put("canNotify", Agents.canNotify(ctx))
         }
 
+        // ---------------- ИИ-сервисы и ключи
+
         @JavascriptInterface
-        fun setKey(key: String): String = safe {
+        fun setProviderKey(providerId: String, key: String): String = safe {
+            val p = Agents.providers(ctx).get(providerId) ?: throw IllegalArgumentException("нет такого сервиса")
             val k = key.trim()
-            if (!k.startsWith("sk-ant-") || k.length < 20) throw IllegalArgumentException("ключ Claude API начинается с sk-ant-")
-            KeyVault.save(ctx, k)
-            Agents.checkKey(ctx, k) { e -> listener(JSONObject().put("type", "keyCheck").put("error", e ?: JSONObject.NULL)) }
+            if (p.kind == "anthropic" && (!k.startsWith("sk-ant-") || k.length < 20)) throw IllegalArgumentException("ключ Claude API начинается с sk-ant-")
+            if (k.length < 8 || k.any { it.isWhitespace() }) throw IllegalArgumentException("похоже, ключ скопирован не полностью")
+            KeyVault.save(ctx, k, p.id)
+            loadModels(p.id)
             KeyVault.masked(k)
         }
 
         @JavascriptInterface
-        fun clearKey(): String = safe { KeyVault.clear(ctx) }
+        fun clearProviderKey(providerId: String): String = safe { KeyVault.clear(ctx, providerId) }
+
+        /** Проверить ключ и получить модели сервиса — ответ придёт событием "models". */
+        @JavascriptInterface
+        fun loadModels(providerId: String): String = safe {
+            Agents.checkKey(ctx, providerId) { models, error ->
+                listener(JSONObject().put("type", "models").put("provider", providerId)
+                    .put("models", models?.let { JSONArray(it) } ?: JSONObject.NULL).put("error", error ?: JSONObject.NULL))
+            }
+        }
+
+        @JavascriptInterface
+        fun setProviderModel(providerId: String, model: String): String = safe { Agents.providers(ctx).setModel(providerId, model) }
+
+        @JavascriptInterface
+        fun setProviderUrl(providerId: String, url: String): String = safe { Agents.providers(ctx).setBaseUrl(providerId, url) }
+
+        @JavascriptInterface
+        fun addProvider(json: String): String = safe {
+            val o = JSONObject(json)
+            val p = Provider.custom(o)
+            if (Agents.providers(ctx).get(p.id)?.builtIn == true) throw IllegalArgumentException("такое имя занято встроенным сервисом")
+            Agents.providers(ctx).save(p)
+            o.optString("key").trim().takeIf { it.isNotEmpty() }?.let { KeyVault.save(ctx, it, p.id) }
+            providerJson(p)
+        }
+
+        @JavascriptInterface
+        fun deleteProvider(providerId: String): String = safe { Agents.providers(ctx).delete(providerId); KeyVault.clear(ctx, providerId) }
+
+        // ---------------- агенты
 
         @JavascriptInterface
         fun saveAgent(json: String): String = safe {
             val o = JSONObject(json)
+            if (Agents.providers(ctx).get(o.optString("provider").ifBlank { Provider.CLAUDE }) == null) throw IllegalArgumentException("выберите ИИ")
             val existing = o.optString("id").takeIf { it.isNotEmpty() }?.let { Agents.store(ctx).get(it) }
             val a = Agent.fromJson(o, existing)
             Agents.store(ctx).save(a)
@@ -142,20 +185,52 @@ class AgentsActivity : Activity() {
         @JavascriptInterface
         fun run(id: String): String = safe {
             val agent = Agents.store(ctx).get(id) ?: throw IllegalStateException("агент не найден")
-            if (agent.notify && Build.VERSION.SDK_INT >= 33 && !Agents.canNotify(ctx)) {
-                runOnUiThread { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1) }
-            }
+            askNotifications(agent.notify)
             Agents.start(ctx, id)
         }
 
+        // ---------------- команды
+
         @JavascriptInterface
-        fun stop(): String = safe { Agents.stop() }
+        fun saveTeam(json: String): String = safe {
+            val o = JSONObject(json)
+            val store = Agents.store(ctx)
+            val existing = o.optString("id").takeIf { it.isNotEmpty() }?.let { store.team(it) }
+            val t = Team.fromJson(o, existing, store.agents().map { it.id }.toSet())
+            store.saveTeam(t)
+            t.toJson()
+        }
+
+        @JavascriptInterface
+        fun deleteTeam(id: String): String = safe { Agents.store(ctx).deleteTeam(id) }
+
+        @JavascriptInterface
+        fun runTeam(id: String): String = safe {
+            val store = Agents.store(ctx)
+            val t = store.team(id) ?: throw IllegalStateException("команда не найдена")
+            askNotifications(store.agents().any { it.id in t.members && it.notify })
+            Agents.startTeam(ctx, id)
+        }
+
+        // ---------------- общее
+
+        @JavascriptInterface
+        fun stop(runId: String): String = safe { Agents.stop(runId) }
+
+        @JavascriptInterface
+        fun stopAll(): String = safe { Agents.stopAll() }
 
         @JavascriptInterface
         fun setDailyLimit(tokens: String): String = safe { Agents.setDailyLimit(ctx, tokens.toLong()); Agents.dailyLimit(ctx) }
 
         @JavascriptInterface
         fun openUrl(url: String): String = safe { runOnUiThread { openInBrowser(url) } }
+
+        private fun askNotifications(need: Boolean) {
+            if (need && Build.VERSION.SDK_INT >= 33 && !Agents.canNotify(ctx)) {
+                runOnUiThread { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1) }
+            }
+        }
     }
 
     companion object {

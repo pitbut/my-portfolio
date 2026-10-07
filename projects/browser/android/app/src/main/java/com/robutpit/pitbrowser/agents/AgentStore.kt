@@ -15,10 +15,12 @@ data class Agent(
     val web: Boolean,
     val notify: Boolean,
     val created: Long,
+    /** ИИ-сервис (id из ProviderStore): claude, openai, gemini, grok, deepseek, qwen или свой. */
+    val provider: String = Provider.CLAUDE,
 ) {
     fun toJson(): JSONObject = JSONObject()
         .put("id", id).put("name", name).put("task", task).put("model", model)
-        .put("effort", effort).put("web", web).put("notify", notify).put("created", created)
+        .put("effort", effort).put("web", web).put("notify", notify).put("created", created).put("provider", provider)
 
     companion object {
         /** Модели, которые можно выбрать. Первая — по умолчанию. Цены — за 1 млн токенов, $ (на сентябрь 2026). */
@@ -35,21 +37,30 @@ data class Agent(
             val task = o.optString("task").trim().take(8000)
             if (name.isEmpty()) throw IllegalArgumentException("укажите название агента")
             if (task.length < 5) throw IllegalArgumentException("опишите задачу агента")
-            val model = o.optString("model").takeIf { it in MODELS } ?: MODELS.keys.first()
+            val provider = o.optString("provider").ifBlank { Provider.CLAUDE }
+            val model = if (provider == Provider.CLAUDE) {
+                o.optString("model").takeIf { it.startsWith("claude-") } ?: MODELS.keys.first()
+            } else {
+                o.optString("model").trim().take(100) // проверит сам сервис; пусто — модель сервиса по умолчанию
+            }
             val effort = o.optString("effort").takeIf { it in EFFORTS } ?: "medium"
             return Agent(
                 id = existing?.id ?: UUID.randomUUID().toString().take(8),
                 name = name, task = task, model = model, effort = effort,
                 web = o.optBoolean("web", true), notify = o.optBoolean("notify", false),
                 created = existing?.created ?: System.currentTimeMillis(),
+                provider = provider,
             )
         }
 
-        fun parse(o: JSONObject) = Agent(
-            o.getString("id"), o.optString("name"), o.optString("task"),
-            o.optString("model").takeIf { it in MODELS } ?: MODELS.keys.first(),
-            o.optString("effort", "medium"), o.optBoolean("web", true), o.optBoolean("notify"), o.optLong("created"),
-        )
+        fun parse(o: JSONObject): Agent {
+            val provider = o.optString("provider").ifBlank { Provider.CLAUDE }
+            return Agent(
+                o.getString("id"), o.optString("name"), o.optString("task"),
+                if (provider == Provider.CLAUDE) o.optString("model").takeIf { it.startsWith("claude-") } ?: MODELS.keys.first() else o.optString("model"),
+                o.optString("effort", "medium"), o.optBoolean("web", true), o.optBoolean("notify"), o.optLong("created"), provider,
+            )
+        }
     }
 
     data class Model(val title: String, val inputPrice: Double, val outputPrice: Double)
@@ -70,18 +81,30 @@ data class AgentRun(
     var outputTokens: Long = 0,
     var webSearches: Long = 0,
     var model: String = "",
+    var provider: String = Provider.CLAUDE,
+    /** Стоимость частей, посчитанных отдельно (поиск через Claude, участники команды). */
+    var extraCostUsd: Double = 0.0,
+    /** false — есть запросы к ИИ, цены которого браузер не знает (показываем только токены). */
+    var costKnown: Boolean = true,
+    /** Для команд: результаты участников. */
+    val members: MutableList<JSONObject> = mutableListOf(),
+    /** Уникальный номер запуска (несколько агентов могут работать одновременно). */
+    val runId: String = java.util.UUID.randomUUID().toString().take(8),
+    var title: String = "",
 ) {
     /** Примерная стоимость по токенам (без отдельной платы за веб-поиск). */
     fun costUsd(): Double {
-        val m = Agent.MODELS[model] ?: return 0.0
-        return inputTokens / 1e6 * m.inputPrice + outputTokens / 1e6 * m.outputPrice
+        val m = Agent.MODELS[model]
+        val own = if (m != null && provider == Provider.CLAUDE) inputTokens / 1e6 * m.inputPrice + outputTokens / 1e6 * m.outputPrice else 0.0
+        return own + extraCostUsd
     }
 
     fun toJson(): JSONObject = JSONObject()
         .put("agentId", agentId).put("started", started).put("finished", finished).put("status", status)
         .put("steps", JSONArray(steps)).put("result", result).put("error", error).put("links", JSONArray(links))
         .put("inputTokens", inputTokens).put("outputTokens", outputTokens).put("webSearches", webSearches)
-        .put("model", model).put("costUsd", costUsd())
+        .put("model", model).put("costUsd", costUsd()).put("provider", provider).put("costKnown", costKnown)
+        .put("extraCostUsd", extraCostUsd).put("members", JSONArray(members)).put("runId", runId).put("title", title)
 
     companion object {
         fun parse(o: JSONObject) = AgentRun(
@@ -92,6 +115,10 @@ data class AgentRun(
             links = o.optJSONArray("links")?.let { a -> MutableList(a.length()) { a.getJSONObject(it) } } ?: mutableListOf(),
             inputTokens = o.optLong("inputTokens"), outputTokens = o.optLong("outputTokens"),
             webSearches = o.optLong("webSearches"), model = o.optString("model"),
+            provider = o.optString("provider").ifBlank { Provider.CLAUDE }, extraCostUsd = o.optDouble("extraCostUsd", 0.0),
+            costKnown = o.optBoolean("costKnown", true),
+            members = o.optJSONArray("members")?.let { a -> MutableList(a.length()) { a.getJSONObject(it) } } ?: mutableListOf(),
+            runId = o.optString("runId").ifBlank { java.util.UUID.randomUUID().toString().take(8) }, title = o.optString("title"),
         )
     }
 }
@@ -117,6 +144,9 @@ class AgentStore(private val dir: File) {
     @Synchronized fun delete(id: String) {
         write(agentsFile, JSONArray(agents().filterNot { it.id == id }.map { it.toJson() }).toString())
         runsFile(id).delete()
+        teams().filter { id in it.members || it.judge == id }.forEach { t ->
+            saveTeam(t.copy(members = t.members - id, judge = if (t.judge == id) "" else t.judge))
+        }
     }
 
     @Synchronized fun runs(agentId: String): List<AgentRun> {
@@ -129,9 +159,29 @@ class AgentStore(private val dir: File) {
         write(runsFile(run.agentId), JSONArray(list.map { it.toJson() }).toString())
     }
 
-    /** Сколько токенов потрачено за сегодня всеми агентами (для лимита в день). */
+    /** Сколько токенов потрачено за сегодня всеми агентами и командами (для лимита в день). */
     @Synchronized fun tokensSince(since: Long): Long =
-        agents().sumOf { a -> runs(a.id).filter { it.started >= since }.sumOf { it.inputTokens + it.outputTokens } }
+        (agents().map { it.id } + teams().map { it.id }).sumOf { id -> runs(id).filter { it.started >= since }.sumOf { it.inputTokens + it.outputTokens } }
+
+    // ------------------------------------------------------------ команды
+
+    private val teamsFile = File(dir, "teams.json")
+
+    @Synchronized fun teams(): List<Team> {
+        val arr = runCatching { JSONArray(teamsFile.readText()) }.getOrDefault(JSONArray())
+        return List(arr.length()) { Team.parse(arr.getJSONObject(it)) }
+    }
+
+    @Synchronized fun team(id: String) = teams().find { it.id == id }
+
+    @Synchronized fun saveTeam(t: Team) {
+        write(teamsFile, JSONArray((teams().filterNot { it.id == t.id } + t).sortedBy { it.created }.map { it.toJson() }).toString())
+    }
+
+    @Synchronized fun deleteTeam(id: String) {
+        write(teamsFile, JSONArray(teams().filterNot { it.id == id }.map { it.toJson() }).toString())
+        runsFile(id).delete()
+    }
 
     private fun runsFile(id: String) = File(dir, "runs-${id.filter { it.isLetterOrDigit() }}.json")
 
