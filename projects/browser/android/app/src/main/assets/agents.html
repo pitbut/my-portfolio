@@ -237,6 +237,8 @@ $('keySave').onclick = () => {
 };
 $('keyRemove').onclick = () => { if (confirm('Удалить ключ с телефона?')) { call('clearKey'); refresh(); } };
 
+$('newAgent').onclick = () => openEdit(null);
+
 // ---------------------------------------------------------------- шаблоны
 for (const t of TEMPLATES) {
   const b = document.createElement('button'); b.className = 'tpl';
