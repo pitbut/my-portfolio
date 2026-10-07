@@ -1,0 +1,4 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- голова робота -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M11,2h2v3h-2zM5,7h14a2,2 0,0 1,2 2v9a2,2 0,0 1,-2 2H5a2,2 0,0 1,-2 -2V9a2,2 0,0 1,2 -2zM8.5,11a1.5,1.5 0,1 0,0 3a1.5,1.5 0,1 0,0 -3zM15.5,11a1.5,1.5 0,1 0,0 3a1.5,1.5 0,1 0,0 -3zM8,16v1.5h8V16z" />
+</vector>

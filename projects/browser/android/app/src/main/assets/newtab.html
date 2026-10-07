@@ -28,6 +28,7 @@
   .app:active { background: rgba(127,127,127,.15); }
   .app .ic { width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #ffd54a, #e08a00); border: 0; color: #222; font-size: 24px; }
   .app .ic img { width: 58px; height: 58px; }
+  .app.agents .ic { background: linear-gradient(135deg, #2fc28a, #1a8f8f); font-size: 28px; }
   .app.store .ic { background: linear-gradient(135deg, #5b8cff, #7a4dff); font-size: 28px; }
   .hint { color: var(--muted); font-size: 12px; max-width: 560px; width: 100%; margin: -8px 0 14px; }
 </style></head>
@@ -69,7 +70,12 @@ function render(data) {
 function renderApps(apps, storeUrl) {
   var box = document.getElementById('apps');
   box.textContent = '';
-  // первая плитка — магазин игр
+  // плитка «Агенты»
+  var ag = document.createElement('div'); ag.className = 'app agents';
+  ag.innerHTML = '<div class="ic">🤖</div><div class="n">Агенты</div>';
+  ag.addEventListener('click', function () { location.href = 'pitbrowser://agents'; });
+  box.appendChild(ag);
+  // плитка — магазин игр
   if (storeUrl) {
     var st = document.createElement('div'); st.className = 'app store';
     st.innerHTML = '<div class="ic">🛍️</div><div class="n">Магазин игр</div>';

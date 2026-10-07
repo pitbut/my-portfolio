@@ -357,6 +357,7 @@ class MainActivity : Activity() {
         val m = menu.menu
         m.add(0, 1, 0, "Новая вкладка")
         m.add(0, 13, 0, "Магазин игр")
+        m.add(0, 14, 0, "Агенты")
         if (isWeb) m.add(0, 2, 0, if (store.isBookmarked(url)) "Удалить из закладок" else "Добавить в закладки")
         m.add(0, 3, 0, "Закладки")
         m.add(0, 4, 0, "История")
@@ -394,6 +395,7 @@ class MainActivity : Activity() {
                 11 -> { tabs.toList().forEach { closeTab(it) } }
                 12 -> pickPackageFile()
                 13 -> navigate(STORE_URL)
+                14 -> startActivity(Intent(this, AgentsActivity::class.java))
             }
             true
         }
@@ -819,6 +821,7 @@ class MainActivity : Activity() {
             "launch" -> if (Apps.packages(this).get(id) != null) startActivity(Apps.launchIntent(this, id))
             "app" -> Apps.packages(this).get(id)?.let { showAppMenu(it) }
             "install-file" -> pickPackageFile()
+            "agents" -> startActivity(Intent(this, AgentsActivity::class.java))
         }
     }
 

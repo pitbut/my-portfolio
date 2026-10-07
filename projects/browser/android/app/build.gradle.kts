@@ -48,8 +48,8 @@ android {
         applicationId = "com.robutpit.pitbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.5.0"
+        versionCode = 7
+        versionName = "1.6.0"
     }
 
     signingConfigs {
@@ -82,14 +82,18 @@ android {
             signingConfig = signingConfigs.getByName("test")
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            // Без ужатия R8: Anthropic SDK работает через рефлексию Jackson, и на телефоне должен быть ровно тот код,
+            // что проходит тесты (AgentRunnerTest). Правила в proguard-rules.pro — на случай, если включим обратно.
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // есть ключ для публикации — подписываем им, иначе тестовым (см. keystore/README.md)
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("test")
         }
     }
     compileOptions {
+        // java.time и др. для Anthropic SDK на Android 7 (API 24–25)
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -109,6 +113,10 @@ androidComponents {
 
 dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
+    // агенты: официальный Java SDK Anthropic (Claude API)
+    implementation("com.anthropic:anthropic-java:2.68.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     testImplementation("org.json:json:20250517")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("junit:junit:4.13.2")
 }
