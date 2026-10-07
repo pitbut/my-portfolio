@@ -1,0 +1,92 @@
+:root {
+  --bg: #dfe3ea; --toolbar: #f6f7f9; --tab: transparent; --tab-active: #f6f7f9; --tab-hover: #eceff3;
+  --text: #1f2328; --muted: #646b75; --field: #ffffff; --field-border: #c9ced6; --accent: #e0a100;
+  --hover: rgba(0,0,0,.07); --line: #d4d8df; --shadow: 0 6px 24px rgba(0,0,0,.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181c; --toolbar: #25272d; --tab-active: #25272d; --tab-hover: #1f2126;
+    --text: #e8eaed; --muted: #9aa0a6; --field: #1b1c20; --field-border: #3a3d44; --accent: #ffc531;
+    --hover: rgba(255,255,255,.08); --line: #33363c;
+  }
+}
+body.private {
+  --bg: #1b1530; --toolbar: #2a2246; --tab-active: #2a2246; --tab-hover: #231c3b;
+  --text: #ece8ff; --muted: #a59cc9; --field: #1d1734; --field-border: #4a3f75; --accent: #b79bff;
+  --hover: rgba(255,255,255,.08); --line: #3d3463;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font: 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; user-select: none; overflow: hidden; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.icon { width: 32px; height: 32px; border-radius: 8px; font-size: 17px; display: grid; place-items: center; flex: none; position: relative; }
+.icon:hover:not(:disabled) { background: var(--hover); }
+.icon:disabled { opacity: .35; cursor: default; }
+
+#chrome { background: var(--toolbar); border-bottom: 1px solid var(--line); }
+
+/* вкладки */
+#tabstrip { display: flex; align-items: flex-end; background: var(--bg); padding: 6px 6px 0; height: 40px; -webkit-app-region: drag; }
+body.mac #tabstrip { padding-left: 78px; }
+#tabs { display: flex; min-width: 0; flex: 0 1 auto; overflow: hidden; -webkit-app-region: no-drag; }
+#newtab { -webkit-app-region: no-drag; margin: 0 4px 2px; width: 28px; height: 28px; }
+.drag { flex: 1; height: 100%; }
+.tab { display: flex; align-items: center; gap: 8px; width: 220px; min-width: 48px; height: 34px; padding: 0 6px 0 12px;
+  border-radius: 10px 10px 0 0; background: var(--tab); cursor: default; position: relative; flex: 0 1 220px; }
+.tab:hover { background: var(--tab-hover); }
+.tab.active { background: var(--tab-active); }
+.tab:not(.active):not(:hover) + .tab:not(.active):not(:hover)::before {
+  content: ''; position: absolute; left: 0; top: 9px; bottom: 9px; width: 1px; background: var(--line); }
+.tab .fav { width: 16px; height: 16px; flex: none; border-radius: 3px; }
+.tab .fav.spin { border: 2px solid var(--muted); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+.tab .title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tab .close { width: 20px; height: 20px; border-radius: 50%; font-size: 12px; flex: none; display: grid; place-items: center; }
+.tab .close:hover { background: var(--hover); }
+.tab.narrow .title { display: none; }
+.tab.narrow:not(.active) .close { display: none; }
+.tab.dragging { opacity: .5; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* панель */
+#toolbar { display: flex; align-items: center; gap: 2px; padding: 4px 6px; height: 44px; }
+#omnibox { flex: 1; display: flex; align-items: center; gap: 6px; height: 34px; margin: 0 6px; padding: 0 4px 0 12px;
+  background: var(--field); border: 1px solid var(--field-border); border-radius: 17px; }
+#omnibox:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+#address { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--text); font: 14px system-ui, sans-serif; user-select: text; }
+#lock { font-size: 12px; opacity: .7; }
+#lock.insecure { filter: grayscale(1); }
+#star { font-size: 18px; width: 28px; height: 28px; }
+#star.on { color: var(--accent); }
+#zoomlevel { font-size: 11px; color: var(--muted); padding: 2px 6px; border: 1px solid var(--field-border); border-radius: 10px; }
+#dlbadge { position: absolute; right: 3px; top: 3px; min-width: 8px; height: 8px; border-radius: 4px; background: var(--accent); }
+
+/* подсказки и меню (в потоке — сдвигают страницу, чтобы не перекрываться ею) */
+#suggestions { list-style: none; margin: 0; padding: 4px 0; border-top: 1px solid var(--line); }
+#suggestions li { display: flex; gap: 10px; align-items: center; padding: 7px 18px 7px 60px; cursor: pointer; }
+#suggestions li.sel, #suggestions li:hover { background: var(--hover); }
+#suggestions .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+#suggestions .u { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+#menupanel { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2px 8px; padding: 6px 10px 10px; border-top: 1px solid var(--line); }
+#menupanel button { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 8px; text-align: left; }
+#menupanel button:hover { background: var(--hover); }
+#menupanel hr { display: none; }
+#menupanel kbd { color: var(--muted); font: 11px system-ui, sans-serif; }
+.zoomrow { display: flex; align-items: center; gap: 6px; padding: 4px 12px; }
+.zoomrow button { width: 30px; justify-content: center !important; padding: 4px !important; }
+.zoomrow span { min-width: 44px; text-align: center; }
+.zoomrow button:first-of-type { margin-left: auto; }
+
+/* закладки */
+#bookmarksbar { display: flex; gap: 2px; padding: 0 8px 4px; height: 30px; overflow: hidden; }
+#bookmarksbar.hidden, #bookmarksbar:empty { display: none; }
+#bookmarksbar button { display: flex; align-items: center; gap: 6px; max-width: 180px; padding: 3px 9px; border-radius: 12px; }
+#bookmarksbar button:hover { background: var(--hover); }
+#bookmarksbar img { width: 14px; height: 14px; }
+#bookmarksbar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* поиск по странице */
+#findbar { display: flex; align-items: center; gap: 4px; padding: 4px 10px 6px; }
+#findinput { width: 260px; height: 28px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--field-border);
+  background: var(--field); color: var(--text); outline: 0; user-select: text; }
+#findcount { color: var(--muted); min-width: 60px; padding: 0 6px; }
+[hidden] { display: none !important; }

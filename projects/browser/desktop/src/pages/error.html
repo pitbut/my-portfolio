@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Не удалось открыть страницу</title><link rel="stylesheet" href="common.css">
+<style>main { margin-top: 12vh; max-width: 560px; } .big { font-size: 56px; } code { color: var(--muted); word-break: break-all; }</style></head>
+<body><main>
+  <div class="big">😕</div>
+  <h1>Не удалось открыть страницу</h1>
+  <p id="msg"></p>
+  <p><code id="url"></code></p>
+  <p><button id="retry">Повторить</button></p>
+</main>
+<script>
+const p = new URLSearchParams(location.search);
+const code = Number(p.get('code'));
+const MSG = {
+  '-105': 'Сайт не найден: не удаётся определить адрес сервера. Проверьте правильность адреса.',
+  '-106': 'Нет подключения к интернету.',
+  '-102': 'Сервер отклонил подключение.',
+  '-118': 'Превышено время ожидания ответа сервера.',
+  '-137': 'Сайт не найден: не удаётся определить адрес сервера.',
+  '-200': 'Сертификат сайта недействителен — соединение небезопасно.',
+  '-201': 'Срок действия сертификата сайта истёк или ещё не начался.',
+  '-202': 'Сертификат сайта выдан ненадёжным центром.',
+};
+msg.textContent = MSG[code] || (code <= -200 && code > -300 ? 'Проблема с сертификатом безопасности сайта.' : 'Ошибка: ' + (p.get('desc') || code));
+url.textContent = p.get('url') || '';
+document.title = p.get('url') || document.title;
+retry.onclick = () => { const u = p.get('url'); if (u) location.replace(u); };
+</script></body></html>

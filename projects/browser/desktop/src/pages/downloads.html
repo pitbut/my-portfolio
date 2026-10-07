@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Загрузки</title><link rel="stylesheet" href="common.css">
+<style>.bar { height: 4px; background: var(--line); border-radius: 2px; margin-top: 6px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--accent); }
+.acts { display: flex; gap: 6px; } .acts button { padding: 4px 10px; font-size: 12px; }</style></head>
+<body><main>
+  <h1>Загрузки <span class="spacer"></span><button id="clear">Очистить список</button></h1>
+  <div class="card" id="list"></div>
+</main>
+<script>
+const size = (n) => !n ? '' : n < 1024 ? n + ' Б' : n < 1048576 ? (n / 1024).toFixed(0) + ' КБ' : n < 1073741824 ? (n / 1048576).toFixed(1) + ' МБ' : (n / 1073741824).toFixed(2) + ' ГБ';
+const STATES = { completed: 'Готово', cancelled: 'Отменено', interrupted: 'Прервано' };
+function render(items) {
+  const list = document.getElementById('list');
+  list.textContent = '';
+  if (!items.length) { list.innerHTML = '<div class="empty">Загрузок пока нет</div>'; return; }
+  for (const d of items) {
+    const row = document.createElement('div'); row.className = 'row';
+    const main = document.createElement('div'); main.className = 'main';
+    main.innerHTML = '<div class="t"></div><div class="u"></div>';
+    main.firstChild.textContent = d.name;
+    main.lastChild.textContent = d.state === 'progressing' ? `${size(d.received)} из ${size(d.total) || '?'}` : `${STATES[d.state] || d.state} · ${size(d.received)} · ${d.url}`;
+    if (d.state === 'progressing' && d.total) { const bar = document.createElement('div'); bar.className = 'bar'; bar.innerHTML = '<i></i>'; bar.firstChild.style.width = (100 * d.received / d.total) + '%'; main.append(bar); }
+    if (d.state === 'completed') main.onclick = () => pit.openDownload(d.id);
+    const acts = document.createElement('div'); acts.className = 'acts';
+    const btn = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; acts.append(b); };
+    if (d.state === 'progressing') btn('Отмена', () => pit.cancelDownload(d.id));
+    if (d.state === 'completed') { btn('Открыть', () => pit.openDownload(d.id)); btn('Показать в папке', () => pit.showDownload(d.id)); }
+    row.append(main, acts);
+    list.append(row);
+  }
+}
+clear.onclick = () => pit.clearDownloads();
+pit.on('downloads', render);
+pit.downloads().then(render);
+</script></body></html>

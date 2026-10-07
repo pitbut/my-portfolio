@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PitBrowser — браузер для компьютера и телефона</title>
+  <meta name="description" content="PitBrowser — собственный браузер для Windows, macOS, Linux и Android: вкладки, закладки, история, загрузки, приватный режим.">
+  <link rel="icon" href="desktop/build/icon.png">
+  <style>
+    :root { --bg: #0f1115; --card: #181b22; --text: #e8eaed; --muted: #9aa0a6; --gold: #ffc531; --line: #2a2e37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+    a { color: var(--gold); }
+    .back { display: inline-block; margin-bottom: 24px; text-decoration: none; }
+    header { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    header img { width: 84px; height: 84px; }
+    h1 { margin: 0; font-size: clamp(28px, 5vw, 42px); line-height: 1.15; }
+    h1 span { color: var(--gold); }
+    .lead { color: var(--muted); margin: 6px 0 0; }
+    .shot { width: 100%; border-radius: 14px; border: 1px solid var(--line); margin: 28px 0; display: block; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+    .card h3 { margin: 0 0 8px; }
+    .card ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    h2 { margin: 40px 0 14px; }
+    .dl { display: flex; flex-wrap: wrap; gap: 10px; }
+    .dl a { background: var(--gold); color: #1a1a1a; text-decoration: none; font-weight: 600; padding: 10px 18px; border-radius: 10px; }
+    code { background: var(--card); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; }
+    pre { background: var(--card); border: 1px solid var(--line); padding: 14px; border-radius: 10px; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; } td { padding: 6px 10px; border-bottom: 1px solid var(--line); } td:first-child { white-space: nowrap; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="../../index.html">← Все проекты</a>
+  <header>
+    <img src="desktop/build/icon.png" alt="">
+    <div>
+      <h1>Pit<span>Browser</span></h1>
+      <p class="lead">Свой браузер для компьютера (Windows, macOS, Linux) и телефона (Android)</p>
+    </div>
+  </header>
+
+  <img class="shot" src="screenshot-desktop.jpg" alt="PitBrowser на компьютере: новая вкладка">
+
+  <h2>Скачать</h2>
+  <div class="dl">
+    <a href="https://github.com/pitbut/my-portfolio/releases">Windows · macOS · Linux · Android (APK)</a>
+  </div>
+  <p style="color: var(--muted)">Установщики собирает GitHub Actions (workflow «Build PitBrowser») и выкладывает в Releases.</p>
+
+  <h2>Приложения и игры</h2>
+  <p>На телефоне PitBrowser — это ещё и <b>главный экран с вашими приложениями</b>. Игра или приложение
+  (обычный сайт в архиве <code>.pitapp</code>) ставится из магазина или файла, запускается
+  на весь экран, работает без интернета и через библиотеку <b>PitSDK</b> получает:</p>
+  <div class="grid">
+    <div class="card"><h3>📡 Датчики</h3><ul><li>акселерометр, гироскоп, гравитация</li><li>компас и ориентация</li><li>освещённость, приближение, давление</li></ul></div>
+    <div class="card"><h3>🎮 Для игр</h3><ul><li>вибрация, звук, мультитач, геймпады</li><li>наушники, кнопки гарнитуры и громкости</li><li>таблицы рекордов</li><li>экран не гаснет, поворот экрана</li></ul></div>
+    <div class="card"><h3>📷 Медиа</h3><ul><li>камера и микрофон</li><li>геолокация</li><li>только с разрешения пользователя</li></ul></div>
+    <div class="card"><h3>🔵 Bluetooth</h3><ul><li>игры между телефонами без интернета</li><li>BLE: браслеты, датчики, ESP32</li><li>Serial: HC-05, HC-06</li><li>только выбранные пользователем устройства</li></ul></div>
+    <div class="card"><h3>📶 NFC</h3><ul><li>чтение и запись меток</li><li>квесты и карточки персонажей</li><li>текст, ссылки, данные игры</li></ul></div>
+  </div>
+  <p>Встроенная демо-игра «Монетки»: катайте шарик наклоном телефона. Документация для разработчиков —
+  <a href="sdk/README.md">sdk/README.md</a>.</p>
+
+  <h2>ИИ-агенты и команды</h2>
+  <p>Раздел «Агенты»: опишите задачу словами — агент сам поищет в интернете, прочитает страницы и пришлёт отчёт
+  со ссылками или уведомление на телефон. Работают Claude, ChatGPT, Gemini, Grok, DeepSeek, Qwen и любой свой ИИ
+  с OpenAI-совместимым API. Агентов на разных ИИ можно собрать в команду (цепочка, руководитель с помощниками,
+  обсуждение, сравнение с судьёй) или задать один вопрос всем сразу. Ключи хранятся зашифрованными и не видны ни сайтам, ни играм.</p>
+
+  <h2>Возможности</h2>
+  <div class="grid">
+    <div class="card"><h3>💻 Компьютер</h3><ul>
+      <li>Движок Chromium (Electron)</li>
+      <li>Вкладки: перетаскивание, восстановление закрытой</li>
+      <li>Панель закладок, подсказки в адресной строке</li>
+      <li>История с поиском, менеджер загрузок</li>
+      <li>Поиск по странице, масштаб, печать, сохранение</li>
+      <li>Приватные окна (без истории и cookie)</li>
+      <li>Светлая/тёмная тема, выбор поисковика</li>
+    </ul></div>
+    <div class="card"><h3>📱 Телефон</h3><ul>
+      <li>Системный WebView (Chromium), APK ≈ 110 КБ</li>
+      <li>Вкладки, сохраняются после перезапуска</li>
+      <li>Закладки, история, загрузки в «Загрузки»</li>
+      <li>Поиск по странице, «Поделиться»</li>
+      <li>Версия для ПК, полноэкранное видео</li>
+      <li>Камера, микрофон, геолокация — по запросу</li>
+      <li>Можно сделать браузером по умолчанию</li>
+    </ul></div>
+  </div>
+
+  <h2>Горячие клавиши (компьютер)</h2>
+  <table>
+    <tr><td><code>Ctrl+T</code> / <code>Ctrl+W</code></td><td>новая / закрыть вкладку</td></tr>
+    <tr><td><code>Ctrl+Shift+T</code></td><td>вернуть закрытую вкладку</td></tr>
+    <tr><td><code>Ctrl+Shift+N</code></td><td>приватное окно</td></tr>
+    <tr><td><code>Ctrl+L</code></td><td>адресная строка</td></tr>
+    <tr><td><code>Ctrl+D</code> / <code>Ctrl+H</code> / <code>Ctrl+J</code></td><td>закладка / история / загрузки</td></tr>
+    <tr><td><code>Ctrl+F</code></td><td>найти на странице</td></tr>
+    <tr><td><code>Ctrl+Tab</code>, <code>Ctrl+1…9</code></td><td>переключение вкладок</td></tr>
+  </table>
+
+  <h2>Запуск из исходников</h2>
+  <pre>cd projects/browser/desktop
+npm install
+npm start            # запустить
+npm run dist         # собрать установщик для своей ОС
+
+cd projects/browser/android
+./gradlew assembleRelease   # APK в app/build/outputs/apk/release/</pre>
+  <p>Подробности — в <a href="README.md">README.md</a>.</p>
+</main>
+</body>
+</html>

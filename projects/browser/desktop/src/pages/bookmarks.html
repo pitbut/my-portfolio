@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Закладки</title><link rel="stylesheet" href="common.css"></head>
+<body><main>
+  <h1>Закладки <span class="spacer"></span><input type="search" id="q" placeholder="Поиск по закладкам"></h1>
+  <div class="card" id="list"></div>
+</main>
+<script>
+async function render() {
+  const s = q.value.toLowerCase();
+  const items = (await pit.bookmarks()).filter((b) => !s || b.url.toLowerCase().includes(s) || (b.title || '').toLowerCase().includes(s));
+  const list = document.getElementById('list');
+  list.textContent = '';
+  if (!items.length) { list.innerHTML = '<div class="empty">Закладок нет. Нажмите ☆ в адресной строке или Ctrl+D, чтобы добавить.</div>'; return; }
+  for (const b of items) {
+    const row = document.createElement('div'); row.className = 'row';
+    const img = document.createElement('img'); img.src = b.favicon || ''; img.onerror = () => img.style.visibility = 'hidden';
+    const main = document.createElement('div'); main.className = 'main';
+    main.innerHTML = '<div class="t"></div><div class="u"></div>';
+    main.firstChild.textContent = b.title || b.url; main.lastChild.textContent = b.url;
+    main.onclick = (e) => pit.open(b.url, e.ctrlKey || e.metaKey);
+    const del = document.createElement('button'); del.className = 'icon'; del.title = 'Удалить'; del.textContent = '✕';
+    del.onclick = async () => { await pit.removeBookmark(b.url); render(); };
+    row.append(img, main, del);
+    list.append(row);
+  }
+}
+q.oninput = render;
+pit.on('bookmarks', render);
+render();
+</script></body></html>

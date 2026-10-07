@@ -1,0 +1,11 @@
+{
+  "id": "nfc-tags",
+  "name": "NFC-метки",
+  "version": "1.0.0",
+  "description": "Чтение и запись NFC-меток (текст, ссылки, данные) и квест «Охота за метками»: разложите метки и найдите все на время.",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "orientation": "portrait",
+  "permissions": ["nfc", "vibrate", "scores"],
+  "scores": { "order": "asc", "unit": "сек" }
+}

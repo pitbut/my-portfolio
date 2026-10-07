@@ -1,0 +1,10 @@
+{
+  "id": "phone-lab",
+  "name": "Проверка телефона",
+  "version": "1.0.0",
+  "description": "Наушники и кнопки гарнитуры, кнопки громкости, стерео-звук, датчики и вибрация — проверка всего, что PitSDK даёт играм.",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "orientation": "portrait",
+  "permissions": ["headphones", "buttons", "sensors", "vibrate"]
+}

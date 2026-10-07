@@ -1,0 +1,77 @@
+{
+  "name": "pitbrowser",
+  "productName": "PitBrowser",
+  "version": "1.0.0",
+  "description": "PitBrowser — простой браузер на Chromium с вкладками, закладками, историей и приватным режимом",
+  "main": "src/main.js",
+  "author": "robutpit.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pitbut/my-portfolio.git",
+    "directory": "projects/browser/desktop"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.robutpit.pitbrowser",
+    "productName": "PitBrowser",
+    "files": [
+      "src/**/*",
+      "build/icon.png"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Network;WebBrowser",
+      "icon": "build/icon.png"
+    },
+    "protocols": [
+      {
+        "name": "Web",
+        "schemes": [
+          "http",
+          "https"
+        ]
+      }
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "pitbut",
+      "repo": "my-portfolio"
+    }
+  }
+}
