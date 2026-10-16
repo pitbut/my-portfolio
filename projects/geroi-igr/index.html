@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Герои Игр 3D — игра для Android</title>
+<meta name="description" content="3D-игра для детей: 5 героев, 9 миров и 27 уровней — Лего, Игра в кальмара, зомби, прятки, догоняшки, Амогус, Человек-паук, Пол — это лава и футбол. С прокачкой героев.">
+<link rel="icon" href="icon512.png">
+<style>
+  :root { --ink: #1d1640; --bg: #3b2a8a; --pri: #ffcf33; --acc: #ff5f8f; --card: #ffffff; --muted: #6b5fa8; }
+  @media (prefers-color-scheme: dark) { :root { --card: #241b55; --ink: #f3f0ff; --muted: #b9adf5; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif; background: linear-gradient(#5b3fd1, var(--bg) 60%); color: #fff; min-height: 100vh; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 60px; }
+  header { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  header img { width: 120px; height: 120px; border-radius: 28px; box-shadow: 0 8px 0 rgba(0,0,0,.25); }
+  h1 { margin: 0; font-size: clamp(32px, 6vw, 54px); text-shadow: 0 4px 0 var(--acc); }
+  .sub { font-size: 18px; opacity: .9; margin-top: 6px; }
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+  .btn { display: inline-block; text-decoration: none; font-weight: 800; font-size: 19px; padding: 14px 22px; border-radius: 16px; color: #1d1640; background: var(--pri); box-shadow: 0 5px 0 #c99a00; }
+  .btn.pink { background: var(--acc); color: #fff; box-shadow: 0 5px 0 #b8325c; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .shots img { width: 100%; border-radius: 14px; box-shadow: 0 6px 0 rgba(0,0,0,.25); display: block; }
+  section { background: var(--card); color: var(--ink); border-radius: 22px; padding: 20px; margin-top: 22px; }
+  section h2 { margin-top: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .item { border-radius: 14px; padding: 12px; background: rgba(127, 100, 255, .1); }
+  .item b { font-size: 17px; }
+  .item p { margin: 6px 0 0; color: var(--muted); font-size: 14.5px; }
+  footer { text-align: center; margin-top: 30px; opacity: .8; font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="icon512.png" alt="Иконка игры">
+    <div>
+      <h1>Герои Игр 3D</h1>
+      <div class="sub">5 героев · 9 миров · 27 уровней · прокачка персонажей</div>
+    </div>
+  </header>
+  <div class="btns">
+    <a class="btn" href="game/index.html">▶ Играть в браузере</a>
+    <a class="btn pink" href="geroi-igr-3d.apk" download>⬇ Скачать APK для Android</a>
+  </div>
+  <div class="shots">
+    <img src="screens/1-menu.jpg" alt="Главное меню с пятью героями">
+    <img src="screens/2-lego.jpg" alt="Лего-стройка">
+    <img src="screens/7-spider.jpg" alt="Человек-паук на крышах">
+  </div>
+
+  <section>
+    <h2>Герои</h2>
+    <div class="grid">
+      <div class="item"><b>🦒 Давид — самый высокий</b><p>Длинные руки: ловит, ищет и собирает на 40% дальше, прыгает выше всех.</p></div>
+      <div class="item"><b>⚡ Мухамад — самый быстрый</b><p>Бегает на 15% быстрее и дольше не устаёт.</p></div>
+      <div class="item"><b>🧠 Марк — самый умный</b><p>+20% времени на каждом уровне.</p></div>
+      <div class="item"><b>💪 Мустафо — самый сильный</b><p>+1 жизнь, удар отбрасывает врагов и мяч вдвое сильнее.</p></div>
+      <div class="item"><b>⭐ Новичок — твой герой</b><p>Можно дать своё имя. Везунчик: +30% монет.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Миры</h2>
+    <div class="grid">
+      <div class="item"><b>🧱 Лего-стройка</b><p>Собери постройку из деталей нужного цвета на время. Мешает робот-пылесос.</p></div>
+      <div class="item"><b>🦑 Игра в кальмара</b><p>«Тише едешь — дальше будешь»: двигайся, только когда кукла отвернулась.</p></div>
+      <div class="item"><b>🧟 Зомби-апокалипсис</b><p>Собери канистры для вертолёта, отбиваясь от зомби.</p></div>
+      <div class="item"><b>🙈 Прятки</b><p>Найди всех друзей: подсказка — укрытие трясётся и хихикает.</p></div>
+      <div class="item"><b>🏃 Догоняшки</b><p>Салки-замри: догони и «заморозь» всех. На сложном друзья выручают своих.</p></div>
+      <div class="item"><b>👾 Амогус</b><p>Выполни задания на корабле, убегая от предателя, и нажми аварийную кнопку.</p></div>
+      <div class="item"><b>🕷 Человек-паук</b><p>Прыгай по крышам, летай на паутине и поймай злодея.</p></div>
+      <div class="item"><b>🌋 Пол — это лава!</b><p>Прыгай по мебели до двери. Подушки тонут, скейты катаются.</p></div>
+      <div class="item"><b>⚽ Футбол</b><p>Обыграй защитников и забей голы хитрому вратарю.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Прокачка</h2>
+    <p>За уровни герои получают монеты и опыт. Монеты тратятся на улучшения (скорость, прыжок, выносливость, жизни, магнит для монет, сила), а опыт повышает уровень героя — растут все характеристики, на 3-м уровне появляется кепка, на 8-м — корона 👑. За каждый уровень можно получить до 3 звёзд.</p>
+    <p>Управление: джойстик слева, справа кнопки прыжка, рывка и действия. На компьютере: WASD/стрелки, пробел, E, Shift.</p>
+  </section>
+  <footer>Игра работает без интернета · Three.js + Android WebView</footer>
+</main>
+</body>
+</html>

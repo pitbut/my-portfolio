@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#3b2a8a">
+<title>Герои Игр 3D</title>
+<style>
+  :root { --ink:#1d1640; --pri:#ffcf33; --acc:#ff5f8f; --ok:#3ddc84; --card:rgba(255,255,255,0.95); }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #3b2a8a; font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif; color: var(--ink); touch-action: none; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hidden { display: none !important; }
+  .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; padding: max(14px, env(safe-area-inset-top)) 16px max(14px, env(safe-area-inset-bottom)); z-index: 5; }
+  .modal { background: rgba(20, 12, 60, 0.6); justify-content: center; backdrop-filter: blur(3px); }
+  .panel { background: var(--card); border-radius: 22px; padding: 18px; width: min(520px, 100%); box-shadow: 0 10px 0 rgba(0,0,0,0.25); max-height: 100%; overflow-y: auto; touch-action: pan-y; }
+  .btn { font: inherit; font-weight: 800; font-size: 19px; border: 0; border-radius: 16px; padding: 13px 22px; cursor: pointer; color: var(--ink);
+    background: var(--pri); box-shadow: 0 5px 0 #c99a00; transition: transform .08s; }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #c99a00; }
+  .btn.pink { background: var(--acc); color: #fff; box-shadow: 0 5px 0 #b8325c; }
+  .btn.green { background: var(--ok); box-shadow: 0 5px 0 #1f9d57; }
+  .btn.blue { background: #4fb3ff; box-shadow: 0 5px 0 #2a7fc0; }
+  .btn.white { background: #fff; box-shadow: 0 5px 0 #c9c3e6; }
+  .btn.small { font-size: 15px; padding: 8px 14px; }
+  .btn.danger { background: #ff5252; color: #fff; box-shadow: 0 5px 0 #a82020; }
+  .btn.off { opacity: .5; }
+  .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .topbar { width: 100%; max-width: 900px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .topbar h2 { margin: 0; color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,.35); font-size: 24px; text-align: center; flex: 1; }
+  .coins-pill { background: rgba(0,0,0,.45); color: #ffe14d; font-weight: 800; border-radius: 30px; padding: 8px 14px; font-size: 17px; white-space: nowrap; }
+  .ico { width: 46px; height: 46px; padding: 0; font-size: 22px; }
+
+  /* меню */
+  #scr-menu { justify-content: space-between; }
+  .logo { margin-top: 3vh; text-align: center; }
+  .logo h1 { margin: 0; font-size: clamp(38px, 9vw, 72px); color: #fff; letter-spacing: 1px;
+    text-shadow: 0 4px 0 #ff5f8f, 0 8px 0 #3b2a8a, 0 10px 20px rgba(0,0,0,.4); line-height: 1; }
+  .logo p { margin: 10px 0 0; color: #fff; font-weight: 700; font-size: 17px; text-shadow: 0 2px 4px rgba(0,0,0,.5); }
+  .menu-btns { display: flex; flex-direction: column; gap: 12px; width: min(320px, 100%); margin-bottom: 2vh; }
+  .menu-btns .btn { font-size: 22px; }
+
+  /* выбор героя */
+  #scr-select { justify-content: space-between; }
+  .sel-bottom { width: min(560px, 100%); display: flex; flex-direction: column; gap: 10px; }
+  .sel-card-row { display: flex; align-items: center; gap: 8px; }
+  #charCard { flex: 1; padding: 12px 14px; }
+  .cc-head { display: flex; align-items: center; gap: 10px; }
+  .cc-emoji { font-size: 36px; }
+  .cc-name { font-size: 24px; font-weight: 900; }
+  .cc-title { font-size: 14px; color: #6b5fa8; font-weight: 700; }
+  .cc-perk { background: #fff4c7; border-radius: 10px; padding: 6px 10px; font-size: 13.5px; margin: 8px 0; font-weight: 600; }
+  .stats { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; font-size: 13px; font-weight: 700; }
+  .bar { height: 10px; background: #e6e1ff; border-radius: 6px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, #ff5f8f, #ffcf33); border-radius: 6px; }
+  .xp { margin-top: 6px; } .xp small { font-size: 11px; color: #6b5fa8; font-weight: 700; }
+  .xp .bar i { background: linear-gradient(90deg, #4fb3ff, #3ddc84); }
+
+  /* магазин */
+  .up { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 2px dashed #e6e1ff; }
+  .up-ico { font-size: 30px; width: 40px; text-align: center; }
+  .up-info { flex: 1; } .up-info small { color: #6b5fa8; font-weight: 600; }
+  .pips { display: flex; gap: 3px; margin-top: 5px; } .pips i { width: 14px; height: 8px; border-radius: 3px; background: #e6e1ff; } .pips i.on { background: #ff5f8f; }
+  .buy { font-size: 15px; padding: 9px 12px; min-width: 88px; }
+
+  /* карта миров */
+  #worldList { width: min(720px, 100%); overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; padding: 12px 2px 20px; touch-action: pan-y; align-content: start; }
+  .world { background: var(--card); border-radius: 20px; display: flex; gap: 10px; padding: 12px; border-left: 10px solid var(--wc); box-shadow: 0 6px 0 rgba(0,0,0,.2); }
+  .w-emoji { font-size: 42px; }
+  .w-body { flex: 1; } .w-name { font-weight: 900; font-size: 19px; } .w-desc { font-size: 13px; color: #6b5fa8; font-weight: 600; margin-bottom: 8px; }
+  .lvls { display: flex; gap: 8px; }
+  .lvl { font: inherit; flex: 1; border: 0; border-radius: 12px; padding: 6px 4px; background: var(--wc); color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.25); display: flex; flex-direction: column; align-items: center; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+  .lvl b { font-size: 20px; } .lvl span { font-size: 13px; color: #ffe14d; letter-spacing: 1px; }
+  .lvl.locked { background: #bdb7d9; font-size: 20px; }
+  .lvl:active { transform: translateY(3px); }
+
+  .panel h2 { margin: 0 0 10px; text-align: center; } .panel h2 small { color: #6b5fa8; font-size: 16px; }
+  .panel ul { padding-left: 20px; margin: 8px 0; } .panel li { margin: 6px 0; font-weight: 600; font-size: 15px; }
+  .panel p { margin: 8px 0; font-size: 15.5px; }
+  .diff { font-weight: 800; text-align: center; }
+  #resStars { font-size: 52px; color: #ffc400; text-align: center; letter-spacing: 6px; text-shadow: 0 3px 0 #c98a00; }
+  #resStars .dim { color: #d8d3ef; text-shadow: none; }
+  .lvup { background: #e3ffe9; border-radius: 10px; padding: 6px; font-weight: 800; text-align: center; }
+  #resText { text-align: center; font-weight: 700; }
+  .tog { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; padding: 10px 0; }
+  .tog input { width: 26px; height: 26px; }
+
+  /* HUD */
+  #hud { position: fixed; inset: 0; pointer-events: none; z-index: 3; padding: max(10px, env(safe-area-inset-top)) 12px; }
+  .hud-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .hud-l, .hud-r { display: flex; flex-direction: column; gap: 6px; }
+  .hud-r { align-items: flex-end; }
+  .pill { background: rgba(0,0,0,.5); color: #fff; font-weight: 800; border-radius: 14px; padding: 6px 12px; font-size: 17px; }
+  #hudTime.warn { background: #e53935; animation: pulse .5s infinite alternate; }
+  @keyframes pulse { to { transform: scale(1.08); } }
+  #hudGoal { position: absolute; left: 50%; transform: translateX(-50%); top: max(10px, env(safe-area-inset-top)); background: rgba(0,0,0,.55); color: #fff; font-weight: 800; border-radius: 16px; padding: 8px 14px; font-size: 16px; max-width: 52vw; text-align: center; }
+  #btnPause { pointer-events: auto; }
+  #stam { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(12px, env(safe-area-inset-bottom)); width: 160px; height: 10px; background: rgba(0,0,0,.4); border-radius: 6px; overflow: hidden; }
+  #stamFill { height: 100%; background: linear-gradient(90deg, #4fb3ff, #9be7ff); width: 100%; }
+  #hudProg { position: fixed; left: 50%; top: 32%; transform: translateX(-50%); width: 220px; height: 22px; background: rgba(0,0,0,.5); border-radius: 12px; overflow: hidden; border: 3px solid #fff; }
+  #hudProgFill { height: 100%; background: linear-gradient(90deg, #ffd600, #3ddc84); width: 0; }
+  #bigMsg { position: fixed; left: 0; right: 0; top: 38%; text-align: center; font-size: clamp(36px, 9vw, 70px); font-weight: 900; z-index: 6; pointer-events: none;
+    text-shadow: 0 4px 0 rgba(0,0,0,.5), 0 0 20px rgba(0,0,0,.4); opacity: 0; transform: scale(.6); transition: all .2s; }
+  #bigMsg.on { opacity: 1; transform: scale(1); }
+  #toast { position: fixed; left: 50%; bottom: 24%; transform: translateX(-50%) translateY(20px); background: rgba(20,12,60,.85); color: #fff; font-weight: 800; padding: 10px 18px; border-radius: 14px; z-index: 9; opacity: 0; transition: all .25s; pointer-events: none; text-align: center; max-width: 90vw; font-size: 16px; }
+  #toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* управление */
+  #controls { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+  #joyZone { position: absolute; left: 0; bottom: 0; width: 50%; height: 70%; pointer-events: auto; }
+  #joy { position: absolute; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,.15); border: 3px solid rgba(255,255,255,.4); left: 30px; bottom: 30px; pointer-events: none; opacity: .5; }
+  #joy.on { opacity: 1; }
+  #joyHint { position: absolute; left: 34px; bottom: calc(40px + env(safe-area-inset-bottom)); width: 140px; height: 140px; border-radius: 50%; border: 3px dashed rgba(255,255,255,.35); }
+  #joy.on ~ #joyHint { display: none; }
+  #joyKnob { position: absolute; left: 40px; top: 40px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,.75); box-shadow: 0 3px 8px rgba(0,0,0,.3); }
+  .cbtn { position: absolute; pointer-events: auto; border-radius: 50%; border: 4px solid rgba(255,255,255,.7); color: #fff; font-size: 34px; display: flex; align-items: center; justify-content: center; text-shadow: 0 2px 3px rgba(0,0,0,.5); box-shadow: 0 5px 0 rgba(0,0,0,.25); }
+  .cbtn.pressed { transform: scale(.9); filter: brightness(1.3); }
+  #btnJump { right: 24px; bottom: calc(28px + env(safe-area-inset-bottom)); width: 92px; height: 92px; background: rgba(61,220,132,.75); }
+  #btnAction { right: 128px; bottom: calc(40px + env(safe-area-inset-bottom)); width: 84px; height: 84px; background: rgba(255,95,143,.8); }
+  #btnSprint { right: 40px; bottom: calc(136px + env(safe-area-inset-bottom)); width: 66px; height: 66px; background: rgba(79,179,255,.75); font-size: 28px; }
+  @media (hover: hover) and (pointer: fine) { #joyHint::after { content: 'WASD / стрелки · Пробел · E · Shift'; position: absolute; top: 150px; left: -10px; width: 260px; color: #fff; font-weight: 700; font-size: 12px; text-shadow: 0 1px 3px #000; } }
+
+  #splash { position: fixed; inset: 0; background: #3b2a8a; z-index: 20; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 30px; font-weight: 900; transition: opacity .5s; }
+  #splash.gone { opacity: 0; pointer-events: none; }
+  @media (max-height: 520px) {
+    .logo h1 { font-size: 40px; } .menu-btns { gap: 8px; } .menu-btns .btn { padding: 9px; font-size: 18px; }
+    .cc-perk { display: none; } .stats { font-size: 11px; gap: 2px 8px; } #charCard { padding: 8px 12px; } .cc-name { font-size: 19px; }
+    .sel-bottom { width: min(760px, 100%); }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="splash">Загрузка… 🎮</div>
+
+<!-- Главное меню -->
+<div id="scr-menu" class="screen">
+  <div class="logo"><h1>ГЕРОИ ИГР 3D</h1><p>Давид · Мухамад · Марк · Мустафо · и ты!</p></div>
+  <div class="menu-btns">
+    <button class="btn green" id="btnPlay">▶ ИГРАТЬ</button>
+    <button class="btn white" id="btnHelp">❓ Как играть</button>
+    <button class="btn white" id="btnSettings">⚙️ Настройки</button>
+  </div>
+</div>
+
+<!-- Выбор героя -->
+<div id="scr-select" class="screen hidden">
+  <div class="topbar"><button class="btn white ico" id="btnSelBack">←</button><h2>Выбери героя</h2><span class="coins-pill">🪙 0</span></div>
+  <div class="sel-bottom">
+    <div class="sel-card-row">
+      <button class="btn white ico" id="btnPrev">◀</button>
+      <div id="charCard" class="panel"></div>
+      <button class="btn white ico" id="btnNextChar">▶</button>
+    </div>
+    <div class="row"><button class="btn blue" id="btnShop">⬆️ Прокачка</button><button class="btn green" id="btnToMap">Играть ▶</button></div>
+  </div>
+</div>
+
+<!-- Прокачка -->
+<div id="scr-shop" class="screen modal hidden">
+  <div class="panel">
+    <div class="topbar"><h2 id="shopTitle" style="color:var(--ink);text-shadow:none;font-size:20px">Прокачка</h2><span class="coins-pill">🪙 0</span></div>
+    <div id="shopList"></div>
+    <p style="font-size:13px;color:#6b5fa8;font-weight:700">💡 Опыт за уровни повышает уровень героя: все характеристики растут. На 3-м уровне герой получает кепку, на 8-м — корону 👑</p>
+    <div class="row"><button class="btn green" id="btnShopBack">Готово</button></div>
+  </div>
+</div>
+
+<!-- Карта миров -->
+<div id="scr-map" class="screen hidden" style="background:linear-gradient(#5b3fd1,#3b2a8a)">
+  <div class="topbar"><button class="btn white ico" id="btnMapBack">←</button><h2>Миры <small id="totalStars" style="font-size:16px;color:#ffe14d"></small></h2><span class="coins-pill">🪙 0</span></div>
+  <div id="worldList"></div>
+</div>
+
+<!-- Описание уровня -->
+<div id="scr-intro" class="screen modal hidden">
+  <div class="panel">
+    <h2 id="introTitle"></h2>
+    <div id="introText"></div>
+    <div class="row"><button class="btn white" id="btnIntroBack">← Назад</button><button class="btn green" id="btnStart">▶ СТАРТ</button></div>
+  </div>
+</div>
+
+<!-- Пауза -->
+<div id="scr-pause" class="screen modal hidden">
+  <div class="panel" style="text-align:center">
+    <h2>⏸ Пауза</h2>
+    <div class="menu-btns" style="margin:10px auto">
+      <button class="btn green" id="btnResume">▶ Продолжить</button>
+      <button class="btn white" id="btnRestart">🔄 Заново</button>
+      <button class="btn pink" id="btnQuit">🗺 К мирам</button>
+    </div>
+  </div>
+</div>
+
+<!-- Результат -->
+<div id="scr-result" class="screen modal hidden">
+  <div class="panel">
+    <h2 id="resTitle"></h2>
+    <div id="resStars"></div>
+    <div id="resText"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn white small" id="btnResMap">🗺 Миры</button>
+      <button class="btn blue small" id="btnResUp">⬆️ Прокачка</button>
+      <button class="btn white small" id="btnRetry">🔄 Ещё раз</button>
+      <button class="btn green small" id="btnNext">Дальше ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- Помощь -->
+<div id="scr-help" class="screen modal hidden">
+  <div class="panel">
+    <h2>❓ Как играть</h2>
+    <ul>
+      <li>🕹 Левая половина экрана — джойстик: коснись и веди пальцем</li>
+      <li>⬆️ Зелёная кнопка — прыжок</li>
+      <li>💨 Синяя кнопка — рывок (держи), тратит выносливость</li>
+      <li>Розовая кнопка — действие уровня: удар 👊, поиск 🔍, паутина 🕸, удар по мячу ⚽…</li>
+      <li>Жёлтая стрелка у ног подсказывает, куда идти</li>
+      <li>⭐ Звёзды: 1 — за победу, +1 — если осталось много времени, +1 — если не потерял ни одной жизни</li>
+      <li>🪙 Монеты тратятся на прокачку: скорость, прыжок, выносливость, жизни, магнит и силу</li>
+      <li>У каждого героя своя суперсила: Давид — самый высокий и длиннорукий, Мухамад — быстрый, Марк — умный (больше времени), Мустафо — сильный</li>
+      <li>9 миров по 3 уровня. Пройди 1-й уровень мира — откроется следующий мир!</li>
+    </ul>
+    <div class="row"><button class="btn green" id="btnHelpBack">Понятно!</button></div>
+  </div>
+</div>
+
+<!-- Настройки -->
+<div id="scr-settings" class="screen modal hidden">
+  <div class="panel">
+    <h2>⚙️ Настройки</h2>
+    <div id="setList"></div>
+    <div class="row" style="margin-top:12px"><button class="btn green" id="btnSetBack">Готово</button></div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hud-l"><div class="pill" id="hudTime">0:00</div><div class="pill" id="hudHp"></div></div>
+    <div id="hudGoal"></div>
+    <div class="hud-r"><button class="btn white ico" id="btnPause">⏸</button><div class="pill" id="hudCoins">🪙 0</div></div>
+  </div>
+  <div id="hudProg" class="hidden"><div id="hudProgFill"></div></div>
+  <div id="stam"><div id="stamFill"></div></div>
+</div>
+<div id="controls" class="hidden">
+  <div id="joyZone"><div id="joy"><div id="joyKnob"></div></div><div id="joyHint"></div></div>
+  <div class="cbtn" id="btnJump">⬆️</div>
+  <div class="cbtn" id="btnAction">✋</div>
+  <div class="cbtn" id="btnSprint">💨</div>
+</div>
+<div id="bigMsg"></div>
+<div id="toast"></div>
+
+<script src="three.min.js"></script>
+<script src="models.js"></script>
+<script src="engine.js"></script>
+<script src="levels.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
