@@ -1,0 +1,226 @@
+<title>Студия Миры</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column, operated like a phone app — review first, then the topic queue, then money settings */
+:root {
+  --bg: #f3f7f6;
+  --surface: #ffffff;
+  --fg: #12302c;
+  --muted: #5b7470;
+  --line: #d6e2df;
+  --accent: #0e7c6b;
+  --accent-fg: #ffffff;
+  --soft: #e3f1ee;
+  --warn: #b25b12;
+  --bad: #b3261e;
+  --good: #1f7a3a;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d1716; --surface: #142321; --fg: #e3efec; --muted: #8fa8a3; --line: #24413c;
+  --accent: #3cc2a9; --accent-fg: #062320; --soft: #183632; --warn: #e49a4c; --bad: #f08a80; --good: #6fcf8a;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d1716; --surface: #142321; --fg: #e3efec; --muted: #8fa8a3; --line: #24413c;
+  --accent: #3cc2a9; --accent-fg: #062320; --soft: #183632; --warn: #e49a4c; --bad: #f08a80; --good: #6fcf8a;
+  color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 720px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 36px; }
+h1, h2 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.05rem; font-weight: 500; display: flex; align-items: baseline; gap: 10px; }
+h2 .count { font-family: var(--body); font-size: .85rem; color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+header { display: flex; flex-direction: column; gap: 10px; }
+.lede { color: var(--muted); margin: 0; max-width: 60ch; }
+.sched { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: .8rem; padding: 3px 10px; border-radius: 999px; background: var(--soft); color: var(--fg); white-space: nowrap; }
+section { display: flex; flex-direction: column; gap: 14px; }
+.list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.row > div { min-width: 0; }
+.row .t { font-weight: 600; overflow-wrap: anywhere; }
+.row .m { font-size: .82rem; color: var(--muted); }
+.tag { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; padding: 1px 8px; border-radius: 4px; border: 1px solid currentColor; margin-right: 6px; }
+.tag.sale { color: var(--accent); } .tag.ads { color: var(--warn); } .tag.reach { color: var(--muted); }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+button, .btn { font: inherit; font-size: .85rem; font-weight: 500; border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-decoration: none; display: inline-flex; align-items: center; }
+button.primary, .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+button.ghost { border-color: transparent; background: transparent; color: var(--muted); padding: 6px 8px; }
+button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: .5; cursor: default; }
+.review { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.review .cap { white-space: pre-wrap; background: var(--bg); border-radius: 8px; padding: 10px 12px; font-size: .9rem; overflow-wrap: anywhere; }
+.review .head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.review .actions { justify-content: flex-start; }
+.empty { color: var(--muted); padding: 14px 0; border-top: 1px solid var(--line); margin: 0; }
+form { display: grid; grid-template-columns: 1fr; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .two { grid-template-columns: 1fr; } }
+label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: flex; flex-direction: column; gap: 4px; }
+input, select, textarea { font: inherit; font-size: .95rem; text-transform: none; letter-spacing: 0; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; box-sizing: border-box; }
+textarea { min-height: 60px; resize: vertical; }
+.status { font-size: .8rem; font-weight: 600; }
+.status.review-s { color: var(--warn); } .status.approved { color: var(--good); } .status.rejected { color: var(--bad); } .status.posted { color: var(--accent); }
+.note { font-size: .85rem; color: var(--muted); margin: 0; max-width: 62ch; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: .85rem; }
+@media (prefers-reduced-motion: no-preference) { .row, .review { transition: background .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Студия Миры</h1>
+    <p class="lede">Сюда каждый день приходит новое видео Миры Велл. Вы проверяете его и одобряете. Темы для видео берутся по порядку из очереди ниже.</p>
+    <div class="sched"><span class="chip">Каждый день · 17:47 Ташкент</span><span class="chip">Сначала на проверку</span><span class="chip">Instagram Reels</span></div>
+  </header>
+
+  <section aria-labelledby="h-review">
+    <h2 id="h-review">На проверке <span class="count" id="c-review"></span></h2>
+    <div id="review"><p class="empty">Новых видео пока нет. Первое придёт в ближайший день по расписанию.</p></div>
+  </section>
+
+  <section aria-labelledby="h-topics">
+    <h2 id="h-topics">Очередь тем <span class="count" id="c-topics"></span></h2>
+    <form id="add">
+      <label for="f-title">Тема видео<input id="f-title" required maxlength="160" placeholder="Например: правда ли, что нужно пить 8 стаканов воды"></label>
+      <div class="two">
+        <label for="f-goal">Цель
+          <select id="f-goal">
+            <option value="reach">Охват — набрать подписчиков</option>
+            <option value="sale">Продажа — вести на продукт</option>
+            <option value="ads">Реклама — интеграция бренда</option>
+          </select></label>
+        <label for="f-note">Пожелание (необязательно)<input id="f-note" maxlength="200" placeholder="Сцена, тон, бренд…"></label>
+      </div>
+      <div><button class="primary" type="submit">Добавить в очередь</button></div>
+    </form>
+    <div class="list" id="topics"><p class="empty">Очередь пуста. Если тем нет, Мира сама выберет тему из своих рубрик: мифы о здоровье, сон, питание, движение.</p></div>
+  </section>
+
+  <section aria-labelledby="h-money">
+    <h2 id="h-money">Монетизация</h2>
+    <p class="note">Эти данные попадут в подписи к видео. Для цели «Продажа» подпись ведёт на ваш продукт. Для цели «Реклама» в подписи и на экране ставится пометка «Реклама».</p>
+    <form id="money">
+      <label for="m-product">Ваш продукт<input id="m-product" maxlength="200" placeholder="Например: гайд «7 дней хорошего сна», 99 000 сум"></label>
+      <label for="m-link">Ссылка в профиле<input id="m-link" maxlength="200" placeholder="https://…"></label>
+      <label for="m-sponsor">Рекламодатель сейчас (если есть)<input id="m-sponsor" maxlength="200" placeholder="Бренд и что рекламируем"></label>
+      <div><button class="primary" type="submit">Сохранить</button></div>
+    </form>
+  </section>
+
+  <section aria-labelledby="h-archive">
+    <h2 id="h-archive">Архив видео <span class="count" id="c-archive"></span></h2>
+    <div class="list" id="archive"><p class="empty">Здесь появятся одобренные и отклонённые видео.</p></div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const GOALS = { reach: "Охват", sale: "Продажа", ads: "Реклама" };
+const STATUS = { review: "На проверке", approved: "Одобрено", rejected: "Отклонено", posted: "Опубликовано" };
+let db = null, topics = [], videos = [];
+const $ = id => document.getElementById(id);
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2200); }
+function fmtDate(s) { if (!s) return ""; const d = new Date(s); return isNaN(d) ? esc(s) : d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }); }
+function safeUrl(u) { return /^https:\/\//i.test(u || "") ? u : null; }
+
+function renderTopics() {
+  const q = topics.filter(t => t.status !== "used").sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  $("c-topics").textContent = q.length ? q.length + " в очереди" : "";
+  if (!q.length) { $("topics").innerHTML = '<p class="empty">Очередь пуста. Если тем нет, Мира сама выберет тему из своих рубрик: мифы о здоровье, сон, питание, движение.</p>'; return; }
+  $("topics").innerHTML = q.map((t, i) => `
+    <div class="row">
+      <div><div class="t">${esc(t.title)}</div>
+        <div class="m"><span class="tag ${esc(t.goal)}">${GOALS[t.goal] || "Охват"}</span>${i === 0 ? "Следующая" : "№ " + (i + 1)}${t.note ? " · " + esc(t.note) : ""}</div></div>
+      <div class="actions">
+        <button class="ghost" data-up="${esc(t.id)}" ${i === 0 ? "disabled" : ""} aria-label="Поднять выше">↑</button>
+        <button class="ghost" data-del="${esc(t.id)}" aria-label="Удалить тему">Удалить</button>
+      </div>
+    </div>`).join("");
+}
+
+function renderVideos() {
+  const rev = videos.filter(v => v.status === "review").sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const arch = videos.filter(v => v.status !== "review").sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  $("c-review").textContent = rev.length ? String(rev.length) : "";
+  $("c-archive").textContent = arch.length ? String(arch.length) : "";
+  $("review").innerHTML = rev.length ? rev.map(v => {
+    const url = safeUrl(v.videoUrl);
+    return `<div class="review">
+      <div class="head"><div class="t"><strong>${esc(v.title)}</strong></div><span class="m">${fmtDate(v.date)}${v.credits ? " · " + esc(v.credits) + " кредитов" : ""}</span></div>
+      <div class="m"><span class="tag ${esc(v.goal)}">${GOALS[v.goal] || "Охват"}</span>${esc(v.format || "")}</div>
+      <div class="cap" id="cap-${esc(v.id)}">${esc(v.caption)}${v.hashtags ? "\n\n" + esc(v.hashtags) : ""}</div>
+      <div class="actions">
+        ${url ? `<a class="btn" href="${esc(url)}" target="_blank" rel="noopener">Открыть видео</a>` : ""}
+        <button data-copy="${esc(v.id)}">Скопировать подпись</button>
+        <button class="primary" data-ok="${esc(v.id)}">Одобрить</button>
+        <button data-no="${esc(v.id)}">Отклонить</button>
+      </div></div>`;
+  }).join("") : '<p class="empty">Новых видео пока нет. Первое придёт в ближайший день по расписанию.</p>';
+  $("archive").innerHTML = arch.length ? arch.map(v => {
+    const url = safeUrl(v.videoUrl);
+    const cls = v.status === "approved" ? "approved" : v.status === "rejected" ? "rejected" : "posted";
+    return `<div class="row"><div><div class="t">${esc(v.title)}</div><div class="m">${fmtDate(v.date)} · <span class="status ${cls}">${STATUS[v.status] || esc(v.status)}</span></div></div>
+      <div class="actions">${url ? `<a class="btn" href="${esc(url)}" target="_blank" rel="noopener">Видео</a>` : ""}${v.status === "approved" ? `<button data-posted="${esc(v.id)}">Выложил</button>` : ""}</div></div>`;
+  }).join("") : '<p class="empty">Здесь появятся одобренные и отклонённые видео.</p>';
+}
+
+document.addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.copy) {
+    const v = videos.find(x => x.id === b.dataset.copy); const text = (v.caption || "") + (v.hashtags ? "\n\n" + v.hashtags : "");
+    try { await navigator.clipboard.writeText(text); toast("Подпись скопирована"); }
+    catch { const r = document.createRange(); r.selectNodeContents($("cap-" + v.id)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Выделено — скопируйте вручную"); }
+    return;
+  }
+  if (!db) { toast("Нет связи с хранилищем"); return; }
+  try {
+    if (b.dataset.ok) { await db.doc("videos/" + b.dataset.ok).update({ status: "approved", decidedAt: new Date().toISOString() }); toast("Одобрено"); }
+    else if (b.dataset.no) { await db.doc("videos/" + b.dataset.no).update({ status: "rejected", decidedAt: new Date().toISOString() }); toast("Отклонено"); }
+    else if (b.dataset.posted) { await db.doc("videos/" + b.dataset.posted).update({ status: "posted" }); toast("Отмечено как опубликованное"); }
+    else if (b.dataset.del) { await db.doc("topics/" + b.dataset.del).delete(); toast("Тема удалена"); }
+    else if (b.dataset.up) {
+      const q = topics.filter(t => t.status !== "used").sort((a, c) => (a.order ?? 0) - (c.order ?? 0));
+      const i = q.findIndex(t => t.id === b.dataset.up);
+      if (i > 0) { const a = q[i - 1], c = q[i];
+        await db.doc("topics/" + c.id).update({ order: a.order ?? 0 });
+        await db.doc("topics/" + a.id).update({ order: c.order ?? 0 }); }
+    }
+  } catch (err) { toast(err?.code === "not_granted" ? "Нет прав на изменение" : "Не сохранилось, попробуйте ещё раз"); }
+});
+
+$("add").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!db) { toast("Нет связи с хранилищем"); return; }
+  const title = $("f-title").value.trim(); if (!title) return;
+  const max = topics.reduce((m, t) => Math.max(m, t.order ?? 0), 0);
+  try {
+    await db.collection("topics").add({ title, goal: $("f-goal").value, note: $("f-note").value.trim(), status: "queued", order: max + 1, createdAt: new Date().toISOString() });
+    $("f-title").value = ""; $("f-note").value = ""; toast("Тема добавлена");
+  } catch { toast("Не сохранилось, попробуйте ещё раз"); }
+});
+
+$("money").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!db) { toast("Нет связи с хранилищем"); return; }
+  try {
+    await db.doc("settings/main").set({ product: $("m-product").value.trim(), link: $("m-link").value.trim(), sponsor: $("m-sponsor").value.trim(), updatedAt: new Date().toISOString() });
+    toast("Сохранено");
+  } catch { toast("Не сохранилось, попробуйте ещё раз"); }
+});
+
+(async () => {
+  db = await window.claude?.use?.("db");
+  if (!db) return;
+  db.collection("topics").onSnapshot(s => { topics = s.docs.map(d => ({ id: d.id, ...d.data() })); renderTopics(); });
+  db.collection("videos").onSnapshot(s => { videos = s.docs.map(d => ({ id: d.id, ...d.data() })); renderVideos(); });
+  const st = await db.doc("settings/main").get();
+  if (st.exists) { const d = st.data(); $("m-product").value = d.product || ""; $("m-link").value = d.link || ""; $("m-sponsor").value = d.sponsor || ""; }
+})();
+</script>
