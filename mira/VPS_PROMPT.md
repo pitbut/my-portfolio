@@ -1,6 +1,9 @@
 Задача: автоматизировать AI-инфлюенсера Миру Велл (здоровье и привычки, Instagram Reels).
 Работай в папке ~/mira. Сайт на этом сервере не ломай: сначала посмотри, как он настроен.
-Навыки Миры уже лежат в ~/mira/.claude/skills — используй их для внешности, голоса, подписей и видео.
+0. НАВЫКИ. Если папки ~/mira/.claude/skills ещё нет, скачай навыки Миры из GitHub:
+   git clone -b ccr-5e1e39d7-68py5l --depth 1 https://github.com/pitbut/my-portfolio.git /tmp/mira-src
+   mkdir -p ~/mira/.claude && cp -r /tmp/mira-src/mira/.claude/skills ~/mira/.claude/ && rm -rf /tmp/mira-src
+   Проверь, что там 7 папок mira-*. Используй эти навыки для внешности, голоса, подписей и видео.
 
 1. ПРОГРАММА mira-bot (Python), служба systemd: работает постоянно, сама запускается после перезагрузки и после сбоя.
 
