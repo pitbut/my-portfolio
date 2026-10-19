@@ -93,7 +93,9 @@ folders.forEach(folder => {
         image: imagePath,
         link: projectInfo.link || `projects/${folder}/index.html`, // Используем link из info.json если есть
         date: projectInfo.date || new Date().toISOString().split('T')[0],
-        tags: projectInfo.tags || []
+        tags: projectInfo.tags || [],
+        // noindex: true — закрытая страница (например, панель с входом): карточка есть, в sitemap не попадает
+        ...(projectInfo.noindex ? { noindex: true } : {})
     };
     
     projects.push(project);

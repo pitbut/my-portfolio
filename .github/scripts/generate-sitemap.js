@@ -15,6 +15,8 @@ const projects = JSON.parse(fs.readFileSync('./projects.json', 'utf8'));
 const urls = [
     { loc: `${SITE_URL}/`, changefreq: 'weekly', priority: '1.0' },
     ...projects
+        // Закрытые страницы (noindex в info.json) в карту сайта не включаем
+        .filter(p => !p.noindex)
         // Абсолютные ссылки на наш же домен (/journal/, /fizcraft/ и т.п.) — тоже наши страницы.
         .filter(p => p.link.startsWith(`${SITE_URL}/`) || (!p.link.startsWith('http://') && !p.link.startsWith('https://')))
         .map(p => ({

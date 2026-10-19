@@ -1,0 +1,9 @@
+{
+  "title": "🔒 Студия Миры — AI-инфлюенсер",
+  "description": "Закрытая панель управления AI-инфлюенсером Мирой Велл: контент-календарь публикаций, проверка видео, автопубликация в Instagram. Вход только для владельца.",
+  "link": "https://www.robutpit.com/mira/",
+  "date": "2026-10-19",
+  "tags": ["AI", "Instagram", "Higgsfield", "Claude", "Python", "Flask"],
+  "image": "preview.svg",
+  "noindex": true
+}
