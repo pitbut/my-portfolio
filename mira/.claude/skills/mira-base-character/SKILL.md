@@ -28,6 +28,10 @@ Allowed variations (keep palette: sage green, sand, white, soft grey, muted blue
 
 ## Reference images
 - Master reference: the two-panel white-studio image (full body left, chest-up portrait right). Always attach it as a reference image when the tool supports it — face consistency comes from the reference, the text only supports it.
+- In Higgsfield it is:
+  - image job `3a3527d9-f93b-4f66-9cb6-b08dae41c123` — pass as the FIRST item of `input_images` / `medias` as `{"id": "3a3527d9-f93b-4f66-9cb6-b08dae41c123", "type": "image_job", "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3K2eLroHPEipdMAJY7TgmOe2LWn/hf_20260930_110415_3a3527d9-f93b-4f66-9cb6-b08dae41c123.png"}` and start the prompt with "Use the woman from the first reference image (Mira) with exactly the same face, hair and identity";
+  - reference element `Mira-Vell` (id `dd32964a-8347-4310-b623-0c6e1d3b7772`) — put `<<<dd32964a-8347-4310-b623-0c6e1d3b7772>>>` in the prompt for models that support elements (Nano Banana Pro / 2, Seedream, Seedance 2.0, Cinema Studio).
+- Never generate Mira from the text description alone: without the reference the face changes every time.
 - If the user uploads a newer approved portrait, that becomes the master reference.
 
 ## Photo style defaults
