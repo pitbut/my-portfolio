@@ -130,16 +130,16 @@ function makeKid(o) {
   const mouth = mesh(G_BOX, mat(0x8a3b2e), 0, -0.11, 0.25, false); mouth.scale.set(0.1, 0.025, 0.02); headG.add(mouth);
 
   if (o.costume === 'spider') {
-    head.material = mat(0xd61f26);
+    head.material = mat(0x262a3d);
     headG.children.forEach(ch => { if (ch !== head) ch.visible = false; });
     for (const sx of [-0.1, 0.1]) {
-      const e = mesh(G_SPH, mat(0xffffff), sx, 0.04, 0.235, false);
+      const e = mesh(G_SPH, mat(0xffe14d, { emissive: 0x665500 }), sx, 0.04, 0.235, false);
       e.scale.set(0.08, 0.05, 0.03); e.rotation.z = sx > 0 ? -0.5 : 0.5; headG.add(e);
     }
-    torso.material = mat(0xd61f26);
-    arms.forEach(a => { a.children[0].material = mat(0xd61f26); a.children[1].material = mat(0xd61f26); });
-    legs.forEach(l => { l.children[0].material = mat(0x1d4fc4); l.children[1].material = mat(0xd61f26); });
-    const logo = mesh(G_SPH, mat(0x111111), 0, hip + torsoH * 0.6, 0.165, false); logo.scale.set(0.06, 0.08, 0.02); body.add(logo);
+    torso.material = mat(0x262a3d);
+    arms.forEach(a => { a.children[0].material = mat(0x262a3d); a.children[1].material = mat(0xffb300); });
+    legs.forEach(l => { l.children[0].material = mat(0x5a2ca0); l.children[1].material = mat(0xffb300); });
+    const logo = mesh(G_SPH, mat(0xffb300), 0, hip + torsoH * 0.6, 0.165, false); logo.scale.set(0.06, 0.08, 0.02); body.add(logo);
   } else {
     // причёска
     const style = o.hairStyle || 'short';
@@ -251,7 +251,7 @@ function makeZombie() {
   return k;
 }
 
-// Член экипажа "амогус"
+// Космонавт-член экипажа
 function makeCrewmate(color) {
   const g = new THREE.Group();
   const m = mat(color);
@@ -259,6 +259,8 @@ function makeCrewmate(color) {
   body.add(mesh(new THREE.CapsuleGeometry(0.42, 0.55, 6, 14), m, 0, 0.95, 0));
   const visor = mesh(G_SPH, mat(0x9fdcff, { emissive: 0x224455 }), 0, 1.2, 0.33); visor.scale.set(0.27, 0.16, 0.14); body.add(visor);
   const pack = mesh(G_BOX, m, 0, 0.95, -0.42); pack.scale.set(0.5, 0.6, 0.22); body.add(pack);
+  const ant = mesh(G_CYL, mat(0x888888), 0.15, 1.75, 0); ant.scale.set(0.03, 0.4, 0.03); body.add(ant);
+  const bulb = mesh(G_SPH, mat(0xffe14d, { emissive: 0x806b00 }), 0.15, 1.97, 0); bulb.scale.setScalar(0.08); body.add(bulb);
   const legs = [];
   for (const sx of [-0.2, 0.2]) {
     const p = new THREE.Group(); p.position.set(sx, 0.45, 0);
