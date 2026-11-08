@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- задний пузырь (оригинал) -->
+    <path android:fillColor="#80FFFFFF"
+        android:pathData="M30,32h30a6,6 0,0 1,6 6v18a6,6 0,0 1,-6 6h-18l-8,7v-7h-4a6,6 0,0 1,-6 -6v-18a6,6 0,0 1,6 -6z" />
+    <!-- передний пузырь (перевод) -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M48,44h30a6,6 0,0 1,6 6v18a6,6 0,0 1,-6 6h-4v7l-8,-7h-18a6,6 0,0 1,-6 -6v-18a6,6 0,0 1,6 -6z" />
+    <!-- буква «Я» -->
+    <path android:strokeColor="#1E6FD9" android:strokeWidth="3.2" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000"
+        android:pathData="M68,51v16M68,51h-6a4.2,4.2 0,0 0,0 8.4h6M63.5,59.4l-5,7.6" />
+</vector>

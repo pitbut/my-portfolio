@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Экранный переводчик</string>
+    <string name="service_label">Экранный переводчик</string>
+    <string name="service_description">Читает текст на экране любого приложения (в том числе Telegram) и показывает поверх него перевод. Текст обрабатывается на телефоне и никуда не отправляется — перевод делается офлайн-моделями ML Kit.</string>
+</resources>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Переводит текст на экране любого приложения автоматически. Нажмите на плавающую кнопку — увидите оригинал, нажмите ещё раз — снова перевод. Удержание кнопки открывает меню."
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+        <!-- 1. Служба -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardService"
+            style="?attr/materialCardViewFilledStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/serviceStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/serviceHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAccessibility"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Открыть «Специальные возможности»" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAppInfo"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Переключатель серый? Разрешить ограниченные настройки" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 2. Языки -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Языки" />
+
+        <TextView
+            style="@style/Label"
+            android:text="Переводить на" />
+
+        <Spinner
+            android:id="@+id/spTarget"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
+        <TextView
+            style="@style/Label"
+            android:text="Если язык короткой фразы не определился, считать его" />
+
+        <Spinner
+            android:id="@+id/spFallback"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDownload"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Скачать языковые модели" />
+
+        <TextView
+            android:id="@+id/modelsInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <!-- 3. Внешний вид -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Работа и внешний вид" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swEnabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Переводить автоматически" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swBubble"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Плавающая кнопка «перевод / оригинал»" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swDark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Тёмные плашки перевода" />
+
+        <TextView
+            android:id="@+id/scaleLabel"
+            style="@style/Label" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slScale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stepSize="0.1"
+            android:valueFrom="0.7"
+            android:valueTo="1.5" />
+
+        <!-- 4. OCR -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Текст на картинках и в играх (OCR)" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swAutoOcr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Распознавать с экрана, если обычного текста нет" />
+
+        <TextView
+            style="@style/Label"
+            android:text="Письменность для распознавания" />
+
+        <Spinner
+            android:id="@+id/spOcr"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
+        <!-- 5. Исключения -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Приложения без перевода" />
+
+        <TextView
+            android:id="@+id/excludedInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClearExcluded"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Очистить список" />
+
+        <!-- 6. Проверка -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Проверить перевод" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="?attr/textInputOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Введите текст на любом языке">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hello! This message will be translated automatically." />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Перевести" />
+
+        <TextView
+            android:id="@+id/testResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textIsSelectable="true" />
+
+        <!-- 7. Справка -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Как это работает" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingMultiplier="1.15"
+            android:text="• Текст читается через «Специальные возможности» — так же, как его читает TalkBack для незрячих. Поэтому перевод работает и в Telegram, даже в чатах, где включён запрет копирования и пересылки: Telegram прячет кнопки, но сам текст системе отдаёт.\n\n• Перевод делается прямо на телефоне моделями Google ML Kit. Каждый язык скачивается один раз (~30 МБ), дальше всё работает без интернета, и ваши переписки никуда не отправляются.\n\n• Оригинал: короткое нажатие на кнопку. Ещё нажатие — снова перевод. Плашки исчезают при прокрутке и появляются снова, когда экран остановится.\n\n• Текст на картинках, в видео и играх: удержите кнопку → «Перевести с картинки (OCR)». Окна, которые запрещают снимки экрана, OCR не видит, но обычный текст в них всё равно переводится.\n\n• Поля ввода не закрываются, чтобы не мешать печатать."
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
+    </LinearLayout>
+</ScrollView>
