@@ -1,6 +1,9 @@
 package com.robutpit.perevodchik
 
 import android.content.Intent
+import android.media.AudioFormat
+import android.os.Build
+import android.os.ParcelFileDescriptor
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -25,6 +28,16 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
     private var session = 0          // номер текущей сессии распознавания (старые ответы игнорируются в JS)
     private var tts: TextToSpeech? = null
     @Volatile private var ttsReady = false
+
+    /* Усиление микрофона (Android 13+). Если распознаватель телефона не принимает наш звук,
+       сами переходим на обычный режим и больше не пытаемся до перезапуска. */
+    private val booster = MicBooster { level -> js("window.nativeSpeech && nativeSpeech.level($level)") }
+    private var boostEnabled = true
+    private var boostBroken = false
+    private var boostProven = false // хоть раз распознал наш звук — значит, поддерживается
+    private var deafSessions = 0  // сессий подряд: микрофон слышал речь, а распознаватель — нет
+    private val boostSupported get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    private val useBoost get() = boostSupported && boostEnabled && !boostBroken && activity.hasMic()
 
     init {
         main.post {
@@ -53,6 +66,20 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
 
     /* ---------- Распознавание ---------- */
 
+    /** Настройки микрофона из JS: усиление 1..6, подавление шума */
+    @JavascriptInterface
+    fun setMic(gain: Float, noiseSuppress: Boolean) = main.post {
+        val nsChanged = booster.noiseSuppress != noiseSuppress
+        booster.gain = gain.coerceIn(1f, 8f)
+        booster.noiseSuppress = noiseSuppress
+        boostEnabled = gain > 1.01f || noiseSuppress
+        if (booster.isRunning && (nsChanged || !useBoost)) booster.stop() // перезапустится при следующей фразе
+    }
+
+    /** Можно ли усиливать звук для встроенного распознавания на этом телефоне */
+    @JavascriptInterface
+    fun canBoost(): Boolean = boostSupported && !boostBroken
+
     @JavascriptInterface
     fun isRecognitionAvailable(): Boolean = SpeechRecognizer.isRecognitionAvailable(activity)
 
@@ -61,7 +88,9 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
         session = id
         val rec = recognizer ?: SpeechRecognizer.createSpeechRecognizer(activity).also { recognizer = it }
         rec.cancel()
-        rec.setRecognitionListener(Listener(id))
+        booster.detach()
+        val boosted = useBoost && booster.start()
+        rec.setRecognitionListener(Listener(id, boosted))
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
@@ -71,10 +100,25 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, activity.packageName)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1200L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1000L)
+        }
+        var readEnd: ParcelFileDescriptor? = null
+        if (boosted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val pipe = ParcelFileDescriptor.createPipe()
+            readEnd = pipe[0]
+            intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, pipe[0])
+            intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
+            intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, AudioFormat.ENCODING_PCM_16BIT)
+            intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, MicBooster.RATE)
+            booster.attach(ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]))
+        } else if (booster.isRunning) {
+            booster.stop()
         }
         try {
             rec.startListening(intent)
+            readEnd?.close() // копию дескриптора распознаватель уже получил
         } catch (e: Exception) {
+            if (boosted) boostFailed()
             js("window.nativeSpeech && nativeSpeech.error($id, 'aborted'); window.nativeSpeech && nativeSpeech.end($id)")
         }
     }
@@ -83,9 +127,17 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
     fun stopListening() = main.post {
         session = -1
         recognizer?.cancel()
+        booster.stop()
     }
 
-    private inner class Listener(private val id: Int) : RecognitionListener {
+    private fun boostFailed() {
+        if (boostBroken) return
+        boostBroken = true
+        booster.stop()
+        js("window.nativeSpeech && nativeSpeech.boostUnsupported && nativeSpeech.boostUnsupported()")
+    }
+
+    private inner class Listener(private val id: Int, private val boosted: Boolean) : RecognitionListener {
         private var finished = false
         private fun cb(fn: String, arg: String? = null) {
             val a = if (arg == null) "" else ", " + JSONObject.quote(arg)
@@ -96,7 +148,10 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
 
         override fun onReadyForSpeech(params: Bundle?) {}
         override fun onBeginningOfSpeech() {}
-        override fun onRmsChanged(rmsdB: Float) {}
+        override fun onRmsChanged(rmsdB: Float) {
+            // Без усиления индикатор громкости рисуем по данным распознавателя (≈ -2..10 дБ)
+            if (!boosted) js("window.nativeSpeech && nativeSpeech.level(${((rmsdB + 2f) / 12f).coerceIn(0f, 1f) * 0.12f})")
+        }
         override fun onBufferReceived(buffer: ByteArray?) {}
         override fun onEndOfSpeech() {}
         override fun onEvent(eventType: Int, params: Bundle?) {}
@@ -108,6 +163,7 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
 
         override fun onResults(results: Bundle?) {
             if (finished) return; finished = true
+            if (boosted) { booster.detach(); deafSessions = 0; if (text(results).isNotBlank()) boostProven = true }
             val t = text(results)
             if (t.isNotBlank()) cb("final", t)
             cb("end")
@@ -115,6 +171,19 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
 
         override fun onError(error: Int) {
             if (finished) return; finished = true
+            if (boosted) {
+                booster.detach()
+                val deaf = error == SpeechRecognizer.ERROR_CLIENT ||
+                    ((error == SpeechRecognizer.ERROR_NO_MATCH || error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) &&
+                        booster.sessionPeak > 0.1f)
+                when {
+                    // Распознаватель не смог взять звук — наш поток он не принимает
+                    error == SpeechRecognizer.ERROR_AUDIO && !boostProven -> boostFailed()
+                    // Микрофон явно слышал речь, а распознаватель — «тишина» 3 раза подряд → не поддерживает
+                    deaf && !boostProven -> if (++deafSessions >= 3) boostFailed()
+                    else -> deafSessions = 0
+                }
+            }
             val code = when (error) {
                 SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "no-speech"
                 SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "not-allowed"
@@ -153,6 +222,7 @@ class SpeechBridge(private val activity: MainActivity, private val web: WebView)
     fun stopSpeaking() = main.post { tts?.stop() }
 
     fun release() {
+        booster.stop()
         recognizer?.destroy(); recognizer = null
         tts?.shutdown(); tts = null
     }

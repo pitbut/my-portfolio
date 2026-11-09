@@ -154,6 +154,19 @@ header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;t
       </div>
     </div>
 
+    <div class="row" id="boostRow">
+      <label class="t" for="boost">🎤 Усиление микрофона: <span id="boostVal"></span></label>
+      <input type="range" id="boost" min="1" max="6" step="0.5">
+      <div class="hint" id="boostHint">Если телефон плохо слышит собеседника на расстоянии — прибавьте.
+        Полоска над кнопкой 🎙️ показывает громкость: когда говорят, она должна заметно подниматься.</div>
+    </div>
+    <div class="row chk" id="noiseRow">
+      <input type="checkbox" id="noiseSup">
+      <div><label for="noiseSup"><b>Подавление шума</b></label>
+        <div class="hint">Включайте на улице или в шумном месте. В тихом помещении лучше выключить:
+          подавление шума глушит и тихие, дальние голоса.</div></div>
+    </div>
+
     <div class="row chk" id="autoSwitchRow">
       <input type="checkbox" id="autoSwitch">
       <div><label for="autoSwitch"><b>Переключать язык после каждой фразы</b></label>
@@ -179,7 +192,7 @@ header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;t
 
     <div class="row"><button class="btn danger" id="clearHist">🗑️ Очистить историю</button></div>
     <div class="row web-only"><a class="btn" style="display:block;text-align:center;text-decoration:none" href="perevodchik.apk" download>📱 Скачать приложение для Android (APK)</a></div>
-    <div class="row hint" style="text-align:center">Живой переводчик 1.0 ·
+    <div class="row hint" style="text-align:center">Живой переводчик 1.1 ·
       <a href="https://www.robutpit.com/projects/perevodchik/privacy.html" target="_blank" rel="noopener" style="color:var(--muted)">Политика конфиденциальности</a></div>
     <div class="row"><button class="btn primary" id="closeSettings">Готово</button></div>
   </div>
@@ -244,6 +257,7 @@ const S = {
   apiKey: store.get('apiKey',''), sens: store.get('sens',5),
   autoSwitch: store.get('autoSwitch',true), rate: store.get('rate',1),
   fsize: store.get('fsize',1.25), speakInText: store.get('speakInText',false),
+  boost: store.get('boost',3), noiseSup: store.get('noiseSup',false),
 };
 const save = k => store.set(k, S[k]);
 let history = store.get('history', []);   // [{side, src, dst, from, to, t}]
@@ -273,6 +287,8 @@ function renderMode(){
   $('modeText').classList.toggle('on', S.mode==='text');
   $('modeVoice').classList.toggle('on', S.mode==='voice');
 }
+function setLevel(v){ $('level').firstElementChild.style.width = Math.min(100, v * 900) + '%'; }
+function applyMic(){ NATIVE?.setMic?.(S.boost, S.noiseSup); }
 function setStatus(t){ $('status').textContent = t || ''; }
 function setLive(t){ $('live').textContent = t || ''; }
 let toastTimer;
@@ -435,6 +451,7 @@ function pauseMic(on){
   $('mic').classList.toggle('speaking', on && listening);
   if (!listening) return;
   if (S.engine === 'browser') { on ? recStop() : recStart(); }
+  if (on) setLevel(0);
   setStatus(on ? '🔊 Говорю перевод…' : statusListening());
 }
 function statusListening(){
@@ -459,6 +476,8 @@ if (NATIVE) {
     final(id, t){ sessions[id]?.onresult?.(ev(t, true)); },
     error(id, code){ sessions[id]?.onerror?.({ error: code }); },
     end(id){ const r = sessions[id]; delete sessions[id]; r?.onend?.(); },
+    level(v){ if (listening && !speaking) setLevel(v); },
+    boostUnsupported(){ toast('Распознаватель этого телефона не принимает усиленный звук — работаю в обычном режиме. Для дальней речи попробуйте Whisper в ⚙️.', 8000); },
   };
 }
 let rec = null, recActive = false, restartTimer, recErr = '';
@@ -513,16 +532,22 @@ function setSideBrowser(side){
 /* ================= Движок 2: Whisper с автоопределением языка ================= */
 // Слушаем микрофон, сами находим начало и конец фразы по громкости,
 // отправляем фразу в Whisper; он возвращает текст и язык.
-let ac, stream, proc, srcNode, wRunning = false;
+let ac, stream, proc, srcNode, gainNode, compNode, wRunning = false;
 const W = { rate: 16000, pre: [], buf: [], inSpeech: false, silenceMs: 0, speechMs: 0, noise: 0.008 };
 async function whisperStart(){
   if (!S.apiKey) { openSettings(); toast('Вставьте API-ключ для Whisper'); stopAll(); return; }
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    // echoCancellation включает режим «разговор у уха», который глушит дальние голоса.
+    // Эхо от собственной озвучки не мешает: пока телефон говорит, звук игнорируется.
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: S.noiseSup, autoGainControl: true } });
   } catch (e) { stopAll(); toast('Нет доступа к микрофону', 5000); return; }
   ac = new (window.AudioContext || window.webkitAudioContext)();
   await ac.resume();
   srcNode = ac.createMediaStreamSource(stream);
+  gainNode = ac.createGain(); gainNode.gain.value = S.boost;
+  // Компрессор не даёт усиленному звуку перегружаться
+  compNode = ac.createDynamicsCompressor();
+  compNode.threshold.value = -12; compNode.ratio.value = 8; compNode.attack.value = 0.003; compNode.release.value = 0.25;
   proc = ac.createScriptProcessor(4096, 1, 1);
   const ratio = ac.sampleRate / W.rate;
   const chunkMs = 4096 / ac.sampleRate * 1000;
@@ -534,7 +559,7 @@ async function whisperStart(){
     for (let i = 0; i < out.length; i++) out[i] = input[Math.floor(i * ratio)];
     let sum = 0; for (let i = 0; i < input.length; i++) sum += input[i] * input[i];
     const rms = Math.sqrt(sum / input.length);
-    $('level').firstElementChild.style.width = Math.min(100, rms * 900) + '%';
+    setLevel(rms);
     if (speaking) { W.inSpeech = false; W.buf = []; W.pre = []; return; }
     const k = 4.2 - S.sens * 0.3;                       // множитель над уровнем шума
     const thr = Math.max(0.006, W.noise * k);
@@ -552,16 +577,16 @@ async function whisperStart(){
       }
     }
   };
-  srcNode.connect(proc); proc.connect(ac.destination);
+  srcNode.connect(gainNode); gainNode.connect(compNode); compNode.connect(proc); proc.connect(ac.destination);
   wRunning = true; setStatus(statusListening());
 }
 function whisperStop(){
   wRunning = false;
-  try { proc && proc.disconnect(); srcNode && srcNode.disconnect(); } catch {}
+  try { proc && proc.disconnect(); srcNode && srcNode.disconnect(); gainNode && gainNode.disconnect(); compNode && compNode.disconnect(); } catch {}
   stream && stream.getTracks().forEach(t => t.stop());
   ac && ac.close().catch(() => {});
-  ac = stream = proc = srcNode = null; W.buf = []; W.pre = []; W.inSpeech = false;
-  $('level').firstElementChild.style.width = '0';
+  ac = stream = proc = srcNode = gainNode = compNode = null; W.buf = []; W.pre = []; W.inSpeech = false;
+  setLevel(0);
 }
 function toWav(chunks){
   const len = chunks.reduce((a, c) => a + c.length, 0);
@@ -640,6 +665,7 @@ function startAll(){
     openSettings(); return;
   }
   if (NATIVE && !NATIVE.hasMic()) { NATIVE.requestMic(); return; }  // ответ придёт в onMicPermission
+  applyMic();
   listening = true; $('mic').classList.add('on'); $('mic').textContent = '⏹';
   // «Разогрев» синтеза речи по нажатию — иначе мобильные браузеры могут его блокировать
   if (!NATIVE && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(''); u.volume = 0; speechSynthesis.speak(u); }
@@ -648,7 +674,7 @@ function startAll(){
 }
 function stopAll(){
   listening = false; $('mic').classList.remove('on','speaking'); $('mic').textContent = '🎙️';
-  recStop(); whisperStop(); setStatus(''); setLive(''); renderSides(); keepAwake(false);
+  recStop(); whisperStop(); setLevel(0); setStatus(''); setLive(''); renderSides(); keepAwake(false);
 }
 $('mic').onclick = () => listening ? stopAll() : startAll();
 $('sideA').onclick = () => { if (S.engine === 'browser') { setSideBrowser('A'); if (!listening) startAll(); } else if (!listening) startAll(); };
@@ -670,17 +696,22 @@ $('modeVoice').onclick = () => { S.mode = 'voice'; save('mode'); renderMode(); }
 function engineUI(){
   $('whisperBox').style.display = S.engine === 'browser' ? 'none' : 'block';
   $('autoSwitchRow').style.display = S.engine === 'browser' ? 'flex' : 'none';
+  // Усилить звук можно в Whisper и во встроенном распознавании приложения (Android 13+)
+  const canBoost = S.engine !== 'browser' || (NATIVE && NATIVE.canBoost && NATIVE.canBoost());
+  $('boostRow').style.display = $('noiseRow').style.display = canBoost ? '' : 'none';
   $('engineHint').textContent = S.engine === 'browser'
     ? (NATIVE ? (SR ? 'Распознавание речи Android (Google). Слушает один язык за раз и чередует языки после каждой фразы.'
                     : '⚠️ На телефоне нет службы распознавания речи Google. Используйте Whisper.')
     : SR ? 'Работает в Chrome на Android и в Safari на iPhone. Слушает один язык за раз и чередует языки после каждой фразы.'
           : '⚠️ Этот браузер не поддерживает встроенное распознавание. Используйте Chrome или Whisper.')
     : 'Слушает оба языка одновременно и сам определяет, какой прозвучал. Нужен API-ключ.';
+  if (!canBoost) $('engineHint').textContent += ' Усилить микрофон в этом режиме нельзя. Если телефон плохо слышит дальнюю речь, выберите Whisper: там есть усиление.';
 }
 function openSettings(){
   $('engine').value = S.engine; $('apiKey').value = S.apiKey; $('sens').value = S.sens;
   $('autoSwitch').checked = S.autoSwitch; $('rate').value = S.rate; $('rateVal').textContent = S.rate + '×';
   $('fsize').value = S.fsize; $('speakInText').checked = S.speakInText;
+  $('boost').value = S.boost; $('boostVal').textContent = S.boost + '×'; $('noiseSup').checked = S.noiseSup;
   engineUI(); $('settings').classList.add('open');
 }
 function closeSettings(){
@@ -688,10 +719,13 @@ function closeSettings(){
   S.engine = $('engine').value; S.apiKey = $('apiKey').value.trim(); S.sens = +$('sens').value;
   S.autoSwitch = $('autoSwitch').checked; S.rate = +$('rate').value; S.fsize = +$('fsize').value;
   S.speakInText = $('speakInText').checked;
-  ['engine','apiKey','sens','autoSwitch','rate','fsize','speakInText'].forEach(save);
+  const micChanged = S.boost !== +$('boost').value || S.noiseSup !== $('noiseSup').checked;
+  S.boost = +$('boost').value; S.noiseSup = $('noiseSup').checked;
+  ['engine','apiKey','sens','autoSwitch','rate','fsize','speakInText','boost','noiseSup'].forEach(save);
+  applyMic();
   document.documentElement.style.setProperty('--fs', S.fsize + 'rem');
   $('settings').classList.remove('open');
-  if (wasListening && (oldEngine !== S.engine || oldKey !== S.apiKey)) { stopAll(); startAll(); }
+  if (wasListening && (oldEngine !== S.engine || oldKey !== S.apiKey || (micChanged && S.engine !== 'browser'))) { stopAll(); startAll(); }
   renderSides();
 }
 $('openSettings').onclick = openSettings;
@@ -699,6 +733,7 @@ $('closeSettings').onclick = closeSettings;
 $('settings').onclick = e => { if (e.target.id === 'settings') closeSettings(); };
 $('engine').onchange = () => { S.engine = $('engine').value; engineUI(); };
 $('rate').oninput = () => $('rateVal').textContent = $('rate').value + '×';
+$('boost').oninput = () => $('boostVal').textContent = $('boost').value + '×';
 $('clearHist').onclick = () => { if (confirm('Удалить всю историю переводов?')) { history = []; store.set('history', []); renderHistory(); closeSettings(); } };
 
 /* Полноэкранный показ */
