@@ -80,6 +80,7 @@ header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;t
 .chk input{width:22px;height:22px;flex:none;margin-top:1px}
 .btn{padding:12px 16px;border-radius:12px;background:var(--panel2);font-weight:600;width:100%}
 .btn.primary{background:var(--a)}
+.native .web-only{display:none}
 .btn.danger{background:rgba(239,68,68,.2);color:#fca5a5}
 #whisperBox{display:none}
 
@@ -88,8 +89,8 @@ header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;t
 #show.open{display:flex}
 #show .big{font-size:clamp(1.8rem,8vw,3.6rem);font-weight:700;text-align:center;line-height:1.25;word-wrap:break-word;max-width:100%}
 #show .small{color:var(--muted);margin-top:18px;text-align:center}
-#show .bar{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));display:flex;gap:12px}
-#show .bar button{padding:12px 18px;border-radius:12px;background:#222;font-weight:600}
+#show .bar{position:absolute;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));display:flex;gap:10px;justify-content:center}
+#show .bar button{padding:12px 14px;border-radius:12px;background:#222;font-weight:600;white-space:nowrap}
 #show.flip .wrap{transform:rotate(180deg)}
 
 .toast{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);background:#334155;padding:10px 16px;border-radius:12px;z-index:40;max-width:90%;font-size:.92rem;box-shadow:0 6px 20px rgba(0,0,0,.4);transition:opacity .3s}
@@ -177,6 +178,9 @@ header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;t
     </div>
 
     <div class="row"><button class="btn danger" id="clearHist">🗑️ Очистить историю</button></div>
+    <div class="row web-only"><a class="btn" style="display:block;text-align:center;text-decoration:none" href="perevodchik.apk" download>📱 Скачать приложение для Android (APK)</a></div>
+    <div class="row hint" style="text-align:center">Живой переводчик 1.0 ·
+      <a href="https://www.robutpit.com/projects/perevodchik/privacy.html" target="_blank" rel="noopener" style="color:var(--muted)">Политика конфиденциальности</a></div>
     <div class="row"><button class="btn primary" id="closeSettings">Готово</button></div>
   </div>
 </div>
@@ -192,6 +196,10 @@ header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;t
 
 <script>
 'use strict';
+/* В приложении для Android интерфейс работает внутри WebView, а речь распознаёт и
+   озвучивает сам Android через мост window.AndroidBridge. На сайте моста нет. */
+const NATIVE = window.AndroidBridge || null;
+if (NATIVE) document.documentElement.classList.add('native');
 /* ================= Языки ================= */
 // code — для перевода, rec — для распознавания/синтеза, w — названия, которые возвращает Whisper
 const LANGS = [
@@ -376,11 +384,25 @@ function pickVoice(code){
 }
 const warned = {};
 let speakToken = 0;
+const ttsWait = {};
+window.nativeTts = { done(id){ const f = ttsWait[id]; delete ttsWait[id]; f && f(); } };
+function stopSpeaking(){ window.speechSynthesis?.cancel(); NATIVE?.stopSpeaking(); }
 function speak(text, code){
   const token = ++speakToken;
   return new Promise(resolve => {
     let done = false;
     const finish = () => { if (done) return; done = true; if (token === speakToken) pauseMic(false); resolve(); };
+    if (NATIVE) {
+      if (!warned[code] && !NATIVE.hasVoice(L(code).rec)) {
+        warned[code] = 1;
+        toast(`На телефоне нет голоса для «${L(code).name}». Установите его: Настройки → Синтез речи.`, 6000);
+      }
+      pauseMic(true);
+      ttsWait[String(token)] = finish;
+      NATIVE.speak(String(token), text, L(code).rec, S.rate);
+      setTimeout(finish, 4000 + text.length * 120 / S.rate);
+      return;
+    }
     if (!('speechSynthesis' in window)) return resolve();
     speechSynthesis.cancel();
     const voice = pickVoice(code);
@@ -422,8 +444,24 @@ function statusListening(){
 }
 
 /* ================= Движок 1: встроенное распознавание ================= */
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, recActive = false, restartTimer;
+let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (NATIVE) {
+  const sessions = {}; let seq = 0;
+  const ev = (t, isFinal) => ({ resultIndex: 0, results: [Object.assign([{ transcript: t }], { isFinal })] });
+  SR = NATIVE.isRecognitionAvailable() ? class {
+    constructor(){ this.lang = 'ru-RU'; this.id = ++seq; sessions[this.id] = this; }
+    start(){ NATIVE.startListening(this.id, this.lang); }
+    abort(){ delete sessions[this.id]; NATIVE.stopListening(); this.onend && this.onend(); }
+    stop(){ this.abort(); }
+  } : null;
+  window.nativeSpeech = {
+    partial(id, t){ sessions[id]?.onresult?.(ev(t, false)); },
+    final(id, t){ sessions[id]?.onresult?.(ev(t, true)); },
+    error(id, code){ sessions[id]?.onerror?.({ error: code }); },
+    end(id){ const r = sessions[id]; delete sessions[id]; r?.onend?.(); },
+  };
+}
+let rec = null, recActive = false, restartTimer, recErr = '';
 function recStart(){
   if (!SR) return;
   if (recActive) return;
@@ -445,15 +483,19 @@ function recStart(){
       if (S.autoSwitch) { curSide = sideAtStart === 'A' ? 'B' : 'A'; renderSides(); }
     }
   };
+  recErr = '';
   rec.onerror = e => {
+    recErr = e.error;
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { stopAll(); toast('Нет доступа к микрофону. Разрешите его в настройках браузера.', 6000); }
-    else if (e.error === 'network') toast('Встроенному распознаванию нужен интернет');
+    else if (e.error === 'network') toast('Распознаванию речи нужен интернет');
     else if (e.error === 'language-not-supported') { stopAll(); toast(`Телефон не распознаёт «${rec.lang}». Выберите Whisper в ⚙️.`, 6000); }
   };
   rec.onend = () => {
     recActive = false;
     if (listening && !speaking && S.engine === 'browser') {
-      clearTimeout(restartTimer); restartTimer = setTimeout(recStart, 150);
+      // После сбоя (нет сети, занят) — пауза побольше, чтобы не крутиться впустую
+      const delay = ['network', 'busy', 'aborted'].includes(recErr) ? 1500 : 150;
+      clearTimeout(restartTimer); restartTimer = setTimeout(recStart, delay);
     }
   };
   try { rec.start(); recActive = true; setStatus(statusListening()); } catch (e) { recActive = false; }
@@ -585,6 +627,7 @@ async function whichSide(whisperLang, text){
 /* ================= Управление ================= */
 let wakeLock = null;
 async function keepAwake(on){
+  if (NATIVE) return NATIVE.keepScreenOn(on);
   try {
     if (on && 'wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
     else if (wakeLock) { await wakeLock.release(); wakeLock = null; }
@@ -592,12 +635,14 @@ async function keepAwake(on){
 }
 function startAll(){
   if (S.engine === 'browser' && !SR) {
-    toast('Этот браузер не умеет распознавать речь. Откройте в Chrome или выберите Whisper в ⚙️.', 7000);
+    toast(NATIVE ? 'На телефоне нет службы распознавания речи (нужно приложение Google). Выберите Whisper в ⚙️.'
+                 : 'Этот браузер не умеет распознавать речь. Откройте в Chrome или выберите Whisper в ⚙️.', 7000);
     openSettings(); return;
   }
+  if (NATIVE && !NATIVE.hasMic()) { NATIVE.requestMic(); return; }  // ответ придёт в onMicPermission
   listening = true; $('mic').classList.add('on'); $('mic').textContent = '⏹';
   // «Разогрев» синтеза речи по нажатию — иначе мобильные браузеры могут его блокировать
-  if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(''); u.volume = 0; speechSynthesis.speak(u); }
+  if (!NATIVE && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(''); u.volume = 0; speechSynthesis.speak(u); }
   if (S.engine === 'browser') recStart(); else whisperStart();
   renderSides(); keepAwake(true);
 }
@@ -618,7 +663,7 @@ function onLangChange(){
 }
 $('langA').onchange = $('langB').onchange = onLangChange;
 $('swap').onclick = () => { [$('langA').value, $('langB').value] = [$('langB').value, $('langA').value]; onLangChange(); };
-$('modeText').onclick = () => { S.mode = 'text'; save('mode'); renderMode(); window.speechSynthesis?.cancel(); };
+$('modeText').onclick = () => { S.mode = 'text'; save('mode'); renderMode(); stopSpeaking(); };
 $('modeVoice').onclick = () => { S.mode = 'voice'; save('mode'); renderMode(); };
 
 /* Настройки */
@@ -626,7 +671,9 @@ function engineUI(){
   $('whisperBox').style.display = S.engine === 'browser' ? 'none' : 'block';
   $('autoSwitchRow').style.display = S.engine === 'browser' ? 'flex' : 'none';
   $('engineHint').textContent = S.engine === 'browser'
-    ? (SR ? 'Работает в Chrome на Android и в Safari на iPhone. Слушает один язык за раз и чередует языки после каждой фразы.'
+    ? (NATIVE ? (SR ? 'Распознавание речи Android (Google). Слушает один язык за раз и чередует языки после каждой фразы.'
+                    : '⚠️ На телефоне нет службы распознавания речи Google. Используйте Whisper.')
+    : SR ? 'Работает в Chrome на Android и в Safari на iPhone. Слушает один язык за раз и чередует языки после каждой фразы.'
           : '⚠️ Этот браузер не поддерживает встроенное распознавание. Используйте Chrome или Whisper.')
     : 'Слушает оба языка одновременно и сам определяет, какой прозвучал. Нужен API-ключ.';
 }
@@ -670,7 +717,18 @@ $('showSpeak').onclick = () => showItem && speak(showItem.dst, showItem.to);
 let installEvt = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('installBtn').hidden = false; });
 $('installBtn').onclick = async () => { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('installBtn').hidden = true; };
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if (!NATIVE && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+/* Вызовы из Android-приложения */
+window.onMicPermission = granted => {
+  if (granted) startAll(); else toast('Без доступа к микрофону перевод речи невозможен. Разрешите его в настройках телефона.', 6000);
+};
+window.appBack = () => {   // кнопка «Назад»: true — обработали сами
+  if ($('settings').classList.contains('open')) { closeSettings(); return true; }
+  if ($('show').classList.contains('open')) { $('show').classList.remove('open','flip'); return true; }
+  return false;
+};
+window.onAppPause = () => { if (listening) stopAll(); stopSpeaking(); };
 
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && listening) keepAwake(true); });
 
