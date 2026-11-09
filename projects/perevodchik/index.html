@@ -192,7 +192,7 @@ header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;t
 
     <div class="row"><button class="btn danger" id="clearHist">🗑️ Очистить историю</button></div>
     <div class="row web-only"><a class="btn" style="display:block;text-align:center;text-decoration:none" href="perevodchik.apk" download>📱 Скачать приложение для Android (APK)</a></div>
-    <div class="row hint" style="text-align:center">Живой переводчик 1.1 ·
+    <div class="row hint" style="text-align:center">Живой переводчик 1.2 ·
       <a href="https://www.robutpit.com/projects/perevodchik/privacy.html" target="_blank" rel="noopener" style="color:var(--muted)">Политика конфиденциальности</a></div>
     <div class="row"><button class="btn primary" id="closeSettings">Готово</button></div>
   </div>
@@ -763,7 +763,10 @@ window.appBack = () => {   // кнопка «Назад»: true — обрабо
   if ($('show').classList.contains('open')) { $('show').classList.remove('open','flip'); return true; }
   return false;
 };
-window.onAppPause = () => { if (listening) stopAll(); stopSpeaking(); };
+// Android не даёт слушать микрофон в фоне: при уходе останавливаемся, при возврате — продолжаем
+let resumeListening = false;
+window.onAppPause = () => { resumeListening = listening; if (listening) stopAll(); stopSpeaking(); };
+window.onAppResume = () => { if (resumeListening) { resumeListening = false; startAll(); } };
 
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && listening) keepAwake(true); });
 

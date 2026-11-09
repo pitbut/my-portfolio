@@ -53,6 +53,11 @@ class MainActivity : Activity() {
         }
 
         web.webViewClient = object : WebViewClient() {
+            // Если процесс WebView упал — перезапускаем экран, а не всё приложение
+            override fun onRenderProcessGone(view: WebView, detail: android.webkit.RenderProcessGoneDetail): Boolean {
+                recreate(); return true
+            }
+
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
                 loader.shouldInterceptRequest(request.url)
 
@@ -138,6 +143,12 @@ class MainActivity : Activity() {
                 super.onBackPressed()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Вернулись в приложение — продолжаем слушать, если слушали до ухода
+        bridge.js("window.onAppResume && window.onAppResume()")
     }
 
     override fun onPause() {
